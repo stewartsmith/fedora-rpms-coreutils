@@ -1,5 +1,5 @@
 --- sh-utils-1.16/src/su.c.badpaths	Mon Apr 14 14:26:55 1997
-+++ sh-utils-1.16/src/su.c	Mon Apr 14 14:28:47 1997
++++ sh-utils-1.16/src/su.c	Sun Aug 17 14:11:31 EDT 2003
 @@ -147,6 +147,15 @@
  #define DEFAULT_ROOT_LOGIN_PATH "/usr/ucb:/bin:/usr/bin:/etc"
  #endif
@@ -9,9 +9,9 @@
 +   these explicitly. -ewt */
 +#undef DEFAULT_LOGIN_PATH
 +#undef DEFAULT_ROOT_LOGIN_PATH
-+#define DEFAULT_LOGIN_PATH "/bin:/usr/bin:/usr/local/bin:/usr/bin/X11"
++#define DEFAULT_LOGIN_PATH "/usr/local/bin:/bin:/usr/bin"
 +#define DEFAULT_ROOT_LOGIN_PATH \
-+    "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin/X11"
++    "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 +
  /* The shell to run if none is given in the user's passwd entry.  */
  #define DEFAULT_SHELL "/bin/sh"

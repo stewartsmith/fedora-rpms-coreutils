@@ -1,26 +1,24 @@
+%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
+%define WITH_SELINUX 0
+%endif
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 4.5.3
-Release: 19.1
+Version: 5.0
+Release: 24
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
+%if %{WITH_SELINUX}
+BuildRequires: libselinux-devel
+%endif
 
 Source0: ftp://prep.ai.mit.edu/pub/gnu/%name/%name-%version.tar.bz2
 Source101:	DIR_COLORS
 Source102:	DIR_COLORS.xterm
-Source103:	readlink.c
-Source104:	readlink.1
 Source105:  colorls.sh
 Source106:  colorls.csh
 Source200:  su.pamd
 Source201:  help2man
-
-# textutils
-Source501:	textutils-2.0-po-update.tar.bz2
-Source510:	textutils-2.0-chinese-locales.tar.bz2
-
-Patch0:		coreutils-4.5.2-lug.patch
 
 # fileutils
 Patch101: fileutils-4.0-spacedir.patch
@@ -31,26 +29,17 @@ Patch107: fileutils-4.1.10-timestyle.patch
 Patch108: fileutils-4.1.5-afs.patch
 Patch111: coreutils-4.5.2-dumbterm.patch
 Patch112: fileutils-4.0u-glibc22.patch
-Patch113: coreutils-4.5.2-nolibrt.patch
 Patch114: fileutils-4.1-restorecolor.patch
 Patch115: fileutils-4.1.1-FBoptions.patch
 Patch1155: fileutils-4.1-force-option--override--interactive-option.patch
 Patch116: fileutils-4.1-dircolors_c.patch
 Patch117: fileutils-4.1-ls_c.patch
 Patch118: fileutils-4.1-ls_h.patch
-Patch152: fileutils-4.1.8-touch_errno.patch
 Patch153: fileutils-4.1.10-utmp.patch
-Patch180: coreutils-4.5.3-fr-fix.patch 
-Patch181: coreutils-4.5.3-samefile.patch
 Patch182: coreutils-4.5.3-acl.patch
 Patch183: coreutils-4.5.3-aclcompile.patch
-Patch184: coreutils-4.5.3-danglinglink.patch
-Patch185: coreutils-4.5.3-errno.patch
-Patch186: coreutils-4.5.3-LC_TIME.patch
-Patch187: coreutils-4.5.3-prompt.patch
 Patch188: coreutils-4.5.3-suidfail.patch
 Patch189: coreutils-4.5.3-stoneage.patch
-Patch190: coreutils-4.5.3-overwrite.patch
 
 # textutils
 Patch500: textutils-2.0.17-mem.patch
@@ -71,7 +60,6 @@ Patch713: coreutils-4.5.3-langinfo.patch
 Patch714: coreutils-4.5.3-printf-ll.patch
 Patch715: coreutils-4.5.3-sysinfo.patch
 Patch716: coreutils-4.5.3-nogetline.patch
-Patch717: coreutils-4.5.3-preserve.patch
 
 # (sb) lin18nux/lsb compliance
 Patch800: coreutils-4.5.3-i18n.patch
@@ -79,15 +67,23 @@ Patch800: coreutils-4.5.3-i18n.patch
 # Think the test suite failure is a bug..
 Patch900: coreutils-4.5.3-test-bugs.patch
 Patch901: coreutils-4.5.3-signal.patch
-Patch902: coreutils-4.5.3-regex.patch
 Patch903: coreutils-4.5.3-manpage.patch
+Patch904: coreutils-5.0-allow_old_options.patch
+Patch905: coreutils-5.0-90563.patch
+Patch906: coreutils-5.0-datealign.patch
+Patch907: coreutils-largefile.patch
 
-Patch904: /patches/coreutils-4.5.3-fold-initvar.patch
+#SELINUX Patch
+%if %{WITH_SELINUX}
+Patch908: coreutils-selinux.patch
+%endif
 
 BuildRoot: %_tmppath/%{name}-root
-BuildRequires:	gettext libtermcap-devel pam-devel texinfo 
+BuildRequires:	gettext libtermcap-devel
+%{?!nopam:BuildRequires: pam-devel}
+BuildRequires:	texinfo >= 4.3
 Prereq:		/sbin/install-info
-Requires:   pam >= 0.66-12
+%{?!nopam:Requires: pam >= 0.66-12}
 Prereq: grep, findutils
 
 # Require a C library that doesn't put LC_TIME files in our way.
@@ -97,7 +93,7 @@ Provides:	fileutils = %version, sh-utils = %version, stat, textutils = %version
 Obsoletes:	fileutils sh-utils stat textutils
 
 # readlink(1) moved here from tetex.
-Conflicts:  tetex < 1.0.7-65
+Conflicts:  tetex < 1.0.7-66
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -105,9 +101,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
 %setup -q
-
-%patch0 -p1
-mv po/{lg,lug}.po
 
 # fileutils
 %patch101 -p1 -b .space
@@ -118,26 +111,17 @@ mv po/{lg,lug}.po
 %patch108 -p1 -b .afs
 %patch111 -p0 -b .dumbterm
 %patch112 -p1 -b .glibc22
-%patch113 -p1 -b .nolibrt
 %patch114 -p1 -b .restore
 %patch115 -p1 -b .FBopts
 %patch1155 -p1
 %patch116 -p1
 %patch117 -p1
 %patch118 -p1
-%patch152 -p1
 %patch153 -p1
-%patch180 -p1 -b .frfix
-%patch181 -p1 -b .samefile
 %patch182 -p1 -b .acl
 %patch183 -p1 -b .aclcompile
-%patch184 -p1 -b .danglinglink
-%patch185 -p1 -b .errno
-%patch186 -p1 -b .LC_TIME
-%patch187 -p1 -b .prompt
 %patch188 -p1 -b .suidfail
 %patch189 -p1 -b .stoneage
-%patch190 -p1 -b .overwrite
 
 # textutils
 %patch500 -p1
@@ -156,7 +140,6 @@ mv po/{lg,lug}.po
 %patch714 -p1 -b .printf-ll
 %patch715 -p1 -b .sysinfo
 %patch716 -p1 -b .nogetline
-%patch717 -p1 -b .preserve
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
@@ -164,9 +147,20 @@ mv po/{lg,lug}.po
 # Coreutils
 %patch900 -p1 -b .test-bugs
 %patch901 -p1 -b .signal
-%patch902 -p1 -b .regex
 %patch903 -p1 -b .manpage
-%patch904 -p1 -b .initvar
+%patch904 -p1 -b .allow_old_options
+%patch905 -p0 -b .90563
+%patch906 -p1 -b .datealign
+%patch907 -p1 -b .largefile
+
+%if %{WITH_SELINUX}
+#SELinux
+%patch908 -p1 -b .selinux
+%endif
+
+# Don't run basic-1 test, since it breaks when run in the background
+# (bug #102033).
+perl -pi -e 's/basic-1//g' tests/stty/Makefile*
 
 %build
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
@@ -175,20 +169,21 @@ cp %SOURCE201 man/help2man
 chmod +x man/help2man
 HELP2MAN=$(pwd)/man/help2man
 export HELP2MAN
-%configure --enable-largefile --enable-pam || :
-make all CPPFLAGS="-DUSE_PAM" su_LDFLAGS="-lpam -lpam_misc"
+aclocal -I m4
+autoconf --force
+automake --copy --force
+%configure --enable-largefile %{?!nopam:--enable-pam} \
+%if  %{WITH_SELINUX}
+--enable-selinux \
+%endif
+|| :
+make all %{?_smp_mflags} \
+	%{?!nopam:CPPFLAGS="-DUSE_PAM" su_LDFLAGS="-lpam -lpam_misc"}
 
-gcc -o readlink $RPM_OPT_FLAGS %SOURCE103
-
-unset LINGUAS || :
-for i in AUTOMAKE ACLOCAL;do perl -pi -e "s%^$i = .*$%$i = /bin/true%g" Makefile.in;done
-%configure
 [[ -f ChangeLog && -f ChangeLog.bz2  ]] || bzip2 -9f ChangeLog
 
-make
-
 # Run the test suite.
-make check || :
+make check
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 perl -pi -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
@@ -210,7 +205,8 @@ if [ -d $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
 fi
 
 # let be compatible with old fileutils, sh-utils and textutils packages :
-mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,%_sysconfdir/pam.d}
+mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir}
+%{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
 for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
 do
 	mv $RPM_BUILD_ROOT/{%_bindir,bin}/$f 
@@ -227,10 +223,6 @@ install -c -m644 %SOURCE102 $RPM_BUILD_ROOT/etc/
 install -c -m755 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d
 install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d
 
-# readlink
-install readlink $RPM_BUILD_ROOT%{_bindir}
-install -m644 %SOURCE104 $RPM_BUILD_ROOT%_mandir/man1
-
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
 
@@ -239,7 +231,7 @@ for i in hostname uptime ; do
 	rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/${i}.1}
 done
 
-install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su
+%{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
 
 ln -sf test $RPM_BUILD_ROOT%_bindir/[
 
@@ -286,7 +278,7 @@ fi
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
-%config(noreplace) /etc/pam.d/su
+%{?!nopam:%config(noreplace) /etc/pam.d/su}
 %doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
 /bin/*
 %_bindir/*
@@ -295,8 +287,115 @@ fi
 %_sbindir/chroot
 
 %changelog
-* Fri Apr 11 2003 Matt Wilson <msw@redhat.com> 4.5.3-19.1
+* Sun Oct 12 2003 Florian La Roche <Florian.LaRoche@redhat.de>
+- allow compiling without pam support
+
+* Fri Oct 10 2003 Tim Waugh <twaugh@redhat.com> 5.0-23
+- Make split(1) handle large files (bug #106700).
+
+* Thu Oct  9 2003 Dan Walsh <dwalsh@redhat.com> 5.0-22
+- Turn off SELinux
+
+* Wed Oct  8 2003 Dan Walsh <dwalsh@redhat.com> 5.0-21.sel
+- Cleanup SELinux patch
+
+* Fri Oct  3 2003 Tim Waugh <twaugh@redhat.com> 5.0-20
+- Restrict ACL support to only those programs needing it (bug #106141).
+- Fix default PATH for LSB (bug #102567).
+
+* Thu Sep 11 2003 Dan Walsh <dwalsh@redhat.com> 5.0-19
+- Turn off SELinux
+
+* Wed Sep 10 2003 Dan Walsh <dwalsh@redhat.com> 5.0-18.sel
+- Turn on SELinux
+
+* Fri Sep 5 2003 Dan Walsh <dwalsh@redhat.com> 5.0-17
+- Turn off SELinux
+
+* Tue Sep 2 2003 Dan Walsh <dwalsh@redhat.com> 5.0-16.sel
+- Only call getfilecon if the user requested it.
+- build with selinux
+
+* Wed Aug 20 2003 Tim Waugh <twaugh@redhat.com> 5.0-14
+- Documentation fix (bug #102697).
+
+* Tue Aug 12 2003 Tim Waugh <twaugh@redhat.com> 5.0-13
+- Made su use pam again (oops).
+- Fixed another i18n bug causing sort --month-sort to fail.
+- Don't run dubious stty test, since it fails when backgrounded
+  (bug #102033).
+- Re-enable make check.
+
+* Fri Aug  8 2003 Tim Waugh <twaugh@redhat.com> 5.0-12
+- Don't run 'make check' for this build (build environment problem).
+- Another uninitialized variable in i18n (from bug #98683).
+
+* Wed Aug 6 2003 Dan Walsh <dwalsh@redhat.com> 5.0-11
+- Internationalize runcon
+- Update latest chcon from NSA
+
+* Wed Jul 30 2003 Tim Waugh <twaugh@redhat.com>
+- Re-enable make check.
+
+* Wed Jul 30 2003 Tim Waugh <twaugh@redhat.com> 5.0-9
+- Don't run 'make check' for this build (build environment problem).
+
+* Mon Jul 28 2003 Tim Waugh <twaugh@redhat.com> 5.0-8
+- Actually use the ACL patch (bug #100519).
+
+* Wed Jul 18 2003 Dan Walsh <dwalsh@redhat.com> 5.0-7
+- Convert to SELinux
+
+* Mon Jun  9 2003 Tim Waugh <twaugh@redhat.com>
+- Removed samefile patch.  Now the test suite passes.
+
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
+* Wed May 28 2003 Tim Waugh <twaugh@redhat.com> 5.0-5
+- Both kon and kterm support colours (bug #83701).
+- Fix 'ls -l' alignment in zh_CN locale (bug #88346).
+
+* Mon May 12 2003 Tim Waugh <twaugh@redhat.com> 5.0-4
+- Prevent file descriptor leakage in du (bug #90563).
+- Build requires recent texinfo (bug #90439).
+
+* Wed Apr 30 2003 Tim Waugh <twaugh@redhat.com> 5.0-3
+- Allow obsolete options unless POSIXLY_CORRECT is set.
+
+* Sat Apr 12 2003 Tim Waugh <twaugh@redhat.com>
+- Fold bug was introduced by i18n patch; fixed there instead.
+
+* Fri Apr 11 2003 Matt Wilson <msw@redhat.com> 5.0-2
 - fix segfault in fold (#88683)
+
+* Sat Apr  5 2003 Tim Waugh <twaugh@redhat.com> 5.0-1
+- 5.0.
+
+* Mon Mar 24 2003 Tim Waugh <twaugh@redhat.com>
+- Use _smp_mflags.
+
+* Mon Mar 24 2003 Tim Waugh <twaugh@redhat.com> 4.5.11-2
+- Remove overwrite patch.
+- No longer seem to need nolibrt, errno patches.
+
+* Thu Mar 20 2003 Tim Waugh <twaugh@redhat.com>
+- No longer seem to need danglinglink, prompt, lug, touch_errno patches.
+
+* Thu Mar 20 2003 Tim Waugh <twaugh@redhat.com> 4.5.11-1
+- 4.5.11.
+- Use packaged readlink.
+
+* Wed Mar 19 2003 Tim Waugh <twaugh@redhat.com> 4.5.10-1
+- 4.5.10.
+- Update lug, touch_errno, acl, utmp, printf-ll, i18n, test-bugs patches.
+- Drop fr_fix, LC_TIME, preserve, regex patches.
+
+* Wed Mar 12 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-21
+- Fixed another i18n patch bug (bug #82032).
+
+* Tue Mar 11 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-20
+- Fix sort(1) efficiency in multibyte encoding (bug #82032).
 
 * Tue Feb 18 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-19
 - Ship readlink(1) (bug #84200).
