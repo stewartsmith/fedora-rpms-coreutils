@@ -3050,7 +3050,7 @@
 -   to stdout, with maximum line length WIDTH.
 -   Return 0 if successful, 1 if an error occurs. */
 -
- static int
+ static void
 -fold_file (char *filename, int width)
 +fold_text (FILE *istream, int width, int *saved_errno)
  {

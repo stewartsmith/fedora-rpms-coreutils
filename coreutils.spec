@@ -248,6 +248,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Oct 18 2004 Tim Waugh <twaugh@redhat.com>
+- Prevent compiler warning in coreutils-i18n.patch (bug #136090).
+
 * Tue Oct  5 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-31
 - getgrouplist() patch from Ulrich Drepper.
 - The selinux patch should be applied last.
