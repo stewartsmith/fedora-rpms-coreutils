@@ -256,6 +256,7 @@ fi
 
 %changelog
 * Wed Mar 14 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
+- Fixed pam patch.
 - Fixed broken configure test.
 - Fixed build with GCC 4 (bug #151045).
 

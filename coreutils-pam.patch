@@ -33,11 +33,11 @@
  #define getusershell _getusershell_sys_proto_
  
 +#ifdef USE_PAM
-+# include <security/pam_appl.h>
-+# include <security/pam_misc.h>
 +# include <signal.h>
 +# include <sys/wait.h>
 +# include <sys/fsuid.h>
++# include <security/pam_appl.h>
++# include <security/pam_misc.h>
 +#endif /* USE_PAM */
 +
  #include "system.h"
