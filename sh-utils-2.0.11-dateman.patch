@@ -1,0 +1,14 @@
+--- sh-utils-2.0.11/man/date.1.man	Tue May 15 19:02:55 2001
++++ sh-utils-2.0.11/man/date.1	Tue May 15 19:06:05 2001
+@@ -152,6 +152,11 @@
+ .IP
+ `-' (hyphen) do not pad the field
+ `_' (underscore) pad the field with spaces
++.SH ENVIRONMENT
++.TP
++TZ
++Specifies the timezone, unless overridden by command line parameters.
++If neither is specified, the setting from /etc/localtime is used.
+ .SH AUTHOR
+ Written by David MacKenzie.
+ .SH "REPORTING BUGS"
