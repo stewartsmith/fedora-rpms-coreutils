@@ -3,8 +3,8 @@
 %endif
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.0
-Release: 39
+Version: 5.2.1
+Release: 3
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -12,73 +12,41 @@ Url:     ftp://alpha.gnu.org/gnu/coreutils/
 BuildRequires: libselinux-devel
 %endif
 
-Source0: ftp://prep.ai.mit.edu/pub/gnu/%name/%name-%version.tar.bz2
+Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
 Source101:	DIR_COLORS
 Source102:	DIR_COLORS.xterm
 Source105:  colorls.sh
 Source106:  colorls.csh
 Source200:  su.pamd
-Source201:  help2man
 
 # fileutils
-Patch101: fileutils-4.0-spacedir.patch
-Patch102: fileutils-4.0s-sparc.patch
-Patch103: coreutils-4.5.2-trunc.patch
 Patch105: coreutils-4.5.2-C.patch
 Patch107: fileutils-4.1.10-timestyle.patch
 Patch108: fileutils-4.1.5-afs.patch
-Patch111: coreutils-4.5.2-dumbterm.patch
-Patch112: fileutils-4.0u-glibc22.patch
-Patch114: fileutils-4.1-restorecolor.patch
-Patch115: fileutils-4.1.1-FBoptions.patch
-Patch1155: fileutils-4.1-force-option--override--interactive-option.patch
 Patch116: fileutils-4.1-dircolors_c.patch
-Patch117: fileutils-4.1-ls_c.patch
-Patch118: fileutils-4.1-ls_h.patch
 Patch153: fileutils-4.1.10-utmp.patch
-Patch182: coreutils-4.5.3-acl.patch
-Patch183: coreutils-4.5.3-aclcompile.patch
-Patch188: coreutils-4.5.3-suidfail.patch
-Patch189: coreutils-4.5.3-stoneage.patch
-
-# textutils
-Patch502: textutils-2.0.21-man.patch
+Patch182: coreutils-acl.patch
 
 # sh-utils
-Patch702: sh-utils-2.0-utmp.patch
 Patch703: sh-utils-2.0.11-dateman.patch
 Patch704: sh-utils-1.16-paths.patch
 # RMS will never accept the PAM patch because it removes his historical
 # rant about Twenex and the wheel group, so we'll continue to maintain
 # it here indefinitely.
-Patch706: coreutils-4.5.2-pam.patch
-Patch710: sh-utils-2.0-rfc822.patch
-Patch711: coreutils-4.5.3-hname.patch
-Patch712: coreutils-4.5.3-chdir.patch
+Patch706: coreutils-pam.patch
 Patch713: coreutils-4.5.3-langinfo.patch
 Patch714: coreutils-4.5.3-printf-ll.patch
 Patch715: coreutils-4.5.3-sysinfo.patch
-Patch716: coreutils-4.5.3-nogetline.patch
 
 # (sb) lin18nux/lsb compliance
-Patch800: coreutils-4.5.3-i18n.patch
+Patch800: coreutils-i18n.patch
 
-# Think the test suite failure is a bug..
-Patch900: coreutils-4.5.3-test-bugs.patch
-Patch901: coreutils-4.5.3-signal.patch
-Patch903: coreutils-4.5.3-manpage.patch
 Patch904: coreutils-5.0-allow_old_options.patch
-Patch905: coreutils-5.0-90563.patch
-Patch906: coreutils-5.0-datealign.patch
-Patch907: coreutils-largefile.patch
-Patch908: coreutils-5.0-md5.patch
-Patch909: coreutils-lsw.patch
-Patch910: coreutils-lsw2.patch
-Patch911: coreutils-nonerequired.patch
 
 #SELINUX Patch
 %if %{WITH_SELINUX}
 Patch950: coreutils-selinux.patch
+Patch951: coreutils-ls-stat.patch
 %endif
 
 BuildRoot: %_tmppath/%{name}-root
@@ -106,63 +74,33 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # fileutils
-%patch101 -p1 -b .space
-%patch102 -p1 -b .sparc
-%patch103 -p0 -b .trunc
 %patch105 -p0 -b .Coption
 %patch107 -p1 -b .timestyle
 %patch108 -p1 -b .afs
-%patch111 -p0 -b .dumbterm
-%patch112 -p1 -b .glibc22
-%patch114 -p1 -b .restore
-%patch115 -p1 -b .FBopts
-%patch1155 -p1
 %patch116 -p1
-%patch117 -p1
-%patch118 -p1
 %patch153 -p1
 %patch182 -p1 -b .acl
-%patch183 -p1 -b .aclcompile
-%patch188 -p1 -b .suidfail
-%patch189 -p1 -b .stoneage
-
-# textutils
-# patch in new ALL_LINGUAS
-%patch502 -p1
 
 # sh-utils
-%patch702 -p1 -b .utmp
 %patch703 -p1 -b .dateman
 %patch704 -p1 -b .paths
 %patch706 -p1 -b .pam
-%patch710 -p1 -b .rfc822
-%patch711 -p1 -b .hname
-%patch712 -p1 -b .chdir
 %patch713 -p1 -b .langinfo
 %patch714 -p1 -b .printf-ll
 %patch715 -p1 -b .sysinfo
-%patch716 -p1 -b .nogetline
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
 # Coreutils
-%patch900 -p1 -b .test-bugs
-%patch901 -p1 -b .signal
-%patch903 -p1 -b .manpage
 %patch904 -p1 -b .allow_old_options
-%patch905 -p0 -b .90563
-%patch906 -p1 -b .datealign
-%patch907 -p1 -b .largefile
-%patch908 -p1 -b .md5
-%patch909 -p1 -b .lsw
-%patch910 -p1 -b .lsw2
-%patch911 -p1 -b .nonerequired
 
 %if %{WITH_SELINUX}
 #SELinux
 %patch950 -p1 -b .selinux
+%patch951 -p1 -b .ls-stat
 %endif
+
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
@@ -171,14 +109,10 @@ perl -pi -e 's/basic-1//g' tests/stty/Makefile*
 %build
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in */*/Makefile.in
-cp %SOURCE201 man/help2man
-chmod +x man/help2man
-HELP2MAN=$(pwd)/man/help2man
-export HELP2MAN
 aclocal -I m4
 autoconf --force
 automake --copy --force
-%configure --enable-largefile %{?!nopam:--enable-pam} \
+%configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
 %if  %{WITH_SELINUX}
 --enable-selinux \
 %endif
@@ -233,13 +167,11 @@ install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
 
 # These come from util-linux and/or procps.
-for i in hostname uptime ; do
+for i in hostname uptime kill ; do
 	rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/${i}.1}
 done
 
 %{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
-
-ln -sf test $RPM_BUILD_ROOT%_bindir/[
 
 bzip2 -f9 old/*/C* || :
 
@@ -293,6 +225,65 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Tue Mar 16 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-3
+- If preserve fails, report as warning unless user requires preserve
+
+* Tue Mar 16 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-2
+- Make mv default to preserve on context
+
+* Sat Mar 13 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-1
+- 5.2.1.
+
+* Fri Mar 12 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-9
+- Add '-Z' to 'ls --help' output (bug #118108).
+
+* Fri Mar  5 2004 Tim Waugh <twaugh@redhat.com>
+- Fix deref-args test case for rebuilding under SELinux (bug #117556).
+
+* Wed Feb 25 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-8
+- kill(1) offloaded to util-linux altogether.
+
+* Tue Feb 24 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-7
+- Ship the real '[', not a symlink.
+
+* Mon Feb 23 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-6
+- Apply Paul Eggert's chown patch (bug #116536).
+- Merged chdir patch into pam patch where it belongs.
+
+* Mon Feb 23 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-5
+- Fixed i18n patch bug causing sort -M not to work (bug #116575).
+
+* Sat Feb 21 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-4
+- Reinstate kill binary, just not its man page (bug #116463).
+
+* Sat Feb 21 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-3
+- Updated ls-stat patch.
+
+* Fri Feb 20 2004 Dan Walsh <dwalsh@redhat.com> 5.2.0-2
+- fix chcon to ignore . and .. directories for recursing
+
+* Fri Feb 20 2004 Tim Waugh <twaugh@redhat.com> 5.2.0-1
+- Patch ls so that failed stat() is handled gracefully (Ulrich Drepper).
+- 5.2.0.
+
+* Thu Feb 19 2004 Tim Waugh <twaugh@redhat.com>
+- More AFS patch tidying.
+
+* Wed Feb 18 2004 Dan Walsh <dwalsh@redhat.com> 5.1.3-0.2
+- fix chcon to handle -h qualifier properly, eliminate potential crash 
+
+* Wed Feb 18 2004 Tim Waugh <twaugh@redhat.com>
+- Stop 'sort -g' leaking memory (i18n patch bug #115620).
+- Don't ship kill, since util-linux already does.
+- Tidy AFS patch.
+
+* Mon Feb 16 2004 Tim Waugh <twaugh@redhat.com> 5.1.3-0.1
+- 5.1.3.
+- Patches ported forward or removed.
+
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com> 5.0-40
+- rebuilt
+
 * Tue Jan  20 2004 Dan Walsh <dwalsh@redhat.com> 5.0-39
 - Change /etc/pam.d/su to remove preservuser and add multiple
 
