@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 35
+Release: 36
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -247,6 +247,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Dec 28 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-36
+- Fix to only setdefaultfilecon if not overridden by command line
+
 * Mon Dec 27 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-35
 - Change install to restorecon if it can
 
