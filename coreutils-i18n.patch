@@ -314,7 +314,7 @@
 +  char buf[MB_LEN_MAX + BUFSIZ];  /* For spooling a read byte sequence. */
 +  char *bufpos;		/* Next read position of BUF. */
 +  size_t buflen;	/* The length of the byte sequence in buf. */
-+  wint_t wc;		/* A gotten wide character. */
++  wint_t wc = 0;	/* A gotten wide character. */
 +  size_t mblength;	/* The byte size of a multibyte character which shows
 +			   as same character as WC. */
 +  mbstate_t state;	/* State of the stream. */

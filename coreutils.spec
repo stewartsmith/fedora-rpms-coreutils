@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 18
+Release: 19
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -185,7 +185,7 @@ install -m 4755 src/su $RPM_BUILD_ROOT/bin
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
-	rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/${i}.1}
+	rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/$i.1}
 done
 
 %{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
@@ -242,6 +242,15 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Aug  4 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-19
+- Added 'gnome' TERM to DIR_COLORS (bug #129112).
+- Worked around a bash bug #129128.
+- Fixed an i18n patch bug in cut (bug #129114).
+
+* Tue Aug  3 2004 Tim Waugh <twaugh@redhat.com>
+- Fixed colorls.{sh,csh} so that the l. and ll aliases are always defined
+  (bug #128948).
+
 * Tue Jul 13 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-18
 - Fixed field extraction in sort (bug #127694).
 
