@@ -1,9 +1,9 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 4.5.3
-Release: 7
+Release: 19
 License: GPL
-Group:   System/Base
+Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
 
 Source0: ftp://prep.ai.mit.edu/pub/gnu/%name/%name-%version.tar.bz2
@@ -71,24 +71,32 @@ Patch713: coreutils-4.5.3-langinfo.patch
 Patch714: coreutils-4.5.3-printf-ll.patch
 Patch715: coreutils-4.5.3-sysinfo.patch
 Patch716: coreutils-4.5.3-nogetline.patch
+Patch717: coreutils-4.5.3-preserve.patch
 
 # (sb) lin18nux/lsb compliance
 Patch800: coreutils-4.5.3-i18n.patch
 
 # Think the test suite failure is a bug..
 Patch900: coreutils-4.5.3-test-bugs.patch
+Patch901: coreutils-4.5.3-signal.patch
+Patch902: coreutils-4.5.3-regex.patch
+Patch903: coreutils-4.5.3-manpage.patch
 
 
 BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel pam-devel texinfo 
 Prereq:		/sbin/install-info
 Requires:   pam >= 0.66-12
+Prereq: grep, findutils
+
+# Require a C library that doesn't put LC_TIME files in our way.
+Conflicts: glibc < 2.2
 
 Provides:	fileutils = %version, sh-utils = %version, stat, textutils = %version
 Obsoletes:	fileutils sh-utils stat textutils
 
-# For when we ship readlink in this package:
-#Conflicts:  tetex < 1.0.7-49mdk
+# readlink(1) moved here from tetex.
+Conflicts:  tetex < 1.0.7-65
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -147,12 +155,16 @@ mv po/{lg,lug}.po
 %patch714 -p1 -b .printf-ll
 %patch715 -p1 -b .sysinfo
 %patch716 -p1 -b .nogetline
+%patch717 -p1 -b .preserve
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
 # Coreutils
 %patch900 -p1 -b .test-bugs
+%patch901 -p1 -b .signal
+%patch902 -p1 -b .regex
+%patch903 -p1 -b .manpage
 
 %build
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
@@ -214,9 +226,8 @@ install -c -m755 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d
 install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d
 
 # readlink
-# (Don't install this for now -tmw)
-#install readlink $RPM_BUILD_ROOT/usr/bin
-#install -m644 %SOURCE104 $RPM_BUILD_ROOT%_mandir/man1
+install readlink $RPM_BUILD_ROOT%{_bindir}
+install -m644 %SOURCE104 $RPM_BUILD_ROOT%_mandir/man1
 
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
@@ -241,6 +252,11 @@ rm -f $RPM_BUILD_ROOT%{_datadir}/info/dir
 rm -rf $RPM_BUILD_ROOT
 
 %pre
+# Remove these old glibc files on upgrade (bug #84090).
+for file in $(find /usr/share/locale -type f -name LC_TIME); do
+	[ -x /bin/rm ] && /bin/rm -f "$file"
+done
+
 # We must desinstall theses info files since they're merged in
 # coreutils.info. else their postun'll be runned too last
 # and install-info'll faill badly because of doubles
@@ -277,6 +293,43 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Tue Feb 18 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-19
+- Ship readlink(1) (bug #84200).
+
+* Thu Feb 13 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-18
+- Deal with glibc < 2.2 in %%pre scriplet (bug #84090).
+
+* Wed Feb 12 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-16
+- Require glibc >= 2.2 (bug #84090).
+
+* Tue Feb 11 2003 Bill Nottingham <notting@redhat.com> 4.5.3-15
+- fix group (#84095)
+
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com> 4.5.3-14
+- rebuilt
+
+* Thu Jan 16 2003 Tim Waugh <twaugh@redhat.com>
+- Fix rm(1) man page.
+
+* Thu Jan 16 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-13
+- Fix re_compile_pattern check.
+- Fix su hang (bug #81653).
+
+* Tue Jan 14 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-11
+- Fix memory size calculation.
+
+* Tue Dec 17 2002 Tim Waugh <twaugh@redhat.com> 4.5.3-10
+- Fix mv error message (bug #79809).
+
+* Mon Dec 16 2002 Tim Powers <timp@redhat.com> 4.5.3-9
+- added PreReq on grep
+
+* Fri Dec 13 2002 Tim Waugh <twaugh@redhat.com>
+- Fix cp --preserve with multiple arguments.
+
+* Thu Dec 12 2002 Tim Waugh <twaugh@redhat.com> 4.5.3-8
+- Turn on colorls for screen (bug #78816).
+
 * Mon Dec  9 2002 Tim Waugh <twaugh@redhat.com> 4.5.3-7
 - Fix mv (bug #79283).
 - Add patch27 (nogetline).
