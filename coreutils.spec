@@ -48,6 +48,7 @@ Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch909: coreutils-zh_CN.patch
 Patch910: coreutils-gcc4.patch
+Patch911: coreutils-brokentest.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -110,6 +111,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch909 -p1 -b .zh_CN
 %patch910 -p1 -b .gcc4
+%patch911 -p1 -b .brokentest
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -254,6 +256,7 @@ fi
 
 %changelog
 * Wed Mar 14 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
+- Fixed broken configure test.
 - Fixed build with GCC 4 (bug #151045).
 
 * Wed Feb  9 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-41
