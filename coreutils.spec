@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 22
+Release: 23
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -244,6 +244,10 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Fri Aug 20 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-23
+- Fixed colorls.csh quoting (bug #102412).
+- Fixed another join LSB test failure (bug #121153).
+
 * Mon Aug 16 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-22
 - Fixed sort -t LSB test failure (bug #121154).
 - Fixed join LSB test failure (bug #121153).

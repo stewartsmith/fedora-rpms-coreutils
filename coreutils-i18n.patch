@@ -3435,7 +3435,7 @@
 +  char *ptr = line->buf.buffer;
 +  char const *lim = ptr + line->buf.length - 1;
 +  wchar_t wc = 0;
-+  size_t mblength;
++  size_t mblength = 1;
 +  mbstate_t state, state_bak;
 +
 +  memset (&state, 0, sizeof (mbstate_t));
@@ -3447,7 +3447,7 @@
 +    {
 +      unsigned char t = tab[0];
 +      char *sep = ptr;
-+      for (; ptr < lim; ptr = sep + 1)
++      for (; ptr < lim; ptr = sep + mblength)
 +	{
 +	  sep = ptr;
 +	  while (sep < lim)
