@@ -7,7 +7,7 @@ Version: 5.2.1
 Release: 32
 License: GPL
 Group:   System Environment/Base
-Url:     ftp://alpha.gnu.org/gnu/coreutils/
+Url:     http://www.gnu.org/software/coreutils/
 %if %{WITH_SELINUX}
 BuildRequires: libselinux-devel
 %endif
@@ -250,6 +250,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Nov  8 2004 Tim Waugh <twaugh@redhat.com>
+- Updated URL (bug #138279).
+
 * Mon Oct 25 2004 Steve Grubb <sgrubb@redhat.com> 5.2.1-32
 - Handle the return code of function calls in runcon.
 
