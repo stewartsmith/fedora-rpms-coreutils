@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 4.5.3
-Release: 19
+Release: 19.0.1
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -81,6 +81,7 @@ Patch900: coreutils-4.5.3-test-bugs.patch
 Patch901: coreutils-4.5.3-signal.patch
 Patch902: coreutils-4.5.3-regex.patch
 Patch903: coreutils-4.5.3-manpage.patch
+Patch904: coreutils-lsw.patch
 
 
 BuildRoot: %_tmppath/%{name}-root
@@ -165,6 +166,7 @@ mv po/{lg,lug}.po
 %patch901 -p1 -b .signal
 %patch902 -p1 -b .regex
 %patch903 -p1 -b .manpage
+%patch904 -p1 -b .lsw
 
 %build
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
@@ -293,6 +295,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Oct 22 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-19.0.1
+- Apply Paul Eggart's patches for 'ls -w'.
+
 * Tue Feb 18 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-19
 - Ship readlink(1) (bug #84200).
 
