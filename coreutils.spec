@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 28
+Release: 29
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -185,6 +185,7 @@ install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d
 
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
+install -m 755 src/runuser $RPM_BUILD_ROOT/bin
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
@@ -245,6 +246,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Mon Oct 4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-29
+- Mv runuser to /bin
+
 * Mon Oct 4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-28
 - Fix runuser man page.
 
