@@ -1,6 +1,15 @@
---- coreutils-5.2.1/src/uname.c.sysinfo	2004-01-21 22:27:02.000000000 +0000
-+++ coreutils-5.2.1/src/uname.c	2005-02-04 17:11:38.854805577 +0000
-@@ -249,6 +249,42 @@
+--- coreutils-4.5.3/src/uname.c.sysinfo	2002-08-31 09:52:11.000000000 +0100
++++ coreutils-4.5.3/src/uname.c	2002-11-28 18:29:15.000000000 +0000
+@@ -232,7 +232,7 @@
+       if (toprint & PRINT_KERNEL_RELEASE)
+ 	print_element (name.release);
+       if (toprint & PRINT_KERNEL_VERSION)
+-	print_element (name.version);
++	print_element (name.version);
+       if (toprint & PRINT_MACHINE)
+ 	print_element (name.machine);
+     }
+@@ -246,6 +246,28 @@
  	if (0 <= sysinfo (SI_ARCHITECTURE, processor, sizeof processor))
  	  element = processor;
        }
@@ -24,26 +33,12 @@
 +			fclose(f);
 +		}
 +	}
-+	if (!strcmp(element,"x86_64")) { /* Check for ia32e */
-+		char cinfo[1024];
-+		FILE *f=fopen("/proc/cpuinfo", "r");
-+		if(f) {
-+			while(fgets(cinfo, 1024, f)) {
-+				if(!strncmp(cinfo, "vendor_id", 9)) {
-+					if(strstr(cinfo, "GenuineIntel"))
-+						element="ia32e";
-+					break;
-+				}
-+			}
-+			fclose(f);
-+		}
-+	}
 +#endif
 +      }
  #endif
  #ifdef UNAME_PROCESSOR
        if (element == unknown)
-@@ -265,7 +301,7 @@
+@@ -262,7 +284,7 @@
  
    if (toprint & PRINT_HARDWARE_PLATFORM)
      {
@@ -52,7 +47,7 @@
  #if HAVE_SYSINFO && defined SI_PLATFORM
        {
  	static char hardware_platform[257];
-@@ -273,6 +309,14 @@
+@@ -270,6 +292,14 @@
  			  hardware_platform, sizeof hardware_platform))
  	  element = hardware_platform;
        }
