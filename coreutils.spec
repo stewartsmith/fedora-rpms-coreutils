@@ -54,6 +54,7 @@ Patch920: coreutils-dateseconds.patch
 Patch921: coreutils-chown.patch
 Patch922: coreutils-rmaccess.patch
 Patch923: coreutils-copy.patch
+Patch924: coreutils-stale-utmp.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -116,6 +117,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch921 -p1 -b .chown
 %patch922 -p1 -b .rmaccess
 %patch923 -p1 -b .copy
+%patch924 -p1 -b .stale-utmp
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -253,6 +255,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Mar 29 2005 Tim Waugh <twaugh@redhat.com>
+- Added "stale utmp" patch from upstream.
+
 * Thu Mar 24 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-43
 - Removed patch that adds -C option to install(1).
 
