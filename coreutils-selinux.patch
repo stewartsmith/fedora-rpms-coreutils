@@ -2118,7 +2118,7 @@
 +#ifdef WITH_SELINUX
 +
 +  if ( print_scontext ) {
-+    sprintf (p, "%-32s ", f->scontext);
++    sprintf (p, "%-32s ", f->scontext ?: "");
 +    p += strlen (p);
 +  }
 +#endif
@@ -2317,7 +2317,7 @@
 +    }
 +  }
 +
-+  (void) sprintf (p, "%-32s ", f->scontext);
++  (void) sprintf (p, "%-32s ", f->scontext ?: "");
 +  p += strlen (p);
 + 
 +  DIRED_INDENT ();

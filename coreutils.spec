@@ -244,6 +244,10 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Tue Sep 14 2004 Tim Waugh <twaugh@redhat.com>
+- SELinux patch fix: don't display '(null)' if getfilecon() fails
+  (bug #131196).
+
 * Fri Aug 20 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-23
 - Fixed colorls.csh quoting (bug #102412).
 - Fixed another join LSB test failure (bug #121153).
