@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 30
+Release: 31
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -45,6 +45,7 @@ Patch904: coreutils-5.0-allow_old_options.patch
 Patch905: coreutils-jday.patch
 Patch906: coreutils-fchown.patch
 Patch907: coreutils-5.2.1-runuser.patch
+Patch908: coreutils-getgrouplist.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -104,6 +105,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch905 -p1 -b .jday
 %patch906 -p1 -b .fchown
 %patch907 -p1 -b .runuser
+%patch908 -p1 -b .getgrouplist
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -246,7 +248,8 @@ fi
 /sbin/runuser
 
 %changelog
-* Tue Oct  5 2004 Tim Waugh <twaugh@redhat.com>
+* Tue Oct  5 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-31
+- getgrouplist() patch from Ulrich Drepper.
 - The selinux patch should be applied last.
 
 * Mon Oct  4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-30
