@@ -1713,8 +1713,8 @@
      }
  
    exit (G_fail ? EXIT_FAILURE : EXIT_SUCCESS);
---- coreutils-5.2.1/src/ls.c	2004-06-04 09:22:35.927057211 +0100
-+++ coreutils-5.2.1/src/ls.c	2004-06-04 09:55:05.010506573 +0100
+--- coreutils-5.2.1/src/ls.c	2004-06-04 09:55:05.010506573 +0100
++++ coreutils-5.2.1/src/ls.c	2004-06-07 14:18:07.448963915 +0100
 @@ -121,6 +121,18 @@
  
  #define AUTHORS "Richard Stallman", "David MacKenzie"
@@ -1996,7 +1996,7 @@
  
  	      if (dereference == DEREF_COMMAND_LINE_ARGUMENTS)
  		break;
-@@ -2399,13 +2499,33 @@
+@@ -2399,18 +2499,42 @@
  
  	default: /* DEREF_NEVER */
  	  err = lstat (path, &f->stat);
@@ -2033,7 +2033,17 @@
  	  return 0;
  	}
  
-@@ -2893,6 +3013,16 @@
+ #if HAVE_ACL || USE_ACL
+-      if (format == long_format)
++      if (format == long_format
++#ifdef WITH_SELINUX
++	  || format == security_format
++#endif
++	  )
+ 	{
+ 	  int n = file_has_acl (path, &f->stat);
+ 	  f->have_acl = (0 < n);
+@@ -2893,6 +3017,16 @@
  	  DIRED_PUTCHAR ('\n');
  	}
        break;
@@ -2050,7 +2060,7 @@
      }
  }
  
-@@ -2974,9 +3104,9 @@
+@@ -2974,9 +3108,9 @@
     WIDTH.  */
  
  static void
@@ -2062,7 +2072,7 @@
    if (name)
      printf ("%-*s ", width, name);
    else
-@@ -2988,9 +3118,9 @@
+@@ -2988,9 +3122,9 @@
  /* Likewise, for groups.  */
  
  static void
@@ -2074,7 +2084,7 @@
    if (name)
      printf ("%-*s ", width, name);
    else
-@@ -3095,7 +3225,7 @@
+@@ -3095,7 +3229,7 @@
      {
        char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
        sprintf (p, "%*s ", inode_number_width,
@@ -2083,7 +2093,7 @@
        p += inode_number_width + 1;
      }
  
-@@ -3103,8 +3233,10 @@
+@@ -3103,8 +3237,10 @@
      {
        char hbuf[LONGEST_HUMAN_READABLE + 1];
        sprintf (p, "%*s ", block_size_width,
@@ -2096,7 +2106,7 @@
        p += block_size_width + 1;
      }
  
-@@ -3113,10 +3245,18 @@
+@@ -3113,10 +3249,18 @@
    {
      char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
      sprintf (p, "%s %*s ", modebuf, nlink_width,
@@ -2116,7 +2126,7 @@
    DIRED_INDENT ();
  
    if (print_owner | print_group | print_author)
-@@ -3124,18 +3264,19 @@
+@@ -3124,18 +3268,19 @@
        DIRED_FPUTS (buf, stdout, p - buf);
  
        if (print_owner)
@@ -2140,7 +2150,7 @@
      {
        char majorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
        char minorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-@@ -3153,13 +3294,15 @@
+@@ -3153,13 +3298,15 @@
        char hbuf[LONGEST_HUMAN_READABLE + 1];
        uintmax_t size = unsigned_file_size (f->stat.st_size);
        sprintf (p, "%*s ", file_size_width,
@@ -2159,7 +2169,7 @@
      {
        time_t six_months_ago;
        int recent;
-@@ -3214,15 +3357,17 @@
+@@ -3214,15 +3361,17 @@
  	 print it as a huge integer number of seconds.  */
        char hbuf[INT_BUFSIZE_BOUND (intmax_t)];
        sprintf (p, "%*s ", long_time_expected_width (),
@@ -2181,7 +2191,7 @@
  
    if (f->filetype == symbolic_link)
      {
-@@ -3230,7 +3375,7 @@
+@@ -3230,7 +3379,7 @@
  	{
  	  DIRED_FPUTS_LITERAL (" -> ", stdout);
  	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
@@ -2190,7 +2200,7 @@
  	  if (indicator_style != none)
  	    print_type_indicator (f->linkmode);
  	}
-@@ -3412,10 +3557,10 @@
+@@ -3412,10 +3561,10 @@
  
  static void
  print_name_with_quoting (const char *p, mode_t mode, int linkok,
@@ -2203,7 +2213,7 @@
  
    if (stack)
      PUSH_CURRENT_DIRED_POS (stack);
-@@ -3460,7 +3605,8 @@
+@@ -3460,7 +3609,8 @@
  	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
  			    ST_NBLOCKSIZE, output_block_size));
  
@@ -2213,7 +2223,7 @@
  
    if (indicator_style != none)
      print_type_indicator (f->stat.st_mode);
-@@ -3499,7 +3645,8 @@
+@@ -3499,7 +3649,8 @@
  }
  
  static void
@@ -2223,7 +2233,7 @@
  {
    int type = C_FILE;
    struct color_ext_type *ext;	/* Color extension */
-@@ -3536,6 +3683,8 @@
+@@ -3536,6 +3687,8 @@
  	type = C_CHR;
        else if (S_ISDOOR (mode))
  	type = C_DOOR;
@@ -2232,7 +2242,7 @@
  
        if ((type == C_FILE) && ((mode & S_ISUID) != 0))
          type = C_UID;
-@@ -4037,6 +4186,16 @@
+@@ -4037,6 +4190,16 @@
    -X                         sort alphabetically by entry extension\n\
    -1                         list one file per line\n\
  "), stdout);
@@ -2249,7 +2259,7 @@
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\n\
-@@ -4057,0 +4217,80 @@
+@@ -4057,0 +4221,80 @@
 +
 +#ifdef WITH_SELINUX
 +

@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 14
+Release: 15
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -55,7 +55,7 @@ Patch950: coreutils-selinux.patch
 %endif
 
 BuildRoot: %_tmppath/%{name}-root
-BuildRequires:	gettext libtermcap-devel
+BuildRequires:	gettext libtermcap-devel bison
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires:	texinfo >= 4.3
 BuildRequires: autoconf >= 2.58, automake >= 1.8
@@ -242,6 +242,12 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Mon Jun  7 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-15
+- Fix ls -Z (bug #125447).
+
+* Fri Jun  4 2004 Tim Waugh <twaugh@redhat.com>
+- Build requires bison (bug #125290).
+
 * Fri Jun  4 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-14
 - Fix selinux patch causing problems with ls --format=... (bug #125238).
 
