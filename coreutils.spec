@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.0
-Release: 24
+Release: 34.1
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -72,10 +72,13 @@ Patch904: coreutils-5.0-allow_old_options.patch
 Patch905: coreutils-5.0-90563.patch
 Patch906: coreutils-5.0-datealign.patch
 Patch907: coreutils-largefile.patch
+Patch908: coreutils-5.0-md5.patch
+Patch909: coreutils-lsw.patch
+Patch910: coreutils-lsw2.patch
 
 #SELINUX Patch
 %if %{WITH_SELINUX}
-Patch908: coreutils-selinux.patch
+Patch950: coreutils-selinux.patch
 %endif
 
 BuildRoot: %_tmppath/%{name}-root
@@ -152,10 +155,13 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch905 -p0 -b .90563
 %patch906 -p1 -b .datealign
 %patch907 -p1 -b .largefile
+%patch908 -p1 -b .md5
+%patch909 -p1 -b .lsw
+%patch910 -p1 -b .lsw2
 
 %if %{WITH_SELINUX}
 #SELinux
-%patch908 -p1 -b .selinux
+%patch950 -p1 -b .selinux
 %endif
 
 # Don't run basic-1 test, since it breaks when run in the background
@@ -287,6 +293,43 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Mar  3 2004 Tim Waugh <twaugh@redhat.com> 5.0-34.1
+- Build for Fedora Core 1.
+
+* Thu Dec  4 2003 Tim Waugh <twaugh@redhat.com> 5.0-34.sel
+- Fix column widths problems in ls.
+
+* Tue Dec  2 2003 Tim Waugh <twaugh@redhat.com> 5.0-33.sel
+- Speed up md5sum by disabling speed-up asm.
+
+* Wed Nov 19 2003 Dan Walsh <dwalsh@redhat.com> 5.0-32.sel
+- Try again
+
+* Wed Nov 19 2003 Dan Walsh <dwalsh@redhat.com> 5.0-31.sel
+- Fix move on non SELinux kernels
+
+* Fri Nov 14 2003 Tim Waugh <twaugh@redhat.com> 5.0-30.sel
+- Fixed useless acl dependencies (bug #106141).
+
+* Fri Oct 24 2003 Dan Walsh <dwalsh@redhat.com> 5.0-29.sel
+- Fix id -Z
+
+* Tue Oct 21 2003 Dan Walsh <dwalsh@redhat.com> 5.0-28.sel
+- Turn on SELinux
+- Fix chcon error handling
+
+* Wed Oct 15 2003 Dan Walsh <dwalsh@redhat.com> 5.0-28
+- Turn off SELinux
+
+* Mon Oct 13 2003 Dan Walsh <dwalsh@redhat.com> 5.0-27.sel
+- Turn on SELinux
+
+* Mon Oct 13 2003 Dan Walsh <dwalsh@redhat.com> 5.0-27
+- Turn off SELinux
+
+* Mon Oct 13 2003 Dan Walsh <dwalsh@redhat.com> 5.0-26.sel
+- Turn on SELinux
+
 * Sun Oct 12 2003 Florian La Roche <Florian.LaRoche@redhat.de>
 - allow compiling without pam support
 
