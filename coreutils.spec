@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 33
+Release: 34
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -250,6 +250,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Dec  6 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-34
+- Don't set fs uid until after pam_open_session (bug #77791)..
+
 * Thu Nov 25 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-33
 - Fixed colorls.csh (bug #139988).  Patch from Miloslav Trmac.
 

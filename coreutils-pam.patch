@@ -9,8 +9,8 @@
  
  $(PROGRAMS): ../lib/libfetish.a
  
---- coreutils-5.2.0/src/su.c.pam	2004-02-23 17:40:54.000000000 +0000
-+++ coreutils-5.2.0/src/su.c	2004-02-23 17:40:54.000000000 +0000
+--- coreutils-5.2.0/src/su.c	2004-02-23 17:40:54.000000000 +0000
++++ coreutils-5.2.1/src/su.c	2004-12-06 15:47:07.082619911 +0000
 @@ -38,6 +38,16 @@
     restricts who can su to UID 0 accounts.  RMS considers that to
     be fascist.
@@ -306,15 +306,10 @@
  }
  
  /* Return 1 if SHELL is a restricted shell (one not returned by
-@@ -586,9 +771,13 @@
-     }
-   modify_environment (pw, shell);
+@@ -588,7 +773,8 @@
  
 +
-+#ifdef USE_PAM
-+  setfsuid(pw->pw_uid);
-+  setfsgid(pw->pw_gid);
-+#else
++#ifndef USE_PAM
    change_identity (pw);
 -  if (simulate_login && chdir (pw->pw_dir))
 -    error (0, errno, _("warning: cannot change directory to %s"), pw->pw_dir);
