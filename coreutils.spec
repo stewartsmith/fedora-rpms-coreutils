@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 41
+Release: 42
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -47,6 +47,7 @@ Patch906: coreutils-fchown.patch
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch909: coreutils-zh_CN.patch
+Patch910: coreutils-gcc4.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -108,6 +109,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
 %patch909 -p1 -b .zh_CN
+%patch910 -p1 -b .gcc4
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -251,6 +253,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Mar 14 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
+- Fixed build with GCC 4 (bug #151045).
+
 * Wed Feb  9 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-41
 - Jakub Jelinek's sort -t multibyte fixes (bug #147567).
 
