@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 26
+Release: 28
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -245,6 +245,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Mon Oct 4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-28
+- Fix runuser man page.
+
 * Mon Oct  4 2004 Tim Waugh <twaugh@redhat.com>
 - Fixed build.
 
