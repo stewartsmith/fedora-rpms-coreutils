@@ -137,7 +137,8 @@ automake --copy --force
 || :
 make all %{?_smp_mflags} \
 	%{?!nopam:CPPFLAGS="-DUSE_PAM"} \
-	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
+	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}" \
+	runuser_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
 
 [[ -f ChangeLog && -f ChangeLog.bz2  ]] || bzip2 -9f ChangeLog
 
@@ -244,6 +245,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Mon Oct  4 2004 Tim Waugh <twaugh@redhat.com>
+- Fixed build.
+
 * Fri Sep 24 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-26
 - Add runuser as similar to su, but only runable by root
 
