@@ -252,7 +252,7 @@ fi
 
 %changelog
 * Wed Feb  9 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-41
-- Jakub's sort -t multibyte fixes (bug #147567).
+- Jakub Jelinek's sort -t multibyte fixes (bug #147567).
 
 * Sat Feb  5 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-40
 - Undo last change (bug #145266).
