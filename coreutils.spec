@@ -20,7 +20,6 @@ Source106:  colorls.csh
 Source200:  su.pamd
 
 # fileutils
-Patch105: coreutils-4.5.2-C.patch
 Patch107: fileutils-4.1.10-timestyle.patch
 Patch108: fileutils-4.1.5-afs.patch
 Patch116: fileutils-4.1-dircolors_c.patch
@@ -85,7 +84,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # fileutils
-%patch105 -p0 -b .Coption
 %patch107 -p1 -b .timestyle
 %patch108 -p1 -b .afs
 %patch116 -p1
@@ -255,6 +253,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Mar 24 2005 Tim Waugh <twaugh@redhat.com>
+- Removed patch that adds -C option to install(1).
+
 * Wed Mar 14 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
 - Fixed pam patch.
 - Fixed broken configure test.
