@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 4.5.3
-Release: 19.0.1
+Release: 19.0.2
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -295,6 +295,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Oct 29 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-19.0.2
+- Fixed xalloc function declarations.
+
 * Wed Oct 22 2003 Tim Waugh <twaugh@redhat.com> 4.5.3-19.0.1
 - Apply Paul Eggart's patches for 'ls -w'.
 
