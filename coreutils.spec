@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 34
+Release: 35
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -55,7 +55,6 @@ Patch923: coreutils-copy.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
-Patch951: coreutils-5.2.1-runcon.patch
 
 BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel bison
@@ -116,8 +115,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #SELinux
 %patch950 -p1 -b .selinux
-%patch951 -p1 -b .runcon
-
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
@@ -250,6 +247,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Dec 27 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-35
+- Change install to restorecon if it can
+
 * Wed Dec 15 2004 Tim Waugh <twaugh@redhat.com>
 - Fixed small bug in i18n patch.
 
