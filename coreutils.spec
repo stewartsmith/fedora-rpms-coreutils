@@ -44,6 +44,7 @@ Patch800: coreutils-i18n.patch
 Patch904: coreutils-5.0-allow_old_options.patch
 Patch905: coreutils-jday.patch
 Patch906: coreutils-fchown.patch
+Patch907: coreutils-5.2.1-runuser.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -53,7 +54,6 @@ Patch923: coreutils-copy.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
-Patch951: coreutils-5.2.1-runuser.patch
 
 BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel bison
@@ -103,6 +103,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch904 -p1 -b .allow_old_options
 %patch905 -p1 -b .jday
 %patch906 -p1 -b .fchown
+%patch907 -p1 -b .runuser
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -112,7 +113,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #SELinux
 %patch950 -p1 -b .selinux
-%patch951 -p1 -b .runuser
 
 
 # Don't run basic-1 test, since it breaks when run in the background
@@ -247,10 +247,13 @@ fi
 /sbin/runuser
 
 %changelog
-* Mon Oct 4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-30
+* Tue Oct  5 2004 Tim Waugh <twaugh@redhat.com>
+- The selinux patch should be applied last.
+
+* Mon Oct  4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-30
 - Mv runuser to /sbin
 
-* Mon Oct 4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-28
+* Mon Oct  4 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-28
 - Fix runuser man page.
 
 * Mon Oct  4 2004 Tim Waugh <twaugh@redhat.com>
