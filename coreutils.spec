@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 24
+Release: 25
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -43,6 +43,7 @@ Patch800: coreutils-i18n.patch
 
 Patch904: coreutils-5.0-allow_old_options.patch
 Patch905: coreutils-jday.patch
+Patch906: coreutils-fchown.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -102,6 +103,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # Coreutils
 %patch904 -p1 -b .allow_old_options
 %patch905 -p1 -b .jday
+%patch906 -p1 -b .fchown
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -244,6 +246,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Fri Sep 24 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-25
+- chown(1) patch from Ulrich Drepper.
+
 * Tue Sep 14 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-24
 - SELinux patch fix: don't display '(null)' if getfilecon() fails
   (bug #131196).
