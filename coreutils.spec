@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 20
+Release: 21
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -48,6 +48,7 @@ Patch905: coreutils-jday.patch
 Patch920: coreutils-dateseconds.patch
 Patch921: coreutils-chown.patch
 Patch922: coreutils-rmaccess.patch
+Patch923: coreutils-copy.patch
 
 #SELINUX Patch
 %if %{WITH_SELINUX}
@@ -106,6 +107,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch920 -p1 -b .dateseconds
 %patch921 -p1 -b .chown
 %patch922 -p1 -b .rmaccess
+%patch923 -p1 -b .copy
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -242,6 +244,10 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Aug 11 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-21
+- Apply upstream patch to fix 'cp -a' onto multiply-linked files (bug #128874).
+- SELinux patch fix: don't error out if lgetfilecon() returns ENODATA.
+
 * Tue Aug 10 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-20
 - Added 'konsole' TERM to DIR_COLORS (bug #129544).
 

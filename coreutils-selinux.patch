@@ -189,7 +189,7 @@
 +      else {
 +	if ( errno == ENOTSUP ) {
 +	  error (0, errno, _("warning: security context not preserved %s"), quote (src_path));
-+	} else {
++	} else if ( errno != ENODATA ) {
 +	  error (0, errno, _("cannot lgetfilecon %s"), quote (src_path));
 +	  return 1;
 +	}
