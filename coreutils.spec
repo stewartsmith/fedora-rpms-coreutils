@@ -137,8 +137,7 @@ automake --copy --force
 || :
 make all %{?_smp_mflags} \
 	%{?!nopam:CPPFLAGS="-DUSE_PAM"} \
-	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}" \
-	runuser_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
+	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
 
 [[ -f ChangeLog && -f ChangeLog.bz2  ]] || bzip2 -9f ChangeLog
 
