@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 19
+Release: 20
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -242,6 +242,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Tue Aug 10 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-20
+- Added 'konsole' TERM to DIR_COLORS (bug #129544).
+
 * Wed Aug  4 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-19
 - Added 'gnome' TERM to DIR_COLORS (bug #129112).
 - Worked around a bash bug #129128.
