@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 43
+Release: 44
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -255,7 +255,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Tue Mar 29 2005 Tim Waugh <twaugh@redhat.com>
+* Tue Mar 29 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-44
 - Added "stale utmp" patch from upstream.
 
 * Thu Mar 24 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-43
