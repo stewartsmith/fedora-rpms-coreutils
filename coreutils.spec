@@ -250,6 +250,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Dec 15 2004 Tim Waugh <twaugh@redhat.com>
+- Fixed small bug in i18n patch.
+
 * Mon Dec  6 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-34
 - Don't set fs uid until after pam_open_session (bug #77791).
 
