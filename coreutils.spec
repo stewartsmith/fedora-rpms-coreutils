@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 25
+Release: 26
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -52,9 +52,8 @@ Patch922: coreutils-rmaccess.patch
 Patch923: coreutils-copy.patch
 
 #SELINUX Patch
-%if %{WITH_SELINUX}
 Patch950: coreutils-selinux.patch
-%endif
+Patch951: coreutils-5.2.1-runuser.patch
 
 BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel bison
@@ -111,10 +110,9 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch922 -p1 -b .rmaccess
 %patch923 -p1 -b .copy
 
-%if %{WITH_SELINUX}
 #SELinux
 %patch950 -p1 -b .selinux
-%endif
+%patch951 -p1 -b .runuser
 
 
 # Don't run basic-1 test, since it breaks when run in the background
@@ -246,6 +244,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Fri Sep 24 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-26
+- Add runuser as similar to su, but only runable by root
+
 * Fri Sep 24 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-25
 - chown(1) patch from Ulrich Drepper.
 
