@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 32
+Release: 33
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -250,7 +250,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Nov 25 2004 Tim Waugh <twaugh@redhat.com>
+* Thu Nov 25 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-33
 - Fixed colorls.csh (bug #139988).  Patch from Miloslav Trmac.
 
 * Mon Nov  8 2004 Tim Waugh <twaugh@redhat.com>
