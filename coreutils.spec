@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 11
+Release: 12
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -47,6 +47,7 @@ Patch905: coreutils-jday.patch
 # From upstream
 Patch920: coreutils-dateseconds.patch
 Patch921: coreutils-chown.patch
+Patch922: coreutils-rmaccess.patch
 
 #SELINUX Patch
 %if %{WITH_SELINUX}
@@ -104,6 +105,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # From upstream
 %patch920 -p1 -b .dateseconds
 %patch921 -p1 -b .chown
+%patch922 -p1 -b .rmaccess
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -240,6 +242,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Jun  2 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-12
+- Don't call access() on symlinks about to be removed (bug #124699).
+
 * Wed Jun  2 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-11
 - Fix ja translation (bug #124862).
 
