@@ -1716,7 +1716,7 @@
 +
 +  memset (&state, '\0', sizeof(mbstate_t));
 +
-+  if (tab[0])
++  if (tab[0] != TAB_DEFAULT)
 +    while (ptr < lim && eword--)
 +      {
 +	while (ptr < lim && memcmp (ptr, tab, tab_length) != 0)
@@ -1747,7 +1747,7 @@
 +
 +# ifdef POSIX_UNSPECIFIED
 +  /* Make LIM point to the end of (one byte past) the current field.  */
-+  if (tab[0])
++  if (tab[0] != TAB_DEFAULT)
 +    {
 +      char *newlim, *p;
 +
