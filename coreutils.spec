@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 7
+Release: 11
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -42,9 +42,11 @@ Patch715: coreutils-4.5.3-sysinfo.patch
 Patch800: coreutils-i18n.patch
 
 Patch904: coreutils-5.0-allow_old_options.patch
+Patch905: coreutils-jday.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
+Patch921: coreutils-chown.patch
 
 #SELINUX Patch
 %if %{WITH_SELINUX}
@@ -55,6 +57,7 @@ BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires:	texinfo >= 4.3
+BuildRequires: autoconf >= 2.58, automake >= 1.8
 Prereq:		/sbin/install-info
 %{?!nopam:Requires: pam >= 0.66-12}
 Prereq: grep, findutils
@@ -96,9 +99,11 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # Coreutils
 %patch904 -p1 -b .allow_old_options
+%patch905 -p1 -b .jday
 
 # From upstream
 %patch920 -p1 -b .dateseconds
+%patch921 -p1 -b .chown
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -111,6 +116,11 @@ the old GNU fileutils, sh-utils, and textutils packages.
 perl -pi -e 's/basic-1//g' tests/stty/Makefile*
 
 %build
+%ifarch s390 s390x
+export CFLAGS="$RPM_OPT_FLAGS -fPIC"
+%else
+export CFLAGS="$RPM_OPT_FLAGS -fpic"
+%endif
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in */*/Makefile.in
 aclocal -I m4
@@ -122,7 +132,8 @@ automake --copy --force
 %endif
 || :
 make all %{?_smp_mflags} \
-	%{?!nopam:CPPFLAGS="-DUSE_PAM" su_LDFLAGS="-lpam -lpam_misc"}
+	%{?!nopam:CPPFLAGS="-DUSE_PAM"} \
+	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
 
 [[ -f ChangeLog && -f ChangeLog.bz2  ]] || bzip2 -9f ChangeLog
 
@@ -229,6 +240,24 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Jun  2 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-11
+- Fix ja translation (bug #124862).
+
+* Tue May 18 2004 Jeremy Katz <katzj@redhat.com> 5.2.1-10
+- rebuild
+
+* Mon May 17 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-9
+- Mention pam in the info for su (bug #122592).
+- Remove wheel group rant again (bug #122886).
+- Change default behaviour for chgrp/chown (bug #123263).  Patch from
+  upstream.
+
+* Mon May 17 2004 Thomas Woerner <twoerner@redhat.com> 5.2.1-8
+- compiling su PIE
+
+* Wed May 12 2004 Tim Waugh <twaugh@redhat.com>
+- Build requires new versions of autoconf and automake (bug #123098).
+
 * Tue May  4 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-7
 - Fix join -t (bug #122435).
 
