@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 40
+Release: 41
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -121,6 +121,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
 perl -pi -e 's/basic-1//g' tests/stty/Makefile*
+
+chmod a+x tests/sort/sort-mb-tests
 
 %build
 %ifarch s390 s390x
@@ -249,6 +251,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Feb  9 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-41
+- Jakub's sort -t multibyte fixes (bug #147567).
+
 * Sat Feb  5 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-40
 - Undo last change (bug #145266).
 

@@ -1351,8 +1351,8 @@
  /* We've just printed some files and need to clean up things before
     looking for more options and printing the next batch of files.
  
---- coreutils-5.1.3/src/sort.c	2004-02-16 15:36:40.000000000 +0000
-+++ coreutils-5.2.1/src/sort.c	2004-12-15 14:10:01.347312694 +0000
+--- coreutils-5.2.1/src/sort.c	2004-12-15 14:10:01.347312694 +0000
++++ coreutils-5.2.1/src/sort.c	2005-02-09 07:34:40.000000000 -0500
 @@ -23,10 +23,31 @@
  
  #include <config.h>
@@ -1440,17 +1440,24 @@
  /* The kind of blanks for '-b' to skip in various options. */
  enum blanktype { bl_start, bl_end, bl_both };
  
-@@ -251,7 +306,8 @@
- /* Tab character separating fields.  If TAB_DEFAULT, then fields are
+@@ -245,13 +300,11 @@
+    they were read if all keys compare equal.  */
+ static bool stable;
+ 
+-/* If TAB has this value, blanks separate fields.  */
+-enum { TAB_DEFAULT = CHAR_MAX + 1 };
+-
+-/* Tab character separating fields.  If TAB_DEFAULT, then fields are
++/* Tab character separating fields.  If tab_length is 0, then fields are
     separated by the empty string between a non-blank character and a blank
     character. */
 -static int tab = TAB_DEFAULT;
-+static int tab[MB_LEN_MAX + 1] = { TAB_DEFAULT };
-+static size_t tab_length = 1;
++static char tab[MB_LEN_MAX + 1];
++static size_t tab_length = 0;
  
  /* Flag to remove consecutive duplicate lines from the output.
     Only the last of a sequence of equal lines will be output. */
-@@ -384,6 +440,46 @@
+@@ -384,6 +437,46 @@
  };
  static struct tempnode *volatile temphead;
  
@@ -1497,7 +1504,7 @@
  /* Clean up any remaining temporary files. */
  
  static void
-@@ -521,7 +617,7 @@
+@@ -521,7 +614,7 @@
        }
  }
  
@@ -1506,7 +1513,7 @@
  
  static int
  struct_month_cmp (const void *m1, const void *m2)
-@@ -536,7 +632,7 @@
+@@ -536,7 +629,7 @@
  /* Initialize the character class tables. */
  
  static void
@@ -1515,7 +1522,7 @@
  {
    int i;
  
-@@ -574,6 +670,64 @@
+@@ -574,6 +667,64 @@
  #endif
  }
  
@@ -1580,7 +1587,7 @@
  /* Specify the amount of main memory to use when sorting.  */
  static void
  specify_sort_size (char const *s)
-@@ -784,7 +938,7 @@
+@@ -784,7 +935,7 @@
     by KEY in LINE. */
  
  static char *
@@ -1589,12 +1596,12 @@
  {
    register char *ptr = line->text, *lim = ptr + line->length - 1;
    register size_t sword = key->sword;
-@@ -794,10 +948,10 @@
+@@ -794,10 +945,10 @@
    /* The leading field separator itself is included in a field when -t
       is absent.  */
  
 -  if (tab != TAB_DEFAULT)
-+  if (tab[0] != TAB_DEFAULT)
++  if (tab_length)
      while (ptr < lim && sword--)
        {
 -	while (ptr < lim && *ptr != tab)
@@ -1602,7 +1609,7 @@
  	  ++ptr;
  	if (ptr < lim)
  	  ++ptr;
-@@ -825,11 +979,70 @@
+@@ -825,11 +976,70 @@
    return ptr;
  }
  
@@ -1619,7 +1626,7 @@
 +
 +  memset (&state, '\0', sizeof(mbstate_t));
 +
-+  if (tab[0] != TAB_DEFAULT)
++  if (tab_length)
 +    while (ptr < lim && sword--)
 +      {
 +	while (ptr < lim && memcmp (ptr, tab, tab_length) != 0)
@@ -1674,12 +1681,12 @@
  {
    register char *ptr = line->text, *lim = ptr + line->length - 1;
    register size_t eword = key->eword, echar = key->echar;
-@@ -842,10 +1055,10 @@
+@@ -842,10 +1052,10 @@
       `beginning' is the first character following the delimiting TAB.
       Otherwise, leave PTR pointing at the first `blank' character after
       the preceding field.  */
 -  if (tab != TAB_DEFAULT)
-+  if (tab[0] != TAB_DEFAULT)
++  if (tab_length)
      while (ptr < lim && eword--)
        {
 -	while (ptr < lim && *ptr != tab)
@@ -1687,12 +1694,12 @@
  	  ++ptr;
  	if (ptr < lim && (eword | echar))
  	  ++ptr;
-@@ -891,10 +1104,10 @@
+@@ -891,10 +1101,10 @@
       */
  
    /* Make LIM point to the end of (one byte past) the current field.  */
 -  if (tab != TAB_DEFAULT)
-+  if (tab[0] != TAB_DEFAULT)
++  if (tab_length)
      {
        char *newlim;
 -      newlim = memchr (ptr, tab, lim - ptr);
@@ -1700,7 +1707,7 @@
        if (newlim)
  	lim = newlim;
      }
-@@ -926,15 +1139,137 @@
+@@ -926,15 +1136,137 @@
    return ptr;
  }
  
@@ -1716,7 +1723,7 @@
 +
 +  memset (&state, '\0', sizeof(mbstate_t));
 +
-+  if (tab[0] != TAB_DEFAULT)
++  if (tab_length)
 +    while (ptr < lim && eword--)
 +      {
 +	while (ptr < lim && memcmp (ptr, tab, tab_length) != 0)
@@ -1747,7 +1754,7 @@
 +
 +# ifdef POSIX_UNSPECIFIED
 +  /* Make LIM point to the end of (one byte past) the current field.  */
-+  if (tab[0] != TAB_DEFAULT)
++  if (tab_length)
 +    {
 +      char *newlim, *p;
 +
@@ -1842,7 +1849,7 @@
  }
  
  /* Fill BUF reading from FP, moving buf->left bytes from the end
-@@ -1019,8 +1354,22 @@
+@@ -1019,8 +1351,22 @@
  		  else
  		    {
  		      if (key->skipsblanks)
@@ -1867,7 +1874,7 @@
  		      line->keybeg = line_start;
  		    }
  		  if (key->skipeblanks)
-@@ -1128,13 +1477,32 @@
+@@ -1128,13 +1474,32 @@
    register int tmpa, tmpb, tmp;
    register size_t log_a, log_b;
  
@@ -1906,7 +1913,7 @@
  
    if (tmpa == NEGATION_SIGN)
      {
-@@ -1268,15 +1636,60 @@
+@@ -1268,15 +1633,60 @@
    /* FIXME: maybe add option to try expensive FP conversion
       only if A and B can't be compared more cheaply/accurately.  */
  
@@ -1974,7 +1981,7 @@
      return 1;
  
    /* Sort numbers in the usual way, where -0 == +0.  Put NaNs after
-@@ -1294,7 +1707,7 @@
+@@ -1294,7 +1704,7 @@
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -1983,7 +1990,7 @@
  {
    char *month;
    register size_t i;
-@@ -1332,11 +1745,79 @@
+@@ -1332,11 +1742,79 @@
    return result;
  }
  
@@ -2064,7 +2071,7 @@
  {
    struct keyfield const *key = keylist;
  
-@@ -1507,6 +1988,187 @@
+@@ -1507,6 +1985,187 @@
    return key->reverse ? -diff : diff;
  }
  
@@ -2252,7 +2259,7 @@
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -2252,20 +2914,44 @@
+@@ -2252,20 +2911,44 @@
    {
      struct lconv const *lconvp = localeconv ();
  
@@ -2302,13 +2309,14 @@
    have_read_stdin = false;
    inittables ();
  
-@@ -2462,13 +3148,47 @@
+@@ -2462,13 +3145,47 @@
  
  	case 't':
  	  {
 -	    int newtab = optarg[0];
 -	    if (! newtab)
 +	    char newtab[MB_LEN_MAX + 1];
++	    size_t newtab_length = 1;
 +	    strncpy (newtab, optarg, MB_LEN_MAX);
 +	    if (! newtab[0])
  	      error (SORT_FAILURE, 0, _("empty tab"));
@@ -2317,7 +2325,7 @@
 +	      {
 +		wchar_t wc;
 +		mbstate_t state;
-+		size_t newtab_length, i;
++		size_t i;
 +
 +		memset (&state, '\0', sizeof (mbstate_t));
 +		newtab_length = mbrtowc (&wc, newtab, strnlen (newtab, MB_LEN_MAX), &state);
@@ -2331,6 +2339,8 @@
 +
 +                if (optarg[newtab_length])
 +		  {
++		    if (strcmp (optarg, "\\0") == 0)
++		      newtab[0] = '\0';
 +		    /* Provoke with `sort -txx'.  Complain about
 +		       "multi-character tab" instead of "multibyte tab", so
 +		       that the diagnostic's wording does not need to be
@@ -2338,9 +2348,6 @@
 +		    error (SORT_FAILURE, 0, _("multi-character tab `%s'"),
 +			   optarg);
 +		  }
-+
-+		for (i = 0; i < newtab_length; i++)
-+		  tab[i] = newtab[i];
 +	      }
 +            else
 +#endif
@@ -2353,15 +2360,18 @@
  		else
  		  {
  		    /* Provoke with `sort -txx'.  Complain about
-@@ -2479,9 +3199,9 @@
+@@ -2479,9 +3196,12 @@
  			   optarg);
  		  }
  	      }
 -	    if (tab != TAB_DEFAULT && tab != newtab)
-+	    if (tab[0] != TAB_DEFAULT && tab[0] != newtab[0])
++	    if (tab_length
++		&& (tab_length != newtab_length
++		    || memcmp (tab, newtab, tab_length) != 0))
  	      error (SORT_FAILURE, 0, _("incompatible tabs"));
 -	    tab = newtab;
-+	    tab[0] = newtab[0];
++	    memcpy (tab, newtab, newtab_length);
++	    tab_length = newtab_length;
  	  }
  	  break;
  
@@ -4095,3 +4105,130 @@
  
    if (have_read_stdin && fclose (stdin) == EOF)
      error (EXIT_FAILURE, errno, "-");
+--- coreutils-5.2.1/tests/sort/sort-mb-tests.jj	2005-02-09 07:34:40.000000000 -0500
++++ coreutils-5.2.1/tests/sort/sort-mb-tests	2005-02-09 07:34:40.000000000 -0500
+@@ -0,0 +1,58 @@
++#! /bin/sh
++case $# in
++  0) xx='../../src/sort';;
++  *) xx="$1";;
++esac
++test "$VERBOSE" && echo=echo || echo=:
++$echo testing program: $xx
++errors=0
++test "$srcdir" || srcdir=.
++test "$VERBOSE" && $xx --version 2> /dev/null
++
++export LC_ALL=en_US.UTF-8
++locale -k LC_CTYPE 2>&1 | grep -q charmap.*UTF-8 || exit 77
++errors=0
++
++$xx -t ＠ +1 -n mb1.I > mb1.O
++code=$?
++if test $code != 0; then
++  $echo "Test mb1 failed: $xx return code $code differs from expected value 0" 1>&2
++  errors=`expr $errors + 1`
++else
++  cmp mb1.O $srcdir/mb1.X > /dev/null 2>&1
++  case $? in
++    0) if test "$VERBOSE"; then $echo "passed mb1"; fi;;
++    1) $echo "Test mb1 failed: files mb1.O and $srcdir/mb1.X differ" 1>&2
++       (diff -c mb1.O $srcdir/mb1.X) 2> /dev/null
++       errors=`expr $errors + 1`;;
++    2) $echo "Test mb1 may have failed." 1>&2
++       $echo The command "cmp mb1.O $srcdir/mb1.X" failed. 1>&2
++       errors=`expr $errors + 1`;;
++  esac
++fi
++
++$xx -t ＠ +3 -n mb2.I > mb2.O
++code=$?
++if test $code != 0; then
++  $echo "Test mb2 failed: $xx return code $code differs from expected value 0" 1>&2
++  errors=`expr $errors + 1`
++else
++  cmp mb2.O $srcdir/mb2.X > /dev/null 2>&1
++  case $? in
++    0) if test "$VERBOSE"; then $echo "passed mb2"; fi;;
++    1) $echo "Test mb2 failed: files mb2.O and $srcdir/mb2.X differ" 1>&2
++       (diff -c mb2.O $srcdir/mb2.X) 2> /dev/null
++       errors=`expr $errors + 1`;;
++    2) $echo "Test mb2 may have failed." 1>&2
++       $echo The command "cmp mb2.O $srcdir/mb2.X" failed. 1>&2
++       errors=`expr $errors + 1`;;
++  esac
++fi
++
++if test $errors = 0; then
++  $echo Passed all 113 tests. 1>&2
++else
++  $echo Failed $errors tests. 1>&2
++fi
++test $errors = 0 || errors=1
++exit $errors
+--- coreutils-5.2.1/tests/sort/mb1.I.jj	2005-02-09 07:34:40.000000000 -0500
++++ coreutils-5.2.1/tests/sort/mb1.I	2005-02-09 07:34:40.000000000 -0500
+@@ -0,0 +1,4 @@
++Apple＠10
++Banana＠5
++Citrus＠20
++Cherry＠30
+--- coreutils-5.2.1/tests/sort/mb2.I.jj	2005-02-09 07:34:40.000000000 -0500
++++ coreutils-5.2.1/tests/sort/mb2.I	2005-02-09 07:34:40.000000000 -0500
+@@ -0,0 +1,4 @@
++Apple＠ＡＡ10＠＠20
++Banana＠ＡＡ5＠＠30
++Citrus＠ＡＡ20＠＠5
++Cherry＠ＡＡ30＠＠10
+--- coreutils-5.2.1/tests/sort/mb1.X.jj	2005-02-09 07:34:40.000000000 -0500
++++ coreutils-5.2.1/tests/sort/mb1.X	2005-02-09 07:34:40.000000000 -0500
+@@ -0,0 +1,4 @@
++Banana＠5
++Apple＠10
++Citrus＠20
++Cherry＠30
+--- coreutils-5.2.1/tests/sort/mb2.X.jj	2005-02-09 07:34:40.000000000 -0500
++++ coreutils-5.2.1/tests/sort/mb2.X	2005-02-09 07:34:40.000000000 -0500
+@@ -0,0 +1,4 @@
++Citrus＠ＡＡ20＠＠5
++Cherry＠ＡＡ30＠＠10
++Apple＠ＡＡ10＠＠20
++Banana＠ＡＡ5＠＠30
+--- coreutils-5.2.1/tests/sort/Makefile.am.jj	2004-02-11 06:54:14.000000000 -0500
++++ coreutils-5.2.1/tests/sort/Makefile.am	2005-02-09 07:36:20.000000000 -0500
+@@ -43,12 +43,14 @@ o-no-file1.E create-empty.O create-empty
+ nul-nls.E use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E
+ ##test-files-end
+ 
+-EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
+-noinst_SCRIPTS = $x-tests
++run_gen += mb1.O mb2.O
++
++EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
++noinst_SCRIPTS = $x-tests $x-mb-tests
+ 
+ editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
+ 
+-TESTS = $x-tests
++TESTS = $x-tests $x-mb-tests
+ 
+ mk_script = $(srcdir)/../mk-script
+ $(srcdir)/$x-tests: $(mk_script) Test.pm
+--- coreutils-5.2.1/tests/sort/Makefile.in.jj	2004-03-11 03:58:06.000000000 -0500
++++ coreutils-5.2.1/tests/sort/Makefile.in	2005-02-09 07:36:50.000000000 -0500
+@@ -301,10 +301,13 @@ n10b.E n11a.O n11a.E n11b.O n11b.E 01a.O
+ o-no-file1.E create-empty.O create-empty.E neg-nls.O neg-nls.E nul-nls.O \
+ nul-nls.E use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E
+ 
++run_gen += mb1.O mb2.O
++
++EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
+ EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
+-noinst_SCRIPTS = $x-tests
++noinst_SCRIPTS = $x-tests $x-mb-tests
+ editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
+-TESTS = $x-tests
++TESTS = $x-tests $x-mb-tests
+ mk_script = $(srcdir)/../mk-script
+ MAINTAINERCLEANFILES = $x-tests $(maint_gen)
+ CLEANFILES = $(run_gen)
