@@ -1,10 +1,10 @@
 %if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
-%define WITH_SELINUX 0
+%define WITH_SELINUX 1
 %endif
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.0
-Release: 34.1
+Release: 39
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -42,7 +42,6 @@ Patch188: coreutils-4.5.3-suidfail.patch
 Patch189: coreutils-4.5.3-stoneage.patch
 
 # textutils
-Patch500: textutils-2.0.17-mem.patch
 Patch502: textutils-2.0.21-man.patch
 
 # sh-utils
@@ -75,6 +74,7 @@ Patch907: coreutils-largefile.patch
 Patch908: coreutils-5.0-md5.patch
 Patch909: coreutils-lsw.patch
 Patch910: coreutils-lsw2.patch
+Patch911: coreutils-nonerequired.patch
 
 #SELINUX Patch
 %if %{WITH_SELINUX}
@@ -127,7 +127,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch189 -p1 -b .stoneage
 
 # textutils
-%patch500 -p1
 # patch in new ALL_LINGUAS
 %patch502 -p1
 
@@ -158,6 +157,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .md5
 %patch909 -p1 -b .lsw
 %patch910 -p1 -b .lsw2
+%patch911 -p1 -b .nonerequired
 
 %if %{WITH_SELINUX}
 #SELinux
@@ -293,8 +293,23 @@ fi
 %_sbindir/chroot
 
 %changelog
-* Wed Mar  3 2004 Tim Waugh <twaugh@redhat.com> 5.0-34.1
-- Build for Fedora Core 1.
+* Tue Jan  20 2004 Dan Walsh <dwalsh@redhat.com> 5.0-39
+- Change /etc/pam.d/su to remove preservuser and add multiple
+
+* Tue Jan  20 2004 Dan Walsh <dwalsh@redhat.com> 5.0-38
+- Change is_selinux_enabled to is_selinux_enabled > 0
+
+* Tue Jan  20 2004 Dan Walsh <dwalsh@redhat.com> 5.0-37
+- Add pam_selinux to pam file to allow switching of roles within selinux
+
+* Fri Jan 16 2004 Tim Waugh <twaugh@redhat.com>
+- The textutils-2.0.17-mem.patch is no longer needed.
+
+* Thu Jan 15 2004 Tim Waugh <twaugh@redhat.com> 5.0-36
+- Fixed autoconf test causing builds to fail.
+
+* Tue Dec  9 2003 Dan Walsh <dwalsh@redhat.com> 5.0-35
+- Fix copying to non xattr files
 
 * Thu Dec  4 2003 Tim Waugh <twaugh@redhat.com> 5.0-34.sel
 - Fix column widths problems in ls.
