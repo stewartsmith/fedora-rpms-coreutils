@@ -49,6 +49,7 @@ Patch908: coreutils-getgrouplist.patch
 Patch909: coreutils-zh_CN.patch
 Patch910: coreutils-gcc4.patch
 Patch911: coreutils-brokentest.patch
+Patch912: coreutils-stale-utmp.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -112,6 +113,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch909 -p1 -b .zh_CN
 %patch910 -p1 -b .gcc4
 %patch911 -p1 -b .brokentest
+%patch912 -p1 -b .stale-utmp
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -255,6 +257,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Mar 23 2005 Tim Waugh <twaugh@redhat.com>
+- Add who(1) patch to work around stale utmp entries (bug #109726).
+
 * Wed Mar 14 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
 - Fixed pam patch.
 - Fixed broken configure test.
