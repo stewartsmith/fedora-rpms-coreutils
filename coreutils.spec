@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 37
+Release: 38
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -249,6 +249,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Feb  4 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-38
+- Special case for ia32e in uname (bug #145266).
+
 * Thu Jan 13 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-37
 - Fixed zh_CN translation (bug #144845).  Patch from Mitrophan Chin.
 
