@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 3
+Release: 7
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -43,10 +43,12 @@ Patch800: coreutils-i18n.patch
 
 Patch904: coreutils-5.0-allow_old_options.patch
 
+# From upstream
+Patch920: coreutils-dateseconds.patch
+
 #SELINUX Patch
 %if %{WITH_SELINUX}
 Patch950: coreutils-selinux.patch
-Patch951: coreutils-ls-stat.patch
 %endif
 
 BuildRoot: %_tmppath/%{name}-root
@@ -95,10 +97,12 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # Coreutils
 %patch904 -p1 -b .allow_old_options
 
+# From upstream
+%patch920 -p1 -b .dateseconds
+
 %if %{WITH_SELINUX}
 #SELinux
 %patch950 -p1 -b .selinux
-%patch951 -p1 -b .ls-stat
 %endif
 
 
@@ -225,6 +229,19 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Tue May  4 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-7
+- Fix join -t (bug #122435).
+
+* Tue Apr 20 2004 Tim Waugh <twaugh@redhat.com> 5.2.1-6
+- Fix 'ls -Z' displaying users/groups if stat() failed (bug #121292).
+
+* Fri Apr 9 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-5
+- Add ls -LZ fix
+- Fix chcon to handle "."
+
+* Wed Mar 17 2004 Tim Waugh <twaugh@redhat.com>
+- Apply upstream fix for non-zero seconds for --date="10:00 +0100".
+
 * Tue Mar 16 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-3
 - If preserve fails, report as warning unless user requires preserve
 

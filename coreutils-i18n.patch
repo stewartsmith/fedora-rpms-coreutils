@@ -3424,7 +3424,7 @@
        char *sep;
        for (; (sep = memchr (ptr, t, lim - ptr)) != NULL; ptr = sep + 1)
  	extract_field (line, ptr, sep - ptr);
-@@ -262,6 +281,147 @@
+@@ -262,6 +281,148 @@
    extract_field (line, ptr, lim - ptr);
  }
  
@@ -3449,6 +3449,7 @@
 +      char *sep = ptr;
 +      for (; ptr < lim; ptr = sep + 1)
 +	{
++	  sep = ptr;
 +	  while (sep < lim)
 +	    {
 +	      state_bak = state;
@@ -3572,7 +3573,7 @@
  /* Read a line from FP into LINE and split it into fields.
     Return true if successful.  */
  
-@@ -282,6 +442,11 @@
+@@ -282,6 +443,11 @@
    line->nfields_allocated = 0;
    line->nfields = 0;
    line->fields = NULL;
@@ -3584,7 +3585,7 @@
    xfields (line);
    return true;
  }
-@@ -336,56 +501,116 @@
+@@ -336,56 +502,116 @@
  keycmp (struct line const *line1, struct line const *line2)
  {
    /* Start of field to compare in each file.  */
@@ -3724,7 +3725,7 @@
  }
  
  /* Print field N of LINE if it exists and is nonempty, otherwise
-@@ -410,11 +635,18 @@
+@@ -410,11 +636,18 @@
  
  /* Print the join of LINE1 and LINE2.  */
  
@@ -3744,7 +3745,7 @@
  
    outlist = outlist_head.next;
    if (outlist)
-@@ -430,12 +662,12 @@
+@@ -430,12 +663,12 @@
  	  if (o->file == 0)
  	    {
  	      if (line1 == &uni_blank)
@@ -3759,7 +3760,7 @@
  		  line = line1;
  		  field = join_field_1;
  		}
-@@ -449,7 +681,7 @@
+@@ -449,7 +682,7 @@
  	  o = o->next;
  	  if (o == NULL)
  	    break;
@@ -3768,7 +3769,7 @@
  	}
        putchar ('\n');
      }
-@@ -467,23 +699,23 @@
+@@ -467,23 +700,23 @@
        prfield (join_field_1, line1);
        for (i = 0; i < join_field_1 && i < line1->nfields; ++i)
  	{
@@ -3796,7 +3797,7 @@
  	  prfield (i, line2);
  	}
        putchar ('\n');
-@@ -678,7 +910,7 @@
+@@ -678,7 +911,7 @@
  	  valid = true;
  	}
        else
@@ -3805,7 +3806,7 @@
  	  /* `0' must be all alone -- no `.FIELD'.  */
  	  error (0, 0, _("invalid field specifier: `%s'"), s);
  	}
-@@ -817,7 +1049,23 @@
+@@ -817,7 +1050,23 @@
  	  break;
  
  	case 't':
