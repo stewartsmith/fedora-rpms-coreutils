@@ -250,6 +250,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Nov 25 2004 Tim Waugh <twaugh@redhat.com>
+- Fixed colorls.csh (bug #139988).  Patch from Miloslav Trmac.
+
 * Mon Nov  8 2004 Tim Waugh <twaugh@redhat.com>
 - Updated URL (bug #138279).
 
