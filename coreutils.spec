@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 36
+Release: 37
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -46,6 +46,7 @@ Patch905: coreutils-jday.patch
 Patch906: coreutils-fchown.patch
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
+Patch909: coreutils-zh_CN.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -106,6 +107,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch906 -p1 -b .fchown
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
+%patch909 -p1 -b .zh_CN
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -247,6 +249,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jan 13 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-37
+- Fixed zh_CN translation (bug #144845).  Patch from Mitrophan Chin.
+
 * Mon Dec 28 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-36
 - Fix to only setdefaultfilecon if not overridden by command line
 
