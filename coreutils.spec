@@ -4,7 +4,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 16
+Release: 17
 License: GPL
 Group:   System Environment/Base
 Url:     ftp://alpha.gnu.org/gnu/coreutils/
@@ -242,6 +242,9 @@ fi
 %_sbindir/chroot
 
 %changelog
+* Wed Jun 23 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-17
+- Move pam-xauth to after pam-selinux
+
 * Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
