@@ -255,6 +255,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Apr  8 2005 Tim Waugh <twaugh@redhat.com>
+- Use better upstream patch for "stale utmp".
+
 * Tue Mar 29 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-44
 - Added "stale utmp" patch from upstream.
 
