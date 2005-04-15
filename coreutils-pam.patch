@@ -1,5 +1,5 @@
---- coreutils-5.2.0/src/Makefile.am.pam	2004-02-23 17:40:54.000000000 +0000
-+++ coreutils-5.2.0/src/Makefile.am	2004-02-23 17:40:54.000000000 +0000
+--- coreutils-5.2.1/src/Makefile.am.pam	2005-04-15 17:03:44.000000000 +0100
++++ coreutils-5.2.1/src/Makefile.am	2005-04-15 17:03:44.000000000 +0100
 @@ -66,7 +66,7 @@
  
  uptime_LDADD = $(LDADD) $(GETLOADAVG_LIBS)
@@ -9,8 +9,8 @@
  
  $(PROGRAMS): ../lib/libfetish.a
  
---- coreutils-5.2.0/src/su.c	2004-02-23 17:40:54.000000000 +0000
-+++ coreutils-5.2.1/src/su.c	2004-12-06 15:47:07.082619911 +0000
+--- coreutils-5.2.1/src/su.c.pam	2005-04-15 17:03:44.000000000 +0100
++++ coreutils-5.2.1/src/su.c	2005-04-15 17:04:52.000000000 +0100
 @@ -38,6 +38,16 @@
     restricts who can su to UID 0 accounts.  RMS considers that to
     be fascist.
@@ -28,7 +28,7 @@
     Options:
     -, -l, --login	Make the subshell a login shell.
  			Unset all environment variables except
-@@ -81,6 +91,14 @@
+@@ -81,6 +91,15 @@
     prototype (returning `int') in <unistd.h>.  */
  #define getusershell _getusershell_sys_proto_
  
@@ -36,6 +36,7 @@
 +# include <signal.h>
 +# include <sys/wait.h>
 +# include <sys/fsuid.h>
++# include <unistd.h>
 +# include <security/pam_appl.h>
 +# include <security/pam_misc.h>
 +#endif /* USE_PAM */
@@ -43,7 +44,7 @@
  #include "system.h"
  #include "dirname.h"
  
-@@ -150,7 +168,9 @@
+@@ -150,7 +169,9 @@
  /* The user to become if none is specified.  */
  #define DEFAULT_USER "root"
  
@@ -53,7 +54,7 @@
  char *getpass ();
  char *getusershell ();
  void endusershell ();
-@@ -158,8 +178,12 @@
+@@ -158,8 +179,12 @@
  
  extern char **environ;
  
@@ -67,7 +68,7 @@
  
  /* The name this program was run with.  */
  char *program_name;
-@@ -271,7 +295,22 @@
+@@ -271,7 +296,22 @@
  }
  #endif
  
@@ -90,12 +91,13 @@
     Return 1 if the user gives the correct password for entry PW,
     0 if not.  Return 1 without asking for a password if run by UID 0
     or if PW has an empty password.  */
-@@ -279,6 +318,34 @@
+@@ -279,6 +319,42 @@
  static int
  correct_password (const struct passwd *pw)
  {
 +#ifdef USE_PAM
 +  struct passwd *caller;
++  char *tty_name, *ttyn;
 +  retval = pam_start(PROGRAM_NAME, pw->pw_name, &conv, &pamh);
 +  PAM_BAIL_P;
 +
@@ -110,6 +112,13 @@
 +	  PAM_BAIL_P;
 +  }
 +
++  ttyn = ttyname(0);
++  if (strncmp(ttyn, "/dev/", 5) == 0)
++       tty_name = ttyn+5;
++  else
++       tty_name = ttyn;
++  retval = pam_set_item(pamh, PAM_TTY, tty_name);
++  PAM_BAIL_P;
 +  retval = pam_authenticate(pamh, 0);
 +  PAM_BAIL_P;
 +  retval = pam_acct_mgmt(pamh, 0);
@@ -125,7 +134,7 @@
    char *unencrypted, *encrypted, *correct;
  #if HAVE_GETSPNAM && HAVE_STRUCT_SPWD_SP_PWDP
    /* Shadow passwd stuff for SVR3 and maybe other systems.  */
-@@ -303,6 +370,7 @@
+@@ -303,6 +379,7 @@
    encrypted = crypt (unencrypted, correct);
    memset (unencrypted, 0, strlen (unencrypted));
    return strcmp (encrypted, correct) == 0;
@@ -133,7 +142,7 @@
  }
  
  /* Update `environ' for the new shell based on PW, with SHELL being
-@@ -312,16 +380,24 @@
+@@ -312,16 +389,24 @@
  modify_environment (const struct passwd *pw, const char *shell)
  {
    char *term;
@@ -159,18 +168,22 @@
        xputenv (concat ("HOME", "=", pw->pw_dir));
        xputenv (concat ("SHELL", "=", shell));
        xputenv (concat ("USER", "=", pw->pw_name));
-@@ -358,22 +434,73 @@
+@@ -354,8 +439,13 @@
+ {
+ #ifdef HAVE_INITGROUPS
+   errno = 0;
+-  if (initgroups (pw->pw_name, pw->pw_gid) == -1)
++  if (initgroups (pw->pw_name, pw->pw_gid) == -1) {
++#ifdef USE_PAM
++    pam_close_session(pamh, 0);
++    pam_end(pamh, PAM_ABORT);
++#endif
      error (EXIT_FAIL, errno, _("cannot set groups"));
++  }
    endgrent ();
  #endif
-+#ifdef USE_PAM
-+  retval = pam_setcred(pamh, PAM_ESTABLISH_CRED);
-+  if (retval != PAM_SUCCESS)
-+    error (1, 0, pam_strerror(pamh, retval));
-+#endif /* USE_PAM */
    if (setgid (pw->pw_gid))
-     error (EXIT_FAIL, errno, _("cannot set group id"));
-   if (setuid (pw->pw_uid))
+@@ -364,16 +454,69 @@
      error (EXIT_FAIL, errno, _("cannot set user id"));
  }
  
@@ -226,6 +239,13 @@
 +  if(pam_copyenv(pamh) != PAM_SUCCESS)
 +     fprintf (stderr, "error copying PAM environment\n");
 +  
++  /* Credentials should be set in the parent */ 
++  if (pam_setcred(pamh, PAM_ESTABLISH_CRED) != PAM_SUCCESS) {
++    pam_close_session(pamh, 0);
++    fprintf(stderr, "could not set PAM credentials\n");
++    exit(1);
++  }
++
 +  child = fork();
 +  if (child == 0) {  /* child shell */
 +  change_identity (pw);
@@ -234,7 +254,7 @@
  
    if (additional_args)
      args = xmalloc (sizeof (char *)
-@@ -385,6 +512,9 @@
+@@ -385,6 +528,9 @@
        char *arg0;
        char *shell_basename;
  
@@ -244,13 +264,16 @@
        shell_basename = base_name (shell);
        arg0 = xmalloc (strlen (shell_basename) + 2);
        arg0[0] = '-';
-@@ -411,6 +541,61 @@
+@@ -411,6 +557,66 @@
      error (0, errno, "%s", shell);
      exit (exit_status);
    }
 +#ifdef USE_PAM
 +  } else if (child == -1) {
 +      fprintf(stderr, "can not fork user shell: %s", strerror(errno));
++      pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
++      pam_close_session(pamh, 0);
++      pam_end(pamh, PAM_ABORT);
 +      exit(1);
 +  }
 +  /* parent only */
@@ -291,6 +314,8 @@
 +    fprintf(stderr, "\nSession terminated, killing shell...");
 +    kill (child, SIGTERM);
 +  }
++  /* Not checking retval on this because we need to call close session */
++  pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 +  retval = pam_close_session(pamh, 0);
 +  PAM_BAIL_P;
 +  retval = pam_end(pamh, PAM_SUCCESS);
@@ -306,7 +331,9 @@
  }
  
  /* Return 1 if SHELL is a restricted shell (one not returned by
-@@ -588,7 +773,8 @@
+@@ -586,9 +792,10 @@
+     }
+   modify_environment (pw, shell);
  
 +
 +#ifndef USE_PAM
@@ -318,37 +345,9 @@
 -  run_shell (shell, command, additional_args);
 +  run_shell (shell, command, additional_args, pw);
  }
---- coreutils-5.2.0/configure.ac.pam	2004-02-23 17:40:54.000000000 +0000
-+++ coreutils-5.2.0/configure.ac	2004-02-23 17:40:54.000000000 +0000
-@@ -7,6 +7,13 @@
- 
- AM_INIT_AUTOMAKE([1.8 gnits dist-bzip2])
- 
-+dnl Give the chance to enable PAM
-+AC_ARG_ENABLE(pam, dnl
-+[  --enable-pam              Enable use of the PAM libraries],
-+[AC_DEFINE(USE_PAM, 1, [Define if you want to use PAM])
-+LIB_PAM="-ldl -lpam -lpam_misc"
-+AC_SUBST(LIB_PAM)])
-+
- gl_DEFAULT_POSIX2_VERSION
- gl_USE_SYSTEM_EXTENSIONS
- jm_PERL
---- coreutils-5.2.0/config.hin.pam	2004-02-23 17:40:54.000000000 +0000
-+++ coreutils-5.2.0/config.hin	2004-02-23 17:40:54.000000000 +0000
-@@ -1365,6 +1365,9 @@
- /* Define if you want access control list support. */
- #undef USE_ACL
- 
-+/* Define if you want to use PAM */
-+#undef USE_PAM
-+
- /* Version number of package */
- #undef VERSION
- 
---- coreutils-5.2.1/doc/coreutils.texi.pam	2004-05-18 11:41:14.026354659 +0100
-+++ coreutils-5.2.1/doc/coreutils.texi	2004-05-18 11:48:27.056915340 +0100
-@@ -11855,8 +11855,11 @@
+--- coreutils-5.2.1/doc/coreutils.texi.pam	2005-04-15 17:03:44.000000000 +0100
++++ coreutils-5.2.1/doc/coreutils.texi	2005-04-15 17:03:44.000000000 +0100
+@@ -11850,8 +11850,11 @@
  @findex syslog
  @command{su} can optionally be compiled to use @code{syslog} to report
  failed, and optionally successful, @command{su} attempts.  (If the system
@@ -362,7 +361,7 @@
  
  The program accepts the following options.  Also see @ref{Common options}.
  
-@@ -11937,33 +11940,6 @@
+@@ -11932,33 +11935,6 @@
  the exit status of the subshell otherwise
  @end display
  
@@ -395,4 +394,32 @@
 -
  @node Process control
  @chapter Process control
+ 
+--- coreutils-5.2.1/configure.ac.pam	2005-04-15 17:03:44.000000000 +0100
++++ coreutils-5.2.1/configure.ac	2005-04-15 17:03:44.000000000 +0100
+@@ -7,6 +7,13 @@
+ 
+ AM_INIT_AUTOMAKE([1.8 gnits dist-bzip2])
+ 
++dnl Give the chance to enable PAM
++AC_ARG_ENABLE(pam, dnl
++[  --enable-pam              Enable use of the PAM libraries],
++[AC_DEFINE(USE_PAM, 1, [Define if you want to use PAM])
++LIB_PAM="-ldl -lpam -lpam_misc"
++AC_SUBST(LIB_PAM)])
++
+ gl_DEFAULT_POSIX2_VERSION
+ gl_USE_SYSTEM_EXTENSIONS
+ jm_PERL
+--- coreutils-5.2.1/config.hin.pam	2005-04-15 17:03:44.000000000 +0100
++++ coreutils-5.2.1/config.hin	2005-04-15 17:03:44.000000000 +0100
+@@ -1365,6 +1365,9 @@
+ /* Define if you want access control list support. */
+ #undef USE_ACL
+ 
++/* Define if you want to use PAM */
++#undef USE_PAM
++
+ /* Version number of package */
+ #undef VERSION
  
