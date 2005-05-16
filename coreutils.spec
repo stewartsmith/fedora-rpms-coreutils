@@ -1,6 +1,3 @@
-%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
-%define WITH_SELINUX 1
-%endif
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
@@ -8,9 +5,7 @@ Release: 45
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
-%if %{WITH_SELINUX}
 BuildRequires: libselinux-devel
-%endif
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
 Source101:	DIR_COLORS
@@ -58,6 +53,7 @@ Patch924: coreutils-stale-utmp.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
+Patch951: coreutils-runcon.patch
 
 BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel bison
@@ -121,6 +117,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #SELinux
 %patch950 -p1 -b .selinux
+%patch951 -p1 -b .runcon
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
@@ -140,9 +137,7 @@ aclocal -I m4
 autoconf --force
 automake --copy --force
 %configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
-%if  %{WITH_SELINUX}
 --enable-selinux \
-%endif
 || :
 make all %{?_smp_mflags} \
 	%{?!nopam:CPPFLAGS="-DUSE_PAM"} \
@@ -255,6 +250,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 16 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-46
+- Fix SELinux patch to better handle MLS integration
+
 * Mon May 16 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-45
 - Applied Russell Coker's selinux changes (bug #157856).
 
