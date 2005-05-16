@@ -255,6 +255,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 16 2005 Tim Waugh <twaugh@redhat.com>
+- Applied Russell Coker's selinux changes (bug #157856).
+
 * Fri Apr  8 2005 Tim Waugh <twaugh@redhat.com>
 - Fixed pam patch from Steve Grubb (bug #154946).
 - Use better upstream patch for "stale utmp".

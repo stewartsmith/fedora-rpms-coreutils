@@ -623,13 +623,13 @@
  
 +#ifdef WITH_SELINUX
 +#include <selinux/selinux.h>
-+int selinux_enabled= 0;
++
 +static int print_scontext       = 0;
-+#define check_selinux() if (!selinux_enabled) { \
-+	    fprintf( stderr, "Sorry, this option can only be used " \
-+		             "on a SELinux kernel.\n" ); \
-+	    exit( EXIT_FAILURE ); \
-+}
++
++
++
++
++
 +
 +#endif
 +
@@ -774,18 +774,6 @@
      }
  
    if (dir_defaulted)
-@@ -1223,6 +1270,11 @@
-   /* Record whether there is an option specifying sort type.  */
-   int sort_type_specified = 0;
- 
-+#ifdef WITH_SELINUX
-+  /* 1 iff kernel has new selinux system calls */
-+  selinux_enabled= (is_selinux_enabled()>0);
-+#endif
-+
-   qmark_funny_chars = 0;
- 
-   /* initialize all switches to default settings */
 @@ -1273,6 +1325,9 @@
    all_files = 0;
    really_all_files = 0;
@@ -811,7 +799,7 @@
  
 +#ifdef WITH_SELINUX
 +	case 'Z':
-+	  check_selinux();
++
 +	  print_scontext = 1;
 +	  format = security_format;
 +	  break;
@@ -826,17 +814,17 @@
 +#ifdef WITH_SELINUX
 +
 +	case CONTEXT_OPTION: /* new security format */
-+		check_selinux();
++
 +		print_scontext = 1;
 +		format = security_format;
 +		break;
 +	case LCONTEXT_OPTION: /* long format plus security context */
-+		check_selinux();
++
 +		print_scontext = 1;
 +		format = long_format;
 +		break;
 +	case SCONTEXT_OPTION: /* short form of new security format */
-+		check_selinux();
++
 +		print_scontext = 0;
 +		format = security_format;
 +		break;
@@ -880,7 +868,7 @@
  	  err = stat (path, &f->stat);
 +#ifdef WITH_SELINUX
 +	  if (err>=0) 
-+	    if (selinux_enabled && (format == security_format || print_scontext))
++	    if (format == security_format || print_scontext)
 +	      getfilecon(path, &f->scontext);
 +#endif
  	  break;
@@ -892,7 +880,7 @@
  	      err = stat (path, &f->stat);
 +#ifdef WITH_SELINUX
 +	      if (err>=0) 
-+		if (selinux_enabled && (format == security_format || print_scontext))
++		if (format == security_format || print_scontext)
 +		  getfilecon(path, &f->scontext);
 +#endif
  
@@ -904,7 +892,7 @@
  	  err = lstat (path, &f->stat);
 +#ifdef WITH_SELINUX
 +	  if (err>=0) 
-+	    if (selinux_enabled && (format == security_format || print_scontext))
++	    if (format == security_format || print_scontext)
 +	      lgetfilecon(path, &f->scontext);
 +#endif
  	  break;
