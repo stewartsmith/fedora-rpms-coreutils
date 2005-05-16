@@ -1,3 +1,4 @@
+unchanged:
 --- coreutils-5.2.1/README.selinux	2004-12-29 12:24:03.260876459 -0500
 +++ coreutils-5.2.1/README	2004-12-29 12:24:03.417858780 -0500
 @@ -7,11 +7,11 @@
@@ -14,6 +15,7 @@
    split stat stty su sum sync tac tail tee test touch tr true tsort tty
    uname unexpand uniq unlink uptime users vdir wc who whoami yes
  
+unchanged:
 --- coreutils-5.2.1/src/stat.c.selinux	2004-02-05 08:46:12.000000000 -0500
 +++ coreutils-5.2.1/src/stat.c	2004-12-29 12:24:03.419858555 -0500
 @@ -42,6 +42,13 @@
@@ -308,12 +310,13 @@
      }
  
    exit (G_fail ? EXIT_FAILURE : EXIT_SUCCESS);
---- /dev/null	2004-12-29 02:13:24.827638832 -0500
-+++ coreutils-5.2.1/src/runcon.c	2004-12-29 12:24:03.421858330 -0500
-@@ -0,0 +1,201 @@
+diff -u coreutils-5.2.1/src/runcon.c coreutils-5.2.1/src/runcon.c
+--- coreutils-5.2.1/src/runcon.c	2004-12-29 12:24:03.421858330 -0500
++++ coreutils-5.2.1/src/runcon.c	2005-05-16 14:19:19.000000000 -0400
+@@ -0,0 +1,253 @@
 +/*
 + * runcon [ context |
-+ *         ( [ -r role ] [-t type] [ -u user ] [ -l levelrange ] )
++ *         ( [ -c ] [ -r role ] [-t type] [ -u user ] [ -l levelrange ] )
 + *         command [arg1 [arg2 ...] ]
 + *
 + * attempt to run the specified command with the specified context.
@@ -322,6 +325,7 @@
 + * -t type  : use the current context with the specified type
 + * -u user  : use the current context with the specified user
 + * -l level : use the current context with the specified level range
++ * -c       : compute process transition context before modifying
 + *
 + * Contexts are interpreted as follows:
 + *
@@ -342,6 +346,7 @@
 +#include <getopt.h>
 +#include <selinux/context.h>
 +#include <selinux/selinux.h>
++#include <selinux/flask.h>
 +#include <errno.h>
 +#include "system.h"
 +extern int errno;
@@ -349,19 +354,28 @@
 +/* The name the program was run with. */
 +char *program_name;
 +
++/* If nonzero, display usage information and exit.  */
++static int show_help;
++
++/* If nonzero, print the version on standard output and exit.  */
++static int show_version;
++
 +void
-+usage(char *str)
++usage(int status)
 +{
-+  printf(_("Usage: %s [OPTION]... command [args]\n"
++  printf(_("Usage: %s CONTEXT COMMAND [args]\n"
++         "  or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n"
 +         "Run a program in a different security context.\n\n"
-+         "  context       Complete security context\n"
-+         "  -t            type (for same role as parent)\n"
-+         "  -u            user identity\n"
-+         "  -r            role\n"
-+         "  -l            levelrange\n"
-+         "    --help      display this help and exit\n"),
-+         program_name);
-+  exit(1);
++         "  CONTEXT            Complete security context\n"
++         "  -c, --compute      compute process transition context before modifying\n"
++         "  -t, --type=TYPE    type (for same role as parent)\n"
++         "  -u, --user=USER    user identity\n"
++         "  -r, --role=ROLE    role\n"
++         "  -l, --range=RANGE  levelrange\n"
++         "      --help         display this help and exit\n"
++         "      --version      output version information and exit\n"),
++         program_name, program_name);
++  exit(status);
 +}
 +
 +int 
@@ -373,6 +387,9 @@
 +  char *type    = 0;
 +  char *context = NULL;
 +  security_context_t cur_context = NULL;
++  security_context_t file_context = NULL;
++  security_context_t new_context = NULL;
++  int compute_trans = 0;
 +
 +  context_t      con;
 +
@@ -390,14 +407,18 @@
 +      { "type", 1, 0, 't' },
 +      { "user", 1, 0, 'u' },
 +      { "range", 1, 0, 'l' },
-+      { "help", 0, 0, '?' },
++      { "compute", 0, 0, 'c' },
++      { "help", 0, &show_help, 1 },
++      { "version", 0, &show_version, 1 },
 +      { 0, 0, 0, 0 }
 +    };
-+    c = getopt_long(argc, argv, "s:r:t:u:l:?", long_options, &option_index);
++    c = getopt_long(argc, argv, "r:t:u:l:c", long_options, &option_index);
 +    if ( c == -1 ) {
 +      break;
 +    }
 +    switch ( c ) {
++    case 0:
++      break;
 +    case 'r':
 +      if ( role ) {
 +	fprintf(stderr,_("multiple roles\n"));
@@ -426,12 +447,34 @@
 +      }
 +      range = optarg;
 +      break;
++    case 'c':
++      compute_trans = 1;
++      break;
 +    default:
-+      fprintf(stderr,_("unrecognised option %c\n"),c);
-+    case '?':
-+      usage(0);
++      usage(1);
 +      break;
 +    }
++  }
++
++  if (show_version) {
++    printf("runcon (%s) %s\n", GNU_PACKAGE, VERSION);
++    exit(0);
++  }
++
++  if (show_help)
++    usage(0);
++
++  if ( !(user || role || type || range || compute_trans)) {
++    if ( optind >= argc ) {
++      fprintf(stderr,_("must specify -c, -t, -u, -l, -r, or context\n"));
++      usage(1);
++    }
++    context = argv[optind++];
++  }
++  
++  if ( optind >= argc ) {
++    fprintf(stderr,_("no command found\n"));
++    usage(1);
 +  }
 +
 + if( is_selinux_enabled() != 1 ) {
@@ -440,17 +483,6 @@
 +    exit(-1);
 +  }
 +  
-+  if ( !(user || role || type || range)) {
-+    if ( optind >= argc ) {
-+      usage(_("must specify -t, -u, -l, -r, or context"));
-+    }
-+    context = argv[optind++];
-+  }
-+  
-+  if ( optind >= argc ) {
-+    usage(_("no command found"));
-+  }
-+
 +  if ( context ) {
 +    con = context_new(context);
 +    if (!con) {
@@ -463,6 +495,29 @@
 +      fprintf(stderr,_("Couldn't get current context.\n"));
 +      exit(1);
 +    }
++
++    /* We will generate context based on process transition */
++    if ( compute_trans ) {
++      /* Get context of file to be executed */
++      if (getfilecon(argv[optind], &file_context) == -1) {
++        fprintf(stderr,_("unable to retrieve attributes of %s\n"),
++                argv[optind]);
++        exit(1);
++      }
++      /* compute result of process transition */
++      if (security_compute_create(cur_context, file_context,
++                                  SECCLASS_PROCESS, &new_context) != 0) {
++        fprintf(stderr,_("unable to compute a new context\n"));
++        exit(1);
++      }
++      /* free contexts */
++      freecon(file_context);
++      freecon(cur_context);
++
++      /* set cur_context equal to new_context */
++      cur_context = new_context;
++    }
++
 +    con = context_new(cur_context);
 +    if (!con) {
 +      fprintf(stderr,_("%s is not a valid context\n"), cur_context);
@@ -512,6 +567,7 @@
 +  }
 +  return 1; /* can't reach this statement.... */
 +}
+unchanged:
 --- coreutils-5.2.1/src/mkdir.c.selinux	2004-01-21 17:27:02.000000000 -0500
 +++ coreutils-5.2.1/src/mkdir.c	2004-12-29 12:24:03.422858217 -0500
 @@ -34,6 +34,10 @@
@@ -580,6 +636,7 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
+unchanged:
 --- coreutils-5.2.1/src/mv.c.selinux	2004-12-29 12:24:02.845923189 -0500
 +++ coreutils-5.2.1/src/mv.c	2004-12-29 12:24:03.424857992 -0500
 @@ -34,6 +34,11 @@
@@ -615,6 +672,7 @@
    /* FIXME: consider not calling getenv for SIMPLE_BACKUP_SUFFIX unless
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+unchanged:
 --- coreutils-5.2.1/src/ls.c.selinux	2004-12-29 12:24:02.848922851 -0500
 +++ coreutils-5.2.1/src/ls.c	2004-12-29 12:24:03.429857429 -0500
 @@ -121,6 +121,18 @@
@@ -1233,6 +1291,7 @@
 +  }
 +}
 +#endif
+unchanged:
 --- /dev/null	2004-12-29 02:13:24.827638832 -0500
 +++ coreutils-5.2.1/src/chcon.c	2004-12-29 12:24:03.430857317 -0500
 @@ -0,0 +1,421 @@
@@ -1657,6 +1716,7 @@
 +    freecon(ref_context);
 +  exit (errors);
 +}
+unchanged:
 --- coreutils-5.2.1/src/id.c.selinux	2004-12-29 12:24:03.287873419 -0500
 +++ coreutils-5.2.1/src/id.c	2004-12-29 12:24:03.432857091 -0500
 @@ -45,6 +45,20 @@
@@ -1790,6 +1850,7 @@
 +  }
 +#endif
  }
+unchanged:
 --- coreutils-5.2.1/src/install.c.selinux	2004-12-29 12:24:02.850922625 -0500
 +++ coreutils-5.2.1/src/install.c	2004-12-29 12:24:47.138935019 -0500
 @@ -47,6 +47,43 @@
@@ -1953,6 +2014,7 @@
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\
+unchanged:
 --- coreutils-5.2.1/src/copy.h.selinux	2004-12-29 12:24:02.853922288 -0500
 +++ coreutils-5.2.1/src/copy.h	2004-12-29 12:24:03.435856754 -0500
 @@ -105,6 +105,9 @@
@@ -1965,6 +2027,7 @@
  
    /* Enabled for mv, and for cp by the --preserve=links option.
       If nonzero, attempt to preserve in the destination files any
+unchanged:
 --- coreutils-5.2.1/src/Makefile.am.selinux	2004-12-29 12:24:03.264876008 -0500
 +++ coreutils-5.2.1/src/Makefile.am	2004-12-29 12:24:03.436856641 -0500
 @@ -3,13 +3,13 @@
@@ -2010,6 +2073,7 @@
  
  ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
  sort_LDADD = $(LDADD) $(POW_LIB)
+unchanged:
 --- coreutils-5.2.1/src/copy.c.selinux	2004-12-29 12:24:03.382862721 -0500
 +++ coreutils-5.2.1/src/copy.c	2004-12-29 12:24:03.439856303 -0500
 @@ -42,6 +42,11 @@
@@ -2107,6 +2171,7 @@
    /* We have failed to create the destination file.
       If we've just added a dev/ino entry via the remember_copied
       call above (i.e., unless we've just failed to create a hard link),
+unchanged:
 --- coreutils-5.2.1/src/mknod.c.selinux	2004-01-21 17:27:02.000000000 -0500
 +++ coreutils-5.2.1/src/mknod.c	2004-12-29 12:24:03.440856191 -0500
 @@ -36,8 +36,15 @@
@@ -2170,6 +2235,7 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
+unchanged:
 --- coreutils-5.2.1/src/cp.c.selinux	2004-12-29 12:24:02.852922400 -0500
 +++ coreutils-5.2.1/src/cp.c	2004-12-29 12:24:03.443855853 -0500
 @@ -49,6 +49,11 @@
@@ -2334,6 +2400,7 @@
  
  	case PARENTS_OPTION:
  	  flag_path = 1;
+unchanged:
 --- coreutils-5.2.1/src/mkfifo.c.selinux	2004-01-21 17:27:02.000000000 -0500
 +++ coreutils-5.2.1/src/mkfifo.c	2004-12-29 12:24:03.444855740 -0500
 @@ -32,11 +32,18 @@
@@ -2399,6 +2466,7 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
+unchanged:
 --- coreutils-5.2.1/configure.ac.selinux	2004-12-29 12:24:02.947911703 -0500
 +++ coreutils-5.2.1/configure.ac	2004-12-29 12:24:03.446855515 -0500
 @@ -14,6 +14,13 @@
@@ -2415,6 +2483,7 @@
  gl_DEFAULT_POSIX2_VERSION
  gl_USE_SYSTEM_EXTENSIONS
  jm_PERL
+unchanged:
 --- coreutils-5.2.1/man/mkfifo.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/mkfifo.1	2004-12-29 12:24:03.446855515 -0500
 @@ -12,6 +12,9 @@
@@ -2427,6 +2496,7 @@
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set permission mode (as in chmod), not a=rw - umask
  .TP
+unchanged:
 --- coreutils-5.2.1/man/ls.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/ls.1	2004-12-29 12:24:03.448855290 -0500
 @@ -195,6 +195,20 @@
@@ -2450,6 +2520,7 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
+unchanged:
 --- coreutils-5.2.1/man/dir.1.selinux	2004-03-02 17:51:06.000000000 -0500
 +++ coreutils-5.2.1/man/dir.1	2004-12-29 12:24:03.452854839 -0500
 @@ -195,6 +195,20 @@
@@ -2473,6 +2544,7 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
+unchanged:
 --- coreutils-5.2.1/man/mkdir.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/mkdir.1	2004-12-29 12:24:03.453854727 -0500
 @@ -12,6 +12,8 @@
@@ -2484,15 +2556,16 @@
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set permission mode (as in chmod), not rwxrwxrwx - umask
  .TP
---- /dev/null	2004-12-29 02:13:24.827638832 -0500
-+++ coreutils-5.2.1/man/runcon.1	2004-12-29 12:24:03.454854614 -0500
-@@ -0,0 +1,39 @@
-+.TH RUNCON "1" "July 2003" "runcon (coreutils) 5.0" "selinux"
+diff -u coreutils-5.2.1/man/runcon.1 coreutils-5.2.1/man/runcon.1
+--- coreutils-5.2.1/man/runcon.1	2004-12-29 12:24:03.454854614 -0500
++++ coreutils-5.2.1/man/runcon.1	2005-05-16 14:18:12.000000000 -0400
+@@ -0,0 +1,43 @@
++.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
 +.SH NAME
 +runcon \- run command with specified security context 
 +.SH SYNOPSIS
 +.B runcon
-+[\fI-t TYPE\fR] [\fI-l LEVEL\fR] [\fI-u USER\fR] [\fI-r ROLE\fR] \fICOMMAND\fR [\fIARGS...\fR]
++[\fI-c\fR] [\fI-t TYPE\fR] [\fI-l LEVEL\fR] [\fI-u USER\fR] [\fI-r ROLE\fR] \fICOMMAND\fR [\fIARGS...\fR]
 +.PP
 +or
 +.PP
@@ -2504,8 +2577,12 @@
 +.PP
 +.\" Add any additional description here
 +.PP
-+Run COMMAND with current security context modified by one or more of LEVEL,
-+ROLE, TYPE, and USER, or with completely-specified CONTEXT.
++Run COMMAND with completely-specified CONTEXT, or with current or
++transitioned security context modified by one or more of LEVEL,
++ROLE, TYPE, and USER.
++.TP
++\fB\-c\fR
++compute process transition before modifying context
 +.TP
 +\fB\-t\fR
 +change current type to the specified type
@@ -2519,13 +2596,14 @@
 +\fB\-u\fR
 +change current user to the specified user
 +.PP
-+If none of \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
++If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
 +the first argument is used as the complete context.  Any additional
 +arguments after \fICOMMAND\fR are interpreted as arguments to the
 +command.
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
+unchanged:
 --- coreutils-5.2.1/man/Makefile.in.selinux	2004-03-11 03:58:00.000000000 -0500
 +++ coreutils-5.2.1/man/Makefile.in	2004-12-29 12:24:03.456854389 -0500
 @@ -185,6 +185,7 @@
@@ -2563,6 +2641,7 @@
  
  # Note the use of $t/$*, rather than just `$*' as in other packages.
  # That is necessary to avoid failures for programs that are also shell built-in
+unchanged:
 --- coreutils-5.2.1/man/install.1.selinux	2004-12-29 12:24:02.671942781 -0500
 +++ coreutils-5.2.1/man/install.1	2004-12-29 12:24:03.458854164 -0500
 @@ -60,6 +60,11 @@
@@ -2577,6 +2656,7 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
+unchanged:
 --- coreutils-5.2.1/man/stat.1.selinux	2004-03-02 17:52:31.000000000 -0500
 +++ coreutils-5.2.1/man/stat.1	2004-12-29 12:24:03.459854051 -0500
 @@ -22,6 +22,9 @@
@@ -2599,6 +2679,7 @@
  %D
  Device number in hex
  .TP
+unchanged:
 --- /dev/null	2004-12-29 02:13:24.827638832 -0500
 +++ coreutils-5.2.1/man/chcon.1	2004-12-29 12:24:03.461853826 -0500
 @@ -0,0 +1,64 @@
@@ -2666,6 +2747,7 @@
 +.B info chcon
 +.PP
 +should give you access to the complete manual.
+unchanged:
 --- coreutils-5.2.1/man/mknod.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/mknod.1	2004-12-29 12:24:03.463853601 -0500
 @@ -12,6 +12,9 @@
@@ -2678,6 +2760,7 @@
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set permission mode (as in chmod), not a=rw - umask
  .TP
+unchanged:
 --- /dev/null	2004-12-29 02:13:24.827638832 -0500
 +++ coreutils-5.2.1/man/chcon.x	2004-12-29 12:24:03.464853488 -0500
 @@ -0,0 +1,4 @@
@@ -2685,6 +2768,7 @@
 +chcon \- change file security context
 +[DESCRIPTION]
 +.\" Add any additional description here
+unchanged:
 --- coreutils-5.2.1/man/Makefile.am.selinux	2004-12-29 12:24:03.258876684 -0500
 +++ coreutils-5.2.1/man/Makefile.am	2004-12-29 12:24:03.466853263 -0500
 @@ -10,7 +10,7 @@
@@ -2705,11 +2789,25 @@
  
  SUFFIXES = .x .1
  
---- /dev/null	2004-12-29 02:13:24.827638832 -0500
-+++ coreutils-5.2.1/man/runcon.x	2004-12-29 12:24:03.467853150 -0500
-@@ -0,0 +1,2 @@
+diff -u coreutils-5.2.1/man/runcon.x coreutils-5.2.1/man/runcon.x
+--- coreutils-5.2.1/man/runcon.x	2004-12-29 12:24:03.467853150 -0500
++++ coreutils-5.2.1/man/runcon.x	2005-05-16 14:18:12.000000000 -0400
+@@ -0,0 +1,14 @@
++[NAME]
++runcon \- run command with specified security context
 +[DESCRIPTION]
-+.\" Add any additional description here
++Run COMMAND with completely-specified CONTEXT, or with current or
++transitioned security context modified by one or more of LEVEL,
++ROLE, TYPE, and USER.
++.PP
++If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
++the first argument is used as the complete context.  Any additional
++arguments after \fICOMMAND\fR are interpreted as arguments to the
++command.
++.PP
++Note that only carefully-chosen contexts are likely to successfully
++run.
+unchanged:
 --- coreutils-5.2.1/man/id.1.selinux	2004-03-02 17:52:27.000000000 -0500
 +++ coreutils-5.2.1/man/id.1	2004-12-29 12:24:03.469852925 -0500
 @@ -13,6 +13,9 @@
@@ -2722,6 +2820,7 @@
  \fB\-g\fR, \fB\-\-group\fR
  print only the effective group ID
  .TP
+unchanged:
 --- coreutils-5.2.1/man/cp.1.selinux	2004-03-02 17:51:05.000000000 -0500
 +++ coreutils-5.2.1/man/cp.1	2004-12-29 12:24:03.470852813 -0500
 @@ -57,7 +57,7 @@
@@ -2743,6 +2842,7 @@
  \fB\-\-version\fR
  output version information and exit
  .PP
+unchanged:
 --- coreutils-5.2.1/man/vdir.1.selinux	2004-03-02 17:52:33.000000000 -0500
 +++ coreutils-5.2.1/man/vdir.1	2004-12-29 12:24:03.471852700 -0500
 @@ -195,6 +195,20 @@
@@ -2766,6 +2866,7 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
+unchanged:
 --- coreutils-5.2.1/tests/help-version.selinux	2004-12-29 12:24:03.261876346 -0500
 +++ coreutils-5.2.1/tests/help-version	2004-12-29 12:24:03.473852475 -0500
 @@ -42,6 +42,8 @@
@@ -2786,6 +2887,7 @@
  
    rm -rf $tmp_in $tmp_in2 $tmp_dir $tmp_out
    echo > $tmp_in
+unchanged:
 --- coreutils-5.2.1/config.hin.selinux	2004-12-29 12:24:02.949911478 -0500
 +++ coreutils-5.2.1/config.hin	2004-12-29 12:24:03.475852250 -0500
 @@ -1374,6 +1374,9 @@

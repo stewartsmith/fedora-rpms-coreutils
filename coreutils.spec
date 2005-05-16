@@ -53,7 +53,6 @@ Patch924: coreutils-stale-utmp.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
-Patch951: coreutils-runcon.patch
 
 BuildRoot: %_tmppath/%{name}-root
 BuildRequires:	gettext libtermcap-devel bison
@@ -117,7 +116,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #SELinux
 %patch950 -p1 -b .selinux
-%patch951 -p1 -b .runcon
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
