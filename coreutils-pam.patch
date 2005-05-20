@@ -91,7 +91,7 @@
     Return 1 if the user gives the correct password for entry PW,
     0 if not.  Return 1 without asking for a password if run by UID 0
     or if PW has an empty password.  */
-@@ -279,6 +319,42 @@
+@@ -279,6 +319,44 @@
  static int
  correct_password (const struct passwd *pw)
  {
@@ -113,12 +113,14 @@
 +  }
 +
 +  ttyn = ttyname(0);
-+  if (strncmp(ttyn, "/dev/", 5) == 0)
++  if (ttyn) {
++    if (strncmp(ttyn, "/dev/", 5) == 0)
 +       tty_name = ttyn+5;
-+  else
++    else
 +       tty_name = ttyn;
-+  retval = pam_set_item(pamh, PAM_TTY, tty_name);
-+  PAM_BAIL_P;
++    retval = pam_set_item(pamh, PAM_TTY, tty_name);
++    PAM_BAIL_P;
++  }
 +  retval = pam_authenticate(pamh, 0);
 +  PAM_BAIL_P;
 +  retval = pam_acct_mgmt(pamh, 0);
@@ -134,7 +136,7 @@
    char *unencrypted, *encrypted, *correct;
  #if HAVE_GETSPNAM && HAVE_STRUCT_SPWD_SP_PWDP
    /* Shadow passwd stuff for SVR3 and maybe other systems.  */
-@@ -303,6 +379,7 @@
+@@ -303,6 +381,7 @@
    encrypted = crypt (unencrypted, correct);
    memset (unencrypted, 0, strlen (unencrypted));
    return strcmp (encrypted, correct) == 0;
@@ -142,7 +144,7 @@
  }
  
  /* Update `environ' for the new shell based on PW, with SHELL being
-@@ -312,16 +389,24 @@
+@@ -312,16 +391,24 @@
  modify_environment (const struct passwd *pw, const char *shell)
  {
    char *term;
@@ -168,7 +170,7 @@
        xputenv (concat ("HOME", "=", pw->pw_dir));
        xputenv (concat ("SHELL", "=", shell));
        xputenv (concat ("USER", "=", pw->pw_name));
-@@ -354,8 +439,13 @@
+@@ -354,8 +441,13 @@
  {
  #ifdef HAVE_INITGROUPS
    errno = 0;
@@ -183,7 +185,7 @@
    endgrent ();
  #endif
    if (setgid (pw->pw_gid))
-@@ -364,16 +454,69 @@
+@@ -364,16 +456,69 @@
      error (EXIT_FAIL, errno, _("cannot set user id"));
  }
  
@@ -254,7 +256,7 @@
  
    if (additional_args)
      args = xmalloc (sizeof (char *)
-@@ -385,6 +528,9 @@
+@@ -385,6 +530,9 @@
        char *arg0;
        char *shell_basename;
  
@@ -264,7 +266,7 @@
        shell_basename = base_name (shell);
        arg0 = xmalloc (strlen (shell_basename) + 2);
        arg0[0] = '-';
-@@ -411,6 +557,66 @@
+@@ -411,6 +559,66 @@
      error (0, errno, "%s", shell);
      exit (exit_status);
    }
@@ -331,7 +333,7 @@
  }
  
  /* Return 1 if SHELL is a restricted shell (one not returned by
-@@ -586,9 +792,10 @@
+@@ -586,9 +794,10 @@
      }
    modify_environment (pw, shell);
  

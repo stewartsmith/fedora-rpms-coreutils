@@ -248,6 +248,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri May 20 2005 Tim Waugh <twaugh@redhat.com>
+- Better error checking in the pam patch (bug #158189).
+
 * Mon May 16 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-46
 - Fix SELinux patch to better handle MLS integration
 
