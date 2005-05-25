@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 47
+Release: 48
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -250,7 +250,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Wed May 25 2005 Tim Waugh <twaugh@redhat.com>
+* Wed May 25 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-48
 - Prevent buffer overflow in who(1) (bug #158405).
 
 * Fri May 20 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-47
