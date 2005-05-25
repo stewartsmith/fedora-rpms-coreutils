@@ -43,6 +43,7 @@ Patch908: coreutils-getgrouplist.patch
 Patch909: coreutils-zh_CN.patch
 Patch910: coreutils-gcc4.patch
 Patch911: coreutils-brokentest.patch
+Patch912: coreutils-overflow.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -106,6 +107,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch909 -p1 -b .zh_CN
 %patch910 -p1 -b .gcc4
 %patch911 -p1 -b .brokentest
+%patch912 -p1 -b .overflow
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -248,6 +250,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed May 25 2005 Tim Waugh <twaugh@redhat.com>
+- Prevent buffer overflow in who(1) (bug #158405).
+
 * Fri May 20 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-47
 - Better error checking in the pam patch (bug #158189).
 
