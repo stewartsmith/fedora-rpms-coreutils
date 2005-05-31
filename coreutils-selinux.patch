@@ -832,7 +832,7 @@ unchanged:
      }
  
    if (dir_defaulted)
-@@ -1273,6 +1325,9 @@
+@@ -1273,6 +1320,9 @@
    all_files = 0;
    really_all_files = 0;
    ignore_patterns = 0;
@@ -842,7 +842,7 @@ unchanged:
  
    /* FIXME: put this in a function.  */
    {
-@@ -1350,7 +1405,7 @@
+@@ -1350,7 +1400,7 @@
    }
  
    while ((c = getopt_long (argc, argv,
@@ -851,7 +851,7 @@ unchanged:
  			   long_options, NULL)) != -1)
      {
        switch (c)
-@@ -1470,6 +1525,13 @@
+@@ -1470,6 +1520,13 @@
  	  format = horizontal;
  	  break;
  
@@ -865,7 +865,7 @@ unchanged:
  	case 'A':
  	  really_all_files = 0;
  	  all_files = 1;
-@@ -1637,6 +1699,25 @@
+@@ -1637,6 +1694,25 @@
  
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  
@@ -891,7 +891,7 @@ unchanged:
  	default:
  	  usage (EXIT_FAILURE);
  	}
-@@ -2300,6 +2381,12 @@
+@@ -2300,6 +2376,12 @@
        free (files[i].name);
        if (files[i].linkname)
  	free (files[i].linkname);
@@ -904,7 +904,7 @@ unchanged:
      }
  
    files_index = 0;
-@@ -2336,11 +2423,14 @@
+@@ -2336,11 +2418,14 @@
    f->linkname = 0;
    f->linkmode = 0;
    f->linkok = 0;
@@ -920,7 +920,7 @@ unchanged:
  
  	      /* FIXME: remove this disjunct.
  		 I don't think we care about symlinks here, but for now
-@@ -2373,6 +2463,11 @@
+@@ -2373,6 +2458,11 @@
  	{
  	case DEREF_ALWAYS:
  	  err = stat (path, &f->stat);
@@ -932,7 +932,7 @@ unchanged:
  	  break;
  
  	case DEREF_COMMAND_LINE_ARGUMENTS:
-@@ -2381,6 +2476,11 @@
+@@ -2381,6 +2471,11 @@
  	    {
  	      int need_lstat;
  	      err = stat (path, &f->stat);
@@ -944,7 +944,7 @@ unchanged:
  
  	      if (dereference == DEREF_COMMAND_LINE_ARGUMENTS)
  		break;
-@@ -2399,18 +2499,42 @@
+@@ -2399,18 +2494,42 @@
  
  	default: /* DEREF_NEVER */
  	  err = lstat (path, &f->stat);
@@ -991,7 +991,7 @@ unchanged:
  	{
  	  int n = file_has_acl (path, &f->stat);
  	  f->have_acl = (0 < n);
-@@ -2893,6 +3017,16 @@
+@@ -2893,6 +3012,16 @@
  	  DIRED_PUTCHAR ('\n');
  	}
        break;
@@ -1008,7 +1008,7 @@ unchanged:
      }
  }
  
-@@ -2974,9 +3108,9 @@
+@@ -2974,9 +3103,9 @@
     WIDTH.  */
  
  static void
@@ -1020,7 +1020,7 @@ unchanged:
    if (name)
      printf ("%-*s ", width, name);
    else
-@@ -2988,9 +3122,9 @@
+@@ -2988,9 +3117,9 @@
  /* Likewise, for groups.  */
  
  static void
@@ -1032,7 +1032,7 @@ unchanged:
    if (name)
      printf ("%-*s ", width, name);
    else
-@@ -3095,7 +3229,7 @@
+@@ -3095,7 +3224,7 @@
      {
        char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
        sprintf (p, "%*s ", inode_number_width,
@@ -1041,7 +1041,7 @@ unchanged:
        p += inode_number_width + 1;
      }
  
-@@ -3103,8 +3237,10 @@
+@@ -3103,8 +3232,10 @@
      {
        char hbuf[LONGEST_HUMAN_READABLE + 1];
        sprintf (p, "%*s ", block_size_width,
@@ -1054,7 +1054,7 @@ unchanged:
        p += block_size_width + 1;
      }
  
-@@ -3113,10 +3249,18 @@
+@@ -3113,10 +3244,18 @@
    {
      char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
      sprintf (p, "%s %*s ", modebuf, nlink_width,
@@ -1074,7 +1074,7 @@ unchanged:
    DIRED_INDENT ();
  
    if (print_owner | print_group | print_author)
-@@ -3124,18 +3268,19 @@
+@@ -3124,18 +3263,19 @@
        DIRED_FPUTS (buf, stdout, p - buf);
  
        if (print_owner)
@@ -1098,7 +1098,7 @@ unchanged:
      {
        char majorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
        char minorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-@@ -3153,13 +3298,15 @@
+@@ -3153,13 +3293,15 @@
        char hbuf[LONGEST_HUMAN_READABLE + 1];
        uintmax_t size = unsigned_file_size (f->stat.st_size);
        sprintf (p, "%*s ", file_size_width,
@@ -1117,7 +1117,7 @@ unchanged:
      {
        time_t six_months_ago;
        int recent;
-@@ -3214,15 +3361,17 @@
+@@ -3214,15 +3356,17 @@
  	 print it as a huge integer number of seconds.  */
        char hbuf[INT_BUFSIZE_BOUND (intmax_t)];
        sprintf (p, "%*s ", long_time_expected_width (),
@@ -1139,7 +1139,7 @@ unchanged:
  
    if (f->filetype == symbolic_link)
      {
-@@ -3230,7 +3379,7 @@
+@@ -3230,7 +3374,7 @@
  	{
  	  DIRED_FPUTS_LITERAL (" -> ", stdout);
  	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
@@ -1148,7 +1148,7 @@ unchanged:
  	  if (indicator_style != none)
  	    print_type_indicator (f->linkmode);
  	}
-@@ -3412,10 +3561,10 @@
+@@ -3412,10 +3556,10 @@
  
  static void
  print_name_with_quoting (const char *p, mode_t mode, int linkok,
@@ -1161,7 +1161,7 @@ unchanged:
  
    if (stack)
      PUSH_CURRENT_DIRED_POS (stack);
-@@ -3460,7 +3609,8 @@
+@@ -3460,7 +3604,8 @@
  	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
  			    ST_NBLOCKSIZE, output_block_size));
  
@@ -1171,7 +1171,7 @@ unchanged:
  
    if (indicator_style != none)
      print_type_indicator (f->stat.st_mode);
-@@ -3499,7 +3649,8 @@
+@@ -3499,7 +3644,8 @@
  }
  
  static void
@@ -1181,7 +1181,7 @@ unchanged:
  {
    int type = C_FILE;
    struct color_ext_type *ext;	/* Color extension */
-@@ -3536,6 +3687,8 @@
+@@ -3536,6 +3682,8 @@
  	type = C_CHR;
        else if (S_ISDOOR (mode))
  	type = C_DOOR;
@@ -1190,7 +1190,7 @@ unchanged:
  
        if ((type == C_FILE) && ((mode & S_ISUID) != 0))
          type = C_UID;
-@@ -4037,6 +4190,16 @@
+@@ -4037,6 +4185,16 @@
    -X                         sort alphabetically by entry extension\n\
    -1                         list one file per line\n\
  "), stdout);
@@ -1207,7 +1207,7 @@ unchanged:
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\n\
-@@ -4055,3 +4218,83 @@
+@@ -4055,3 +4213,83 @@
      }
    exit (status);
  }
@@ -2088,7 +2088,7 @@ unchanged:
  #define DO_CHOWN(Chown, File, New_uid, New_gid)				\
    (Chown (File, New_uid, New_gid)					\
     /* If non-root uses -p, it's ok if we can't preserve ownership.	\
-@@ -1289,6 +1294,34 @@
+@@ -1289,6 +1294,32 @@
       In such cases, set this variable to zero.  */
    preserve_metadata = 1;
  
@@ -2110,9 +2110,7 @@ unchanged:
 +	  freecon(con);
 +	}
 +      else {
-+	if ( errno == ENOTSUP ) {
-+	  error (0, errno, _("warning: security context not preserved %s"), quote (src_path));
-+	} else if ( errno != ENODATA ) {
++	if (( errno != ENOTSUP ) && ( errno != ENODATA )) {
 +	  error (0, errno, _("cannot lgetfilecon %s"), quote (src_path));
 +	  return 1;
 +	}
@@ -2123,7 +2121,7 @@ unchanged:
    if (S_ISDIR (src_mode))
      {
        struct dir_list *dir;
-@@ -1358,8 +1391,13 @@
+@@ -1358,8 +1389,13 @@
  	}
  
        /* Are we crossing a file system boundary?  */
@@ -2138,7 +2136,7 @@ unchanged:
  
        /* Copy the contents of the directory.  */
  
-@@ -1492,6 +1530,11 @@
+@@ -1492,6 +1528,11 @@
  	    }
  	}
  
@@ -2150,7 +2148,7 @@ unchanged:
        /* There's no need to preserve timestamps or permissions.  */
        preserve_metadata = 0;
  
-@@ -1524,7 +1567,7 @@
+@@ -1524,7 +1565,7 @@
    if (command_line_arg)
      record_file (x->dest_info, dst_path, NULL);
  
@@ -2159,7 +2157,7 @@ unchanged:
      return 0;
  
    /* POSIX says that `cp -p' must restore the following:
-@@ -1630,6 +1673,11 @@
+@@ -1630,6 +1671,11 @@
  
  un_backup:
  
