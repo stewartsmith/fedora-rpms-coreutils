@@ -44,6 +44,7 @@ Patch909: coreutils-zh_CN.patch
 Patch910: coreutils-gcc4.patch
 Patch911: coreutils-brokentest.patch
 Patch912: coreutils-overflow.patch
+Patch913: coreutils-no-sign-extend.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -108,6 +109,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch910 -p1 -b .gcc4
 %patch911 -p1 -b .brokentest
 %patch912 -p1 -b .overflow
+%patch913 -p1 -b .no-sign-extend
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -250,6 +252,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jun 16 2005 Tim Waugh <twaugh@redhat.com>
+- Don't display the sign-extended part of the host id (bug #160078).
+
 * Tue May 31 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-49
 - Eliminate bogus "can not preserve context" message when moving files.
 
