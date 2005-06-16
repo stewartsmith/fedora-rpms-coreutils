@@ -252,6 +252,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jun 16 2005 Tim Waugh <twaugh@redhat.com>
+- Better hostid fix.
+
 * Thu Jun 16 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-50
 - Don't display the sign-extended part of the host id (bug #160078).
 
