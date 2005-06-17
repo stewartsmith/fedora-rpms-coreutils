@@ -44,7 +44,6 @@ Patch909: coreutils-zh_CN.patch
 Patch910: coreutils-gcc4.patch
 Patch911: coreutils-brokentest.patch
 Patch912: coreutils-overflow.patch
-Patch913: coreutils-no-sign-extend.patch
 
 # From upstream
 Patch920: coreutils-dateseconds.patch
@@ -52,6 +51,7 @@ Patch921: coreutils-chown.patch
 Patch922: coreutils-rmaccess.patch
 Patch923: coreutils-copy.patch
 Patch924: coreutils-stale-utmp.patch
+Patch925: coreutils-no-sign-extend.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -109,7 +109,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch910 -p1 -b .gcc4
 %patch911 -p1 -b .brokentest
 %patch912 -p1 -b .overflow
-%patch913 -p1 -b .no-sign-extend
 
 # From upstream
 %patch920 -p1 -b .dateseconds
@@ -117,6 +116,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch922 -p1 -b .rmaccess
 %patch923 -p1 -b .copy
 %patch924 -p1 -b .stale-utmp
+%patch925 -p1 -b .no-sign-extend
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -252,8 +252,8 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Jun 16 2005 Tim Waugh <twaugh@redhat.com>
-- Better hostid fix.
+* Fri Jun 17 2005 Tim Waugh <twaugh@redhat.com>
+- Use upstream hostid fix.
 
 * Thu Jun 16 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-50
 - Don't display the sign-extended part of the host id (bug #160078).
