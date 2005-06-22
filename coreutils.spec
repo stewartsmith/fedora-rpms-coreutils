@@ -252,6 +252,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jun 22 2005 Tim Waugh <twaugh@redhat.com>
+- Fixed stale-utmp patch so that 'who -r' and 'who -b' work
+  again (bug #161264).
+
 * Fri Jun 17 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-51
 - Use upstream hostid fix.
 
