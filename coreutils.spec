@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 51
+Release: 52
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -252,7 +252,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Wed Jun 22 2005 Tim Waugh <twaugh@redhat.com>
+* Wed Jun 22 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-52
 - Fixed stale-utmp patch so that 'who -r' and 'who -b' work
   again (bug #161264).
 
