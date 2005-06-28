@@ -252,6 +252,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jun 28 2005 Tim Waugh <twaugh@redhat.com>
+- Corrected comments in DIR_COLORS.xterm (bug #161711).
+
 * Wed Jun 22 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-52
 - Fixed stale-utmp patch so that 'who -r' and 'who -b' work
   again (bug #161264).
