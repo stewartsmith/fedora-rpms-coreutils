@@ -15,7 +15,6 @@ unchanged:
    split stat stty su sum sync tac tail tee test touch tr true tsort tty
    uname unexpand uniq unlink uptime users vdir wc who whoami yes
  
-unchanged:
 --- coreutils-5.2.1/src/stat.c.selinux	2004-02-05 08:46:12.000000000 -0500
 +++ coreutils-5.2.1/src/stat.c	2004-12-29 12:24:03.419858555 -0500
 @@ -42,6 +42,13 @@
@@ -310,7 +309,6 @@ unchanged:
      }
  
    exit (G_fail ? EXIT_FAILURE : EXIT_SUCCESS);
-diff -u coreutils-5.2.1/src/runcon.c coreutils-5.2.1/src/runcon.c
 --- coreutils-5.2.1/src/runcon.c	2004-12-29 12:24:03.421858330 -0500
 +++ coreutils-5.2.1/src/runcon.c	2005-05-16 14:19:19.000000000 -0400
 @@ -0,0 +1,253 @@
@@ -567,7 +565,6 @@ diff -u coreutils-5.2.1/src/runcon.c coreutils-5.2.1/src/runcon.c
 +  }
 +  return 1; /* can't reach this statement.... */
 +}
-unchanged:
 --- coreutils-5.2.1/src/mkdir.c.selinux	2004-01-21 17:27:02.000000000 -0500
 +++ coreutils-5.2.1/src/mkdir.c	2004-12-29 12:24:03.422858217 -0500
 @@ -34,6 +34,10 @@
@@ -636,7 +633,6 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
-unchanged:
 --- coreutils-5.2.1/src/mv.c.selinux	2004-12-29 12:24:02.845923189 -0500
 +++ coreutils-5.2.1/src/mv.c	2004-12-29 12:24:03.424857992 -0500
 @@ -34,6 +34,11 @@
@@ -672,7 +668,6 @@ unchanged:
    /* FIXME: consider not calling getenv for SIMPLE_BACKUP_SUFFIX unless
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
-unchanged:
 --- coreutils-5.2.1/src/ls.c.selinux	2004-12-29 12:24:02.848922851 -0500
 +++ coreutils-5.2.1/src/ls.c	2004-12-29 12:24:03.429857429 -0500
 @@ -121,6 +121,18 @@
@@ -1291,7 +1286,6 @@ unchanged:
 +  }
 +}
 +#endif
-unchanged:
 --- /dev/null	2004-12-29 02:13:24.827638832 -0500
 +++ coreutils-5.2.1/src/chcon.c	2004-12-29 12:24:03.430857317 -0500
 @@ -0,0 +1,421 @@
@@ -1450,9 +1444,9 @@ unchanged:
 +  int status = 0;
 +
 +  if (change_symlinks)
-+    status = lgetfilecon(file, &file_context);
++    status = lgetfilecon_raw(file, &file_context);
 +  else 
-+    status = getfilecon(file, &file_context);
++    status = getfilecon_raw(file, &file_context);
 +
 +  if ((status < 0) && (errno != ENODATA))
 +    {
@@ -1716,7 +1710,6 @@ unchanged:
 +    freecon(ref_context);
 +  exit (errors);
 +}
-unchanged:
 --- coreutils-5.2.1/src/id.c.selinux	2004-12-29 12:24:03.287873419 -0500
 +++ coreutils-5.2.1/src/id.c	2004-12-29 12:24:03.432857091 -0500
 @@ -45,6 +45,20 @@
@@ -1819,7 +1812,7 @@ unchanged:
 +   * value later, we will know we are on a non-selinux kernel.         */
 +  if( selinux_enabled )
 +    {
-+      if (getcon(&context))
++      if (getcon(&context) && just_context)
 +        error (1, 0, "can't get process context");
 +    }
 +#endif
@@ -1850,7 +1843,6 @@ unchanged:
 +  }
 +#endif
  }
-unchanged:
 --- coreutils-5.2.1/src/install.c.selinux	2004-12-29 12:24:02.850922625 -0500
 +++ coreutils-5.2.1/src/install.c	2004-12-29 12:24:47.138935019 -0500
 @@ -47,6 +47,43 @@
@@ -2014,7 +2006,6 @@ unchanged:
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\
-unchanged:
 --- coreutils-5.2.1/src/copy.h.selinux	2004-12-29 12:24:02.853922288 -0500
 +++ coreutils-5.2.1/src/copy.h	2004-12-29 12:24:03.435856754 -0500
 @@ -105,6 +105,9 @@
@@ -2027,7 +2018,6 @@ unchanged:
  
    /* Enabled for mv, and for cp by the --preserve=links option.
       If nonzero, attempt to preserve in the destination files any
-unchanged:
 --- coreutils-5.2.1/src/Makefile.am.selinux	2004-12-29 12:24:03.264876008 -0500
 +++ coreutils-5.2.1/src/Makefile.am	2004-12-29 12:24:03.436856641 -0500
 @@ -3,13 +3,13 @@
@@ -2073,7 +2063,6 @@ unchanged:
  
  ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
  sort_LDADD = $(LDADD) $(POW_LIB)
-unchanged:
 --- coreutils-5.2.1/src/copy.c.selinux	2004-12-29 12:24:03.382862721 -0500
 +++ coreutils-5.2.1/src/copy.c	2004-12-29 12:24:03.439856303 -0500
 @@ -42,6 +42,11 @@
@@ -2169,7 +2158,6 @@ unchanged:
    /* We have failed to create the destination file.
       If we've just added a dev/ino entry via the remember_copied
       call above (i.e., unless we've just failed to create a hard link),
-unchanged:
 --- coreutils-5.2.1/src/mknod.c.selinux	2004-01-21 17:27:02.000000000 -0500
 +++ coreutils-5.2.1/src/mknod.c	2004-12-29 12:24:03.440856191 -0500
 @@ -36,8 +36,15 @@
@@ -2233,7 +2221,6 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
-unchanged:
 --- coreutils-5.2.1/src/cp.c.selinux	2004-12-29 12:24:02.852922400 -0500
 +++ coreutils-5.2.1/src/cp.c	2004-12-29 12:24:03.443855853 -0500
 @@ -49,6 +49,11 @@
@@ -2398,7 +2385,6 @@ unchanged:
  
  	case PARENTS_OPTION:
  	  flag_path = 1;
-unchanged:
 --- coreutils-5.2.1/src/mkfifo.c.selinux	2004-01-21 17:27:02.000000000 -0500
 +++ coreutils-5.2.1/src/mkfifo.c	2004-12-29 12:24:03.444855740 -0500
 @@ -32,11 +32,18 @@
@@ -2464,7 +2450,6 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
-unchanged:
 --- coreutils-5.2.1/configure.ac.selinux	2004-12-29 12:24:02.947911703 -0500
 +++ coreutils-5.2.1/configure.ac	2004-12-29 12:24:03.446855515 -0500
 @@ -14,6 +14,13 @@
@@ -2481,7 +2466,6 @@ unchanged:
  gl_DEFAULT_POSIX2_VERSION
  gl_USE_SYSTEM_EXTENSIONS
  jm_PERL
-unchanged:
 --- coreutils-5.2.1/man/mkfifo.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/mkfifo.1	2004-12-29 12:24:03.446855515 -0500
 @@ -12,6 +12,9 @@
@@ -2494,7 +2478,6 @@ unchanged:
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set permission mode (as in chmod), not a=rw - umask
  .TP
-unchanged:
 --- coreutils-5.2.1/man/ls.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/ls.1	2004-12-29 12:24:03.448855290 -0500
 @@ -195,6 +195,20 @@
@@ -2518,7 +2501,6 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
-unchanged:
 --- coreutils-5.2.1/man/dir.1.selinux	2004-03-02 17:51:06.000000000 -0500
 +++ coreutils-5.2.1/man/dir.1	2004-12-29 12:24:03.452854839 -0500
 @@ -195,6 +195,20 @@
@@ -2542,7 +2524,6 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
-unchanged:
 --- coreutils-5.2.1/man/mkdir.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/mkdir.1	2004-12-29 12:24:03.453854727 -0500
 @@ -12,6 +12,8 @@
@@ -2554,7 +2535,6 @@ unchanged:
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set permission mode (as in chmod), not rwxrwxrwx - umask
  .TP
-diff -u coreutils-5.2.1/man/runcon.1 coreutils-5.2.1/man/runcon.1
 --- coreutils-5.2.1/man/runcon.1	2004-12-29 12:24:03.454854614 -0500
 +++ coreutils-5.2.1/man/runcon.1	2005-05-16 14:18:12.000000000 -0400
 @@ -0,0 +1,43 @@
@@ -2601,7 +2581,6 @@ diff -u coreutils-5.2.1/man/runcon.1 coreutils-5.2.1/man/runcon.1
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
-unchanged:
 --- coreutils-5.2.1/man/Makefile.in.selinux	2004-03-11 03:58:00.000000000 -0500
 +++ coreutils-5.2.1/man/Makefile.in	2004-12-29 12:24:03.456854389 -0500
 @@ -185,6 +185,7 @@
@@ -2639,7 +2618,6 @@ unchanged:
  
  # Note the use of $t/$*, rather than just `$*' as in other packages.
  # That is necessary to avoid failures for programs that are also shell built-in
-unchanged:
 --- coreutils-5.2.1/man/install.1.selinux	2004-12-29 12:24:02.671942781 -0500
 +++ coreutils-5.2.1/man/install.1	2004-12-29 12:24:03.458854164 -0500
 @@ -60,6 +60,11 @@
@@ -2654,7 +2632,6 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
-unchanged:
 --- coreutils-5.2.1/man/stat.1.selinux	2004-03-02 17:52:31.000000000 -0500
 +++ coreutils-5.2.1/man/stat.1	2004-12-29 12:24:03.459854051 -0500
 @@ -22,6 +22,9 @@
@@ -2677,7 +2654,6 @@ unchanged:
  %D
  Device number in hex
  .TP
-unchanged:
 --- /dev/null	2004-12-29 02:13:24.827638832 -0500
 +++ coreutils-5.2.1/man/chcon.1	2004-12-29 12:24:03.461853826 -0500
 @@ -0,0 +1,64 @@
@@ -2745,7 +2721,6 @@ unchanged:
 +.B info chcon
 +.PP
 +should give you access to the complete manual.
-unchanged:
 --- coreutils-5.2.1/man/mknod.1.selinux	2004-03-02 17:52:28.000000000 -0500
 +++ coreutils-5.2.1/man/mknod.1	2004-12-29 12:24:03.463853601 -0500
 @@ -12,6 +12,9 @@
@@ -2758,7 +2733,6 @@ unchanged:
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set permission mode (as in chmod), not a=rw - umask
  .TP
-unchanged:
 --- /dev/null	2004-12-29 02:13:24.827638832 -0500
 +++ coreutils-5.2.1/man/chcon.x	2004-12-29 12:24:03.464853488 -0500
 @@ -0,0 +1,4 @@
@@ -2766,7 +2740,6 @@ unchanged:
 +chcon \- change file security context
 +[DESCRIPTION]
 +.\" Add any additional description here
-unchanged:
 --- coreutils-5.2.1/man/Makefile.am.selinux	2004-12-29 12:24:03.258876684 -0500
 +++ coreutils-5.2.1/man/Makefile.am	2004-12-29 12:24:03.466853263 -0500
 @@ -10,7 +10,7 @@
@@ -2787,7 +2760,6 @@ unchanged:
  
  SUFFIXES = .x .1
  
-diff -u coreutils-5.2.1/man/runcon.x coreutils-5.2.1/man/runcon.x
 --- coreutils-5.2.1/man/runcon.x	2004-12-29 12:24:03.467853150 -0500
 +++ coreutils-5.2.1/man/runcon.x	2005-05-16 14:18:12.000000000 -0400
 @@ -0,0 +1,14 @@
@@ -2805,7 +2777,6 @@ diff -u coreutils-5.2.1/man/runcon.x coreutils-5.2.1/man/runcon.x
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
-unchanged:
 --- coreutils-5.2.1/man/id.1.selinux	2004-03-02 17:52:27.000000000 -0500
 +++ coreutils-5.2.1/man/id.1	2004-12-29 12:24:03.469852925 -0500
 @@ -13,6 +13,9 @@
@@ -2818,7 +2789,6 @@ unchanged:
  \fB\-g\fR, \fB\-\-group\fR
  print only the effective group ID
  .TP
-unchanged:
 --- coreutils-5.2.1/man/cp.1.selinux	2004-03-02 17:51:05.000000000 -0500
 +++ coreutils-5.2.1/man/cp.1	2004-12-29 12:24:03.470852813 -0500
 @@ -57,7 +57,7 @@
@@ -2840,7 +2810,6 @@ unchanged:
  \fB\-\-version\fR
  output version information and exit
  .PP
-unchanged:
 --- coreutils-5.2.1/man/vdir.1.selinux	2004-03-02 17:52:33.000000000 -0500
 +++ coreutils-5.2.1/man/vdir.1	2004-12-29 12:24:03.471852700 -0500
 @@ -195,6 +195,20 @@
@@ -2864,7 +2833,6 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
-unchanged:
 --- coreutils-5.2.1/tests/help-version.selinux	2004-12-29 12:24:03.261876346 -0500
 +++ coreutils-5.2.1/tests/help-version	2004-12-29 12:24:03.473852475 -0500
 @@ -42,6 +42,8 @@
@@ -2885,7 +2853,6 @@ unchanged:
  
    rm -rf $tmp_in $tmp_in2 $tmp_dir $tmp_out
    echo > $tmp_in
-unchanged:
 --- coreutils-5.2.1/config.hin.selinux	2004-12-29 12:24:02.949911478 -0500
 +++ coreutils-5.2.1/config.hin	2004-12-29 12:24:03.475852250 -0500
 @@ -1374,6 +1374,9 @@

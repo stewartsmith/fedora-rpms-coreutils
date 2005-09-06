@@ -1,11 +1,12 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 52
+Release: 53
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
-BuildRequires: libselinux-devel
+BuildRequires: libselinux-devel >= 1.25.6-1
+Requires: libselinux >= 1.25.6-1
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
 Source101:	DIR_COLORS
@@ -252,6 +253,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Sep 6 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-53
+- Allow id to run even when SELinux security context can not be run
+- Change chcon to use raw functions.
+
 * Thu Jun 28 2005 Tim Waugh <twaugh@redhat.com>
 - Corrected comments in DIR_COLORS.xterm (bug #161711).
 
