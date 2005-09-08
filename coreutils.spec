@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 53
+Release: 54
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -245,7 +245,38 @@ fi
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) /etc/pam.d/su}
 %doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
-/bin/*
+/bin/basename
+/bin/cat
+/bin/chgrp
+/bin/chmod
+/bin/chown
+/bin/cp
+/bin/cut
+/bin/date
+/bin/dd
+/bin/df
+/bin/echo
+/bin/env
+/bin/false
+/bin/link
+/bin/ln
+/bin/ls
+/bin/mkdir
+/bin/mknod
+/bin/mv
+/bin/nice
+/bin/pwd
+/bin/rm
+/bin/rmdir
+/bin/sleep
+/bin/sort
+/bin/stty
+%attr(4755,root,root) /bin/su
+/bin/sync
+/bin/touch
+/bin/true
+/bin/uname
+/bin/unlink
 %_bindir/*
 %_infodir/coreutils*
 %_mandir/man*/*
@@ -253,6 +284,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Sep  8 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-54
+- Explicit setuid bit for /bin/su in file manifest (bug #167745).
+
 * Tue Sep 6 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-53
 - Allow id to run even when SELinux security context can not be run
 - Change chcon to use raw functions.
