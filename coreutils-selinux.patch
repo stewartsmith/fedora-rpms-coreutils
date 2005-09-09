@@ -1444,9 +1444,9 @@ unchanged:
 +  int status = 0;
 +
 +  if (change_symlinks)
-+    status = lgetfilecon_raw(file, &file_context);
++    status = lgetfilecon(file, &file_context);
 +  else 
-+    status = getfilecon_raw(file, &file_context);
++    status = getfilecon(file, &file_context);
 +
 +  if ((status < 0) && (errno != ENODATA))
 +    {

@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 54
+Release: 55
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -284,6 +284,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Sep 9 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-55
+- Reverse change to use raw functions
+
 * Thu Sep  8 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-54
 - Explicit setuid bit for /bin/su in file manifest (bug #167745).
 
