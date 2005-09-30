@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.2.1
-Release: 55
+Release: 56
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -284,6 +284,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Sep 30 2005 Tomas Mraz <tmraz@redhat.com> - 5.2.1-56
+- use include instead of pam_stack in pam config
+
 * Fri Sep 9 2005 Dan Walsh <dwalsh@redhat.com> 5.2.1-55
 - Reverse change to use raw functions
 
