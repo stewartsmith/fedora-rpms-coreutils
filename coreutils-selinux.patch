@@ -1,22 +1,5 @@
-unchanged:
---- coreutils-5.2.1/README.selinux	2004-12-29 12:24:03.260876459 -0500
-+++ coreutils-5.2.1/README	2004-12-29 12:24:03.417858780 -0500
-@@ -7,11 +7,11 @@
- 
- The programs that can be built with this package are:
- 
--  [ basename cat chgrp chmod chown chroot cksum comm cp csplit cut date dd
-+  [ basename cat chcon chgrp chmod chown chroot cksum comm cp csplit cut date dd
-   df dir dircolors dirname du echo env expand expr factor false fmt fold
-   ginstall groups head hostid hostname id join kill link ln logname ls
-   md5sum mkdir mkfifo mknod mv nice nl nohup od paste pathchk pinky pr
--  printenv printf ptx pwd readlink rm rmdir runuser seq sha1sum shred sleep sort
-+  printenv printf ptx pwd readlink rm rmdir runcon runuser seq sha1sum shred sleep sort
-   split stat stty su sum sync tac tail tee test touch tr true tsort tty
-   uname unexpand uniq unlink uptime users vdir wc who whoami yes
- 
---- coreutils-5.2.1/src/stat.c.selinux	2004-02-05 08:46:12.000000000 -0500
-+++ coreutils-5.2.1/src/stat.c	2004-12-29 12:24:03.419858555 -0500
+--- coreutils-5.92/src/stat.c.selinux	2005-10-14 14:55:40.000000000 +0100
++++ coreutils-5.92/src/stat.c	2005-10-26 17:51:02.000000000 +0100
 @@ -42,6 +42,13 @@
  # endif
  #endif
@@ -31,25 +14,25 @@ unchanged:
  #include "system.h"
  
  #include "error.h"
-@@ -95,6 +102,7 @@
-   {"dereference", no_argument, 0, 'L'},
-   {"format", required_argument, 0, 'c'},
-   {"filesystem", no_argument, 0, 'f'},
+@@ -101,6 +108,7 @@
+ #define AUTHORS "Michael Meskes"
+ 
+ static struct option const long_options[] = {
 +  {"context", no_argument, 0, 'Z'},
-   {"terse", no_argument, 0, 't'},
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-@@ -345,7 +353,7 @@
+   {"dereference", no_argument, NULL, 'L'},
+   {"file-system", no_argument, NULL, 'f'},
+   {"filesystem", no_argument, NULL, 'f'}, /* obsolete and undocumented alias */
+@@ -311,7 +319,7 @@
  /* print statfs info */
  static void
- print_statfs (char *pformat, char m, char const *filename,
+ print_statfs (char *pformat, size_t buf_len, char m, char const *filename,
 -	      void const *data)
-+	      void const *data,SECURITY_ID_T scontext)
++	      void const *data, SECURITY_ID_T scontext)
  {
    STRUCT_STATVFS const *statfsbuf = data;
  
-@@ -407,7 +415,10 @@
-       strcat (pformat, PRIdMAX);
+@@ -383,7 +391,10 @@
+       xstrcat (pformat, buf_len, PRIdMAX);
        printf (pformat, (intmax_t) (statfsbuf->f_ffree));
        break;
 -
@@ -58,54 +41,55 @@ unchanged:
 +      printf(scontext);
 +      break;
      default:
-       strcat (pformat, "c");
+       xstrcat (pformat, buf_len, "c");
        printf (pformat, m);
-@@ -417,7 +428,7 @@
- 
+@@ -394,7 +405,7 @@
  /* print stat info */
  static void
--print_stat (char *pformat, char m, char const *filename, void const *data)
-+print_stat (char *pformat, char m, char const *filename, void const *data, SECURITY_ID_T scontext)
+ print_stat (char *pformat, size_t buf_len, char m,
+-	    char const *filename, void const *data)
++	    char const *filename, void const *data, SECURITY_ID_T scontext)
  {
    struct stat *statbuf = (struct stat *) data;
    struct passwd *pw_ent;
-@@ -553,6 +564,10 @@
-       strcat (pformat, "d");
-       printf (pformat, (int) statbuf->st_ctime);
+@@ -528,6 +539,10 @@
+       xstrcat (pformat, buf_len, TYPE_SIGNED (time_t) ? "ld" : "lu");
+       printf (pformat, (unsigned long int) statbuf->st_ctime);
        break;
 +    case 'C':
 +      strcat (pformat, "s");
 +      printf(pformat,scontext);
 +      break;
      default:
-       strcat (pformat, "c");
+       xstrcat (pformat, buf_len, "c");
        printf (pformat, m);
-@@ -562,8 +577,8 @@
+@@ -537,8 +552,9 @@
  
  static void
  print_it (char const *masterformat, char const *filename,
--	  void (*print_func) (char *, char, char const *, void const *),
+-	  void (*print_func) (char *, size_t, char, char const *, void const *),
 -	  void const *data)
-+	  void (*print_func) (char *, char, char const *, void const *,SECURITY_ID_T ),
-+	  void const *data,  SECURITY_ID_T scontext)
++	  void (*print_func) (char *, size_t, char, char const *, void const *,
++			      SECURITY_ID_T ),
++	  void const *data, SECURITY_ID_T scontext)
  {
    char *b;
  
-@@ -598,7 +613,7 @@
+@@ -576,7 +592,7 @@
  	      putchar ('%');
  	      break;
  	    default:
--	      print_func (dest, *p, filename, data);
-+	      print_func (dest, *p, filename, data,scontext);
+-	      print_func (dest, n_alloc, *p, filename, data);
++		    print_func (dest, n_alloc, *p, filename, data, scontext);
  	      break;
  	    }
  	}
-@@ -615,9 +630,17 @@
+@@ -592,9 +608,17 @@
  
- /* stat the filesystem and print what we find */
- static void
--do_statfs (char const *filename, int terse, char const *format)
-+do_statfs (char const *filename, int terse, int secure, char const *format)
+ /* Stat the file system and print what we find.  */
+ static bool
+-do_statfs (char const *filename, bool terse, char const *format)
++do_statfs (char const *filename, bool terse, bool secure, char const *format)
  {
    STRUCT_STATVFS statfsbuf;
 +  SECURITY_ID_T scontext = NULL;
@@ -116,175 +100,170 @@ unchanged:
 +      return;
 +    }
 +#endif
-   int i = statfs (filename, &statfsbuf);
  
-   if (i == -1)
-@@ -629,23 +652,40 @@
+   if (STATFS (filename, &statfsbuf) != 0)
+     {
+@@ -605,25 +629,46 @@
  
    if (format == NULL)
      {
 -      format = (terse
--		? "%n %i %l %t %b %f %a %s %c %d"
+-		? "%n %i %l %t %s %S %b %f %a %c %d\n"
 -		: "  File: \"%n\"\n"
 -		"    ID: %-8i Namelen: %-7l Type: %T\n"
--		"Blocks: Total: %-10b Free: %-10f Available: %-10a Size: %s\n"
--		"Inodes: Total: %-10c Free: %-10d");
--    }
--
--  print_it (format, filename, print_statfs, &statfsbuf);
-+      if (terse) {
-+	if(secure)
-+	  format = "%n %i %l %t %b %f %a %s %c %d %C";
-+	else
-+	  format = "%n %i %l %t %b %f %a %s %c %d";
-+      } 
-+      else 
+-		"Block size: %-10s Fundamental block size: %S\n"
+-		"Blocks: Total: %-10b Free: %-10f Available: %a\n"
+-		"Inodes: Total: %-10c Free: %d\n");
++      if (terse)
 +	{
-+	  if(secure)
++	  if (secure)
++	    format = "%n %i %l %t %s %S %b %f %a %c %d %C\n";
++	  else
++	    format = "%n %i %l %t %s %S %b %f %a %c %d\n";
++	}
++      else
++	{
++	  if (secure)
 +	    format = "  File: \"%n\"\n"
 +	      "    ID: %-8i Namelen: %-7l Type: %T\n"
-+	      "Blocks: Total: %-10b Free: %-10f Available: %-10a Size: %s\n"
-+	      "Inodes: Total: %-10c Free: %-10d\n"
++	      "Block size: %-10s Fundamental block size: %S\n"
++	      "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++	      "Inodes: Total: %-10c Free: %d\n"
 +	      "   S_Context: %C\n";
-+	  else	
-+	    format= "  File: \"%n\"\n"
++	  else
++	    format = "  File: \"%n\"\n"
 +	      "    ID: %-8i Namelen: %-7l Type: %T\n"
-+	      "Blocks: Total: %-10b Free: %-10f Available: %-10a Size: %s\n"
-+	      "Inodes: Total: %-10c Free: %-10d";
-+	}	
-+    }
-+  print_it (format, filename, print_statfs, &statfsbuf,scontext);
++	      "Block size: %-10s Fundamental block size: %S\n"
++	      "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++	      "Inodes: Total: %-10c Free: %d\n";
++	}
+     }
+ 
+-  print_it (format, filename, print_statfs, &statfsbuf);
++  print_it (format, filename, print_statfs, &statfsbuf, scontext);
 +#ifdef WITH_SELINUX
 +  if (scontext != NULL)
 +    freecon(scontext);
 +#endif
+   return true;
  }
--
+ 
  /* stat the file and print what we find */
- static void
--do_stat (char const *filename, int follow_links, int terse,
-+  do_stat (char const *filename, int follow_links, int terse,int secure,
+ static bool
+-do_stat (char const *filename, bool follow_links, bool terse,
++do_stat (char const *filename, bool follow_links, bool terse, bool secure,
  	 char const *format)
  {
    struct stat statbuf;
 +  SECURITY_ID_T scontext = NULL;
-   int i = ((follow_links == 1)
- 	   ? stat (filename, &statbuf)
- 	   : lstat (filename, &statbuf));
-@@ -656,11 +696,28 @@
-       return;
+ 
+   if ((follow_links ? stat : lstat) (filename, &statbuf) != 0)
+     {
+@@ -631,11 +676,29 @@
+       return false;
      }
  
 +#ifdef WITH_SELINUX
 +  if(secure) {
-+    if (link) 
++    int i;
++    if (!follow_links) 
 +      i=lgetfilecon(filename, &scontext);
 +    else
 +      i=getfilecon(filename, &scontext);
 +    if (i == -1)
 +      {
 +	perror (filename);
-+	return;
++	return false;
 +      }
 +  }
 +#endif
 +
    if (format == NULL)
      {
-       if (terse != 0)
+       if (terse)
  	{
--	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o";
+-	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
 +	   if (secure)
-+		  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C";
++	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
 +	   else
-+	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o";
++	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
  	}
        else
  	{
-@@ -668,7 +725,17 @@
- 	  i = statbuf.st_mode & S_IFMT;
- 	  if (i == S_IFCHR || i == S_IFBLK)
- 	    {
--	      format =
-+          	if (secure)
-+               		format =
-+			  "  File: %N\n"
-+			  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+			  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
-+			  " Device type: %t,%T\n"
-+			  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+			  "   S_Context: %C\n"
-+			  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
-+        	else
-+	       format =
- 		"  File: %N\n"
- 		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
- 		"Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
-@@ -678,6 +745,15 @@
+@@ -653,16 +716,30 @@
  	    }
  	  else
  	    {
-+	   	if (secure)
-+		  format =
-+		    "  File: %N\n"
-+		    "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+		    "Device: %Dh/%dd\tInode: %-10i  Links: %-5h\n"
-+		    "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+		    "S_Context: %C\n"
-+		    "Access: %x\n" "Modify: %y\n" "Change: %z\n";
-+                else
- 	      format =
- 		"  File: %N\n"
- 		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-@@ -687,7 +763,11 @@
+-	      format =
+-		"  File: %N\n"
+-		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
+-		"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
+-		"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
+-		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
++	      if (secure)
++		format =
++		  "  File: %N\n"
++		  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++		  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
++		  " Device type: %t,%T\n"
++		  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++		  "   S_Context: %C\n"
++		  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
++	      else
++		format =
++		  "  File: %N\n"
++		  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++		  "Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
++		  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++		  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
  	    }
  	}
      }
 -  print_it (format, filename, print_stat, &statbuf);
-+  print_it (format, filename, print_stat, &statbuf,scontext);
++  print_it (format, filename, print_stat, &statbuf, scontext);
 +#ifdef WITH_SELINUX
 +  if (scontext) 
 +    freecon(scontext);
 +#endif
+   return true;
  }
  
- void
-@@ -705,6 +785,7 @@
-   -f, --filesystem      display filesystem status instead of file status\n\
+@@ -681,6 +758,7 @@
+   -f, --file-system     display file system status instead of file status\n\
    -c  --format=FORMAT   use the specified FORMAT instead of the default\n\
    -L, --dereference     follow links\n\
 +  -Z, --context         print the security context \n\
    -t, --terse           print the information in terse form\n\
  "), stdout);
        fputs (HELP_OPTION_DESCRIPTION, stdout);
-@@ -756,6 +837,7 @@
+@@ -732,6 +810,7 @@
    %c   Total file nodes in file system\n\
    %d   Free file nodes in file system\n\
    %f   Free blocks in file system\n\
 +  %C - Security context in SELinux\n\
  "), stdout);
        fputs (_("\
-   %i   File System id in hex\n\
-@@ -778,6 +860,7 @@
-   int follow_links = 0;
-   int fs = 0;
-   int terse = 0;
-+  int secure = 0;
+   %i   File System ID in hex\n\
+@@ -756,6 +835,7 @@
+   bool follow_links = false;
+   bool fs = false;
+   bool terse = false;
++  bool secure = false;
    char *format = NULL;
+   bool ok = true;
  
-   initialize_main (&argc, &argv);
-@@ -788,7 +871,7 @@
+@@ -767,7 +847,7 @@
  
    atexit (close_stdout);
  
--  while ((c = getopt_long (argc, argv, "c:fLlt", long_options, NULL)) != -1)
-+  while ((c = getopt_long (argc, argv, "c:fLltZ", long_options, NULL)) != -1)
+-  while ((c = getopt_long (argc, argv, "c:fLt", long_options, NULL)) != -1)
++  while ((c = getopt_long (argc, argv, "c:fLtZ", long_options, NULL)) != -1)
      {
        switch (c)
  	{
-@@ -810,6 +893,14 @@
+@@ -786,6 +866,14 @@
  	case 't':
- 	  terse = 1;
+ 	  terse = true;
  	  break;
 +	case 'Z':
 +	  if((is_selinux_enabled()>0))
@@ -297,20 +276,19 @@ unchanged:
  
  	case_GETOPT_HELP_CHAR;
  
-@@ -829,9 +920,9 @@
-   for (i = optind; i < argc; i++)
-     {
-       if (fs == 0)
--	do_stat (argv[i], follow_links, terse, format);
-+	do_stat (argv[i], follow_links, terse, secure, format);
-       else
--	do_statfs (argv[i], terse, format);
-+	do_statfs (argv[i], terse, secure, format);
-     }
+@@ -804,8 +892,8 @@
  
-   exit (G_fail ? EXIT_FAILURE : EXIT_SUCCESS);
---- coreutils-5.2.1/src/runcon.c	2004-12-29 12:24:03.421858330 -0500
-+++ coreutils-5.2.1/src/runcon.c	2005-05-16 14:19:19.000000000 -0400
+   for (i = optind; i < argc; i++)
+     ok &= (fs
+-	   ? do_statfs (argv[i], terse, format)
+-	   : do_stat (argv[i], follow_links, terse, format));
++	   ? do_statfs (argv[i], terse, secure, format)
++	   : do_stat (argv[i], follow_links, terse, secure, format));
+ 
+   exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
+ }
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.92/src/runcon.c	2005-10-26 17:42:29.000000000 +0100
 @@ -0,0 +1,253 @@
 +/*
 + * runcon [ context |
@@ -565,9 +543,9 @@ unchanged:
 +  }
 +  return 1; /* can't reach this statement.... */
 +}
---- coreutils-5.2.1/src/mkdir.c.selinux	2004-01-21 17:27:02.000000000 -0500
-+++ coreutils-5.2.1/src/mkdir.c	2004-12-29 12:24:03.422858217 -0500
-@@ -34,6 +34,10 @@
+--- coreutils-5.92/src/mkdir.c.selinux	2005-06-15 00:55:47.000000000 +0100
++++ coreutils-5.92/src/mkdir.c	2005-10-26 17:42:29.000000000 +0100
+@@ -34,11 +34,18 @@
  
  #define AUTHORS "David MacKenzie"
  
@@ -578,8 +556,6 @@ unchanged:
  /* The name this program was run with. */
  char *program_name;
  
-@@ -42,6 +46,9 @@
- 
  static struct option const longopts[] =
  {
 +#ifdef WITH_SELINUX
@@ -588,7 +564,7 @@ unchanged:
    {"mode", required_argument, NULL, 'm'},
    {"parents", no_argument, NULL, 'p'},
    {"verbose", no_argument, NULL, 'v'},
-@@ -63,6 +70,11 @@
+@@ -60,6 +67,11 @@
  Create the DIRECTORY(ies), if they do not already exist.\n\
  \n\
  "), stdout);
@@ -600,9 +576,9 @@ unchanged:
        fputs (_("\
  Mandatory arguments to long options are mandatory for short options too.\n\
  "), stdout);
-@@ -98,7 +110,11 @@
+@@ -95,7 +107,11 @@
  
-   create_parents = 0;
+   atexit (close_stdout);
  
 +#ifdef WITH_SELINUX
 +  while ((optc = getopt_long (argc, argv, "pm:vZ:", longopts, NULL)) != -1)
@@ -612,7 +588,7 @@ unchanged:
      {
        switch (optc)
  	{
-@@ -113,6 +129,20 @@
+@@ -108,6 +124,20 @@
  	case 'v': /* --verbose  */
  	  verbose_fmt_string = _("created directory %s");
  	  break;
@@ -633,8 +609,8 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-5.2.1/src/mv.c.selinux	2004-12-29 12:24:02.845923189 -0500
-+++ coreutils-5.2.1/src/mv.c	2004-12-29 12:24:03.424857992 -0500
+--- coreutils-5.92/src/mv.c.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/src/mv.c	2005-10-26 17:42:29.000000000 +0100
 @@ -34,6 +34,11 @@
  #include "quote.h"
  #include "remove.h"
@@ -647,17 +623,17 @@ unchanged:
  /* The official name of this program (e.g., no `g' prefix).  */
  #define PROGRAM_NAME "mv"
  
-@@ -124,6 +129,9 @@
-   x->preserve_links = 1;
-   x->preserve_mode = 1;
-   x->preserve_timestamps = 1;
+@@ -127,6 +132,9 @@
+   x->preserve_links = true;
+   x->preserve_mode = true;
+   x->preserve_timestamps = true;
 +#ifdef WITH_SELINUX
 +  x->preserve_security_context = 1;
 +#endif
-   x->require_preserve = 0;  /* FIXME: maybe make this an option */
-   x->recursive = 1;
+   x->require_preserve = false;  /* FIXME: maybe make this an option */
+   x->recursive = true;
    x->sparse_mode = SPARSE_AUTO;  /* FIXME: maybe make this an option */
-@@ -376,6 +384,10 @@
+@@ -365,6 +373,10 @@
  
    cp_option_init (&x);
  
@@ -668,9 +644,9 @@ unchanged:
    /* FIXME: consider not calling getenv for SIMPLE_BACKUP_SUFFIX unless
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
---- coreutils-5.2.1/src/ls.c.selinux	2004-12-29 12:24:02.848922851 -0500
-+++ coreutils-5.2.1/src/ls.c	2004-12-29 12:24:03.429857429 -0500
-@@ -121,6 +121,18 @@
+--- coreutils-5.92/src/ls.c.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/src/ls.c	2005-10-26 17:42:29.000000000 +0100
+@@ -135,6 +135,18 @@
  
  #define AUTHORS "Richard Stallman", "David MacKenzie"
  
@@ -689,7 +665,7 @@ unchanged:
  #define obstack_chunk_alloc malloc
  #define obstack_chunk_free free
  
-@@ -165,7 +177,8 @@
+@@ -170,7 +182,8 @@
      symbolic_link DT_INIT (DT_LNK),
      sock DT_INIT (DT_SOCK),
      arg_directory DT_INIT (2 * (DT_UNKNOWN | DT_FIFO | DT_CHR | DT_DIR | DT_BLK
@@ -699,15 +675,15 @@ unchanged:
    };
  
  struct fileinfo
-@@ -174,6 +187,7 @@
+@@ -179,6 +192,7 @@
      char *name;
  
      struct stat stat;
 +    int stat_failed;
  
-     /* For symbolic link, name of the file linked to, otherwise zero. */
+     /* For symbolic link, name of the file linked to, otherwise zero.  */
      char *linkname;
-@@ -192,6 +206,10 @@
+@@ -197,6 +211,10 @@
      /* For long listings, true if the file has an access control list.  */
      bool have_acl;
  #endif
@@ -718,17 +694,17 @@ unchanged:
    };
  
  #if HAVE_ACL || USE_ACL
-@@ -227,7 +245,8 @@
- static int file_interesting (const struct dirent *next);
- static uintmax_t gobble_file (const char *name, enum filetype type,
- 			      int explicit_arg, const char *dirname);
+@@ -232,7 +250,8 @@
+ static bool file_ignored (char const *name);
+ static uintmax_t gobble_file (char const *name, enum filetype type,
+ 			      bool command_line_arg, char const *dirname);
 -static void print_color_indicator (const char *name, mode_t mode, int linkok);
 +static void print_color_indicator (const char *name, mode_t mode, int linkok,
 +				   int stat_failed);
  static void put_indicator (const struct bin_str *ind);
- static int put_indicator_direct (const struct bin_str *ind);
  static void add_ignore_pattern (const char *pattern);
-@@ -247,7 +266,7 @@
+ static void attach (char *dest, const char *dirname, const char *name);
+@@ -253,7 +272,7 @@
  static void print_long_format (const struct fileinfo *f);
  static void print_many_per_line (void);
  static void print_name_with_quoting (const char *p, mode_t mode,
@@ -737,7 +713,7 @@ unchanged:
  				     struct obstack *stack);
  static void prep_non_filename_text (void);
  static void print_type_indicator (mode_t mode);
-@@ -256,6 +275,9 @@
+@@ -263,6 +282,9 @@
  static void sort_files (void);
  static void parse_ls_color (void);
  void usage (int status);
@@ -745,9 +721,9 @@ unchanged:
 +static void print_scontext_format (const struct fileinfo *f);
 +#endif
  
- /* The name the program was run with, stripped of any leading path. */
+ /* The name this program was run with.  */
  char *program_name;
-@@ -354,7 +376,11 @@
+@@ -371,7 +393,11 @@
      one_per_line,		/* -1 */
      many_per_line,		/* -C */
      horizontal,			/* -x */
@@ -760,7 +736,7 @@ unchanged:
    };
  
  static enum format format;
-@@ -679,6 +705,11 @@
+@@ -740,6 +766,11 @@
    SHOW_CONTROL_CHARS_OPTION,
    SI_OPTION,
    SORT_OPTION,
@@ -772,43 +748,40 @@ unchanged:
    TIME_OPTION,
    TIME_STYLE_OPTION
  };
-@@ -722,6 +753,11 @@
-   {"time-style", required_argument, 0, TIME_STYLE_OPTION},
-   {"color", optional_argument, 0, COLOR_OPTION},
-   {"block-size", required_argument, 0, BLOCK_SIZE_OPTION},
+@@ -784,6 +815,11 @@
+   {"time-style", required_argument, NULL, TIME_STYLE_OPTION},
+   {"color", optional_argument, NULL, COLOR_OPTION},
+   {"block-size", required_argument, NULL, BLOCK_SIZE_OPTION},
 +#ifdef WITH_SELINUX
 +  {"context", no_argument, 0, CONTEXT_OPTION},
 +  {"lcontext", no_argument, 0, LCONTEXT_OPTION},
 +  {"scontext", no_argument, 0, SCONTEXT_OPTION},
 +#endif
-   {"author", no_argument, 0, AUTHOR_OPTION},
+   {"author", no_argument, NULL, AUTHOR_OPTION},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-@@ -731,13 +767,21 @@
+@@ -793,12 +829,19 @@
  static char const *const format_args[] =
  {
    "verbose", "long", "commas", "horizontal", "across",
--  "vertical", "single-column", 0
-+  "vertical", "single-column", 
+-  "vertical", "single-column", NULL
++  "vertical", "single-column",
 +#ifdef WITH_SELINUX
 +  "context",
 +#endif
-+  0
++  NULL
  };
- 
  static enum format const format_types[] =
  {
    long_format, long_format, with_commas, horizontal, horizontal,
--  many_per_line, one_per_line
-+  many_per_line, one_per_line,
+   many_per_line, one_per_line
 +#ifdef WITH_SELINUX
-+  security_format,
++  , security_format
 +#endif
-+  invalid_format
  };
+ ARGMATCH_VERIFY (format_args, format_types);
  
- static char const *const sort_args[] =
-@@ -1101,6 +1145,9 @@
+@@ -1222,6 +1265,9 @@
  
    format_needs_stat = sort_type == sort_time || sort_type == sort_size
      || format == long_format
@@ -817,27 +790,27 @@ unchanged:
 +#endif
      || dereference == DEREF_ALWAYS
      || print_block_size || print_inode;
-   format_needs_type = (format_needs_stat == 0
-@@ -1125,7 +1172,7 @@
- 
-   for (; i < argc; i++)
-     {
--      gobble_file (argv[i], unknown, 1, "");
-+      gobble_file (argv[i], command_line, 1, "");
+   format_needs_type = (!format_needs_stat
+@@ -1251,7 +1297,7 @@
      }
+   else
+     do
+-      gobble_file (argv[i++], unknown, true, "");
++      gobble_file (argv[i++], command_line, true, "");
+     while (i < argc);
  
-   if (dir_defaulted)
-@@ -1273,6 +1320,9 @@
-   all_files = 0;
-   really_all_files = 0;
-   ignore_patterns = 0;
+   if (files_index)
+@@ -1414,6 +1460,9 @@
+   ignore_mode = IGNORE_DEFAULT;
+   ignore_patterns = NULL;
+   hide_patterns = NULL;
 +#ifdef WITH_SELINUX
 +  print_scontext       = 0;
 +#endif
  
    /* FIXME: put this in a function.  */
    {
-@@ -1350,7 +1400,7 @@
+@@ -1489,7 +1538,7 @@
    }
  
    while ((c = getopt_long (argc, argv,
@@ -846,7 +819,7 @@ unchanged:
  			   long_options, NULL)) != -1)
      {
        switch (c)
-@@ -1470,6 +1520,13 @@
+@@ -1608,6 +1657,13 @@
  	  format = horizontal;
  	  break;
  
@@ -858,9 +831,9 @@ unchanged:
 +	  break;
 +#endif
  	case 'A':
- 	  really_all_files = 0;
- 	  all_files = 1;
-@@ -1637,6 +1694,25 @@
+ 	  if (ignore_mode == IGNORE_DEFAULT)
+ 	    ignore_mode = IGNORE_DOT_AND_DOTDOT;
+@@ -1784,6 +1840,25 @@
  
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  
@@ -884,12 +857,12 @@ unchanged:
 +#endif
 +
  	default:
- 	  usage (EXIT_FAILURE);
+ 	  usage (LS_FAILURE);
  	}
-@@ -2300,6 +2376,12 @@
+@@ -2468,6 +2543,12 @@
+     {
        free (files[i].name);
-       if (files[i].linkname)
- 	free (files[i].linkname);
+       free (files[i].linkname);
 +#ifdef WITH_SELINUX
 +      if (files[i].scontext) {
 +	freecon (files[i].scontext);
@@ -899,15 +872,15 @@ unchanged:
      }
  
    files_index = 0;
-@@ -2336,11 +2418,14 @@
-   f->linkname = 0;
+@@ -2506,11 +2587,14 @@
+   f->linkname = NULL;
    f->linkmode = 0;
-   f->linkok = 0;
+   f->linkok = false;
 +#ifdef WITH_SELINUX
 +  f->scontext = NULL;
 +#endif
  
-   if (explicit_arg
+   if (command_line_arg
        || format_needs_stat
        || (format_needs_type
 -	  && (type == unknown
@@ -915,38 +888,38 @@ unchanged:
  
  	      /* FIXME: remove this disjunct.
  		 I don't think we care about symlinks here, but for now
-@@ -2373,6 +2458,11 @@
+@@ -2547,6 +2631,11 @@
  	{
  	case DEREF_ALWAYS:
- 	  err = stat (path, &f->stat);
+ 	  err = stat (absolute_name, &f->stat);
 +#ifdef WITH_SELINUX
 +	  if (err>=0) 
 +	    if (format == security_format || print_scontext)
-+	      getfilecon(path, &f->scontext);
++	      getfilecon(absolute_name, &f->scontext);
 +#endif
  	  break;
  
  	case DEREF_COMMAND_LINE_ARGUMENTS:
-@@ -2381,6 +2471,11 @@
+@@ -2555,6 +2644,11 @@
  	    {
- 	      int need_lstat;
- 	      err = stat (path, &f->stat);
+ 	      bool need_lstat;
+ 	      err = stat (absolute_name, &f->stat);
 +#ifdef WITH_SELINUX
 +	      if (err>=0) 
 +		if (format == security_format || print_scontext)
-+		  getfilecon(path, &f->scontext);
++		  getfilecon(absolute_name, &f->scontext);
 +#endif
  
  	      if (dereference == DEREF_COMMAND_LINE_ARGUMENTS)
  		break;
-@@ -2399,18 +2494,42 @@
+@@ -2573,17 +2667,41 @@
  
  	default: /* DEREF_NEVER */
- 	  err = lstat (path, &f->stat);
+ 	  err = lstat (absolute_name, &f->stat);
 +#ifdef WITH_SELINUX
 +	  if (err>=0) 
 +	    if (format == security_format || print_scontext)
-+	      lgetfilecon(path, &f->scontext);
++	      lgetfilecon(absolute_name, &f->scontext);
 +#endif
  	  break;
  	}
@@ -955,22 +928,20 @@ unchanged:
 +      f->stat_failed = (err < 0);
 +      if (f->stat_failed)
  	{
--	  error (0, errno, "%s", quotearg_colon (path));
--	  exit_status = 1;
+-	  file_failure (command_line_arg, "%s", absolute_name);
 +	  /* We treat stat failures for files the user named special.
 +	     There is no guarantee that these files really exist so
 +	     we do not print any information.  */
 +	  if (type == command_line)
 +	    {
-+	      error (0, errno, "%s", quotearg_colon (path));
-+	      exit_status = 1;
++	      file_failure (1, "%s", absolute_name);
 +	      return 0;
 +	    }
 +
 +	  f->filetype = type;
 +	  memset (&f->stat, '\0', sizeof (f->stat));
 +
-+	  f->name = xstrdup (name);
++	  f->name = xstrdup (absolute_name);
 +	  files_index++;
 +
  	  return 0;
@@ -982,11 +953,11 @@ unchanged:
 +#ifdef WITH_SELINUX
 +	  || format == security_format
 +#endif
-+	  )
++	      )
  	{
- 	  int n = file_has_acl (path, &f->stat);
+ 	  int n = file_has_acl (absolute_name, &f->stat);
  	  f->have_acl = (0 < n);
-@@ -2893,6 +3012,16 @@
+@@ -3072,6 +3190,16 @@
  	  DIRED_PUTCHAR ('\n');
  	}
        break;
@@ -1003,31 +974,31 @@ unchanged:
      }
  }
  
-@@ -2974,9 +3103,9 @@
+@@ -3179,17 +3307,19 @@
     WIDTH.  */
  
  static void
 -format_user (uid_t u, int width)
 +format_user (uid_t u, int width, int stat_failed)
  {
--  char const *name = (numeric_ids ? NULL : getuser (u));
-+  char const *name = stat_failed ? "?" : (numeric_ids ? NULL : getuser (u));
-   if (name)
-     printf ("%-*s ", width, name);
-   else
-@@ -2988,9 +3117,9 @@
+-  format_user_or_group (numeric_ids ? NULL : getuser (u), u, width);
++  format_user_or_group (stat_failed ? "?" :
++			(numeric_ids ? NULL : getuser (u)), u, width);
+ }
+ 
  /* Likewise, for groups.  */
  
  static void
 -format_group (gid_t g, int width)
 +format_group (gid_t g, int width, int stat_failed)
  {
--  char const *name = (numeric_ids ? NULL : getgroup (g));
-+  char const *name = stat_failed ? "?" : (numeric_ids ? NULL : getgroup (g));
-   if (name)
-     printf ("%-*s ", width, name);
-   else
-@@ -3095,7 +3224,7 @@
+-  format_user_or_group (numeric_ids ? NULL : getgroup (g), g, width);
++  format_user_or_group (stat_failed ? "?" :
++			(numeric_ids ? NULL : getgroup (g)), g, width);
+ }
+ 
+ /* Return the number of columns that format_user_or_group will print.  */
+@@ -3279,7 +3409,7 @@
      {
        char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
        sprintf (p, "%*s ", inode_number_width,
@@ -1036,27 +1007,27 @@ unchanged:
        p += inode_number_width + 1;
      }
  
-@@ -3103,8 +3232,10 @@
+@@ -3287,8 +3417,10 @@
      {
        char hbuf[LONGEST_HUMAN_READABLE + 1];
-       sprintf (p, "%*s ", block_size_width,
--	       human_readable (ST_NBLOCKS (f->stat), hbuf, human_output_opts,
--			       ST_NBLOCKSIZE, output_block_size));
-+	       f->stat_failed
-+	       ? "?"
-+	       : human_readable (ST_NBLOCKS (f->stat), hbuf, human_output_opts,
-+				 ST_NBLOCKSIZE, output_block_size));
-       p += block_size_width + 1;
-     }
- 
-@@ -3113,10 +3244,18 @@
+       char const *blocks =
+-	human_readable (ST_NBLOCKS (f->stat), hbuf, human_output_opts,
+-			ST_NBLOCKSIZE, output_block_size);
++	f->stat_failed
++	? "?"
++	: human_readable (ST_NBLOCKS (f->stat), hbuf, human_output_opts,
++			  ST_NBLOCKSIZE, output_block_size);
+       int pad;
+       for (pad = block_size_width - mbswidth (blocks, 0); 0 < pad; pad--)
+ 	*p++ = ' ';
+@@ -3302,10 +3434,18 @@
    {
      char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
      sprintf (p, "%s %*s ", modebuf, nlink_width,
 -	     umaxtostr (f->stat.st_nlink, hbuf));
 +	     f->stat_failed ? "?" : umaxtostr (f->stat.st_nlink, hbuf));
    }
-   p += sizeof modebuf + nlink_width + 1;
+   p += sizeof modebuf - 2 + any_has_acl + 1 + nlink_width + 1;
  
 +#ifdef WITH_SELINUX
 +
@@ -1069,7 +1040,7 @@ unchanged:
    DIRED_INDENT ();
  
    if (print_owner | print_group | print_author)
-@@ -3124,18 +3263,19 @@
+@@ -3313,18 +3453,19 @@
        DIRED_FPUTS (buf, stdout, p - buf);
  
        if (print_owner)
@@ -1093,26 +1064,29 @@ unchanged:
      {
        char majorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
        char minorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-@@ -3153,13 +3293,15 @@
+@@ -3342,8 +3483,10 @@
+     {
        char hbuf[LONGEST_HUMAN_READABLE + 1];
-       uintmax_t size = unsigned_file_size (f->stat.st_size);
-       sprintf (p, "%*s ", file_size_width,
--	       human_readable (size, hbuf, human_output_opts,
--			       1, file_output_block_size));
-+	       f->stat_failed
-+	       ? "?"
-+	       : human_readable (size, hbuf, human_output_opts,
-+				 1, file_output_block_size));
-     }
+       char const *size =
+-	human_readable (unsigned_file_size (f->stat.st_size),
+-			hbuf, human_output_opts, 1, file_output_block_size);
++	f->stat_failed
++	? "?"
++	: human_readable (unsigned_file_size (f->stat.st_size),
++			  hbuf, human_output_opts, 1, file_output_block_size);
+       int pad;
+       for (pad = file_size_width - mbswidth (size, 0); 0 < pad; pad--)
+ 	*p++ = ' ';
+@@ -3356,7 +3499,7 @@
+   s = 0;
+   *p = '\1';
  
-   p += file_size_width + 1;
- 
--  if ((when_local = localtime (&when)))
-+  if (!f->stat_failed && (when_local = localtime (&when)))
+-  if (when_local)
++  if (!f->stat_failed && when_local)
      {
        time_t six_months_ago;
-       int recent;
-@@ -3214,15 +3356,17 @@
+       bool recent;
+@@ -3403,15 +3546,17 @@
  	 print it as a huge integer number of seconds.  */
        char hbuf[INT_BUFSIZE_BOUND (intmax_t)];
        sprintf (p, "%*s ", long_time_expected_width (),
@@ -1134,7 +1108,7 @@ unchanged:
  
    if (f->filetype == symbolic_link)
      {
-@@ -3230,7 +3374,7 @@
+@@ -3419,7 +3564,7 @@
  	{
  	  DIRED_FPUTS_LITERAL (" -> ", stdout);
  	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
@@ -1143,7 +1117,7 @@ unchanged:
  	  if (indicator_style != none)
  	    print_type_indicator (f->linkmode);
  	}
-@@ -3412,10 +3556,10 @@
+@@ -3601,10 +3746,10 @@
  
  static void
  print_name_with_quoting (const char *p, mode_t mode, int linkok,
@@ -1156,7 +1130,7 @@ unchanged:
  
    if (stack)
      PUSH_CURRENT_DIRED_POS (stack);
-@@ -3460,7 +3604,8 @@
+@@ -3652,7 +3797,8 @@
  	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
  			    ST_NBLOCKSIZE, output_block_size));
  
@@ -1166,7 +1140,7 @@ unchanged:
  
    if (indicator_style != none)
      print_type_indicator (f->stat.st_mode);
-@@ -3499,7 +3644,8 @@
+@@ -3693,7 +3839,8 @@
  }
  
  static void
@@ -1176,16 +1150,16 @@ unchanged:
  {
    int type = C_FILE;
    struct color_ext_type *ext;	/* Color extension */
-@@ -3536,6 +3682,8 @@
+@@ -3732,6 +3879,8 @@
  	type = C_CHR;
        else if (S_ISDOOR (mode))
  	type = C_DOOR;
 +      else if (stat_failed)
 +	type = C_ORPHAN;
  
-       if ((type == C_FILE) && ((mode & S_ISUID) != 0))
-         type = C_UID;
-@@ -4037,6 +4185,16 @@
+       if (type == C_FILE)
+ 	{
+@@ -4221,6 +4370,16 @@
    -X                         sort alphabetically by entry extension\n\
    -1                         list one file per line\n\
  "), stdout);
@@ -1202,7 +1176,7 @@ unchanged:
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\n\
-@@ -4055,3 +4213,83 @@
+@@ -4244,3 +4403,83 @@
      }
    exit (status);
  }
@@ -1286,8 +1260,8 @@ unchanged:
 +  }
 +}
 +#endif
---- /dev/null	2004-12-29 02:13:24.827638832 -0500
-+++ coreutils-5.2.1/src/chcon.c	2004-12-29 12:24:03.430857317 -0500
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.92/src/chcon.c	2005-10-26 17:42:29.000000000 +0100
 @@ -0,0 +1,421 @@
 +/* chcontext -- change security context of a pathname */
 +
@@ -1710,9 +1684,9 @@ unchanged:
 +    freecon(ref_context);
 +  exit (errors);
 +}
---- coreutils-5.2.1/src/id.c.selinux	2004-12-29 12:24:03.287873419 -0500
-+++ coreutils-5.2.1/src/id.c	2004-12-29 12:24:03.432857091 -0500
-@@ -45,6 +45,20 @@
+--- coreutils-5.92/src/id.c.selinux	2005-10-26 17:42:29.000000000 +0100
++++ coreutils-5.92/src/id.c	2005-10-26 17:42:29.000000000 +0100
+@@ -37,6 +37,20 @@
  
  int getugroups ();
  
@@ -1733,9 +1707,9 @@ unchanged:
  static void print_user (uid_t uid);
  static void print_group (gid_t gid);
  static void print_group_list (const char *username);
-@@ -63,8 +77,14 @@
- /* Nonzero if errors have been encountered.  */
- static int problems = 0;
+@@ -55,8 +69,14 @@
+ /* True unless errors have been encountered.  */
+ static bool ok = true;
  
 +/* The SELinux context */
 +/* Set `context' to a known invalid value so print_full_info() will *
@@ -1748,7 +1722,7 @@ unchanged:
    {"group", no_argument, NULL, 'g'},
    {"groups", no_argument, NULL, 'G'},
    {"name", no_argument, NULL, 'n'},
-@@ -88,6 +108,7 @@
+@@ -80,6 +100,7 @@
  Print information for USERNAME, or the current user.\n\
  \n\
    -a              ignore, for compatibility with other versions\n\
@@ -1756,15 +1730,15 @@ unchanged:
    -g, --group     print only the effective group ID\n\
    -G, --groups    print all group IDs\n\
    -n, --name      print a name instead of a number, for -ugG\n\
-@@ -109,6 +130,7 @@
+@@ -101,6 +122,7 @@
  main (int argc, char **argv)
  {
    int optc;
 +  int selinux_enabled=(is_selinux_enabled()>0);
  
-   /* If nonzero, output the list of all group IDs. -G */
-   int just_group_list = 0;
-@@ -127,7 +149,7 @@
+   /* If true, output the list of all group IDs. -G */
+   bool just_group_list = false;
+@@ -119,13 +141,24 @@
  
    atexit (close_stdout);
  
@@ -1773,7 +1747,6 @@ unchanged:
      {
        switch (optc)
  	{
-@@ -136,6 +158,17 @@
  	case 'a':
  	  /* Ignore -a, for compatibility with SVR4.  */
  	  break;
@@ -1789,9 +1762,9 @@ unchanged:
 +          break;
 +#endif
  	case 'g':
- 	  just_group = 1;
+ 	  just_group = true;
  	  break;
-@@ -158,8 +191,28 @@
+@@ -148,8 +181,28 @@
  	}
      }
  
@@ -1820,9 +1793,9 @@ unchanged:
 +  if (just_user + just_group + just_group_list + just_context > 1)
 +    error (EXIT_FAILURE, 0, _("cannot print \"only\" of more than one choice"));
  
-   if (just_user + just_group + just_group_list == 0 && (use_real || use_name))
+   if (just_user + just_group + just_group_list == 0 && (use_real | use_name))
      error (EXIT_FAILURE, 0,
-@@ -190,6 +243,10 @@
+@@ -183,6 +236,10 @@
      print_group (use_real ? rgid : egid);
    else if (just_group_list)
      print_group_list (argv[optind]);
@@ -1833,7 +1806,7 @@ unchanged:
    else
      print_full_info (argv[optind]);
    putchar ('\n');
-@@ -419,4 +476,9 @@
+@@ -407,4 +464,9 @@
      free (groups);
    }
  #endif /* HAVE_GETGROUPS */
@@ -1843,9 +1816,9 @@ unchanged:
 +  }
 +#endif
  }
---- coreutils-5.2.1/src/install.c.selinux	2004-12-29 12:24:02.850922625 -0500
-+++ coreutils-5.2.1/src/install.c	2004-12-29 12:24:47.138935019 -0500
-@@ -47,6 +47,43 @@
+--- coreutils-5.92/src/install.c.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/src/install.c	2005-10-26 17:42:29.000000000 +0100
+@@ -48,6 +48,43 @@
  # include <sys/wait.h>
  #endif
  
@@ -1886,10 +1859,10 @@ unchanged:
 +}
 +#endif
 +
- struct passwd *getpwnam ();
- struct group *getgrnam ();
- 
-@@ -123,11 +160,17 @@
+ #if ! HAVE_ENDGRENT
+ # define endgrent() ((void) 0)
+ #endif
+@@ -109,12 +146,18 @@
  static struct option const long_options[] =
  {
    {"backup", optional_argument, NULL, 'b'},
@@ -1899,6 +1872,7 @@ unchanged:
    {"directory", no_argument, NULL, 'd'},
    {"group", required_argument, NULL, 'g'},
    {"mode", required_argument, NULL, 'm'},
+   {"no-target-directory", no_argument, NULL, 'T'},
    {"owner", required_argument, NULL, 'o'},
    {"preserve-timestamps", no_argument, NULL, 'p'},
 +#ifdef WITH_SELINUX
@@ -1906,19 +1880,19 @@ unchanged:
 +#endif
    {"strip", no_argument, NULL, 's'},
    {"suffix", required_argument, NULL, 'S'},
-   {"version-control", required_argument, NULL, 'V'}, /* Deprecated. FIXME. */
-@@ -244,6 +287,9 @@
+   {"target-directory", required_argument, NULL, 't'},
+@@ -154,6 +197,9 @@
+   x->stdin_tty = false;
  
-   x->update = 0;
-   x->verbose = 0;
+   x->update = false;
 +#ifdef WITH_SELINUX
 +  x->preserve_security_context = 0;
 +#endif
+   x->verbose = false;
    x->dest_info = NULL;
    x->src_info = NULL;
- }
-@@ -261,6 +307,11 @@
-   struct cp_options x;
+@@ -195,6 +241,11 @@
+   bool no_target_directory = false;
    int n_files;
    char **file;
 +#ifdef WITH_SELINUX
@@ -1929,21 +1903,21 @@ unchanged:
  
    initialize_main (&argc, &argv);
    program_name = argv[0];
-@@ -282,7 +333,11 @@
+@@ -216,7 +267,11 @@
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
 +#ifdef WITH_SELINUX
-+  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pPvV:S:Z:", long_options,
++  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pPt:TvS:Z:", long_options,
 +#else
-   while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pvV:S:", long_options,
+   while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pt:TvS:", long_options,
 +#endif
  			      NULL)) != -1)
      {
        switch (optc)
-@@ -335,6 +390,41 @@
- 	  make_backups = 1;
- 	  backup_suffix_string = optarg;
+@@ -278,6 +333,41 @@
+ 	case 'T':
+ 	  no_target_directory = true;
  	  break;
 +#ifdef WITH_SELINUX
 + 	case 'P':
@@ -1983,19 +1957,19 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
-@@ -564,6 +654,10 @@
-       err = 1;
+@@ -524,6 +614,10 @@
+       ok = false;
      }
  
 +#ifdef WITH_SELINUX
 +  if (use_default_selinux_context)
-+	  setdefaultfilecon(path);
++    setdefaultfilecon(name);
 +#endif
-   return err;
+   return ok;
  }
  
-@@ -716,6 +810,11 @@
-   -S, --suffix=SUFFIX override the usual backup suffix\n\
+@@ -668,6 +762,11 @@
+   -T, --no-target-directory  treat DEST as a normal file\n\
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
 +      fputs (_("\
@@ -2006,21 +1980,21 @@ unchanged:
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\
---- coreutils-5.2.1/src/copy.h.selinux	2004-12-29 12:24:02.853922288 -0500
-+++ coreutils-5.2.1/src/copy.h	2004-12-29 12:24:03.435856754 -0500
-@@ -105,6 +105,9 @@
-   int preserve_ownership;
-   int preserve_mode;
-   int preserve_timestamps;
+--- coreutils-5.92/src/copy.h.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/src/copy.h	2005-10-26 17:42:29.000000000 +0100
+@@ -127,6 +127,9 @@
+   bool preserve_ownership;
+   bool preserve_mode;
+   bool preserve_timestamps;
 +#ifdef WITH_SELINUX
-+  int preserve_security_context;
++  bool preserve_security_context;
 +#endif
  
    /* Enabled for mv, and for cp by the --preserve=links option.
-      If nonzero, attempt to preserve in the destination files any
---- coreutils-5.2.1/src/Makefile.am.selinux	2004-12-29 12:24:03.264876008 -0500
-+++ coreutils-5.2.1/src/Makefile.am	2004-12-29 12:24:03.436856641 -0500
-@@ -3,13 +3,13 @@
+      If true, attempt to preserve in the destination files any
+--- coreutils-5.92/src/Makefile.am.selinux	2005-10-26 17:42:29.000000000 +0100
++++ coreutils-5.92/src/Makefile.am	2005-10-26 17:42:29.000000000 +0100
+@@ -20,13 +20,13 @@
  EXTRA_PROGRAMS = chroot df hostid nice pinky stty su runuser uname uptime users who
  
  bin_SCRIPTS = groups
@@ -2036,23 +2010,31 @@ unchanged:
    test true tty whoami yes \
    $(OPTIONAL_BIN_PROGS) $(DF_PROG)
  
-@@ -32,13 +32,20 @@
- # replacement functions defined in libfetish.a.
- LDADD = ../lib/libfetish.a $(LIBINTL) ../lib/libfetish.a
+@@ -50,9 +50,9 @@
+ LDADD = ../lib/libcoreutils.a $(LIBINTL) ../lib/libcoreutils.a
  
+ # for eaccess in lib/euidaccess.c.
+-cp_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@
+-ginstall_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@
+-mv_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@
++cp_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@ @LIB_SELINUX@
++ginstall_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@ @LIB_SELINUX@
++mv_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@ @LIB_SELINUX@
+ pathchk_LDADD = $(LDADD) $(LIB_EACCESS)
+ rm_LDADD = $(LDADD) $(LIB_EACCESS)
+ test_LDADD = $(LDADD) $(LIB_EACCESS)
+@@ -61,11 +61,18 @@
+ 
+ # for clock_gettime and fdatasync
+ dd_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
 -dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@
 -ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@
 +dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@ @LIB_SELINUX@
 +ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@ @LIB_SELINUX@
- shred_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+ pr_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+ shred_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
 -vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@
--cp_LDADD = $(LDADD) @LIBACL@
--ginstall_LDADD = $(LDADD) @LIBACL@
--mv_LDADD = $(LDADD) @LIBACL@
 +vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@ @LIB_SELINUX@
-+cp_LDADD = $(LDADD) @LIBACL@ @LIB_SELINUX@
-+ginstall_LDADD = $(LDADD) @LIBACL@ @LIB_SELINUX@
-+mv_LDADD = $(LDADD) @LIBACL@ @LIB_SELINUX@
 +chcon_LDADD = $(LDADD) @LIB_SELINUX@
 +id_LDADD = $(LDADD) @LIB_SELINUX@
 +mkdir_LDADD = $(LDADD) @LIB_SELINUX@
@@ -2063,30 +2045,30 @@ unchanged:
  
  ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
  sort_LDADD = $(LDADD) $(POW_LIB)
---- coreutils-5.2.1/src/copy.c.selinux	2004-12-29 12:24:03.382862721 -0500
-+++ coreutils-5.2.1/src/copy.c	2004-12-29 12:24:03.439856303 -0500
-@@ -42,6 +42,11 @@
- #include "utimens.h"
+--- coreutils-5.92/src/copy.c.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/src/copy.c	2005-10-26 17:42:29.000000000 +0100
+@@ -51,6 +51,11 @@
  #include "xreadlink.h"
+ #include "yesno.h"
  
 +#ifdef WITH_SELINUX
 +#include <selinux/selinux.h>          /* for is_selinux_enabled() */
 +extern int  selinux_enabled;
 +#endif
 +
- #define DO_CHOWN(Chown, File, New_uid, New_gid)				\
-   (Chown (File, New_uid, New_gid)					\
-    /* If non-root uses -p, it's ok if we can't preserve ownership.	\
-@@ -1289,6 +1294,32 @@
+ #ifndef HAVE_FCHMOD
+ # define HAVE_FCHMOD false
+ #endif
+@@ -1384,6 +1389,32 @@
       In such cases, set this variable to zero.  */
-   preserve_metadata = 1;
+   preserve_metadata = true;
  
 +#ifdef WITH_SELINUX
 +  if (x->preserve_security_context && selinux_enabled)
 +    {
 +      security_context_t con;
 +
-+      if (lgetfilecon (src_path, &con) >= 0)
++      if (lgetfilecon (src_name, &con) >= 0)
 +	{
 +	  if (setfscreatecon(con) < 0) 
 +	    {
@@ -2100,7 +2082,7 @@ unchanged:
 +	}
 +      else {
 +	if (( errno != ENOTSUP ) && ( errno != ENODATA )) {
-+	  error (0, errno, _("cannot lgetfilecon %s"), quote (src_path));
++	  error (0, errno, _("cannot lgetfilecon %s"), quote (src_name));
 +	  return 1;
 +	}
 +      }
@@ -2110,22 +2092,22 @@ unchanged:
    if (S_ISDIR (src_mode))
      {
        struct dir_list *dir;
-@@ -1358,8 +1389,13 @@
- 	}
+@@ -1454,7 +1485,13 @@
  
        /* Are we crossing a file system boundary?  */
--      if (x->one_file_system && device != 0 && device != src_sb.st_dev)
-+      if (x->one_file_system && device != 0 && device != src_sb.st_dev) {
+       if (x->one_file_system && device != 0 && device != src_sb.st_dev)
+-	return true;
++	{
 +#ifdef WITH_SELINUX
-+	if (x->preserve_security_context && selinux_enabled)
-+	  setfscreatecon(NULL);
++	  if (x->preserve_security_context && selinux_enabled)
++	    setfscreatecon(NULL);
 +#endif
- 	return 0;
-+      }
++	  return true;
++	}
  
        /* Copy the contents of the directory.  */
  
-@@ -1492,6 +1528,11 @@
+@@ -1590,6 +1627,11 @@
  	    }
  	}
  
@@ -2135,18 +2117,9 @@ unchanged:
 +#endif
 +
        /* There's no need to preserve timestamps or permissions.  */
-       preserve_metadata = 0;
+       preserve_metadata = false;
  
-@@ -1524,7 +1565,7 @@
-   if (command_line_arg)
-     record_file (x->dest_info, dst_path, NULL);
- 
--  if ( ! preserve_metadata)
-+  if ( ! preserve_metadata) 
-     return 0;
- 
-   /* POSIX says that `cp -p' must restore the following:
-@@ -1630,6 +1671,11 @@
+@@ -1728,6 +1770,11 @@
  
  un_backup:
  
@@ -2158,8 +2131,8 @@ unchanged:
    /* We have failed to create the destination file.
       If we've just added a dev/ino entry via the remember_copied
       call above (i.e., unless we've just failed to create a hard link),
---- coreutils-5.2.1/src/mknod.c.selinux	2004-01-21 17:27:02.000000000 -0500
-+++ coreutils-5.2.1/src/mknod.c	2004-12-29 12:24:03.440856191 -0500
+--- coreutils-5.92/src/mknod.c.selinux	2005-05-14 08:58:37.000000000 +0100
++++ coreutils-5.92/src/mknod.c	2005-10-26 17:42:29.000000000 +0100
 @@ -36,8 +36,15 @@
  /* The name this program was run with. */
  char *program_name;
@@ -2188,7 +2161,7 @@ unchanged:
        fputs (_("\
  Mandatory arguments to long options are mandatory for short options too.\n\
  "), stdout);
-@@ -103,7 +115,11 @@
+@@ -103,13 +115,31 @@
  
    specified_mode = NULL;
  
@@ -2200,7 +2173,6 @@ unchanged:
      {
        switch (optc)
  	{
-@@ -112,6 +128,20 @@
  	case 'm':
  	  specified_mode = optarg;
  	  break;
@@ -2221,9 +2193,9 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-5.2.1/src/cp.c.selinux	2004-12-29 12:24:02.852922400 -0500
-+++ coreutils-5.2.1/src/cp.c	2004-12-29 12:24:03.443855853 -0500
-@@ -49,6 +49,11 @@
+--- coreutils-5.92/src/cp.c.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/src/cp.c	2005-10-26 17:42:29.000000000 +0100
+@@ -51,6 +51,11 @@
  
  #define AUTHORS "Torbjorn Granlund", "David MacKenzie", "Jim Meyering"
  
@@ -2232,20 +2204,20 @@ unchanged:
 +int selinux_enabled=0;
 +#endif
 +
- #ifndef _POSIX_VERSION
- uid_t geteuid ();
- #endif
-@@ -143,6 +148,9 @@
+ /* Used by do_copy, make_dir_parents_private, and re_protect
+    to keep a list of leading directories whose protections
+    need to be fixed after copying. */
+@@ -141,6 +146,9 @@
+   {"target-directory", required_argument, NULL, 't'},
    {"update", no_argument, NULL, 'u'},
    {"verbose", no_argument, NULL, 'v'},
-   {"version-control", required_argument, NULL, 'V'}, /* Deprecated. FIXME. */
 +#ifdef WITH_SELINUX
 +  {"context", required_argument, NULL, 'Z'},
 +#endif
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -192,6 +200,9 @@
+@@ -194,6 +202,9 @@
                                   additional attributes: links, all\n\
  "), stdout);
        fputs (_("\
@@ -2253,8 +2225,8 @@ unchanged:
 +"), stdout);
 +      fputs (_("\
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
-       --parents                append source path to DIRECTORY\n\
-   -P                           same as `--no-dereference'\n\
+       --parents                use full source file name under DIRECTORY\n\
+ "), stdout);
 @@ -219,6 +230,7 @@
                                   destination file is missing\n\
    -v, --verbose                explain what is being done\n\
@@ -2263,29 +2235,18 @@ unchanged:
  "), stdout);
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
-@@ -748,8 +760,8 @@
- 	{
- 	  new_dest = (char *) dest;
- 	}
--
--      return copy (source, new_dest, new_dst, x, &unused, NULL);
-+      ret=copy (source, new_dest, new_dst, x, &unused, NULL);
-+      return ret;
-     }
- 
-   /* unreachable */
-@@ -773,6 +785,10 @@
-   x->preserve_mode = 0;
-   x->preserve_timestamps = 0;
+@@ -741,6 +753,10 @@
+   x->preserve_mode = false;
+   x->preserve_timestamps = false;
  
 +#ifdef WITH_SELINUX
-+  x->preserve_security_context = 0;
++  x->preserve_security_context = false;
 +#endif
 +
-   x->require_preserve = 0;
-   x->recursive = 0;
+   x->require_preserve = false;
+   x->recursive = false;
    x->sparse_mode = SPARSE_AUTO;
-@@ -800,19 +816,20 @@
+@@ -768,18 +784,19 @@
        PRESERVE_TIMESTAMPS,
        PRESERVE_OWNERSHIP,
        PRESERVE_LINK,
@@ -2298,17 +2259,16 @@ unchanged:
 -      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_ALL
 +      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_CONTEXT, PRESERVE_ALL
      };
- 
    /* Valid arguments to the `--preserve' option. */
    static char const* const preserve_args[] =
      {
        "mode", "timestamps",
--      "ownership", "links", "all", 0
-+      "ownership", "links", "context", "all", 0
+-      "ownership", "links", "all", NULL
++      "ownership", "links", "context", "all", NULL
      };
+   ARGMATCH_VERIFY (preserve_args, preserve_vals);
  
-   char *arg_writable = xstrdup (arg);
-@@ -847,11 +864,16 @@
+@@ -815,11 +832,16 @@
  	  x->preserve_links = on_off;
  	  break;
  
@@ -2325,10 +2285,10 @@ unchanged:
  	  break;
  
  	default:
-@@ -875,6 +897,10 @@
-   struct cp_options x;
-   int copy_contents = 0;
+@@ -844,6 +866,10 @@
+   bool copy_contents = false;
    char *target_directory = NULL;
+   bool no_target_directory = false;
 +#ifdef WITH_SELINUX
 +  security_context_t scontext = NULL;
 +  selinux_enabled= (is_selinux_enabled()>0);
@@ -2336,21 +2296,21 @@ unchanged:
  
    initialize_main (&argc, &argv);
    program_name = argv[0];
-@@ -890,7 +916,11 @@
+@@ -859,7 +885,11 @@
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
 +#ifdef WITH_SELINUX
-+  while ((c = getopt_long (argc, argv, "abcdfHilLprsuvxPRS:V:Z:", long_opts, NULL))
++  while ((c = getopt_long (argc, argv, "abcdfHilLprst:uvxPRS:TZ:",
 +#else
-   while ((c = getopt_long (argc, argv, "abdfHilLprsuvxPRS:V:", long_opts, NULL))
+   while ((c = getopt_long (argc, argv, "abdfHilLprst:uvxPRS:T",
 +#endif
+ 			   long_opts, NULL))
  	 != -1)
      {
-       switch (c)
-@@ -981,6 +1011,36 @@
- 	  x.preserve_timestamps = 1;
- 	  x.require_preserve = 1;
+@@ -950,6 +980,36 @@
+ 	case 'R':
+ 	  x.recursive = true;
  	  break;
 +#ifdef WITH_SELINUX
 +	case 'c':
@@ -2383,10 +2343,10 @@ unchanged:
 +	  break;
 +#endif
  
- 	case PARENTS_OPTION:
- 	  flag_path = 1;
---- coreutils-5.2.1/src/mkfifo.c.selinux	2004-01-21 17:27:02.000000000 -0500
-+++ coreutils-5.2.1/src/mkfifo.c	2004-12-29 12:24:03.444855740 -0500
+ 	case REPLY_OPTION: /* Deprecated */
+ 	  x.interactive = XARGMATCH ("--reply", optarg,
+--- coreutils-5.92/src/mkfifo.c.selinux	2005-05-14 08:58:37.000000000 +0100
++++ coreutils-5.92/src/mkfifo.c	2005-10-26 17:42:29.000000000 +0100
 @@ -32,11 +32,18 @@
  
  #define AUTHORS "David MacKenzie"
@@ -2418,7 +2378,7 @@ unchanged:
        fputs (_("\
  Mandatory arguments to long options are mandatory for short options too.\n\
  "), stdout);
-@@ -93,7 +105,11 @@
+@@ -92,13 +104,30 @@
  #ifndef S_ISFIFO
    error (EXIT_FAILURE, 0, _("fifo files not supported"));
  #else
@@ -2430,7 +2390,6 @@ unchanged:
      {
        switch (optc)
  	{
-@@ -102,6 +118,19 @@
  	case 'm':
  	  specified_mode = optarg;
  	  break;
@@ -2450,24 +2409,8 @@ unchanged:
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-5.2.1/configure.ac.selinux	2004-12-29 12:24:02.947911703 -0500
-+++ coreutils-5.2.1/configure.ac	2004-12-29 12:24:03.446855515 -0500
-@@ -14,6 +14,13 @@
- LIB_PAM="-ldl -lpam -lpam_misc"
- AC_SUBST(LIB_PAM)])
- 
-+dnl Give the chance to enable SELINUX
-+AC_ARG_ENABLE(selinux, dnl
-+[  --enable-selinux              Enable use of the SELINUX libraries],
-+[AC_DEFINE(WITH_SELINUX, 1, [Define if you want to use SELINUX])
-+LIB_SELINUX="-lselinux"
-+AC_SUBST(LIB_SELINUX)])
-+
- gl_DEFAULT_POSIX2_VERSION
- gl_USE_SYSTEM_EXTENSIONS
- jm_PERL
---- coreutils-5.2.1/man/mkfifo.1.selinux	2004-03-02 17:52:28.000000000 -0500
-+++ coreutils-5.2.1/man/mkfifo.1	2004-12-29 12:24:03.446855515 -0500
+--- coreutils-5.92/man/mkfifo.1.selinux	2005-10-22 19:14:48.000000000 +0100
++++ coreutils-5.92/man/mkfifo.1	2005-10-26 17:42:29.000000000 +0100
 @@ -12,6 +12,9 @@
  .PP
  Mandatory arguments to long options are mandatory for short options too.
@@ -2476,11 +2419,11 @@ unchanged:
 +set security context (quoted string)
 +.TP
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
- set permission mode (as in chmod), not a=rw - umask
+ set permission mode (as in chmod), not a=rw \- umask
  .TP
---- coreutils-5.2.1/man/ls.1.selinux	2004-03-02 17:52:28.000000000 -0500
-+++ coreutils-5.2.1/man/ls.1	2004-12-29 12:24:03.448855290 -0500
-@@ -195,6 +195,20 @@
+--- coreutils-5.92/man/ls.1.selinux	2005-10-22 19:14:47.000000000 +0100
++++ coreutils-5.92/man/ls.1	2005-10-26 17:42:29.000000000 +0100
+@@ -201,6 +201,20 @@
  .TP
  \fB\-1\fR
  list one file per line
@@ -2501,9 +2444,9 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-5.2.1/man/dir.1.selinux	2004-03-02 17:51:06.000000000 -0500
-+++ coreutils-5.2.1/man/dir.1	2004-12-29 12:24:03.452854839 -0500
-@@ -195,6 +195,20 @@
+--- coreutils-5.92/man/dir.1.selinux	2005-10-22 19:14:46.000000000 +0100
++++ coreutils-5.92/man/dir.1	2005-10-26 17:42:29.000000000 +0100
+@@ -201,6 +201,20 @@
  .TP
  \fB\-1\fR
  list one file per line
@@ -2524,8 +2467,8 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-5.2.1/man/mkdir.1.selinux	2004-03-02 17:52:28.000000000 -0500
-+++ coreutils-5.2.1/man/mkdir.1	2004-12-29 12:24:03.453854727 -0500
+--- coreutils-5.92/man/mkdir.1.selinux	2005-10-22 19:14:48.000000000 +0100
++++ coreutils-5.92/man/mkdir.1	2005-10-26 17:42:29.000000000 +0100
 @@ -12,6 +12,8 @@
  .PP
  Mandatory arguments to long options are mandatory for short options too.
@@ -2533,10 +2476,10 @@ unchanged:
 +\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR (SELinux) set security context to CONTEXT
 +.TP
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
- set permission mode (as in chmod), not rwxrwxrwx - umask
+ set permission mode (as in chmod), not rwxrwxrwx \- umask
  .TP
---- coreutils-5.2.1/man/runcon.1	2004-12-29 12:24:03.454854614 -0500
-+++ coreutils-5.2.1/man/runcon.1	2005-05-16 14:18:12.000000000 -0400
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.92/man/runcon.1	2005-10-26 17:42:29.000000000 +0100
 @@ -0,0 +1,43 @@
 +.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
 +.SH NAME
@@ -2581,27 +2524,115 @@ unchanged:
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
---- coreutils-5.2.1/man/Makefile.in.selinux	2004-03-11 03:58:00.000000000 -0500
-+++ coreutils-5.2.1/man/Makefile.in	2004-12-29 12:24:03.456854389 -0500
-@@ -185,6 +185,7 @@
- INTLLIBS = @INTLLIBS@
+--- coreutils-5.92/man/Makefile.in.selinux	2005-10-22 19:13:19.000000000 +0100
++++ coreutils-5.92/man/Makefile.in	2005-10-26 17:44:55.000000000 +0100
+@@ -107,25 +107,25 @@
+ 	$(top_srcdir)/m4/onceonly_2_57.m4 $(top_srcdir)/m4/openat.m4 \
+ 	$(top_srcdir)/m4/pathmax.m4 $(top_srcdir)/m4/perl.m4 \
+ 	$(top_srcdir)/m4/physmem.m4 $(top_srcdir)/m4/po.m4 \
+-	$(top_srcdir)/m4/posixtm.m4 $(top_srcdir)/m4/posixver.m4 \
+-	$(top_srcdir)/m4/prereq.m4 $(top_srcdir)/m4/progtest.m4 \
+-	$(top_srcdir)/m4/putenv.m4 $(top_srcdir)/m4/quote.m4 \
+-	$(top_srcdir)/m4/quotearg.m4 $(top_srcdir)/m4/readlink.m4 \
+-	$(top_srcdir)/m4/readtokens.m4 $(top_srcdir)/m4/readutmp.m4 \
+-	$(top_srcdir)/m4/regex.m4 $(top_srcdir)/m4/rename.m4 \
+-	$(top_srcdir)/m4/restrict.m4 $(top_srcdir)/m4/rmdir-errno.m4 \
+-	$(top_srcdir)/m4/rmdir.m4 $(top_srcdir)/m4/root-dev-ino.m4 \
+-	$(top_srcdir)/m4/rpmatch.m4 $(top_srcdir)/m4/safe-read.m4 \
+-	$(top_srcdir)/m4/safe-write.m4 $(top_srcdir)/m4/same.m4 \
+-	$(top_srcdir)/m4/save-cwd.m4 $(top_srcdir)/m4/savedir.m4 \
+-	$(top_srcdir)/m4/setenv.m4 $(top_srcdir)/m4/settime.m4 \
+-	$(top_srcdir)/m4/sha1.m4 $(top_srcdir)/m4/sig2str.m4 \
+-	$(top_srcdir)/m4/signed.m4 $(top_srcdir)/m4/socklen.m4 \
+-	$(top_srcdir)/m4/sockpfaf.m4 $(top_srcdir)/m4/ssize_t.m4 \
+-	$(top_srcdir)/m4/st_dm_mode.m4 $(top_srcdir)/m4/stat-macros.m4 \
+-	$(top_srcdir)/m4/stat-prog.m4 $(top_srcdir)/m4/stat-time.m4 \
+-	$(top_srcdir)/m4/stdbool.m4 $(top_srcdir)/m4/stdint_h.m4 \
+-	$(top_srcdir)/m4/stdio-safer.m4 \
++	$(top_srcdir)/m4/posix_acl.m4 $(top_srcdir)/m4/posixtm.m4 \
++	$(top_srcdir)/m4/posixver.m4 $(top_srcdir)/m4/prereq.m4 \
++	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/putenv.m4 \
++	$(top_srcdir)/m4/quote.m4 $(top_srcdir)/m4/quotearg.m4 \
++	$(top_srcdir)/m4/readlink.m4 $(top_srcdir)/m4/readtokens.m4 \
++	$(top_srcdir)/m4/readutmp.m4 $(top_srcdir)/m4/regex.m4 \
++	$(top_srcdir)/m4/rename.m4 $(top_srcdir)/m4/restrict.m4 \
++	$(top_srcdir)/m4/rmdir-errno.m4 $(top_srcdir)/m4/rmdir.m4 \
++	$(top_srcdir)/m4/root-dev-ino.m4 $(top_srcdir)/m4/rpmatch.m4 \
++	$(top_srcdir)/m4/safe-read.m4 $(top_srcdir)/m4/safe-write.m4 \
++	$(top_srcdir)/m4/same.m4 $(top_srcdir)/m4/save-cwd.m4 \
++	$(top_srcdir)/m4/savedir.m4 $(top_srcdir)/m4/setenv.m4 \
++	$(top_srcdir)/m4/settime.m4 $(top_srcdir)/m4/sha1.m4 \
++	$(top_srcdir)/m4/sig2str.m4 $(top_srcdir)/m4/signed.m4 \
++	$(top_srcdir)/m4/socklen.m4 $(top_srcdir)/m4/sockpfaf.m4 \
++	$(top_srcdir)/m4/ssize_t.m4 $(top_srcdir)/m4/st_dm_mode.m4 \
++	$(top_srcdir)/m4/stat-macros.m4 $(top_srcdir)/m4/stat-prog.m4 \
++	$(top_srcdir)/m4/stat-time.m4 $(top_srcdir)/m4/stdbool.m4 \
++	$(top_srcdir)/m4/stdint_h.m4 $(top_srcdir)/m4/stdio-safer.m4 \
+ 	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/stpcpy.m4 \
+ 	$(top_srcdir)/m4/strcase.m4 $(top_srcdir)/m4/strcspn.m4 \
+ 	$(top_srcdir)/m4/strdup.m4 $(top_srcdir)/m4/strftime.m4 \
+@@ -199,7 +199,6 @@
+ GLIBC21 = @GLIBC21@
+ GMSGFMT = @GMSGFMT@
+ GNU_PACKAGE = @GNU_PACKAGE@
+-GREP = @GREP@
+ HAVE__BOOL = @HAVE__BOOL@
+ HELP2MAN = @HELP2MAN@
+ INSTALL_DATA = @INSTALL_DATA@
+@@ -210,6 +209,7 @@
+ INTL_MACOSX_LIBS = @INTL_MACOSX_LIBS@
  KMEM_GROUP = @KMEM_GROUP@
  LDFLAGS = @LDFLAGS@
 +LIBACL = @LIBACL@
  LIBICONV = @LIBICONV@
  LIBINTL = @LIBINTL@
  LIBOBJS = @LIBOBJS@
-@@ -192,6 +193,8 @@
- LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
- LIB_CRYPT = @LIB_CRYPT@
+@@ -220,6 +220,8 @@
+ LIB_FDATASYNC = @LIB_FDATASYNC@
+ LIB_GETHRXTIME = @LIB_GETHRXTIME@
  LIB_NANOSLEEP = @LIB_NANOSLEEP@
 +LIB_PAM = @LIB_PAM@
 +LIB_SELINUX = @LIB_SELINUX@
  LN_S = @LN_S@
  LTLIBICONV = @LTLIBICONV@
  LTLIBINTL = @LTLIBINTL@
-@@ -273,7 +276,7 @@
-   rm.1 rmdir.1 seq.1 sha1sum.1 shred.1 sleep.1 sort.1 split.1 stat.1 stty.1 \
+@@ -271,30 +273,23 @@
+ build_os = @build_os@
+ build_vendor = @build_vendor@
+ datadir = @datadir@
+-datarootdir = @datarootdir@
+-docdir = @docdir@
+-dvidir = @dvidir@
+ exec_prefix = @exec_prefix@
+ host = @host@
+ host_alias = @host_alias@
+ host_cpu = @host_cpu@
+ host_os = @host_os@
+ host_vendor = @host_vendor@
+-htmldir = @htmldir@
+ includedir = @includedir@
+ infodir = @infodir@
+ install_sh = @install_sh@
+ libdir = @libdir@
+ libexecdir = @libexecdir@
+-localedir = @localedir@
+ localstatedir = @localstatedir@
+ mandir = @mandir@
+ mkdir_p = @mkdir_p@
+ oldincludedir = @oldincludedir@
+-pdfdir = @pdfdir@
+ prefix = @prefix@
+ program_transform_name = @program_transform_name@
+-psdir = @psdir@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+ sysconfdir = @sysconfdir@
+@@ -307,10 +302,10 @@
+   link.1 ln.1 logname.1 \
+   ls.1 md5sum.1 mkdir.1 mkfifo.1 mknod.1 mv.1 nice.1 nl.1 nohup.1 od.1 \
+   paste.1 pathchk.1 pinky.1 pr.1 printenv.1 printf.1 ptx.1 pwd.1 readlink.1 \
+-  rm.1 rmdir.1 seq.1 sha1sum.1 shred.1 sleep.1 sort.1 split.1 stat.1 stty.1 \
++  rm.1 rmdir.1 runuser.1 seq.1 sha1sum.1 shred.1 sleep.1 sort.1 split.1 stat.1 stty.1 \
    su.1 sum.1 sync.1 tac.1 tail.1 tee.1 test.1 touch.1 tr.1 true.1 tsort.1 \
    tty.1 uname.1 unexpand.1 uniq.1 unlink.1 uptime.1 users.1 vdir.1 wc.1 \
 -  who.1 whoami.1 yes.1
@@ -2609,7 +2640,15 @@ unchanged:
  
  man_aux = $(dist_man_MANS:.1=.x)
  EXTRA_DIST = $(man_aux) help2man
-@@ -595,6 +598,8 @@
+@@ -600,6 +595,7 @@
+ readlink.1:	$(common_dep)	$(srcdir)/readlink.x	../src/readlink.c
+ rm.1:		$(common_dep)	$(srcdir)/rm.x		../src/rm.c
+ rmdir.1:	$(common_dep)	$(srcdir)/rmdir.x	../src/rmdir.c
++runuser.1:	$(common_dep)	$(srcdir)/runuser.x	../src/runuser.c
+ seq.1:		$(common_dep)	$(srcdir)/seq.x		../src/seq.c
+ sha1sum.1:	$(common_dep)	$(srcdir)/sha1sum.x	../src/md5sum.c
+ shred.1:	$(common_dep)	$(srcdir)/shred.x	../src/shred.c
+@@ -631,6 +627,8 @@
  who.1:		$(common_dep)	$(srcdir)/who.x		../src/who.c
  whoami.1:	$(common_dep)	$(srcdir)/whoami.x	../src/whoami.c
  yes.1:		$(common_dep)	$(srcdir)/yes.x		../src/yes.c
@@ -2618,9 +2657,9 @@ unchanged:
  
  # Note the use of $t/$*, rather than just `$*' as in other packages.
  # That is necessary to avoid failures for programs that are also shell built-in
---- coreutils-5.2.1/man/install.1.selinux	2004-12-29 12:24:02.671942781 -0500
-+++ coreutils-5.2.1/man/install.1	2004-12-29 12:24:03.458854164 -0500
-@@ -60,6 +60,11 @@
+--- coreutils-5.92/man/install.1.selinux	2005-10-22 19:14:47.000000000 +0100
++++ coreutils-5.92/man/install.1	2005-10-26 17:42:29.000000000 +0100
+@@ -65,6 +65,11 @@
  .TP
  \fB\-v\fR, \fB\-\-verbose\fR
  print the name of each directory as it is created
@@ -2632,8 +2671,8 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-5.2.1/man/stat.1.selinux	2004-03-02 17:52:31.000000000 -0500
-+++ coreutils-5.2.1/man/stat.1	2004-12-29 12:24:03.459854051 -0500
+--- coreutils-5.92/man/stat.1.selinux	2005-10-22 19:14:49.000000000 +0100
++++ coreutils-5.92/man/stat.1	2005-10-26 17:42:29.000000000 +0100
 @@ -22,6 +22,9 @@
  \fB\-t\fR, \fB\-\-terse\fR
  print the information in terse form
@@ -2644,9 +2683,9 @@ unchanged:
  \fB\-\-help\fR
  display this help and exit
  .TP
-@@ -42,6 +45,9 @@
- %b
- Number of blocks allocated (see %B)
+@@ -45,6 +48,9 @@
+ %d
+ Device number in decimal
  .TP
 +%C
 +SELinux security context
@@ -2654,8 +2693,8 @@ unchanged:
  %D
  Device number in hex
  .TP
---- /dev/null	2004-12-29 02:13:24.827638832 -0500
-+++ coreutils-5.2.1/man/chcon.1	2004-12-29 12:24:03.461853826 -0500
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.92/man/chcon.1	2005-10-26 17:42:29.000000000 +0100
 @@ -0,0 +1,64 @@
 +.TH CHCON 1 "July 2003" "chcon (coreutils) 5.0" "User Commands"
 +.SH NAME
@@ -2721,8 +2760,8 @@ unchanged:
 +.B info chcon
 +.PP
 +should give you access to the complete manual.
---- coreutils-5.2.1/man/mknod.1.selinux	2004-03-02 17:52:28.000000000 -0500
-+++ coreutils-5.2.1/man/mknod.1	2004-12-29 12:24:03.463853601 -0500
+--- coreutils-5.92/man/mknod.1.selinux	2005-10-22 19:14:48.000000000 +0100
++++ coreutils-5.92/man/mknod.1	2005-10-26 17:42:29.000000000 +0100
 @@ -12,6 +12,9 @@
  .PP
  Mandatory arguments to long options are mandatory for short options too.
@@ -2731,17 +2770,17 @@ unchanged:
 +set security context (quoted string)
 +.TP
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
- set permission mode (as in chmod), not a=rw - umask
+ set permission mode (as in chmod), not a=rw \- umask
  .TP
---- /dev/null	2004-12-29 02:13:24.827638832 -0500
-+++ coreutils-5.2.1/man/chcon.x	2004-12-29 12:24:03.464853488 -0500
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.92/man/chcon.x	2005-10-26 17:42:29.000000000 +0100
 @@ -0,0 +1,4 @@
 +[NAME]
 +chcon \- change file security context
 +[DESCRIPTION]
 +.\" Add any additional description here
---- coreutils-5.2.1/man/Makefile.am.selinux	2004-12-29 12:24:03.258876684 -0500
-+++ coreutils-5.2.1/man/Makefile.am	2004-12-29 12:24:03.466853263 -0500
+--- coreutils-5.92/man/Makefile.am.selinux	2005-10-26 17:42:29.000000000 +0100
++++ coreutils-5.92/man/Makefile.am	2005-10-26 17:42:29.000000000 +0100
 @@ -10,7 +10,7 @@
    rm.1 rmdir.1 runuser.1 seq.1 sha1sum.1 shred.1 sleep.1 sort.1 split.1 stat.1 stty.1 \
    su.1 sum.1 sync.1 tac.1 tail.1 tee.1 test.1 touch.1 tr.1 true.1 tsort.1 \
@@ -2760,8 +2799,8 @@ unchanged:
  
  SUFFIXES = .x .1
  
---- coreutils-5.2.1/man/runcon.x	2004-12-29 12:24:03.467853150 -0500
-+++ coreutils-5.2.1/man/runcon.x	2005-05-16 14:18:12.000000000 -0400
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.92/man/runcon.x	2005-10-26 17:42:29.000000000 +0100
 @@ -0,0 +1,14 @@
 +[NAME]
 +runcon \- run command with specified security context
@@ -2777,8 +2816,8 @@ unchanged:
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
---- coreutils-5.2.1/man/id.1.selinux	2004-03-02 17:52:27.000000000 -0500
-+++ coreutils-5.2.1/man/id.1	2004-12-29 12:24:03.469852925 -0500
+--- coreutils-5.92/man/id.1.selinux	2005-10-22 19:14:47.000000000 +0100
++++ coreutils-5.92/man/id.1	2005-10-26 17:42:29.000000000 +0100
 @@ -13,6 +13,9 @@
  \fB\-a\fR
  ignore, for compatibility with other versions
@@ -2789,8 +2828,8 @@ unchanged:
  \fB\-g\fR, \fB\-\-group\fR
  print only the effective group ID
  .TP
---- coreutils-5.2.1/man/cp.1.selinux	2004-03-02 17:51:05.000000000 -0500
-+++ coreutils-5.2.1/man/cp.1	2004-12-29 12:24:03.470852813 -0500
+--- coreutils-5.92/man/cp.1.selinux	2005-10-22 19:14:46.000000000 +0100
++++ coreutils-5.92/man/cp.1	2005-10-26 17:42:29.000000000 +0100
 @@ -57,7 +57,7 @@
  .TP
  \fB\-\-preserve\fR[=\fIATTR_LIST\fR]
@@ -2800,7 +2839,7 @@ unchanged:
  additional attributes: links, all
  .TP
  \fB\-\-no\-preserve\fR=\fIATTR_LIST\fR
-@@ -109,6 +109,9 @@
+@@ -105,6 +105,9 @@
  \fB\-\-help\fR
  display this help and exit
  .TP
@@ -2810,9 +2849,9 @@ unchanged:
  \fB\-\-version\fR
  output version information and exit
  .PP
---- coreutils-5.2.1/man/vdir.1.selinux	2004-03-02 17:52:33.000000000 -0500
-+++ coreutils-5.2.1/man/vdir.1	2004-12-29 12:24:03.471852700 -0500
-@@ -195,6 +195,20 @@
+--- coreutils-5.92/man/vdir.1.selinux	2005-10-22 19:14:51.000000000 +0100
++++ coreutils-5.92/man/vdir.1	2005-10-26 17:42:29.000000000 +0100
+@@ -201,6 +201,20 @@
  .TP
  \fB\-1\fR
  list one file per line
@@ -2833,9 +2872,9 @@ unchanged:
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-5.2.1/tests/help-version.selinux	2004-12-29 12:24:03.261876346 -0500
-+++ coreutils-5.2.1/tests/help-version	2004-12-29 12:24:03.473852475 -0500
-@@ -42,6 +42,8 @@
+--- coreutils-5.92/tests/help-version.selinux	2005-10-26 17:42:29.000000000 +0100
++++ coreutils-5.92/tests/help-version	2005-10-26 17:42:29.000000000 +0100
+@@ -45,6 +45,8 @@
  
      # Skip `test'; it doesn't accept --help or --version.
      test $i = test && continue;
@@ -2844,7 +2883,7 @@ unchanged:
  
      # false fails even when invoked with --help or --version.
      if test $i = false; then
-@@ -155,7 +157,7 @@
+@@ -161,7 +163,7 @@
  
  for i in $all_programs; do
    # Skip these.
@@ -2853,9 +2892,95 @@ unchanged:
  
    rm -rf $tmp_in $tmp_in2 $tmp_dir $tmp_out
    echo > $tmp_in
---- coreutils-5.2.1/config.hin.selinux	2004-12-29 12:24:02.949911478 -0500
-+++ coreutils-5.2.1/config.hin	2004-12-29 12:24:03.475852250 -0500
-@@ -1374,6 +1374,9 @@
+--- coreutils-5.92/README.selinux	2005-10-26 17:42:29.000000000 +0100
++++ coreutils-5.92/README	2005-10-26 17:42:29.000000000 +0100
+@@ -7,11 +7,11 @@
+ 
+ The programs that can be built with this package are:
+ 
+-  [ basename cat chgrp chmod chown chroot cksum comm cp csplit cut date dd
++  [ basename cat chcon chgrp chmod chown chroot cksum comm cp csplit cut date dd
+   df dir dircolors dirname du echo env expand expr factor false fmt fold
+   ginstall groups head hostid hostname id join kill link ln logname ls
+   md5sum mkdir mkfifo mknod mv nice nl nohup od paste pathchk pinky pr
+-  printenv printf ptx pwd readlink rm rmdir runuser seq sha1sum shred sleep sort
++  printenv printf ptx pwd readlink rm rmdir runcon runuser seq sha1sum shred sleep sort
+   split stat stty su sum sync tac tail tee test touch tr true tsort tty
+   uname unexpand uniq unlink uptime users vdir wc who whoami yes
+ 
+--- coreutils-5.92/configure.ac.selinux	2005-10-26 17:42:28.000000000 +0100
++++ coreutils-5.92/configure.ac	2005-10-26 17:42:29.000000000 +0100
+@@ -35,6 +35,13 @@
+ LIB_PAM="-ldl -lpam -lpam_misc"
+ AC_SUBST(LIB_PAM)])
+ 
++dnl Give the chance to enable SELINUX
++AC_ARG_ENABLE(selinux, dnl
++[  --enable-selinux              Enable use of the SELINUX libraries],
++[AC_DEFINE(WITH_SELINUX, 1, [Define if you want to use SELINUX])
++LIB_SELINUX="-lselinux"
++AC_SUBST(LIB_SELINUX)])
++
+ gl_DEFAULT_POSIX2_VERSION
+ gl_USE_SYSTEM_EXTENSIONS
+ gl_PERL
+--- coreutils-5.92/config.hin.selinux	2005-10-26 17:42:29.000000000 +0100
++++ coreutils-5.92/config.hin	2005-10-26 17:48:09.000000000 +0100
+@@ -411,10 +411,6 @@
+    don't. */
+ #undef HAVE_DECL_TTYNAME
+ 
+-/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
+-   */
+-#undef HAVE_DECL_TZNAME
+-
+ /* Define to 1 if you have the declaration of wcwidth(), and to 0 otherwise.
+    */
+ #undef HAVE_DECL_WCWIDTH
+@@ -519,6 +515,9 @@
+ /* Define to 1 if you have the `getdelim' function. */
+ #undef HAVE_GETDELIM
+ 
++/* Define to 1 if you have the `getgrouplist' function. */
++#undef HAVE_GETGROUPLIST
++
+ /* Define to 1 if your system has a working `getgroups' function. */
+ #undef HAVE_GETGROUPS
+ 
+@@ -613,9 +612,6 @@
+ /* Define to 1 if you have the `lchown' function. */
+ #undef HAVE_LCHOWN
+ 
+-/* Define to 1 if you have the `acl' library (-lacl). */
+-#undef HAVE_LIBACL
+-
+ /* Define to 1 if you have the `dgc' library (-ldgc). */
+ #undef HAVE_LIBDGC
+ 
+@@ -1518,17 +1514,17 @@
+ /* Define to 1 if unlink (dir) cannot possibly succeed. */
+ #undef UNLINK_CANNOT_UNLINK_DIR
+ 
+-/* Define to 1 if you want getc etc. to use unlocked I/O if available.
+-   Unlocked I/O can improve performance in unithreaded apps, but it is not
+-   safe for multithreaded apps. */
+-#undef USE_UNLOCKED_IO
+-
+ /* Define if you want access control list support. */
+ #undef USE_ACL
+ 
+ /* Define if you want to use PAM */
+ #undef USE_PAM
+ 
++/* Define to 1 if you want getc etc. to use unlocked I/O if available.
++   Unlocked I/O can improve performance in unithreaded apps, but it is not
++   safe for multithreaded apps. */
++#undef USE_UNLOCKED_IO
++
+ /* Version number of package */
+ #undef VERSION
+ 
+@@ -1538,6 +1534,9 @@
  /* Define if sys/ptem.h is required for struct winsize. */
  #undef WINSIZE_IN_PTEM
  
@@ -2865,3 +2990,21 @@ unchanged:
  /* Define to 1 if your processor stores words with the most significant byte
     first (like Motorola and SPARC, unlike Intel and VAX). */
  #undef WORDS_BIGENDIAN
+@@ -1683,7 +1682,7 @@
+ /* Define to rpl_nanosleep if the replacement function should be used. */
+ #undef nanosleep
+ 
+-/* Define to `long int' if <sys/types.h> does not define. */
++/* Define to `long' if <sys/types.h> does not define. */
+ #undef off_t
+ 
+ /* Define to `int' if <sys/types.h> does not define. */
+@@ -1750,7 +1749,7 @@
+ /* Define to empty if the C compiler doesn't support this keyword. */
+ #undef signed
+ 
+-/* Define to `unsigned int' if <sys/types.h> does not define. */
++/* Define to `unsigned' if <sys/types.h> does not define. */
+ #undef size_t
+ 
+ /* Map `socklen_t' to `int' if it is missing. */

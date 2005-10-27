@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.2.1
-Release: 56
+Version: 5.92
+Release: 0.1
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -15,11 +15,14 @@ Source105:  colorls.sh
 Source106:  colorls.csh
 Source200:  su.pamd
 
+# From upstream
+Patch1: coreutils-mkdir.patch
+Patch2: coreutils-dircolors.patch
+Patch3: coreutils-mkdir2.patch
+Patch4: coreutils-tac.patch
+
 # fileutils
 Patch107: fileutils-4.1.10-timestyle.patch
-Patch108: fileutils-4.1.5-afs.patch
-Patch116: fileutils-4.1-dircolors_c.patch
-Patch153: fileutils-4.1.10-utmp.patch
 Patch182: coreutils-acl.patch
 
 # sh-utils
@@ -30,29 +33,14 @@ Patch704: sh-utils-1.16-paths.patch
 # it here indefinitely.
 Patch706: coreutils-pam.patch
 Patch713: coreutils-4.5.3-langinfo.patch
-Patch714: coreutils-4.5.3-printf-ll.patch
 Patch715: coreutils-4.5.3-sysinfo.patch
 
 # (sb) lin18nux/lsb compliance
 Patch800: coreutils-i18n.patch
 
-Patch904: coreutils-5.0-allow_old_options.patch
-Patch905: coreutils-jday.patch
-Patch906: coreutils-fchown.patch
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
-Patch909: coreutils-zh_CN.patch
-Patch910: coreutils-gcc4.patch
-Patch911: coreutils-brokentest.patch
 Patch912: coreutils-overflow.patch
-
-# From upstream
-Patch920: coreutils-dateseconds.patch
-Patch921: coreutils-chown.patch
-Patch922: coreutils-rmaccess.patch
-Patch923: coreutils-copy.patch
-Patch924: coreutils-stale-utmp.patch
-Patch925: coreutils-no-sign-extend.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -82,11 +70,14 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %prep
 %setup -q
 
+# From upstream
+%patch1 -p0 -b .mkdir
+%patch2 -p0 -b .dircolors
+%patch3 -p0 -b .mkdir2
+%patch4 -p0 -b .tac
+
 # fileutils
 %patch107 -p1 -b .timestyle
-%patch108 -p1 -b .afs
-%patch116 -p1
-%patch153 -p1
 %patch182 -p1 -b .acl
 
 # sh-utils
@@ -94,30 +85,15 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch704 -p1 -b .paths
 %patch706 -p1 -b .pam
 %patch713 -p1 -b .langinfo
-%patch714 -p1 -b .printf-ll
 %patch715 -p1 -b .sysinfo
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
 # Coreutils
-%patch904 -p1 -b .allow_old_options
-%patch905 -p1 -b .jday
-%patch906 -p1 -b .fchown
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
-%patch909 -p1 -b .zh_CN
-%patch910 -p1 -b .gcc4
-%patch911 -p1 -b .brokentest
 %patch912 -p1 -b .overflow
-
-# From upstream
-%patch920 -p1 -b .dateseconds
-%patch921 -p1 -b .chown
-%patch922 -p1 -b .rmaccess
-%patch923 -p1 -b .copy
-%patch924 -p1 -b .stale-utmp
-%patch925 -p1 -b .no-sign-extend
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -284,6 +260,14 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Oct 24 2005 Tim Waugh <twaugh@redhat.com> 5.92-0.1
+- 5.92.
+- No longer need afs, dircolors, utmp, gcc4, brokentest, dateseconds,
+  chown, rmaccess, copy, stale-utmp, no-sign-extend, fchown patches.
+- Updated acl, dateman, pam, langinfo, i18n, getgrouplist, selinux patches.
+- Dropped printf-ll, allow_old_options, jday, zh_CN patches.
+- NOTE: i18n patch not ported for sort(1) yet.
+
 * Fri Sep 30 2005 Tomas Mraz <tmraz@redhat.com> - 5.2.1-56
 - use include instead of pam_stack in pam config
 

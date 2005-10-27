@@ -1,9 +1,9 @@
---- sh-utils-2.0.11/man/date.1.man	Tue May 15 19:02:55 2001
-+++ sh-utils-2.0.11/man/date.1	Tue May 15 19:06:05 2001
-@@ -152,6 +152,11 @@
- .IP
- `-' (hyphen) do not pad the field
- `_' (underscore) pad the field with spaces
+--- coreutils-5.92/man/date.1.dateman	2005-10-22 19:14:46.000000000 +0100
++++ coreutils-5.92/man/date.1	2005-10-24 17:57:38.000000000 +0100
+@@ -188,6 +188,11 @@
+ then an optional modifier, which is either
+ E to use the locale's alternate representations if available, or
+ O to use the locale's alternate numeric symbols if available.
 +.SH ENVIRONMENT
 +.TP
 +TZ

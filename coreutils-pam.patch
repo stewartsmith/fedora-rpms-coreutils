@@ -1,16 +1,16 @@
---- coreutils-5.2.1/src/Makefile.am.pam	2005-04-15 17:03:44.000000000 +0100
-+++ coreutils-5.2.1/src/Makefile.am	2005-04-15 17:03:44.000000000 +0100
-@@ -66,7 +66,7 @@
+--- coreutils-5.92/src/Makefile.am.pam	2005-10-24 17:58:21.000000000 +0100
++++ coreutils-5.92/src/Makefile.am	2005-10-24 17:58:21.000000000 +0100
+@@ -93,7 +93,7 @@
  
  uptime_LDADD = $(LDADD) $(GETLOADAVG_LIBS)
  
 -su_LDADD = $(LDADD) $(LIB_CRYPT)
 +su_LDADD = $(LDADD) $(LIB_CRYPT) @LIB_PAM@
  
- $(PROGRAMS): ../lib/libfetish.a
+ $(PROGRAMS): ../lib/libcoreutils.a
  
---- coreutils-5.2.1/src/su.c.pam	2005-04-15 17:03:44.000000000 +0100
-+++ coreutils-5.2.1/src/su.c	2005-04-15 17:04:52.000000000 +0100
+--- coreutils-5.92/src/su.c.pam	2005-10-24 17:58:21.000000000 +0100
++++ coreutils-5.92/src/su.c	2005-10-24 18:06:22.000000000 +0100
 @@ -38,6 +38,16 @@
     restricts who can su to UID 0 accounts.  RMS considers that to
     be fascist.
@@ -54,21 +54,22 @@
  char *getpass ();
  char *getusershell ();
  void endusershell ();
-@@ -158,8 +179,12 @@
+@@ -158,8 +179,13 @@
  
  extern char **environ;
  
--static void run_shell (const char *, const char *, char **)
-+static void run_shell (const char *, const char *, char **, const struct passwd *)
+-static void run_shell (char const *, char const *, char **, size_t)
++static void run_shell (char const *, char const *, char **, size_t,
++	const struct passwd *)
 +#ifdef USE_PAM
-+     ;
++	;
 +#else
       ATTRIBUTE_NORETURN;
 +#endif
  
  /* The name this program was run with.  */
  char *program_name;
-@@ -271,7 +296,22 @@
+@@ -248,7 +274,22 @@
  }
  #endif
  
@@ -88,11 +89,11 @@
 +
  /* Ask the user for a password.
 +   If PAM is in use, let PAM ask for the password if necessary.
-    Return 1 if the user gives the correct password for entry PW,
-    0 if not.  Return 1 without asking for a password if run by UID 0
+    Return true if the user gives the correct password for entry PW,
+    false if not.  Return true without asking for a password if run by UID 0
     or if PW has an empty password.  */
-@@ -279,6 +319,44 @@
- static int
+@@ -256,6 +297,44 @@
+ static bool
  correct_password (const struct passwd *pw)
  {
 +#ifdef USE_PAM
@@ -136,41 +137,34 @@
    char *unencrypted, *encrypted, *correct;
  #if HAVE_GETSPNAM && HAVE_STRUCT_SPWD_SP_PWDP
    /* Shadow passwd stuff for SVR3 and maybe other systems.  */
-@@ -303,6 +381,7 @@
+@@ -280,6 +359,7 @@
    encrypted = crypt (unencrypted, correct);
    memset (unencrypted, 0, strlen (unencrypted));
-   return strcmp (encrypted, correct) == 0;
+   return STREQ (encrypted, correct);
 +#endif /* !USE_PAM */
  }
  
  /* Update `environ' for the new shell based on PW, with SHELL being
-@@ -312,16 +391,24 @@
- modify_environment (const struct passwd *pw, const char *shell)
- {
-   char *term;
-+  char *display;
-+  char *xauthority;
- 
-   if (simulate_login)
-     {
--      /* Leave TERM unchanged.  Set HOME, SHELL, USER, LOGNAME, PATH.
-+      /* Leave TERM, DISPLAY, XAUTHORITY unchanged.  Set HOME, SHELL, USER, LOGNAME, PATH.
+@@ -293,12 +373,18 @@
+       /* Leave TERM unchanged.  Set HOME, SHELL, USER, LOGNAME, PATH.
           Unset all other environment variables.  */
-       term = getenv ("TERM");
-+      display = getenv ("DISPLAY");
-+      xauthority = getenv ("XAUTHORITY");
-       environ = xmalloc (2 * sizeof (char *));
-       environ[0] = 0;
+       char const *term = getenv ("TERM");
++      char const *display = getenv ("DISPLAY");
++      char const *xauthority = getenv ("XAUTHORITY");
        if (term)
- 	xputenv (concat ("TERM", "=", term));
+ 	term = xstrdup (term);
+       environ = xmalloc ((6 + !!term) * sizeof (char *));
+       environ[0] = NULL;
+       if (term)
+ 	xsetenv ("TERM", term);
 +      if (display)
-+	xputenv (concat ("DISPLAY", "=", display));
++	xsetenv ("DISPLAY", display);
 +      if (xauthority)
-+	xputenv (concat ("XAUTHORITY", "=", xauthority));
-       xputenv (concat ("HOME", "=", pw->pw_dir));
-       xputenv (concat ("SHELL", "=", shell));
-       xputenv (concat ("USER", "=", pw->pw_name));
-@@ -354,8 +441,13 @@
++	xsetenv ("XAUTHORITY", xauthority);
+       xsetenv ("HOME", pw->pw_dir);
+       xsetenv ("SHELL", shell);
+       xsetenv ("USER", pw->pw_name);
+@@ -331,8 +417,13 @@
  {
  #ifdef HAVE_INITGROUPS
    errno = 0;
@@ -185,7 +179,7 @@
    endgrent ();
  #endif
    if (setgid (pw->pw_gid))
-@@ -364,16 +456,69 @@
+@@ -341,6 +432,31 @@
      error (EXIT_FAIL, errno, _("cannot set user id"));
  }
  
@@ -205,7 +199,8 @@
 +  env = pam_getenvlist(pamh);
 +  if(env) {
 +    while(*env) {
-+	xputenv(*env);
++	if (putenv (*env))
++	  xalloc_die ();
 +	env++;
 +    }
 +  }
@@ -215,15 +210,17 @@
 +
  /* Run SHELL, or DEFAULT_SHELL if SHELL is empty.
     If COMMAND is nonzero, pass it to the shell with the -c option.
-    If ADDITIONAL_ARGS is nonzero, pass it to the shell as more
-    arguments.  */
+    Pass ADDITIONAL_ARGS to the shell as more arguments; there
+@@ -348,17 +464,49 @@
  
  static void
--run_shell (const char *shell, const char *command, char **additional_args)
-+run_shell (const char *shell, const char *command, char **additional_args, const struct passwd *pw)
+ run_shell (char const *shell, char const *command, char **additional_args,
+-	   size_t n_additional_args)
++	   size_t n_additional_args, const struct passwd *pw)
  {
-   const char **args;
-   int argno = 1;
+   size_t n_args = 1 + fast_startup + 2 * !!command + n_additional_args + 1;
+   char const **args = xnmalloc (n_args, sizeof *args);
+   size_t argno = 1;
 +#ifdef USE_PAM
 +  int child;
 +  sigset_t ourset;
@@ -254,9 +251,8 @@
 +  pam_end(pamh, 0);
 +#endif
  
-   if (additional_args)
-     args = xmalloc (sizeof (char *)
-@@ -385,6 +530,9 @@
+   if (simulate_login)
+     {
        char *arg0;
        char *shell_basename;
  
@@ -266,7 +262,7 @@
        shell_basename = base_name (shell);
        arg0 = xmalloc (strlen (shell_basename) + 2);
        arg0[0] = '-';
-@@ -411,6 +559,66 @@
+@@ -383,6 +531,66 @@
      error (0, errno, "%s", shell);
      exit (exit_status);
    }
@@ -332,24 +328,23 @@
 +#endif /* USE_PAM */
  }
  
- /* Return 1 if SHELL is a restricted shell (one not returned by
-@@ -586,9 +794,10 @@
-     }
+ /* Return true if SHELL is a restricted shell (one not returned by
+@@ -550,9 +758,11 @@
+   shell = xstrdup (shell ? shell : pw->pw_shell);
    modify_environment (pw, shell);
  
-+
 +#ifndef USE_PAM
    change_identity (pw);
--  if (simulate_login && chdir (pw->pw_dir))
--    error (0, errno, _("warning: cannot change directory to %s"), pw->pw_dir);
 +#endif
+   if (simulate_login && chdir (pw->pw_dir) != 0)
+     error (0, errno, _("warning: cannot change directory to %s"), pw->pw_dir);
  
--  run_shell (shell, command, additional_args);
-+  run_shell (shell, command, additional_args, pw);
+-  run_shell (shell, command, argv + optind, MAX (0, argc - optind));
++  run_shell (shell, command, argv + optind, MAX (0, argc - optind), pw);
  }
---- coreutils-5.2.1/doc/coreutils.texi.pam	2005-04-15 17:03:44.000000000 +0100
-+++ coreutils-5.2.1/doc/coreutils.texi	2005-04-15 17:03:44.000000000 +0100
-@@ -11850,8 +11850,11 @@
+--- coreutils-5.92/doc/coreutils.texi.pam	2005-10-16 08:26:21.000000000 +0100
++++ coreutils-5.92/doc/coreutils.texi	2005-10-24 17:58:21.000000000 +0100
+@@ -12746,8 +12746,11 @@
  @findex syslog
  @command{su} can optionally be compiled to use @code{syslog} to report
  failed, and optionally successful, @command{su} attempts.  (If the system
@@ -363,7 +358,7 @@
  
  The program accepts the following options.  Also see @ref{Common options}.
  
-@@ -11932,33 +11935,6 @@
+@@ -12828,33 +12831,6 @@
  the exit status of the subshell otherwise
  @end display
  
@@ -397,11 +392,11 @@
  @node Process control
  @chapter Process control
  
---- coreutils-5.2.1/configure.ac.pam	2005-04-15 17:03:44.000000000 +0100
-+++ coreutils-5.2.1/configure.ac	2005-04-15 17:03:44.000000000 +0100
-@@ -7,6 +7,13 @@
- 
- AM_INIT_AUTOMAKE([1.8 gnits dist-bzip2])
+--- coreutils-5.92/configure.ac.pam	2005-10-24 17:58:21.000000000 +0100
++++ coreutils-5.92/configure.ac	2005-10-24 17:58:21.000000000 +0100
+@@ -28,6 +28,13 @@
+ AB_INIT()
+ AM_INIT_AUTOMAKE([1.8.3 gnits dist-bzip2])
  
 +dnl Give the chance to enable PAM
 +AC_ARG_ENABLE(pam, dnl
@@ -412,10 +407,10 @@
 +
  gl_DEFAULT_POSIX2_VERSION
  gl_USE_SYSTEM_EXTENSIONS
- jm_PERL
---- coreutils-5.2.1/config.hin.pam	2005-04-15 17:03:44.000000000 +0100
-+++ coreutils-5.2.1/config.hin	2005-04-15 17:03:44.000000000 +0100
-@@ -1365,6 +1365,9 @@
+ gl_PERL
+--- coreutils-5.92/config.hin.pam	2005-10-24 17:58:21.000000000 +0100
++++ coreutils-5.92/config.hin	2005-10-24 17:58:21.000000000 +0100
+@@ -1526,6 +1526,9 @@
  /* Define if you want access control list support. */
  #undef USE_ACL
  
