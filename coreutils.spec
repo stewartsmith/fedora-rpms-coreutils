@@ -38,6 +38,7 @@ Patch715: coreutils-4.5.3-sysinfo.patch
 
 # (sb) lin18nux/lsb compliance
 Patch800: coreutils-i18n.patch
+Patch801: coreutils-i18n-sort.patch
 
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
@@ -91,6 +92,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
+%patch801 -p1 -b .i18n-sort
 
 # Coreutils
 %patch907 -p1 -b .runuser
@@ -262,6 +264,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com>
+- Start porting i18n patch to sort.c.
+
 * Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com> 5.92-0.2
 - Fix chgrp basic test.
 - Include md5sum patch from ALT.
