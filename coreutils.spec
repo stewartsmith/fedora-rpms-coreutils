@@ -20,6 +20,7 @@ Patch1: coreutils-mkdir.patch
 Patch2: coreutils-dircolors.patch
 Patch3: coreutils-mkdir2.patch
 Patch4: coreutils-tac.patch
+Patch5: coreutils-5.92-alt-md5sum-binary.patch
 
 # fileutils
 Patch107: fileutils-4.1.10-timestyle.patch
@@ -75,6 +76,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch2 -p0 -b .dircolors
 %patch3 -p0 -b .mkdir2
 %patch4 -p0 -b .tac
+%patch5 -p1 -b .alt-md5sum-binary
 
 # fileutils
 %patch107 -p1 -b .timestyle
@@ -260,6 +262,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com>
+- Include md5sum patch from ALT.
+
 * Mon Oct 24 2005 Tim Waugh <twaugh@redhat.com> 5.92-0.1
 - 5.92.
 - No longer need afs, dircolors, utmp, gcc4, brokentest, dateseconds,
