@@ -265,6 +265,7 @@ fi
 
 %changelog
 * Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com>
+- Fixed for sort-mb-tests (avoid +n syntax).
 - Start porting i18n patch to sort.c.
 
 * Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com> 5.92-0.2

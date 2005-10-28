@@ -3082,7 +3082,7 @@
 +locale -k LC_CTYPE 2>&1 | grep -q charmap.*UTF-8 || exit 77
 +errors=0
 +
-+$xx -t ＠ +1 -n mb1.I > mb1.O
++$xx -t ＠ -k2 -n mb1.I > mb1.O
 +code=$?
 +if test $code != 0; then
 +  $echo "Test mb1 failed: $xx return code $code differs from expected value 0" 1>&2
@@ -3100,7 +3100,7 @@
 +  esac
 +fi
 +
-+$xx -t ＠ +3 -n mb2.I > mb2.O
++$xx -t ＠ -k4 -n mb2.I > mb2.O
 +code=$?
 +if test $code != 0; then
 +  $echo "Test mb2 failed: $xx return code $code differs from expected value 0" 1>&2
@@ -3171,7 +3171,7 @@
  editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
  
 -TESTS = $x-tests
-+TESTS = $x-tests # $x-mb-tests
++TESTS = $x-tests $x-mb-tests
  
  mk_script = $(srcdir)/../mk-script
  $(srcdir)/$x-tests: $(mk_script) Test.pm Makefile.am
@@ -3192,7 +3192,7 @@
  
  editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
 -TESTS = $x-tests
-+TESTS = $x-tests # $x-mb-tests
++TESTS = $x-tests $x-mb-tests
  mk_script = $(srcdir)/../mk-script
  MAINTAINERCLEANFILES = $x-tests $(maint_gen)
  CLEANFILES = $(run_gen)
