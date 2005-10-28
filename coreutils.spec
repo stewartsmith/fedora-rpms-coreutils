@@ -22,7 +22,7 @@ Patch3: coreutils-mkdir2.patch
 Patch4: coreutils-tac.patch
 Patch5: coreutils-5.92-alt-md5sum-binary.patch
 
-# fileutils
+Patch100: coreutils-chgrp.patch
 Patch107: fileutils-4.1.10-timestyle.patch
 Patch182: coreutils-acl.patch
 
@@ -78,7 +78,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch4 -p0 -b .tac
 %patch5 -p1 -b .alt-md5sum-binary
 
-# fileutils
+%patch100 -p1 -b .chgrp
 %patch107 -p1 -b .timestyle
 %patch182 -p1 -b .acl
 
@@ -263,6 +263,7 @@ fi
 
 %changelog
 * Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com>
+- Fix chgrp basic test.
 - Include md5sum patch from ALT.
 
 * Mon Oct 24 2005 Tim Waugh <twaugh@redhat.com> 5.92-0.1
