@@ -1,6 +1,6 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.92
+Version: 5.93
 Release: 1
 License: GPL
 Group:   System Environment/Base
@@ -16,12 +16,8 @@ Source106:  colorls.csh
 Source200:  su.pamd
 
 # From upstream
-Patch1: coreutils-mkdir.patch
-Patch2: coreutils-dircolors.patch
-Patch3: coreutils-mkdir2.patch
-Patch4: coreutils-tac.patch
-Patch5: coreutils-5.92-alt-md5sum-binary.patch
 
+# Our patches
 Patch100: coreutils-chgrp.patch
 Patch107: fileutils-4.1.10-timestyle.patch
 Patch182: coreutils-acl.patch
@@ -72,12 +68,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
-%patch1 -p0 -b .mkdir
-%patch2 -p0 -b .dircolors
-%patch3 -p0 -b .mkdir2
-%patch4 -p0 -b .tac
-%patch5 -p1 -b .alt-md5sum-binary
 
+# Our patches
 %patch100 -p1 -b .chgrp
 %patch107 -p1 -b .timestyle
 %patch182 -p1 -b .acl
@@ -262,6 +254,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Nov  8 2005 Tim Waugh <twaugh@redhat.com> 5.93-1
+- 5.93.
+- No longer need alt-md5sum-binary, dircolors, mkdir, mkdir2 or tac patches.
+
 * Fri Oct 28 2005 Tim Waugh <twaugh@redhat.com> 5.92-1
 - Finished porting i18n patch to sort.c.
 - Fixed for sort-mb-tests (avoid +n syntax).
