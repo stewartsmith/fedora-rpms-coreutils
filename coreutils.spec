@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
-Release: 1
+Release: 2
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -35,6 +35,7 @@ Patch715: coreutils-4.5.3-sysinfo.patch
 # (sb) lin18nux/lsb compliance
 Patch800: coreutils-i18n.patch
 
+Patch900: coreutils-setsid.patch
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
@@ -85,6 +86,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch800 -p1 -b .i18n
 
 # Coreutils
+%patch900 -p1 -b .setsid
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
@@ -254,6 +256,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Nov 14 2005 Tim Waugh <twaugh@redhat.com> 5.93-2
+- Call setsid() in su under some circumstances (bug #173008).
+- Prevent runuser operating when setuid (bug #173113).
+
 * Tue Nov  8 2005 Tim Waugh <twaugh@redhat.com> 5.93-1
 - 5.93.
 - No longer need alt-md5sum-binary, dircolors, mkdir, mkdir2 or tac patches.

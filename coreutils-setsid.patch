@@ -1,0 +1,43 @@
+--- coreutils-5.93/src/su.c.setsid	2005-11-14 10:35:48.000000000 +0000
++++ coreutils-5.93/src/su.c	2005-11-14 10:53:03.000000000 +0000
+@@ -497,6 +497,8 @@
+   if (child == 0) {  /* child shell */
+   change_identity (pw);
+   pam_end(pamh, 0);
++  if (command)
++    setsid ();
+ #endif
+ 
+   if (simulate_login)
+@@ -551,13 +553,27 @@
+     sigemptyset(&action.sa_mask);
+     action.sa_flags = 0;
+     sigemptyset(&ourset);
+-    if (sigaddset(&ourset, SIGTERM)
+-        || sigaddset(&ourset, SIGALRM)
+-        || sigaction(SIGTERM, &action, NULL)
+-        || sigprocmask(SIG_UNBLOCK, &ourset, NULL)) {
++    if (command)
++      {
++	if (sigaddset(&ourset, SIGINT) || sigaddset(&ourset, SIGQUIT))
++	  {
++	    fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
++	    caught = 1;
++	  }
++      }
++    if (!caught && (sigaddset(&ourset, SIGTERM)
++		    || sigaddset(&ourset, SIGALRM)
++		    || sigaction(SIGTERM, &action, NULL)
++		    || sigprocmask(SIG_UNBLOCK, &ourset, NULL))) {
+       fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
+       caught = 1;
+     }
++    if (!caught && command && (sigaction(SIGINT, &action, NULL)
++			       || sigaction(SIGQUIT, &action, NULL)))
++      {
++	fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
++	caught = 1;
++      }
+   }
+   if (!caught) {
+     do {
