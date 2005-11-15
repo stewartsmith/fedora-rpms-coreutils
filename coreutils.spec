@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
-Release: 2
+Release: 3
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -256,6 +256,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Nov 14 2005 Dan Walsh <dwalsh@redhat.com> 5.93-3
+- Remove multiple from su.pamd
+
 * Mon Nov 14 2005 Tim Waugh <twaugh@redhat.com> 5.93-2
 - Call setsid() in su under some circumstances (bug #173008).
 - Prevent runuser operating when setuid (bug #173113).
