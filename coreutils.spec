@@ -14,6 +14,7 @@ Source102:	DIR_COLORS.xterm
 Source105:  colorls.sh
 Source106:  colorls.csh
 Source200:  su.pamd
+Source201:  runuser.pamd
 
 # From upstream
 
@@ -110,7 +111,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fpic"
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in */*/Makefile.in
 aclocal -I m4
 autoconf --force
-automake --copy --force
+automake --copy --add-missing
 %configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
 --enable-selinux \
 || :
@@ -171,6 +172,7 @@ for i in hostname uptime kill ; do
 done
 
 %{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
+%{?!nopam:install -m 644 %SOURCE201 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser}
 
 bzip2 -f9 old/*/C* || :
 
@@ -216,6 +218,7 @@ fi
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) /etc/pam.d/su}
+%{?!nopam:%config(noreplace) /etc/pam.d/runuser}
 %doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
 /bin/basename
 /bin/cat
@@ -256,6 +259,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Nov 25 2005 Tim Waugh <twaugh@redhat.com>
+- Apply runuser PAM patch from bug #173807.  Ship runuser PAM file.
+
 * Tue Nov 14 2005 Dan Walsh <dwalsh@redhat.com> 5.93-3
 - Remove multiple from su.pamd
 
