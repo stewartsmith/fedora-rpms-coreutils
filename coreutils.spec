@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
-Release: 3
+Release: 4
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -259,7 +259,8 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Nov 25 2005 Tim Waugh <twaugh@redhat.com>
+* Thu Nov 25 2005 Tim Waugh <twaugh@redhat.com> 5.93-4
+- Rebuild to pick up new glibc *at functions.
 - Apply runuser PAM patch from bug #173807.  Ship runuser PAM file.
 
 * Tue Nov 14 2005 Dan Walsh <dwalsh@redhat.com> 5.93-3
