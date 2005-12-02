@@ -1,3 +1,7 @@
+%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
+%define WITH_SELINUX 1
+%endif
+
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
@@ -5,7 +9,9 @@ Release: 4
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
+%if %{WITH_SELINUX}
 BuildRequires: libselinux-devel >= 1.25.6-1
+%endif
 Requires: libselinux >= 1.25.6-1
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
@@ -92,8 +98,10 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 
+%if %{WITH_SELINUX}
 #SELinux
 %patch950 -p1 -b .selinux
+%endif
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
@@ -260,6 +268,7 @@ fi
 
 %changelog
 * Fri Dec  2 2005 Tim Waugh <twaugh@redhat.com>
+- Parametrize SELinux (bug #174067).
 - Fix runuser.pamd (bug #173807).
 
 * Thu Nov 25 2005 Tim Waugh <twaugh@redhat.com> 5.93-4
