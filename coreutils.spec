@@ -121,8 +121,8 @@ aclocal -I m4
 autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
---enable-selinux \
-|| :
+	--enable-selinux \
+	DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 make all %{?_smp_mflags} \
 	%{?!nopam:CPPFLAGS="-DUSE_PAM"} \
 	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
@@ -267,6 +267,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Dec 16 2005 Tim Waugh <twaugh@redhat.com>
+- Explicitly set default POSIX2 version during configure stage.
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
