@@ -1,5 +1,5 @@
---- coreutils-5.92/lib/linebuffer.h.i18n	2005-05-14 08:58:06.000000000 +0100
-+++ coreutils-5.92/lib/linebuffer.h	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/lib/linebuffer.h.i18n	2005-05-14 08:58:06.000000000 +0100
++++ coreutils-5.93/lib/linebuffer.h	2005-12-23 08:53:01.000000000 +0000
 @@ -22,6 +22,11 @@
  
  # include <stdio.h>
@@ -22,8 +22,8 @@
  };
  
  /* Initialize linebuffer LINEBUFFER for use. */
---- coreutils-5.92/src/cut.c.i18n	2005-08-12 09:28:48.000000000 +0100
-+++ coreutils-5.92/src/cut.c	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/src/cut.c.i18n	2005-08-12 08:16:25.000000000 +0100
++++ coreutils-5.93/src/cut.c	2005-12-23 08:53:01.000000000 +0000
 @@ -29,6 +29,11 @@
  #include <assert.h>
  #include <getopt.h>
@@ -615,8 +615,8 @@
      }
  
    if (optind == argc)
---- coreutils-5.92/src/pr.c.i18n	2005-09-16 08:51:01.000000000 +0100
-+++ coreutils-5.92/src/pr.c	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/src/pr.c.i18n	2005-09-16 08:50:33.000000000 +0100
++++ coreutils-5.93/src/pr.c	2005-12-23 08:53:01.000000000 +0000
 @@ -313,6 +313,32 @@
  
  #include <getopt.h>
@@ -1339,8 +1339,8 @@
  /* We've just printed some files and need to clean up things before
     looking for more options and printing the next batch of files.
  
---- coreutils-5.92/src/uniq.c.i18n	2005-07-05 08:38:37.000000000 +0100
-+++ coreutils-5.92/src/uniq.c	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/src/uniq.c.i18n	2005-07-05 07:32:54.000000000 +0100
++++ coreutils-5.93/src/uniq.c	2005-12-23 08:53:01.000000000 +0000
 @@ -23,6 +23,16 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -1707,8 +1707,8 @@
    skip_chars = 0;
    skip_fields = 0;
    check_chars = SIZE_MAX;
---- coreutils-5.92/src/expand.c.i18n	2005-08-12 09:28:48.000000000 +0100
-+++ coreutils-5.92/src/expand.c	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/src/expand.c.i18n	2005-08-12 08:16:25.000000000 +0100
++++ coreutils-5.93/src/expand.c	2005-12-23 08:53:01.000000000 +0000
 @@ -38,11 +38,28 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -1903,8 +1903,8 @@
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
---- coreutils-5.92/src/fold.c.i18n	2005-08-12 09:28:48.000000000 +0100
-+++ coreutils-5.92/src/fold.c	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/src/fold.c.i18n	2005-08-12 08:29:38.000000000 +0100
++++ coreutils-5.93/src/fold.c	2005-12-23 08:53:01.000000000 +0000
 @@ -23,11 +23,33 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -2313,8 +2313,8 @@
  	  break;
  
  	case 's':		/* Break at word boundaries. */
---- coreutils-5.92/src/join.c.i18n	2005-08-12 09:28:48.000000000 +0100
-+++ coreutils-5.92/src/join.c	2005-10-26 22:17:04.000000000 +0100
+--- coreutils-5.93/src/join.c.i18n	2005-08-12 08:16:25.000000000 +0100
++++ coreutils-5.93/src/join.c	2005-12-23 08:53:01.000000000 +0000
 @@ -23,16 +23,30 @@
  #include <sys/types.h>
  #include <getopt.h>
@@ -2810,8 +2810,8 @@
  	  }
  	  break;
  
---- coreutils-5.92/src/unexpand.c.i18n	2005-08-12 09:28:48.000000000 +0100
-+++ coreutils-5.92/src/unexpand.c	2005-10-26 22:18:37.000000000 +0100
+--- coreutils-5.93/src/unexpand.c.i18n	2005-08-12 08:16:25.000000000 +0100
++++ coreutils-5.93/src/unexpand.c	2005-12-23 08:53:01.000000000 +0000
 @@ -39,11 +39,28 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -3064,140 +3064,8 @@
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
---- /dev/null	2005-10-10 09:36:06.437701000 +0100
-+++ coreutils-5.92/tests/sort/sort-mb-tests	2005-10-26 22:17:04.000000000 +0100
-@@ -0,0 +1,58 @@
-+#! /bin/sh
-+case $# in
-+  0) xx='../../src/sort';;
-+  *) xx="$1";;
-+esac
-+test "$VERBOSE" && echo=echo || echo=:
-+$echo testing program: $xx
-+errors=0
-+test "$srcdir" || srcdir=.
-+test "$VERBOSE" && $xx --version 2> /dev/null
-+
-+export LC_ALL=en_US.UTF-8
-+locale -k LC_CTYPE 2>&1 | grep -q charmap.*UTF-8 || exit 77
-+errors=0
-+
-+$xx -t ＠ -k2 -n mb1.I > mb1.O
-+code=$?
-+if test $code != 0; then
-+  $echo "Test mb1 failed: $xx return code $code differs from expected value 0" 1>&2
-+  errors=`expr $errors + 1`
-+else
-+  cmp mb1.O $srcdir/mb1.X > /dev/null 2>&1
-+  case $? in
-+    0) if test "$VERBOSE"; then $echo "passed mb1"; fi;;
-+    1) $echo "Test mb1 failed: files mb1.O and $srcdir/mb1.X differ" 1>&2
-+       (diff -c mb1.O $srcdir/mb1.X) 2> /dev/null
-+       errors=`expr $errors + 1`;;
-+    2) $echo "Test mb1 may have failed." 1>&2
-+       $echo The command "cmp mb1.O $srcdir/mb1.X" failed. 1>&2
-+       errors=`expr $errors + 1`;;
-+  esac
-+fi
-+
-+$xx -t ＠ -k4 -n mb2.I > mb2.O
-+code=$?
-+if test $code != 0; then
-+  $echo "Test mb2 failed: $xx return code $code differs from expected value 0" 1>&2
-+  errors=`expr $errors + 1`
-+else
-+  cmp mb2.O $srcdir/mb2.X > /dev/null 2>&1
-+  case $? in
-+    0) if test "$VERBOSE"; then $echo "passed mb2"; fi;;
-+    1) $echo "Test mb2 failed: files mb2.O and $srcdir/mb2.X differ" 1>&2
-+       (diff -c mb2.O $srcdir/mb2.X) 2> /dev/null
-+       errors=`expr $errors + 1`;;
-+    2) $echo "Test mb2 may have failed." 1>&2
-+       $echo The command "cmp mb2.O $srcdir/mb2.X" failed. 1>&2
-+       errors=`expr $errors + 1`;;
-+  esac
-+fi
-+
-+if test $errors = 0; then
-+  $echo Passed all 113 tests. 1>&2
-+else
-+  $echo Failed $errors tests. 1>&2
-+fi
-+test $errors = 0 || errors=1
-+exit $errors
---- /dev/null	2005-10-10 09:36:06.437701000 +0100
-+++ coreutils-5.92/tests/sort/mb1.I	2005-10-26 22:17:04.000000000 +0100
-@@ -0,0 +1,4 @@
-+Apple＠10
-+Banana＠5
-+Citrus＠20
-+Cherry＠30
---- /dev/null	2005-10-10 09:36:06.437701000 +0100
-+++ coreutils-5.92/tests/sort/mb2.I	2005-10-26 22:17:04.000000000 +0100
-@@ -0,0 +1,4 @@
-+Apple＠ＡＡ10＠＠20
-+Banana＠ＡＡ5＠＠30
-+Citrus＠ＡＡ20＠＠5
-+Cherry＠ＡＡ30＠＠10
---- /dev/null	2005-10-10 09:36:06.437701000 +0100
-+++ coreutils-5.92/tests/sort/mb1.X	2005-10-26 22:17:04.000000000 +0100
-@@ -0,0 +1,4 @@
-+Banana＠5
-+Apple＠10
-+Citrus＠20
-+Cherry＠30
---- /dev/null	2005-10-10 09:36:06.437701000 +0100
-+++ coreutils-5.92/tests/sort/mb2.X	2005-10-26 22:17:04.000000000 +0100
-@@ -0,0 +1,4 @@
-+Citrus＠ＡＡ20＠＠5
-+Cherry＠ＡＡ30＠＠10
-+Apple＠ＡＡ10＠＠20
-+Banana＠ＡＡ5＠＠30
---- coreutils-5.92/tests/sort/Makefile.am.i18n	2005-06-23 17:32:54.000000000 +0100
-+++ coreutils-5.92/tests/sort/Makefile.am	2005-10-26 22:17:04.000000000 +0100
-@@ -43,14 +43,16 @@
- nul-nls.E use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E
- ##test-files-end
- 
--EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
--noinst_SCRIPTS = $x-tests
-+run_gen += mb1.O mb2.O
-+
-+EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
-+noinst_SCRIPTS = $x-tests # $x-mb-tests
- TESTS_ENVIRONMENT = \
-   PATH="`pwd`/../../src$(PATH_SEPARATOR)$$PATH"
- 
- editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
- 
--TESTS = $x-tests
-+TESTS = $x-tests $x-mb-tests
- 
- mk_script = $(srcdir)/../mk-script
- $(srcdir)/$x-tests: $(mk_script) Test.pm Makefile.am
---- coreutils-5.92/tests/sort/Makefile.in.i18n	2005-10-22 19:13:23.000000000 +0100
-+++ coreutils-5.92/tests/sort/Makefile.in	2005-10-26 22:17:04.000000000 +0100
-@@ -338,13 +338,15 @@
- o-no-file1.E create-empty.O create-empty.E neg-nls.O neg-nls.E nul-nls.O \
- nul-nls.E use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E
- 
--EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
--noinst_SCRIPTS = $x-tests
-+run_gen += mb1.O mb2.O
-+
-+EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
-+noinst_SCRIPTS = $x-tests # $x-mb-tests
- TESTS_ENVIRONMENT = \
-   PATH="`pwd`/../../src$(PATH_SEPARATOR)$$PATH"
- 
- editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
--TESTS = $x-tests
-+TESTS = $x-tests $x-mb-tests
- mk_script = $(srcdir)/../mk-script
- MAINTAINERCLEANFILES = $x-tests $(maint_gen)
- CLEANFILES = $(run_gen)
---- coreutils-5.92/src/sort.c.i18n-sort	2005-10-07 20:16:56.000000000 +0100
-+++ coreutils-5.92/src/sort.c	2005-10-28 15:24:37.000000000 +0100
+--- coreutils-5.93/src/sort.c.i18n	2005-10-07 19:48:28.000000000 +0100
++++ coreutils-5.93/src/sort.c	2005-12-23 10:38:44.000000000 +0000
 @@ -23,9 +23,18 @@
  
  #include <config.h>
@@ -3274,7 +3142,7 @@
  
  /* Flag to remove consecutive duplicate lines from the output.
     Only the last of a sequence of equal lines will be output. */
-@@ -392,6 +423,42 @@
+@@ -392,6 +423,44 @@
  static struct tempnode *volatile temphead;
  static struct tempnode *volatile *temptail = &temphead;
  
@@ -3289,6 +3157,8 @@
 +(*getmonth) (char const *, size_t);
 +static int
 +(*keycompare) (const struct line *, const struct line *);
++static int
++(*numcompare) (const char *, const char *);
 +
 +/* Test for white space multibyte character.
 +   Set LENGTH the byte length of investigated multibyte character. */
@@ -3317,7 +3187,7 @@
  /* Clean up any remaining temporary files.  */
  
  static void
-@@ -545,7 +612,7 @@
+@@ -545,7 +614,7 @@
    free (node);
  }
  
@@ -3326,7 +3196,7 @@
  
  static int
  struct_month_cmp (const void *m1, const void *m2)
-@@ -560,7 +627,7 @@
+@@ -560,7 +629,7 @@
  /* Initialize the character class tables. */
  
  static void
@@ -3335,7 +3205,7 @@
  {
    size_t i;
  
-@@ -572,7 +639,7 @@
+@@ -572,7 +641,7 @@
        fold_toupper[i] = (ISLOWER (i) ? toupper (i) : i);
      }
  
@@ -3344,7 +3214,7 @@
    /* If we're not in the "C" locale, read different names for months.  */
    if (hard_LC_TIME)
      {
-@@ -598,6 +665,64 @@
+@@ -598,6 +667,64 @@
  #endif
  }
  
@@ -3409,7 +3279,7 @@
  /* Specify the amount of main memory to use when sorting.  */
  static void
  specify_sort_size (char const *s)
-@@ -808,7 +933,7 @@
+@@ -808,7 +935,7 @@
     by KEY in LINE. */
  
  static char *
@@ -3418,7 +3288,7 @@
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t sword = key->sword;
-@@ -818,10 +943,10 @@
+@@ -818,10 +945,10 @@
    /* The leading field separator itself is included in a field when -t
       is absent.  */
  
@@ -3431,7 +3301,7 @@
  	  ++ptr;
  	if (ptr < lim)
  	  ++ptr;
-@@ -849,11 +974,70 @@
+@@ -849,11 +976,70 @@
    return ptr;
  }
  
@@ -3503,7 +3373,7 @@
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t eword = key->eword, echar = key->echar;
-@@ -866,10 +1050,10 @@
+@@ -866,10 +1052,10 @@
       `beginning' is the first character following the delimiting TAB.
       Otherwise, leave PTR pointing at the first `blank' character after
       the preceding field.  */
@@ -3516,7 +3386,7 @@
  	  ++ptr;
  	if (ptr < lim && (eword | echar))
  	  ++ptr;
-@@ -915,10 +1099,10 @@
+@@ -915,10 +1101,10 @@
       */
  
    /* Make LIM point to the end of (one byte past) the current field.  */
@@ -3529,7 +3399,7 @@
        if (newlim)
  	lim = newlim;
      }
-@@ -951,6 +1135,107 @@
+@@ -951,6 +1137,107 @@
    return ptr;
  }
  
@@ -3637,7 +3507,42 @@
  /* Fill BUF reading from FP, moving buf->left bytes from the end
     of buf->buf to the beginning first.  If EOF is reached and the
     file wasn't terminated by a newline, supply one.  Set up BUF's line
-@@ -1110,7 +1395,7 @@
+@@ -1067,7 +1354,7 @@
+    hideously fast. */
+ 
+ static int
+-numcompare (const char *a, const char *b)
++numcompare_uni (const char *a, const char *b)
+ {
+   while (blanks[to_uchar (*a)])
+     a++;
+@@ -1077,6 +1364,25 @@
+   return strnumcmp (a, b, decimal_point, thousands_sep);
+ }
+ 
++#if HAVE_MBRTOWC
++static int
++numcompare_mb (const char *a, const char *b)
++{
++  size_t mblength, len;
++  len = strlen (a); /* okay for UTF-8 */
++  while (*a && ismbblank (a, len > MB_CUR_MAX ? MB_CUR_MAX : len, &mblength))
++    {
++      a += mblength;
++      len -= mblength;
++    }
++  len = strlen (b); /* okay for UTF-8 */
++  while (*b && ismbblank (b, len > MB_CUR_MAX ? MB_CUR_MAX : len, &mblength))
++    b += mblength;
++
++  return strnumcmp (a, b, decimal_point, thousands_sep);
++}
++#endif /* HAV_EMBRTOWC */
++
+ static int
+ general_numcompare (const char *sa, const char *sb)
+ {
+@@ -1110,7 +1416,7 @@
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -3646,7 +3551,7 @@
  {
    size_t lo = 0;
    size_t hi = MONTHS_PER_YEAR;
-@@ -1152,11 +1437,79 @@
+@@ -1152,11 +1458,79 @@
    return 0;
  }
  
@@ -3727,7 +3632,7 @@
  {
    struct keyfield const *key = keylist;
  
-@@ -1326,6 +1679,177 @@
+@@ -1326,6 +1700,177 @@
    return key->reverse ? -diff : diff;
  }
  
@@ -3905,7 +3810,7 @@
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -2127,7 +2651,7 @@
+@@ -2127,7 +2672,7 @@
    atexit (close_stdout);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
@@ -3914,7 +3819,7 @@
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -2148,6 +2672,25 @@
+@@ -2148,6 +2693,27 @@
        thousands_sep = -1;
    }
  
@@ -3926,6 +3831,7 @@
 +      limfield = limfield_mb;
 +      getmonth = getmonth_mb;
 +      keycompare = keycompare_mb;
++      numcompare = numcompare_mb;
 +    }
 +  else
 +#endif
@@ -3933,14 +3839,15 @@
 +      inittables = inittables_uni;
 +      begfield = begfield_uni;
 +      limfield = limfield_uni;
-+      keycompare = keycompare_uni;
 +      getmonth = getmonth_uni;
++      keycompare = keycompare_uni;
++      numcompare = numcompare_uni;
 +    }
 +
    have_read_stdin = false;
    inittables ();
  
-@@ -2349,13 +2892,35 @@
+@@ -2349,13 +2915,35 @@
  
  	case 't':
  	  {
@@ -3980,7 +3887,7 @@
  		else
  		  {
  		    /* Provoke with `sort -txx'.  Complain about
-@@ -2366,9 +2931,12 @@
+@@ -2366,9 +2954,12 @@
  			   quote (optarg));
  		  }
  	      }
@@ -3995,3 +3902,278 @@
  	  }
  	  break;
  
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.93/tests/sort/sort-mb-tests	2005-12-23 08:53:01.000000000 +0000
+@@ -0,0 +1,58 @@
++#! /bin/sh
++case $# in
++  0) xx='../../src/sort';;
++  *) xx="$1";;
++esac
++test "$VERBOSE" && echo=echo || echo=:
++$echo testing program: $xx
++errors=0
++test "$srcdir" || srcdir=.
++test "$VERBOSE" && $xx --version 2> /dev/null
++
++export LC_ALL=en_US.UTF-8
++locale -k LC_CTYPE 2>&1 | grep -q charmap.*UTF-8 || exit 77
++errors=0
++
++$xx -t ＠ -k2 -n mb1.I > mb1.O
++code=$?
++if test $code != 0; then
++  $echo "Test mb1 failed: $xx return code $code differs from expected value 0" 1>&2
++  errors=`expr $errors + 1`
++else
++  cmp mb1.O $srcdir/mb1.X > /dev/null 2>&1
++  case $? in
++    0) if test "$VERBOSE"; then $echo "passed mb1"; fi;;
++    1) $echo "Test mb1 failed: files mb1.O and $srcdir/mb1.X differ" 1>&2
++       (diff -c mb1.O $srcdir/mb1.X) 2> /dev/null
++       errors=`expr $errors + 1`;;
++    2) $echo "Test mb1 may have failed." 1>&2
++       $echo The command "cmp mb1.O $srcdir/mb1.X" failed. 1>&2
++       errors=`expr $errors + 1`;;
++  esac
++fi
++
++$xx -t ＠ -k4 -n mb2.I > mb2.O
++code=$?
++if test $code != 0; then
++  $echo "Test mb2 failed: $xx return code $code differs from expected value 0" 1>&2
++  errors=`expr $errors + 1`
++else
++  cmp mb2.O $srcdir/mb2.X > /dev/null 2>&1
++  case $? in
++    0) if test "$VERBOSE"; then $echo "passed mb2"; fi;;
++    1) $echo "Test mb2 failed: files mb2.O and $srcdir/mb2.X differ" 1>&2
++       (diff -c mb2.O $srcdir/mb2.X) 2> /dev/null
++       errors=`expr $errors + 1`;;
++    2) $echo "Test mb2 may have failed." 1>&2
++       $echo The command "cmp mb2.O $srcdir/mb2.X" failed. 1>&2
++       errors=`expr $errors + 1`;;
++  esac
++fi
++
++if test $errors = 0; then
++  $echo Passed all 113 tests. 1>&2
++else
++  $echo Failed $errors tests. 1>&2
++fi
++test $errors = 0 || errors=1
++exit $errors
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.93/tests/sort/mb1.I	2005-12-23 08:53:01.000000000 +0000
+@@ -0,0 +1,4 @@
++Apple＠10
++Banana＠5
++Citrus＠20
++Cherry＠30
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.93/tests/sort/mb2.I	2005-12-23 08:53:01.000000000 +0000
+@@ -0,0 +1,4 @@
++Apple＠ＡＡ10＠＠20
++Banana＠ＡＡ5＠＠30
++Citrus＠ＡＡ20＠＠5
++Cherry＠ＡＡ30＠＠10
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.93/tests/sort/mb1.X	2005-12-23 08:53:01.000000000 +0000
+@@ -0,0 +1,4 @@
++Banana＠5
++Apple＠10
++Citrus＠20
++Cherry＠30
+--- /dev/null	2005-10-10 09:36:06.437701000 +0100
++++ coreutils-5.93/tests/sort/mb2.X	2005-12-23 08:53:01.000000000 +0000
+@@ -0,0 +1,4 @@
++Citrus＠ＡＡ20＠＠5
++Cherry＠ＡＡ30＠＠10
++Apple＠ＡＡ10＠＠20
++Banana＠ＡＡ5＠＠30
+--- coreutils-5.93/tests/sort/Makefile.am.i18n	2005-10-24 22:02:25.000000000 +0100
++++ coreutils-5.93/tests/sort/Makefile.am	2005-12-23 08:53:01.000000000 +0000
+@@ -43,14 +43,16 @@
+ nul-nls.E use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E
+ ##test-files-end
+ 
+-EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
+-noinst_SCRIPTS = $x-tests
++run_gen += mb1.O mb2.O
++
++EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
++noinst_SCRIPTS = $x-tests # $x-mb-tests
+ TESTS_ENVIRONMENT = \
+   PATH="`pwd`/../../src$(PATH_SEPARATOR)$$PATH"
+ 
+ editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
+ 
+-TESTS = $x-tests
++TESTS = $x-tests $x-mb-tests
+ 
+ mk_script = $(srcdir)/../mk-script
+ $(srcdir)/$x-tests: $(mk_script) Test.pm Makefile.am
+--- coreutils-5.93/tests/sort/Makefile.in.i18n	2005-11-05 22:12:25.000000000 +0000
++++ coreutils-5.93/tests/sort/Makefile.in	2005-12-23 09:00:37.000000000 +0000
+@@ -107,25 +107,25 @@
+ 	$(top_srcdir)/m4/onceonly_2_57.m4 $(top_srcdir)/m4/openat.m4 \
+ 	$(top_srcdir)/m4/pathmax.m4 $(top_srcdir)/m4/perl.m4 \
+ 	$(top_srcdir)/m4/physmem.m4 $(top_srcdir)/m4/po.m4 \
+-	$(top_srcdir)/m4/posixtm.m4 $(top_srcdir)/m4/posixver.m4 \
+-	$(top_srcdir)/m4/prereq.m4 $(top_srcdir)/m4/progtest.m4 \
+-	$(top_srcdir)/m4/putenv.m4 $(top_srcdir)/m4/quote.m4 \
+-	$(top_srcdir)/m4/quotearg.m4 $(top_srcdir)/m4/readlink.m4 \
+-	$(top_srcdir)/m4/readtokens.m4 $(top_srcdir)/m4/readutmp.m4 \
+-	$(top_srcdir)/m4/regex.m4 $(top_srcdir)/m4/rename.m4 \
+-	$(top_srcdir)/m4/restrict.m4 $(top_srcdir)/m4/rmdir-errno.m4 \
+-	$(top_srcdir)/m4/rmdir.m4 $(top_srcdir)/m4/root-dev-ino.m4 \
+-	$(top_srcdir)/m4/rpmatch.m4 $(top_srcdir)/m4/safe-read.m4 \
+-	$(top_srcdir)/m4/safe-write.m4 $(top_srcdir)/m4/same.m4 \
+-	$(top_srcdir)/m4/save-cwd.m4 $(top_srcdir)/m4/savedir.m4 \
+-	$(top_srcdir)/m4/setenv.m4 $(top_srcdir)/m4/settime.m4 \
+-	$(top_srcdir)/m4/sha1.m4 $(top_srcdir)/m4/sig2str.m4 \
+-	$(top_srcdir)/m4/signed.m4 $(top_srcdir)/m4/socklen.m4 \
+-	$(top_srcdir)/m4/sockpfaf.m4 $(top_srcdir)/m4/ssize_t.m4 \
+-	$(top_srcdir)/m4/st_dm_mode.m4 $(top_srcdir)/m4/stat-macros.m4 \
+-	$(top_srcdir)/m4/stat-prog.m4 $(top_srcdir)/m4/stat-time.m4 \
+-	$(top_srcdir)/m4/stdbool.m4 $(top_srcdir)/m4/stdint_h.m4 \
+-	$(top_srcdir)/m4/stdio-safer.m4 \
++	$(top_srcdir)/m4/posix_acl.m4 $(top_srcdir)/m4/posixtm.m4 \
++	$(top_srcdir)/m4/posixver.m4 $(top_srcdir)/m4/prereq.m4 \
++	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/putenv.m4 \
++	$(top_srcdir)/m4/quote.m4 $(top_srcdir)/m4/quotearg.m4 \
++	$(top_srcdir)/m4/readlink.m4 $(top_srcdir)/m4/readtokens.m4 \
++	$(top_srcdir)/m4/readutmp.m4 $(top_srcdir)/m4/regex.m4 \
++	$(top_srcdir)/m4/rename.m4 $(top_srcdir)/m4/restrict.m4 \
++	$(top_srcdir)/m4/rmdir-errno.m4 $(top_srcdir)/m4/rmdir.m4 \
++	$(top_srcdir)/m4/root-dev-ino.m4 $(top_srcdir)/m4/rpmatch.m4 \
++	$(top_srcdir)/m4/safe-read.m4 $(top_srcdir)/m4/safe-write.m4 \
++	$(top_srcdir)/m4/same.m4 $(top_srcdir)/m4/save-cwd.m4 \
++	$(top_srcdir)/m4/savedir.m4 $(top_srcdir)/m4/setenv.m4 \
++	$(top_srcdir)/m4/settime.m4 $(top_srcdir)/m4/sha1.m4 \
++	$(top_srcdir)/m4/sig2str.m4 $(top_srcdir)/m4/signed.m4 \
++	$(top_srcdir)/m4/socklen.m4 $(top_srcdir)/m4/sockpfaf.m4 \
++	$(top_srcdir)/m4/ssize_t.m4 $(top_srcdir)/m4/st_dm_mode.m4 \
++	$(top_srcdir)/m4/stat-macros.m4 $(top_srcdir)/m4/stat-prog.m4 \
++	$(top_srcdir)/m4/stat-time.m4 $(top_srcdir)/m4/stdbool.m4 \
++	$(top_srcdir)/m4/stdint_h.m4 $(top_srcdir)/m4/stdio-safer.m4 \
+ 	$(top_srcdir)/m4/stdlib-safer.m4 $(top_srcdir)/m4/stpcpy.m4 \
+ 	$(top_srcdir)/m4/strcase.m4 $(top_srcdir)/m4/strcspn.m4 \
+ 	$(top_srcdir)/m4/strdup.m4 $(top_srcdir)/m4/strftime.m4 \
+@@ -196,7 +196,6 @@
+ GLIBC21 = @GLIBC21@
+ GMSGFMT = @GMSGFMT@
+ GNU_PACKAGE = @GNU_PACKAGE@
+-GREP = @GREP@
+ HAVE__BOOL = @HAVE__BOOL@
+ HELP2MAN = @HELP2MAN@
+ INSTALL_DATA = @INSTALL_DATA@
+@@ -207,6 +206,7 @@
+ INTL_MACOSX_LIBS = @INTL_MACOSX_LIBS@
+ KMEM_GROUP = @KMEM_GROUP@
+ LDFLAGS = @LDFLAGS@
++LIBACL = @LIBACL@
+ LIBICONV = @LIBICONV@
+ LIBINTL = @LIBINTL@
+ LIBOBJS = @LIBOBJS@
+@@ -217,6 +217,8 @@
+ LIB_FDATASYNC = @LIB_FDATASYNC@
+ LIB_GETHRXTIME = @LIB_GETHRXTIME@
+ LIB_NANOSLEEP = @LIB_NANOSLEEP@
++LIB_PAM = @LIB_PAM@
++LIB_SELINUX = @LIB_SELINUX@
+ LN_S = @LN_S@
+ LTLIBICONV = @LTLIBICONV@
+ LTLIBINTL = @LTLIBINTL@
+@@ -268,30 +270,23 @@
+ build_os = @build_os@
+ build_vendor = @build_vendor@
+ datadir = @datadir@
+-datarootdir = @datarootdir@
+-docdir = @docdir@
+-dvidir = @dvidir@
+ exec_prefix = @exec_prefix@
+ host = @host@
+ host_alias = @host_alias@
+ host_cpu = @host_cpu@
+ host_os = @host_os@
+ host_vendor = @host_vendor@
+-htmldir = @htmldir@
+ includedir = @includedir@
+ infodir = @infodir@
+ install_sh = @install_sh@
+ libdir = @libdir@
+ libexecdir = @libexecdir@
+-localedir = @localedir@
+ localstatedir = @localstatedir@
+ mandir = @mandir@
+ mkdir_p = @mkdir_p@
+ oldincludedir = @oldincludedir@
+-pdfdir = @pdfdir@
+ prefix = @prefix@
+ program_transform_name = @program_transform_name@
+-psdir = @psdir@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+ sysconfdir = @sysconfdir@
+@@ -318,33 +313,37 @@
+ neg-nls.I neg-nls.X nul-nls.I nul-nls.X use-nl.I use-nl.X o2.I o2.X nul-tab.I \
+ nul-tab.X
+ 
+-run_gen = n1.O n1.E n2.O n2.E n3.O n3.E n4.O n4.E n5.O n5.E n6.O n6.E n7.O \
+-n7.E n8a.O n8a.E n8b.O n8b.E n9a.O n9a.E n9b.O n9b.E n10a.O n10a.E n10b.O \
+-n10b.E n11a.O n11a.E n11b.O n11b.E 01a.O 01a.E 02a.O 02a.E 02b.O 02b.E 02c.O \
+-02c.E 02m.O 02m.E 02n.O 02n.E 02o.O 02o.E 02p.O 02p.E 03a.O 03a.E 03b.O 03b.E \
+-03c.O 03c.E 03d.O 03d.E 03e.O 03e.E 03f.O 03f.E 03g.O 03g.E 03h.O 03h.E 03i.O \
+-03i.E 04a.O 04a.E 04b.O 04b.E 04c.O 04c.E 04d.O 04d.E 04e.O 04e.E 05a.O 05a.E \
+-05b.O 05b.E 05c.O 05c.E 05d.O 05d.E 05e.O 05e.E 05f.O 05f.E 06a.O 06a.E 06b.O \
+-06b.E 06c.O 06c.E 06d.O 06d.E 06e.O 06e.E 06f.O 06f.E 07a.O 07a.E 07b.O 07b.E \
+-07c.O 07c.E 07d.O 07d.E 08a.O 08a.E 08b.O 08b.E 09a.O 09a.E 09b.O 09b.E 09c.O \
+-09c.E 09d.O 09d.E 10a.O 10a.E 10b.O 10b.E 10c.O 10c.E 10d.O 10d.E 10a0.O \
+-10a0.E 10a1.O 10a1.E 10a2.O 10a2.E 10e.O 10e.E 10f.O 10f.E 10g.O 10g.E 11a.O \
+-11a.E 11b.O 11b.E 11c.O 11c.E 11d.O 11d.E 12a.O 12a.E 12b.O 12b.E 12c.O 12c.E \
+-12d.O 12d.E 13a.O 13a.E 13b.O 13b.E 14a.O 14a.E 14b.O 14b.E 15a.O 15a.E 15b.O \
+-15b.E 15c.O 15c.E 15d.O 15d.E 15e.O 15e.E 16a.O 16a.E 17.O 17.E 18a.O 18a.E \
+-18b.O 18b.E 18c.O 18c.E 18d.O 18d.E 18e.O 18e.E 19a.O 19a.E 19b.O 19b.E 20a.O \
+-20a.E 21a.O 21a.E 21b.O 21b.E 21c.O 21c.E 21d.O 21d.E 21e.O 21e.E 21f.O 21f.E \
+-21g.O 21g.E 22a.O 22a.E 22b.O 22b.E no-file1.O no-file1.E o-no-file1.O \
+-o-no-file1.E create-empty.O create-empty.E neg-nls.O neg-nls.E nul-nls.O \
+-nul-nls.E use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E
+-
+-EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
+-noinst_SCRIPTS = $x-tests
++run_gen = n1.O n1.E n2.O n2.E n3.O n3.E n4.O n4.E n5.O n5.E n6.O n6.E \
++	n7.O n7.E n8a.O n8a.E n8b.O n8b.E n9a.O n9a.E n9b.O n9b.E \
++	n10a.O n10a.E n10b.O n10b.E n11a.O n11a.E n11b.O n11b.E 01a.O \
++	01a.E 02a.O 02a.E 02b.O 02b.E 02c.O 02c.E 02m.O 02m.E 02n.O \
++	02n.E 02o.O 02o.E 02p.O 02p.E 03a.O 03a.E 03b.O 03b.E 03c.O \
++	03c.E 03d.O 03d.E 03e.O 03e.E 03f.O 03f.E 03g.O 03g.E 03h.O \
++	03h.E 03i.O 03i.E 04a.O 04a.E 04b.O 04b.E 04c.O 04c.E 04d.O \
++	04d.E 04e.O 04e.E 05a.O 05a.E 05b.O 05b.E 05c.O 05c.E 05d.O \
++	05d.E 05e.O 05e.E 05f.O 05f.E 06a.O 06a.E 06b.O 06b.E 06c.O \
++	06c.E 06d.O 06d.E 06e.O 06e.E 06f.O 06f.E 07a.O 07a.E 07b.O \
++	07b.E 07c.O 07c.E 07d.O 07d.E 08a.O 08a.E 08b.O 08b.E 09a.O \
++	09a.E 09b.O 09b.E 09c.O 09c.E 09d.O 09d.E 10a.O 10a.E 10b.O \
++	10b.E 10c.O 10c.E 10d.O 10d.E 10a0.O 10a0.E 10a1.O 10a1.E \
++	10a2.O 10a2.E 10e.O 10e.E 10f.O 10f.E 10g.O 10g.E 11a.O 11a.E \
++	11b.O 11b.E 11c.O 11c.E 11d.O 11d.E 12a.O 12a.E 12b.O 12b.E \
++	12c.O 12c.E 12d.O 12d.E 13a.O 13a.E 13b.O 13b.E 14a.O 14a.E \
++	14b.O 14b.E 15a.O 15a.E 15b.O 15b.E 15c.O 15c.E 15d.O 15d.E \
++	15e.O 15e.E 16a.O 16a.E 17.O 17.E 18a.O 18a.E 18b.O 18b.E \
++	18c.O 18c.E 18d.O 18d.E 18e.O 18e.E 19a.O 19a.E 19b.O 19b.E \
++	20a.O 20a.E 21a.O 21a.E 21b.O 21b.E 21c.O 21c.E 21d.O 21d.E \
++	21e.O 21e.E 21f.O 21f.E 21g.O 21g.E 22a.O 22a.E 22b.O 22b.E \
++	no-file1.O no-file1.E o-no-file1.O o-no-file1.E create-empty.O \
++	create-empty.E neg-nls.O neg-nls.E nul-nls.O nul-nls.E \
++	use-nl.O use-nl.E o2.O o2.E nul-tab.O nul-tab.E mb1.O mb2.O
++EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
++noinst_SCRIPTS = $x-tests # $x-mb-tests
+ TESTS_ENVIRONMENT = \
+   PATH="`pwd`/../../src$(PATH_SEPARATOR)$$PATH"
+ 
+ editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
+-TESTS = $x-tests
++TESTS = $x-tests $x-mb-tests
+ mk_script = $(srcdir)/../mk-script
+ MAINTAINERCLEANFILES = $x-tests $(maint_gen)
+ CLEANFILES = $(run_gen)
