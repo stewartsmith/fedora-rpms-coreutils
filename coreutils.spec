@@ -259,7 +259,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Mon Jan 2 2005 Dan Walsh <dwalsh@redhat.com> 5.93-6
+* Mon Jan 2 2006 Dan Walsh <dwalsh@redhat.com> 5.93-6
 - Remove pam_selinux.so from su.pamd, not needed for targeted and Strict/MLS 
 will have to newrole before using.
 
