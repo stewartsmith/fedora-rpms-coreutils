@@ -1,17 +1,11 @@
-%if %{?WITH_SELINUX:0}%{!?WITH_SELINUX:1}
-%define WITH_SELINUX 1
-%endif
-
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
-Release: 5
+Release: 6
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
-%if %{WITH_SELINUX}
 BuildRequires: libselinux-devel >= 1.25.6-1
-%endif
 Requires: libselinux >= 1.25.6-1
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
@@ -98,10 +92,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 
-%if %{WITH_SELINUX}
 #SELinux
 %patch950 -p1 -b .selinux
-%endif
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
@@ -267,6 +259,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jan 2 2005 Dan Walsh <dwalsh@redhat.com> 5.93-6
+- Remove pam_selinux.so from su.pamd, not needed for targeted and Strict/MLS 
+will have to newrole before using.
+
 * Fri Dec 23 2005 Tim Waugh <twaugh@redhat.com> 5.93-5
 - Fix "sort -n" (bug #176468).
 
