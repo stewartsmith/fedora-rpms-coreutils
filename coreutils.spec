@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
-Release: 6
+Release: 7
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -40,6 +40,7 @@ Patch900: coreutils-setsid.patch
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
+Patch913: coreutils-afs.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -91,6 +92,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
+%patch913 -p1 -b .afs
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -259,9 +261,12 @@ fi
 /sbin/runuser
 
 %changelog
-* Mon Jan 2 2006 Dan Walsh <dwalsh@redhat.com> 5.93-6
+* Thu Jan  5 2006 Tim Waugh <twaugh@redhat.com> 5.93-7
+- Don't suppress chown/chgrp errors in install(1) (bug #176708).
+
+* Mon Jan  2 2006 Dan Walsh <dwalsh@redhat.com> 5.93-6
 - Remove pam_selinux.so from su.pamd, not needed for targeted and Strict/MLS 
-will have to newrole before using.
+  will have to newrole before using.
 
 * Fri Dec 23 2005 Tim Waugh <twaugh@redhat.com> 5.93-5
 - Fix "sort -n" (bug #176468).
