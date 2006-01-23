@@ -261,6 +261,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jan 23 2006 Tim Waugh <twaugh@redhat.com>
+- Fixed chcon(1) bug reporting address (bug #178523).
+
 * Thu Jan  5 2006 Tim Waugh <twaugh@redhat.com> 5.93-7
 - Don't suppress chown/chgrp errors in install(1) (bug #176708).
 

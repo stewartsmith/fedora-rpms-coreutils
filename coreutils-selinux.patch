@@ -2747,7 +2747,7 @@
 +\fB\-\-version\fR
 +output version information and exit
 +.SH "REPORTING BUGS"
-+Report bugs to <email@host.com>.
++Report bugs to <https://bugzilla.redhat.com/bugzilla>.
 +.SH "SEE ALSO"
 +The full documentation for
 +.B chcon
