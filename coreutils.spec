@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.93
-Release: 7.1
+Release: 7.2
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -261,6 +261,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 5.93-7.2
+- bump again for double-long bug on ppc(64)
+
 * Tue Feb 07 2006 Jesse Keating <jkeating@redhat.com> - 5.93-7.1
 - rebuilt for new gcc4.1 snapshot and glibc changes
 
