@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.94
-Release: 2
+Release: 3
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -261,6 +261,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Apr 20 2006 Tim Waugh <twaugh@redhat.com> 5.94-3
+- Make 'ls -Z' output more consistent with other output formats.
+
 * Fri Mar 24 2006 Tim Waugh <twaugh@redhat.com> 5.94-2
 - 5.94.
 

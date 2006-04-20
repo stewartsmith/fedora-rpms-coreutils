@@ -1160,8 +1160,8 @@
 +  }
 +  return 1; /* can't reach this statement.... */
 +}
---- coreutils-5.94/src/ls.c.selinux	2006-03-24 13:23:38.000000000 +0000
-+++ coreutils-5.94/src/ls.c	2006-03-24 13:23:45.000000000 +0000
+--- coreutils-5.94/src/ls.c	2006-03-24 13:23:45.000000000 +0000
++++ coreutils-5.94/src/ls.c	2006-04-20 12:24:40.000000000 +0100
 @@ -135,6 +135,18 @@
  
  #define AUTHORS "Richard Stallman", "David MacKenzie"
@@ -1692,10 +1692,7 @@
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\n\
-@@ -4244,3 +4403,83 @@
-     }
-   exit (status);
- }
+@@ -4246,0 +4406,67 @@
 +
 +#ifdef WITH_SELINUX
 +
@@ -1734,23 +1731,10 @@
 +
 +    /* print standard user and group */
 +
-+    user_name = f->stat_failed ? "?" :
-+	    (numeric_ids ? NULL : getuser (f->stat.st_uid));
-+    if (user_name)
-+      (void) sprintf (p, "%-8.8s ", user_name);
-+    else
-+      (void) sprintf (p, "%-8u ", (unsigned int) f->stat.st_uid);
-+    p += strlen (p);
-+
-+    if ( print_group ) {
-+      group_name = f->stat_failed ? "?" :
-+	      (numeric_ids ? NULL : getgroup (f->stat.st_gid));
-+      if (group_name)
-+	(void) sprintf (p, "%-8.8s ", group_name);
-+      else
-+	(void) sprintf (p, "%-8u ", (unsigned int) f->stat.st_gid);
-+      p += strlen (p);
-+    }
++    DIRED_FPUTS (buf, stdout, p - buf);
++    format_user (f->stat.st_uid, owner_width, f->stat_failed);
++    format_group (f->stat.st_gid, group_width, f->stat_failed);
++    p = buf;
 +  }
 +
 +  (void) sprintf (p, "%-32s ", f->scontext ?: "");
