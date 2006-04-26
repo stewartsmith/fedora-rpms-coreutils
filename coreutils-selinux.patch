@@ -2245,8 +2245,8 @@
 +  }
 +#endif
  }
---- coreutils-5.94/src/copy.c	2006-03-24 13:23:45.000000000 +0000
-+++ coreutils-5.94/src/copy.c	2006-04-26 14:06:02.000000000 +1000
+--- coreutils-5.94/src/copy.c.selinux	2006-04-26 15:35:52.000000000 +0100
++++ coreutils-5.94/src/copy.c	2006-04-26 15:42:15.000000000 +0100
 @@ -51,6 +51,11 @@
  #include "xreadlink.h"
  #include "yesno.h"
@@ -2259,12 +2259,12 @@
  #ifndef HAVE_FCHMOD
  # define HAVE_FCHMOD false
  #endif
-@@ -238,6 +243,25 @@
+@@ -238,6 +243,29 @@
      {
        dest_desc = open (dst_name, O_WRONLY | O_TRUNC | O_BINARY, dst_mode);
  
 +#ifdef WITH_SELINUX
-+      if (dest_desc >= 0)
++      if (selinux_enabled && x->preserve_security_context && dest_desc >= 0)
 +	{
 +	  security_context_t con;
 +	  if(getfscreatecon(&con) == -1)
@@ -2272,20 +2272,24 @@
 +	      return_val = false;
 +	      goto close_src_desc;
 +	    }
-+	  if(fsetfilecon(dest_desc, con) == -1)
++
++	  if (con)
 +	    {
-+	      return_val = false;
++	      if(fsetfilecon(dest_desc, con) == -1)
++		{
++		  return_val = false;
++		  freecon(con);
++		  goto close_src_desc;
++		}
 +	      freecon(con);
-+	      goto close_src_desc;
 +	    }
-+	  freecon(con);
 +	}
 +#endif
 +
        if (dest_desc < 0 && x->unlink_dest_after_failed_open)
  	{
  	  if (unlink (dst_name) != 0)
-@@ -1416,6 +1440,32 @@
+@@ -1416,6 +1444,32 @@
       In such cases, set this variable to zero.  */
    preserve_metadata = true;
  
@@ -2318,7 +2322,7 @@
    if (S_ISDIR (src_mode))
      {
        struct dir_list *dir;
-@@ -1486,7 +1536,13 @@
+@@ -1486,7 +1540,13 @@
  
        /* Are we crossing a file system boundary?  */
        if (x->one_file_system && device != 0 && device != src_sb.st_dev)
@@ -2333,7 +2337,7 @@
  
        /* Copy the contents of the directory.  */
  
-@@ -1622,6 +1678,11 @@
+@@ -1622,6 +1682,11 @@
  	    }
  	}
  
@@ -2345,7 +2349,7 @@
        /* There's no need to preserve timestamps or permissions.  */
        preserve_metadata = false;
  
-@@ -1760,6 +1821,11 @@
+@@ -1760,6 +1825,11 @@
  
  un_backup:
  
