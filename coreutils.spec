@@ -41,6 +41,7 @@ Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 Patch913: coreutils-afs.patch
+Patch914: coreutils-tee.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -93,6 +94,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .afs
+%patch914 -p1 -b .tee
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -262,6 +264,7 @@ fi
 
 %changelog
 * Wed Apr 26 2006 Tim Waugh <twaugh@redhat.com> 5.94-4
+- Avoid redeclared 'tee' function.
 - Fix 'cp -Z' when the destination exists (bug #189967).
 
 * Thu Apr 20 2006 Tim Waugh <twaugh@redhat.com> 5.94-3
