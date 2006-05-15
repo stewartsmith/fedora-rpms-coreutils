@@ -263,6 +263,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 15 2006 Tim Waugh <twaugh@redhat.com>
+- Fixed pr in multibyte locales (bug #189663).
+
 * Mon May 15 2006 Tim Waugh <twaugh@redhat.com> 5.95-2
 - 5.95.
 

@@ -615,8 +615,8 @@
      }
  
    if (optind == argc)
---- coreutils-5.93/src/pr.c.i18n	2005-09-16 08:50:33.000000000 +0100
-+++ coreutils-5.93/src/pr.c	2005-12-23 08:53:01.000000000 +0000
+--- coreutils-5.93/src/pr.c	2005-12-23 08:53:01.000000000 +0000
++++ coreutils-5.95/src/pr.c	2006-05-15 13:45:56.000000000 +0100
 @@ -313,6 +313,32 @@
  
  #include <getopt.h>
@@ -846,7 +846,7 @@
  	  use_col_separator = true;
  	  if (optarg)
  	    separator_string (optarg);
-@@ -1188,10 +1279,45 @@
+@@ -1188,17 +1279,52 @@
     a number. */
  
  static void
@@ -894,6 +894,14 @@
    if (*arg)
      {
        long int tmp_long;
+      We've to use 8 as the lower limit, if we use chars_per_default_tab = 8
+      to expand a tab which is not an input_tab-char. */
+   free (clump_buff);
+-  clump_buff = xmalloc (MAX (8, chars_per_input_tab));
++  clump_buff = xmalloc (MAX (80, chars_per_input_tab));
+ }
+ 
+ /* Open the necessary files,
 @@ -1256,7 +1382,7 @@
  	  else
  	    col_sep_string = column_separator;
