@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.94
-Release: 4
+Version: 5.95
+Release: 2
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -263,6 +263,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 15 2006 Tim Waugh <twaugh@redhat.com> 5.95-2
+- 5.95.
+
 * Wed Apr 26 2006 Tim Waugh <twaugh@redhat.com> 5.94-4
 - Avoid redeclared 'tee' function.
 - Fix 'cp -Z' when the destination exists (bug #189967).
