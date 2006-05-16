@@ -1,11 +1,12 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.95
-Release: 2
+Release: 3
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRequires: libselinux-devel >= 1.25.6-1
+BuildRequires: libacl-devel
 Requires: libselinux >= 1.25.6-1
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
@@ -263,6 +264,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue May 16 2006 Tim Waugh <twaugh@redhat.com> 5.95-3
+- BuildRequires libacl-devel.
+
 * Mon May 15 2006 Tim Waugh <twaugh@redhat.com>
 - Fixed pr in multibyte locales (bug #189663).
 
