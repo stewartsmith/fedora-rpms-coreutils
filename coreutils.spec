@@ -43,6 +43,7 @@ Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 Patch913: coreutils-afs.patch
 Patch914: coreutils-tee.patch
+Patch915: coreutils-proc.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -96,6 +97,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .afs
 %patch914 -p1 -b .tee
+%patch915 -p1 -b .proc
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -265,6 +267,7 @@ fi
 
 %changelog
 * Tue May 16 2006 Tim Waugh <twaugh@redhat.com> 5.95-3
+- Upstream patch to fix cp -p when proc is not mounted (bug #190601).
 - BuildRequires libacl-devel.
 
 * Mon May 15 2006 Tim Waugh <twaugh@redhat.com>
