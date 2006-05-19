@@ -505,15 +505,6 @@
  
    if (chars_per_column < 1)
      error (EXIT_FAILURE, 0, _("page width too narrow"));
-@@ -1324,7 +1450,7 @@
-      We've to use 8 as the lower limit, if we use chars_per_default_tab = 8
-      to expand a tab which is not an input_tab-char. */
-   free (clump_buff);
--  clump_buff = xmalloc (MAX (8, chars_per_input_tab));
-+  clump_buff = xmalloc (MAX (80, chars_per_input_tab));
- }
- 
- /* Open the necessary files,
 @@ -1432,7 +1558,7 @@
  
    /* Enlarge p->start_position of first column to use the same form of
@@ -787,7 +778,7 @@
 +  wchar_t wc;
 +  size_t mblength;
 +  int wc_width;
-+  register int *s = clump_buff;
++  register char *s = clump_buff;
 +  register int i, j;
 +  char esc_buff[4];
 +  int width;

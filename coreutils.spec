@@ -266,6 +266,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri May 19 2006 Tim Waugh <twaugh@redhat.com>
+- Fixed pr properly in multibyte locales (bug #192381).
+
 * Tue May 16 2006 Tim Waugh <twaugh@redhat.com> 5.95-3
 - Upstream patch to fix cp -p when proc is not mounted (bug #190601).
 - BuildRequires libacl-devel.
