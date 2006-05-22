@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.95
-Release: 3
+Version: 5.96
+Release: 2
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -43,7 +43,6 @@ Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 Patch913: coreutils-afs.patch
 Patch914: coreutils-tee.patch
-Patch915: coreutils-proc.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -97,7 +96,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .afs
 %patch914 -p1 -b .tee
-%patch915 -p1 -b .proc
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -266,6 +264,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 22 2006 Tim Waugh <twaugh@redhat.com> 5.96-2
+- 5.96.  No longer need proc patch.
+
 * Fri May 19 2006 Tim Waugh <twaugh@redhat.com>
 - Fixed pr properly in multibyte locales (bug #192381).
 
