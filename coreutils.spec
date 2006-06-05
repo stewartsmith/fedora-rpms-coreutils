@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.96
-Release: 2
+Release: 3
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -10,6 +10,7 @@ BuildRequires: libacl-devel
 Requires: libselinux >= 1.25.6-1
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
+Source1: coreutils-5.96.pl.po
 Source101:	DIR_COLORS
 Source102:	DIR_COLORS.xterm
 Source105:  colorls.sh
@@ -71,6 +72,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
 %setup -q
+rm po/pl.*
+cp %{SOURCE1} po/pl.po
 
 # From upstream
 
@@ -132,6 +135,9 @@ make check
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 perl -pi -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
+pushd po
+make pl.gmo
+popd
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -264,6 +270,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jun  5 2006 Tim Waugh <twaugh@redhat.com> 5.96-3
+- Fixed Polish translation.
+
 * Mon May 22 2006 Tim Waugh <twaugh@redhat.com> 5.96-2
 - 5.96.  No longer need proc patch.
 
