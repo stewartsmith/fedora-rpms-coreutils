@@ -19,6 +19,7 @@ Source200:  su.pamd
 Source201:  runuser.pamd
 
 # From upstream
+Patch1: coreutils-tempname.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -76,6 +77,7 @@ rm po/pl.*
 cp %{SOURCE1} po/pl.po
 
 # From upstream
+%patch1 -p1 -b .tempname
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -270,6 +272,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Jun  9 2006 Tim Waugh <twaugh@redhat.com>
+- Fix large file support for temporary files.
+
 * Mon Jun  5 2006 Tim Waugh <twaugh@redhat.com> 5.96-3
 - Fixed Polish translation.
 
