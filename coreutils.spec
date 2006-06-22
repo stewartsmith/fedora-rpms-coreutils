@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.96
-Release: 3
+Release: 4
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,7 @@ Source201:  runuser.pamd
 
 # From upstream
 Patch1: coreutils-tempname.patch
+Patch2: coreutils-5.96-newhashes.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -78,6 +79,7 @@ cp %{SOURCE1} po/pl.po
 
 # From upstream
 %patch1 -p1 -b .tempname
+%patch2 -p1 -b .newhashes
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -272,6 +274,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jun 22 2006 Tim Waugh <twaugh@redhat.com> 5.96-4
+- Include new hashes (bug #196369).  Patch from upstream.
+
 * Fri Jun  9 2006 Tim Waugh <twaugh@redhat.com>
 - Fix large file support for temporary files.
 
