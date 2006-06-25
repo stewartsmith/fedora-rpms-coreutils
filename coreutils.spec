@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.96
-Release: 4
+Version: 5.97
+Release: 1
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -10,7 +10,6 @@ BuildRequires: libacl-devel
 Requires: libselinux >= 1.25.6-1
 
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
-Source1: coreutils-5.96.pl.po
 Source101:	DIR_COLORS
 Source102:	DIR_COLORS.xterm
 Source105:  colorls.sh
@@ -19,8 +18,7 @@ Source200:  su.pamd
 Source201:  runuser.pamd
 
 # From upstream
-Patch1: coreutils-tempname.patch
-Patch2: coreutils-5.96-newhashes.patch
+Patch10: coreutils-newhashes.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -45,7 +43,7 @@ Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 Patch913: coreutils-afs.patch
-Patch914: coreutils-tee.patch
+Patch914: coreutils-autoconf.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -74,12 +72,9 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
 %setup -q
-rm po/pl.*
-cp %{SOURCE1} po/pl.po
 
 # From upstream
-%patch1 -p1 -b .tempname
-%patch2 -p1 -b .newhashes
+%patch10 -p1 -b .newhashes
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -102,7 +97,7 @@ cp %{SOURCE1} po/pl.po
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .afs
-%patch914 -p1 -b .tee
+%patch914 -p1 -b .autoconf
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -275,6 +270,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Sun Jun 25 2006 Tim Waugh <twaugh@redhat.com> 5.97-1
+- 5.97.  No longer need tempname or tee patches, or pl translation.
+
 * Sun Jun 25 2006 Tim Waugh <twaugh@redhat.com> 5.96-4
 - Include new hashes (bug #196369).  Patch from upstream.
 - Build at -O1 on s390 for the moment (bug #196369).
