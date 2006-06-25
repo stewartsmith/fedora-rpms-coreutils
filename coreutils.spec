@@ -115,7 +115,8 @@ chmod a+x tests/sort/sort-mb-tests
 
 %build
 %ifarch s390 s390x
-export CFLAGS="$RPM_OPT_FLAGS -fPIC"
+# Build at -O1 for the moment (bug #196369).
+export CFLAGS="$RPM_OPT_FLAGS -fPIC -O1"
 %else
 export CFLAGS="$RPM_OPT_FLAGS -fpic"
 %endif
@@ -274,8 +275,9 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Jun 22 2006 Tim Waugh <twaugh@redhat.com> 5.96-4
+* Sun Jun 25 2006 Tim Waugh <twaugh@redhat.com> 5.96-4
 - Include new hashes (bug #196369).  Patch from upstream.
+- Build at -O1 on s390 for the moment (bug #196369).
 
 * Fri Jun  9 2006 Tim Waugh <twaugh@redhat.com>
 - Fix large file support for temporary files.
