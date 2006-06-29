@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 1
+Release: 2
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,7 @@ Source200:  su.pamd
 Source201:  runuser.pamd
 
 # From upstream
+Patch1: coreutils-sort-compatibility.patch
 Patch10: coreutils-newhashes.patch
 
 # Our patches
@@ -74,6 +75,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .sort-compatibility
 %patch10 -p1 -b .newhashes
 
 # Our patches
@@ -270,6 +272,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jun 29 2006 Tim Waugh <twaugh@redhat.com> 5.97-2
+- Allow 'sort +1 -2' (patch from upstream).
+
 * Sun Jun 25 2006 Tim Waugh <twaugh@redhat.com> 5.97-1
 - 5.97.  No longer need tempname or tee patches, or pl translation.
 
