@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 3
+Release: 3.1
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -272,6 +272,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 5.97-3.1
+- rebuild
+
 * Tue Jul 11 2006 Tomas Mraz <tmraz@redhat.com> 5.97-3
 - allow root to su to expired user (#152420)
 
