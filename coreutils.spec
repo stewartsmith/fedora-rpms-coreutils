@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 3.1
+Release: 4
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -280,7 +280,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Jul 13 2006 David Howells <dhowells@redhat.com>
+* Thu Jul 13 2006 David Howells <dhowells@redhat.com> 5.97-4
 - split the PAM scripts for "su -l"/"runuser -l" from that of normal "su" and
   "runuser" (#198639)
 - add keyinit instructions to PAM scripts
