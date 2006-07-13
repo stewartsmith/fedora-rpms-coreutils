@@ -16,6 +16,8 @@ Source105:  colorls.sh
 Source106:  colorls.csh
 Source200:  su.pamd
 Source201:  runuser.pamd
+Source202:  su-l.pamd
+Source203:  runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-sort-compatibility.patch
@@ -45,6 +47,7 @@ Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 Patch913: coreutils-afs.patch
 Patch914: coreutils-autoconf.patch
+Patch915: coreutils-split-pam.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -100,6 +103,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .afs
 %patch914 -p1 -b .autoconf
+%patch915 -p1 -b .splitl
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -185,7 +189,9 @@ for i in hostname uptime kill ; do
 done
 
 %{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
+%{?!nopam:install -m 644 %SOURCE202 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su-l}
 %{?!nopam:install -m 644 %SOURCE201 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser}
+%{?!nopam:install -m 644 %SOURCE203 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser-l}
 
 bzip2 -f9 old/*/C* || :
 
@@ -231,7 +237,9 @@ fi
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) /etc/pam.d/su}
+%{?!nopam:%config(noreplace) /etc/pam.d/su-l}
 %{?!nopam:%config(noreplace) /etc/pam.d/runuser}
+%{?!nopam:%config(noreplace) /etc/pam.d/runuser-l}
 %doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
 /bin/basename
 /bin/cat
@@ -272,6 +280,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jul 13 2006 David Howells <dhowells@redhat.com>
+- split the PAM scripts for "su -l"/"runuser -l" from that of normal "su" and
+  "runuser" (#198639)
+- add keyinit instructions to PAM scripts
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 5.97-3.1
 - rebuild
 
