@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 5
+Release: 6
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -280,7 +280,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Fri Jul 21 2006 Tim Waugh <twaugh@redhat.com>
+* Fri Jul 21 2006 Tim Waugh <twaugh@redhat.com> 5.97-6
 - Added runuser '-g' and '-G' options (bug #199344).
 - Added su '--session-command' option (bug #199066).
 
