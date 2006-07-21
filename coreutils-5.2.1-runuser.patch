@@ -1,5 +1,5 @@
---- coreutils-5.96/src/su.c.runuser	2006-06-22 23:31:37.000000000 +0100
-+++ coreutils-5.96/src/su.c	2006-06-22 23:31:37.000000000 +0100
+--- coreutils-5.97/src/su.c.runuser	2006-07-21 14:32:13.000000000 +0100
++++ coreutils-5.97/src/su.c	2006-07-21 15:40:16.000000000 +0100
 @@ -132,9 +132,15 @@
  #include "error.h"
  
@@ -27,7 +27,31 @@
  char *getpass ();
  char *getusershell ();
  void endusershell ();
-@@ -303,10 +313,12 @@
+@@ -180,7 +190,11 @@
+ extern char **environ;
+ 
+ static void run_shell (char const *, char const *, char **, size_t,
+-	const struct passwd *)
++	const struct passwd *
++#ifdef RUNUSER
++		       , gid_t *groups, int num_groups
++#endif
++	)
+ #ifdef USE_PAM
+ 	;
+ #else
+@@ -210,6 +224,10 @@
+   {"login", no_argument, NULL, 'l'},
+   {"preserve-environment", no_argument, NULL, 'p'},
+   {"shell", required_argument, NULL, 's'},
++#ifdef RUNUSER
++  {"group", required_argument, NULL, 'g'},
++  {"supp-group", required_argument, NULL, 'G'},
++#endif
+   {GETOPT_HELP_OPTION_DECL},
+   {GETOPT_VERSION_OPTION_DECL},
+   {NULL, 0, NULL, 0}
+@@ -307,10 +325,12 @@
    retval = pam_start(PROGRAM_NAME, pw->pw_name, &conv, &pamh);
    PAM_BAIL_P;
  
@@ -40,7 +64,7 @@
  
    caller = getpwuid(getuid());
    if(caller != NULL && caller->pw_name != NULL) {
-@@ -323,6 +335,11 @@
+@@ -327,6 +347,11 @@
      retval = pam_set_item(pamh, PAM_TTY, tty_name);
      PAM_BAIL_P;
    }
@@ -52,7 +76,7 @@
    retval = pam_authenticate(pamh, 0);
    PAM_BAIL_P;
    retval = pam_acct_mgmt(pamh, 0);
-@@ -332,6 +349,7 @@
+@@ -336,6 +361,7 @@
      PAM_BAIL_P;
    }
    PAM_BAIL_P;
@@ -60,17 +84,166 @@
    /* must be authenticated if this point was reached */
    return 1;
  #else /* !USE_PAM */
-@@ -746,7 +764,7 @@
+@@ -417,11 +443,22 @@
+ /* Become the user and group(s) specified by PW.  */
+ 
+ static void
+-change_identity (const struct passwd *pw)
++change_identity (const struct passwd *pw
++#ifdef RUNUSER
++		 , gid_t *groups, int num_groups
++#endif
++	)
+ {
+ #ifdef HAVE_INITGROUPS
++  int rc = 0;
+   errno = 0;
+-  if (initgroups (pw->pw_name, pw->pw_gid) == -1) {
++#ifdef RUNUSER
++  if (num_groups)
++    rc = setgroups(num_groups, groups);
++  else
++#endif
++    rc = initgroups(pw->pw_name, pw->pw_gid);
++  if (rc == -1) {
+ #ifdef USE_PAM
+     pam_close_session(pamh, 0);
+     pam_end(pamh, PAM_ABORT);
+@@ -468,7 +505,11 @@
+ 
+ static void
+ run_shell (char const *shell, char const *command, char **additional_args,
+-	   size_t n_additional_args, const struct passwd *pw)
++	   size_t n_additional_args, const struct passwd *pw
++#ifdef RUNUSER
++	   , gid_t *groups, int num_groups
++#endif
++	)
+ {
+   size_t n_args = 1 + fast_startup + 2 * !!command + n_additional_args + 1;
+   char const **args = xnmalloc (n_args, sizeof *args);
+@@ -499,7 +540,11 @@
+ 
+   child = fork();
+   if (child == 0) {  /* child shell */
+-  change_identity (pw);
++  change_identity (pw
++#ifdef RUNUSER
++		   , groups, num_groups
++#endif
++	  );
+   pam_end(pamh, 0);
+   if (!same_session)
+     setsid ();
+@@ -647,6 +692,8 @@
+ Change the effective user id and group id to that of USER.\n\
+ \n\
+   -, -l, --login               make the shell a login shell\n\
++  -g --group=group             specify the primary group\n\
++  -G --supp-group=group        specify a supplemental group\n\
+   -c, --commmand=COMMAND       pass a single COMMAND to the shell with -c\n\
+   --session-command=COMMAND    pass a single COMMAND to the shell with -c\n\
+                                and do not create a new session\n\
+@@ -676,6 +723,12 @@
+   char *shell = NULL;
+   struct passwd *pw;
+   struct passwd pw_copy;
++#ifdef RUNUSER
++  struct group *gr;
++  gid_t groups[NGROUPS_MAX];
++  int num_supp_groups = 0;
++  int use_gid = 0;
++#endif
+ 
+   initialize_main (&argc, &argv);
+   program_name = argv[0];
+@@ -690,7 +743,11 @@
+   simulate_login = false;
+   change_environment = true;
+ 
+-  while ((optc = getopt_long (argc, argv, "c:flmps:", longopts, NULL)) != -1)
++  while ((optc = getopt_long (argc, argv, "c:flmps:"
++#ifdef RUNUSER
++			      "g:G:"
++#endif
++			      , longopts, NULL)) != -1)
+     {
+       switch (optc)
+ 	{
+@@ -720,6 +777,28 @@
+ 	  shell = optarg;
+ 	  break;
+ 
++#ifdef RUNUSER
++	case 'g':
++	  gr = getgrnam(optarg);
++	  if (!gr)
++	    error (EXIT_FAIL, 0, _("group %s does not exist"), optarg);
++	  use_gid = 1;
++	  groups[0] = gr->gr_gid;
++	  break;
++
++	case 'G':
++	  num_supp_groups++;
++	  if (num_supp_groups >= NGROUPS_MAX)
++	    error (EXIT_FAIL, 0,
++		   _("Can't specify more than %d supplemental groups"),
++		   NGROUPS_MAX - 1);
++	  gr = getgrnam(optarg);
++	  if (!gr)
++	    error (EXIT_FAIL, 0, _("group %s does not exist"), optarg);
++	  groups[num_supp_groups] = gr->gr_gid;
++	  break;
++#endif
++
+ 	case_GETOPT_HELP_CHAR;
+ 
+ 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
+@@ -758,7 +837,20 @@
  			  : DEFAULT_SHELL);
    endpwent ();
  
 -  if (!correct_password (pw))
++#ifdef RUNUSER
++  if (num_supp_groups && !use_gid)
++  {
++    pw->pw_gid = groups[1];
++    memmove (groups, groups + 1, sizeof(gid_t) * num_supp_groups);
++  }
++  else if (use_gid)
++  {
++    pw->pw_gid = groups[0];
++    num_supp_groups++;
++  }
++#endif
++
 +  if (CHECKPASSWD && !correct_password (pw))
      {
  #ifdef SYSLOG_FAILURE
        log_su (pw, false);
---- coreutils-5.96/src/Makefile.am.runuser	2006-06-22 23:31:37.000000000 +0100
-+++ coreutils-5.96/src/Makefile.am	2006-06-22 23:31:37.000000000 +0100
+@@ -790,10 +882,18 @@
+   modify_environment (pw, shell);
+ 
+ #ifndef USE_PAM
+-  change_identity (pw);
++  change_identity (pw
++#ifdef RUNUSER
++		   , groups, num_supp_groups
++#endif
++		   );
+ #endif
+   if (simulate_login && chdir (pw->pw_dir) != 0)
+     error (0, errno, _("warning: cannot change directory to %s"), pw->pw_dir);
+ 
+-  run_shell (shell, command, argv + optind, MAX (0, argc - optind), pw);
++  run_shell (shell, command, argv + optind, MAX (0, argc - optind), pw
++#ifdef RUNUSER
++	     , groups, num_supp_groups
++#endif
++	     );
+ }
+--- coreutils-5.97/src/Makefile.am.runuser	2006-07-21 14:32:13.000000000 +0100
++++ coreutils-5.97/src/Makefile.am	2006-07-21 14:32:13.000000000 +0100
 @@ -17,7 +17,7 @@
  ## along with this program; if not, write to the Free Software Foundation,
  ## Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -100,8 +273,8 @@
  
  installed_su = $(DESTDIR)$(bindir)/`echo su|sed '$(transform)'`
  
---- coreutils-5.96/tests/help-version.runuser	2006-02-07 09:13:43.000000000 +0000
-+++ coreutils-5.96/tests/help-version	2006-06-22 23:31:37.000000000 +0100
+--- coreutils-5.97/tests/help-version.runuser	2006-06-01 08:26:09.000000000 +0100
++++ coreutils-5.97/tests/help-version	2006-07-21 14:32:13.000000000 +0100
 @@ -137,6 +137,7 @@
  seq_args=10
  sleep_args=0
@@ -110,8 +283,8 @@
  test_args=foo
  
  # This is necessary in the unusual event that there is
---- coreutils-5.96/AUTHORS.runuser	2006-06-22 23:31:37.000000000 +0100
-+++ coreutils-5.96/AUTHORS	2006-06-22 23:31:37.000000000 +0100
+--- coreutils-5.97/AUTHORS.runuser	2006-07-21 14:32:13.000000000 +0100
++++ coreutils-5.97/AUTHORS	2006-07-21 14:32:13.000000000 +0100
 @@ -60,6 +60,7 @@
  readlink: Dmitry V. Levin
  rm: Paul Rubin, David MacKenzie, Richard Stallman, Jim Meyering
@@ -120,8 +293,8 @@
  seq: Ulrich Drepper
  sha1sum: Ulrich Drepper, Scott Miller, David Madore
  sha224sum: Ulrich Drepper, Scott Miller, David Madore
---- coreutils-5.96/README.runuser	2006-06-22 23:31:37.000000000 +0100
-+++ coreutils-5.96/README	2006-06-22 23:32:02.000000000 +0100
+--- coreutils-5.97/README.runuser	2006-07-21 14:32:13.000000000 +0100
++++ coreutils-5.97/README	2006-07-21 14:32:13.000000000 +0100
 @@ -12,7 +12,7 @@
    df dir dircolors dirname du echo env expand expr factor false fmt fold
    ginstall groups head hostid hostname id join kill link ln logname ls
@@ -131,15 +304,15 @@
    sha256sum sha384sum sha512sum shred sleep sort
    split stat stty su sum sync tac tail tee test touch tr true tsort tty
    uname unexpand uniq unlink uptime users vdir wc who whoami yes
---- /dev/null	2006-06-22 09:01:01.637265000 +0100
-+++ coreutils-5.96/man/runuser.x	2006-06-22 23:31:37.000000000 +0100
+--- /dev/null	2006-07-21 09:48:40.571484750 +0100
++++ coreutils-5.97/man/runuser.x	2006-07-21 14:32:13.000000000 +0100
 @@ -0,0 +1,4 @@
 +[NAME]
 +runuser \- run a shell with substitute user and group IDs
 +[DESCRIPTION]
 +.\" Add any additional description here
---- /dev/null	2006-06-22 09:01:01.637265000 +0100
-+++ coreutils-5.96/man/runuser.1	2006-06-22 23:31:37.000000000 +0100
+--- /dev/null	2006-07-21 09:48:40.571484750 +0100
++++ coreutils-5.97/man/runuser.1	2006-07-21 14:32:13.000000000 +0100
 @@ -0,0 +1,59 @@
 +.\" DO NOT MODIFY THIS FILE!  It was generated by help2man 1.33.
 +.TH RUNUSER "1" "September 2004" "runuser (coreutils) 5.2.1" "User Commands"
@@ -200,8 +373,8 @@
 +.B info coreutils su
 +.PP
 +should give you access to the complete manual.
---- coreutils-5.96/man/Makefile.am.runuser	2006-06-22 23:31:37.000000000 +0100
-+++ coreutils-5.96/man/Makefile.am	2006-06-22 23:31:37.000000000 +0100
+--- coreutils-5.97/man/Makefile.am.runuser	2006-07-21 14:32:13.000000000 +0100
++++ coreutils-5.97/man/Makefile.am	2006-07-21 14:32:13.000000000 +0100
 @@ -7,7 +7,7 @@
    link.1 ln.1 logname.1 \
    ls.1 md5sum.1 mkdir.1 mkfifo.1 mknod.1 mv.1 nice.1 nl.1 nohup.1 od.1 \
