@@ -280,6 +280,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Jul 21 2006 Tim Waugh <twaugh@redhat.com>
+- Added su '--session-command' option (bug #199066).
+
 * Tue Jul 18 2006 Tomas Mraz <tmraz@redhat.com> 5.97-5
 - 'include' su and runuser scripts in su-l and runuser-l scripts
 
