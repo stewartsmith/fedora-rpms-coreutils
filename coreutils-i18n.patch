@@ -1415,8 +1415,8 @@
  	  }
  	  break;
  
---- coreutils-5.95/src/sort.c.i18n	2005-10-07 19:48:28.000000000 +0100
-+++ coreutils-5.95/src/sort.c	2006-05-15 15:08:57.000000000 +0100
+--- coreutils-5.95/src/sort.c	2006-05-15 15:08:57.000000000 +0100
++++ coreutils-5.97/src/sort.c	2006-08-15 17:43:38.000000000 +0100
 @@ -23,9 +23,18 @@
  
  #include <config.h>
@@ -1858,7 +1858,34 @@
  /* Fill BUF reading from FP, moving buf->left bytes from the end
     of buf->buf to the beginning first.  If EOF is reached and the
     file wasn't terminated by a newline, supply one.  Set up BUF's line
-@@ -1067,7 +1354,7 @@
+@@ -1033,8 +1320,24 @@
+ 		  else
+ 		    {
+ 		      if (key->skipsblanks)
+-			while (blanks[to_uchar (*line_start)])
+-			  line_start++;
++			{
++#if HAVE_MBRTOWC
++			  if (MB_CUR_MAX > 1)
++			    {
++			      size_t mblength;
++			      mbstate_t state;
++			      memset (&state, '\0', sizeof(mbstate_t));
++			      while (line_start < line->keylim &&
++				     ismbblank (line_start,
++						line->keylim - line_start,
++						&mblength))
++				line_start += mblength;
++			    }
++			  else
++#endif
++			  while (blanks[to_uchar (*line_start)])
++			    line_start++;
++			}
+ 		      line->keybeg = line_start;
+ 		    }
+ 		}
+@@ -1067,7 +1370,7 @@
     hideously fast. */
  
  static int
@@ -1867,7 +1894,7 @@
  {
    while (blanks[to_uchar (*a)])
      a++;
-@@ -1077,6 +1364,25 @@
+@@ -1077,6 +1380,25 @@
    return strnumcmp (a, b, decimal_point, thousands_sep);
  }
  
@@ -1893,7 +1920,7 @@
  static int
  general_numcompare (const char *sa, const char *sb)
  {
-@@ -1110,7 +1416,7 @@
+@@ -1110,7 +1432,7 @@
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -1902,7 +1929,7 @@
  {
    size_t lo = 0;
    size_t hi = MONTHS_PER_YEAR;
-@@ -1152,11 +1458,79 @@
+@@ -1152,11 +1474,79 @@
    return 0;
  }
  
@@ -1983,7 +2010,7 @@
  {
    struct keyfield const *key = keylist;
  
-@@ -1326,6 +1700,177 @@
+@@ -1326,6 +1716,177 @@
    return key->reverse ? -diff : diff;
  }
  
@@ -2161,7 +2188,7 @@
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -2127,7 +2672,7 @@
+@@ -2127,7 +2688,7 @@
    atexit (close_stdout);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
@@ -2170,7 +2197,7 @@
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -2148,6 +2693,27 @@
+@@ -2148,6 +2709,27 @@
        thousands_sep = -1;
    }
  
@@ -2198,7 +2225,7 @@
    have_read_stdin = false;
    inittables ();
  
-@@ -2349,13 +2915,35 @@
+@@ -2349,13 +2931,35 @@
  
  	case 't':
  	  {
@@ -2238,7 +2265,7 @@
  		else
  		  {
  		    /* Provoke with `sort -txx'.  Complain about
-@@ -2366,9 +2954,12 @@
+@@ -2366,9 +2970,12 @@
  			   quote (optarg));
  		  }
  	      }
