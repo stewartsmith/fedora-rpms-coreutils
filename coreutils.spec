@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 7
+Release: 8
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -280,6 +280,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Aug 23 2006 Tim Waugh <twaugh@redhat.com> 5.97-8
+- Don't chdir until after PAM bits in su (bug #197659).
+
 * Tue Aug 15 2006 Tim Waugh <twaugh@redhat.com> 5.97-7
 - Fixed 'sort -b' multibyte problem (bug #199986).
 
