@@ -280,6 +280,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Aug 24 2006 Tim Waugh <twaugh@redhat.com>
+- Fixed warnings in acl patch (bug #203166).
+
 * Wed Aug 23 2006 Tim Waugh <twaugh@redhat.com> 5.97-8
 - Don't chdir until after PAM bits in su (bug #197659).
 
