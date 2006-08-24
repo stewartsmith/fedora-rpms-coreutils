@@ -48,8 +48,8 @@
  @node Process control
  @chapter Process control
  
---- coreutils-5.97/src/su.c.pam	2006-08-23 10:45:26.000000000 +0100
-+++ coreutils-5.97/src/su.c	2006-08-23 10:45:33.000000000 +0100
+--- coreutils-5.97/src/su.c	2006-08-23 10:45:33.000000000 +0100
++++ coreutils-5.97/src/su.c	2006-08-24 17:04:48.000000000 +0100
 @@ -38,6 +38,16 @@
     restricts who can su to UID 0 accounts.  RMS considers that to
     be fascist.
@@ -108,7 +108,7 @@
  
  /* The name this program was run with.  */
  char *program_name;
-@@ -248,7 +274,22 @@
+@@ -248,7 +274,26 @@
  }
  #endif
  
@@ -124,6 +124,10 @@
 +  pam_end(pamh, PAM_SUCCESS); \
 +  return 0; \
 +}
++#define PAM_BAIL_P_VOID if (retval) {		\
++  pam_end(pamh, PAM_SUCCESS);			\
++return;						\
++}
 +#endif
 +
  /* Ask the user for a password.
@@ -131,7 +135,7 @@
     Return true if the user gives the correct password for entry PW,
     false if not.  Return true without asking for a password if run by UID 0
     or if PW has an empty password.  */
-@@ -256,6 +297,44 @@
+@@ -256,6 +301,44 @@
  static bool
  correct_password (const struct passwd *pw)
  {
@@ -176,7 +180,7 @@
    char *unencrypted, *encrypted, *correct;
  #if HAVE_GETSPNAM && HAVE_STRUCT_SPWD_SP_PWDP
    /* Shadow passwd stuff for SVR3 and maybe other systems.  */
-@@ -280,6 +359,7 @@
+@@ -280,6 +363,7 @@
    encrypted = crypt (unencrypted, correct);
    memset (unencrypted, 0, strlen (unencrypted));
    return STREQ (encrypted, correct);
@@ -184,7 +188,7 @@
  }
  
  /* Update `environ' for the new shell based on PW, with SHELL being
-@@ -293,12 +373,18 @@
+@@ -293,12 +377,18 @@
        /* Leave TERM unchanged.  Set HOME, SHELL, USER, LOGNAME, PATH.
           Unset all other environment variables.  */
        char const *term = getenv ("TERM");
@@ -203,7 +207,7 @@
        xsetenv ("HOME", pw->pw_dir);
        xsetenv ("SHELL", shell);
        xsetenv ("USER", pw->pw_name);
-@@ -331,8 +417,13 @@
+@@ -331,8 +421,13 @@
  {
  #ifdef HAVE_INITGROUPS
    errno = 0;
@@ -218,7 +222,7 @@
    endgrent ();
  #endif
    if (setgid (pw->pw_gid))
-@@ -341,6 +432,31 @@
+@@ -341,6 +436,31 @@
      error (EXIT_FAIL, errno, _("cannot set user id"));
  }
  
@@ -250,7 +254,7 @@
  /* Run SHELL, or DEFAULT_SHELL if SHELL is empty.
     If COMMAND is nonzero, pass it to the shell with the -c option.
     Pass ADDITIONAL_ARGS to the shell as more arguments; there
-@@ -348,17 +464,49 @@
+@@ -348,17 +468,49 @@
  
  static void
  run_shell (char const *shell, char const *command, char **additional_args,
@@ -301,7 +305,7 @@
        shell_basename = base_name (shell);
        arg0 = xmalloc (strlen (shell_basename) + 2);
        arg0[0] = '-';
-@@ -383,6 +531,66 @@
+@@ -383,6 +535,66 @@
      error (0, errno, "%s", shell);
      exit (exit_status);
    }
@@ -354,9 +358,9 @@
 +  /* Not checking retval on this because we need to call close session */
 +  pam_setcred(pamh, PAM_DELETE_CRED | PAM_SILENT);
 +  retval = pam_close_session(pamh, 0);
-+  PAM_BAIL_P;
++  PAM_BAIL_P_VOID;
 +  retval = pam_end(pamh, PAM_SUCCESS);
-+  PAM_BAIL_P;
++  PAM_BAIL_P_VOID;
 +  if (caught) {
 +    sleep(2);
 +    kill(child, SIGKILL);
@@ -368,9 +372,7 @@
  }
  
  /* Return true if SHELL is a restricted shell (one not returned by
-@@ -550,9 +758,9 @@
-   shell = xstrdup (shell ? shell : pw->pw_shell);
-   modify_environment (pw, shell);
+@@ -552,7 +764,7 @@
  
 +#ifndef USE_PAM
    change_identity (pw);
