@@ -1863,7 +1863,7 @@
 +  if(secure)
 +    if (getfilecon(filename,&scontext)<0) {
 +      perror (filename);
-+      return;
++      return false;
 +    }
 +#endif
  
@@ -2079,7 +2079,7 @@
  \n\
  "), stdout);
 +#ifdef WITH_SELINUX
-+      printf (_("\
++      fputs (_("\
 +  -Z, --context=CONTEXT   set security context (quoted string)\n\
 +"), stdout);
 +#endif
