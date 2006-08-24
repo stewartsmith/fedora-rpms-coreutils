@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 8
+Release: 9
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -280,12 +280,8 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Aug 24 2006 Tim Waugh <twaugh@redhat.com>
-- Fixed warnings in pam patch (bug #203166).
-- Fixed warnings in i18n patch (bug #203166).
-- Fixed warnings in sysinfo patch (bug #203166).
-- Fixed warnings in selinux patch (bug #203166).
-- Fixed warnings in acl patch (bug #203166).
+* Thu Aug 24 2006 Tim Waugh <twaugh@redhat.com> 5.97-9
+- Fixed warnings in pam, i18n, sysinfo, selinux and acl patches (bug #203166).
 
 * Wed Aug 23 2006 Tim Waugh <twaugh@redhat.com> 5.97-8
 - Don't chdir until after PAM bits in su (bug #197659).

@@ -1,15 +1,23 @@
---- coreutils-4.5.3/src/uname.c.sysinfo	2002-08-31 09:52:11.000000000 +0100
-+++ coreutils-4.5.3/src/uname.c	2002-11-28 18:29:15.000000000 +0000
-@@ -232,7 +232,7 @@
-       if (toprint & PRINT_KERNEL_RELEASE)
- 	print_element (name.release);
-       if (toprint & PRINT_KERNEL_VERSION)
--	print_element (name.version);
-+	print_element (name.version);
-       if (toprint & PRINT_MACHINE)
- 	print_element (name.machine);
-     }
-@@ -246,6 +246,28 @@
+--- coreutils-5.97/src/uname.c.sysinfo	2005-09-15 20:57:04.000000000 +0100
++++ coreutils-5.97/src/uname.c	2006-08-24 17:15:56.000000000 +0100
+@@ -155,7 +155,7 @@
+ main (int argc, char **argv)
+ {
+   int c;
+-  static char const unknown[] = "unknown";
++  static char unknown[] = "unknown";
+ 
+   /* Mask indicating which elements to print. */
+   unsigned int toprint = 0;
+@@ -249,13 +249,35 @@
+ 
+   if (toprint & PRINT_PROCESSOR)
+     {
+-      char const *element = unknown;
++      char *element = unknown;
+ #if HAVE_SYSINFO && defined SI_ARCHITECTURE
+       {
+ 	static char processor[257];
  	if (0 <= sysinfo (SI_ARCHITECTURE, processor, sizeof processor))
  	  element = processor;
        }
@@ -38,7 +46,16 @@
  #endif
  #ifdef UNAME_PROCESSOR
        if (element == unknown)
-@@ -270,6 +292,14 @@
+@@ -293,7 +315,7 @@
+ 
+   if (toprint & PRINT_HARDWARE_PLATFORM)
+     {
+-      char const *element = unknown;
++      char *element = unknown;
+ #if HAVE_SYSINFO && defined SI_PLATFORM
+       {
+ 	static char hardware_platform[257];
+@@ -301,6 +323,14 @@
  			  hardware_platform, sizeof hardware_platform))
  	  element = hardware_platform;
        }
