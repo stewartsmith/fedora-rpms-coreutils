@@ -640,7 +640,7 @@
 +print_char_multi (char c)
 +{
 +  static size_t mbc_pos = 0;
-+  static unsigned char mbc[MB_LEN_MAX] = {'\0'};
++  static char mbc[MB_LEN_MAX] = {'\0'};
 +  static mbstate_t state = {'\0'};
 +  mbstate_t state_bak;
 +  wchar_t wc;
@@ -650,7 +650,7 @@
 +  if (tabify_output)
 +    {
 +      state_bak = state;
-+      mbc[mbc_pos++] = (unsigned char)c;
++      mbc[mbc_pos++] = c;
 +      mblength = mbrtowc (&wc, mbc, mbc_pos, &state);
 +
 +      while (mbc_pos > 0)

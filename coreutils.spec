@@ -281,6 +281,7 @@ fi
 
 %changelog
 * Thu Aug 24 2006 Tim Waugh <twaugh@redhat.com>
+- Fixed warnings in i18n patch (bug #203166).
 - Fixed warnings in sysinfo patch (bug #203166).
 - Fixed warnings in selinux patch (bug #203166).
 - Fixed warnings in acl patch (bug #203166).
