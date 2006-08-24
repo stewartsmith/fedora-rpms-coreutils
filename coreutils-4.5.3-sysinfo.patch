@@ -38,15 +38,6 @@
  #endif
  #ifdef UNAME_PROCESSOR
        if (element == unknown)
-@@ -262,7 +284,7 @@
- 
-   if (toprint & PRINT_HARDWARE_PLATFORM)
-     {
--      char const *element = unknown;
-+      char *element = unknown;
- #if HAVE_SYSINFO && defined SI_PLATFORM
-       {
- 	static char hardware_platform[257];
 @@ -270,6 +292,14 @@
  			  hardware_platform, sizeof hardware_platform))
  	  element = hardware_platform;
