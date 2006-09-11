@@ -281,6 +281,7 @@ fi
 
 %changelog
 * Mon Sep 11 2006 Tim Waugh <twaugh@redhat.com>
+- Include -g/-G in runuser man page (part of bug #199344).
 - Corrected runuser man page (bug #200620).
 
 * Thu Aug 24 2006 Tim Waugh <twaugh@redhat.com> 5.97-9
