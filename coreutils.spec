@@ -280,6 +280,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Sep 11 2006 Tim Waugh <twaugh@redhat.com>
+- Corrected runuser man page (bug #200620).
+
 * Thu Aug 24 2006 Tim Waugh <twaugh@redhat.com> 5.97-9
 - Fixed warnings in pam, i18n, sysinfo, selinux and acl patches (bug #203166).
 
