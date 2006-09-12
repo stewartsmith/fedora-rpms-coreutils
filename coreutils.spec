@@ -27,6 +27,7 @@ Patch10: coreutils-newhashes.patch
 Patch100: coreutils-chgrp.patch
 Patch107: fileutils-4.1.10-timestyle.patch
 Patch182: coreutils-acl.patch
+Patch183: coreutils-df-cifs.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -85,6 +86,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch100 -p1 -b .chgrp
 %patch107 -p1 -b .timestyle
 %patch182 -p1 -b .acl
+%patch183 -p1 -b .df-cifs
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -280,7 +282,8 @@ fi
 /sbin/runuser
 
 %changelog
-* Mon Sep 11 2006 Tim Waugh <twaugh@redhat.com>
+* Tue Sep 12 2006 Tim Waugh <twaugh@redhat.com>
+- Ignore 'cifs' filesystems for 'df -l' (bug #183703).
 - Include -g/-G in runuser man page (part of bug #199344).
 - Corrected runuser man page (bug #200620).
 
