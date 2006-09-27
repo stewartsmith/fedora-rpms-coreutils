@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 9
+Release: 10
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -282,7 +282,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Tue Sep 12 2006 Tim Waugh <twaugh@redhat.com>
+* Tue Sep 12 2006 Tim Waugh <twaugh@redhat.com> 5.97-10
 - Ignore 'cifs' filesystems for 'df -l' (bug #183703).
 - Include -g/-G in runuser man page (part of bug #199344).
 - Corrected runuser man page (bug #200620).
