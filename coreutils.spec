@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 10
+Release: 11
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -21,6 +21,7 @@ Source203:  runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-sort-compatibility.patch
+Patch2: coreutils-rename.patch
 Patch10: coreutils-newhashes.patch
 
 # Our patches
@@ -80,6 +81,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .sort-compatibility
+%patch2 -p1 -b .rename
 %patch10 -p1 -b .newhashes
 
 # Our patches
@@ -282,6 +284,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Sep 28 2006 Tim Waugh <twaugh@redhat.com> 5.97-11
+- Back-ported rename patch (bug #205744).
+
 * Tue Sep 12 2006 Tim Waugh <twaugh@redhat.com> 5.97-10
 - Ignore 'cifs' filesystems for 'df -l' (bug #183703).
 - Include -g/-G in runuser man page (part of bug #199344).
