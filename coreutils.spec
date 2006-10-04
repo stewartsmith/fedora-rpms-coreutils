@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 11
+Release: 12
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -284,6 +284,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Oct  4 2006 Tim Waugh <twaugh@redhat.com> 5.97-12
+- Fixed 'cp -Z' when destination exists, again (bug #189967).
+
 * Thu Sep 28 2006 Tim Waugh <twaugh@redhat.com> 5.97-11
 - Back-ported rename patch (bug #205744).
 
