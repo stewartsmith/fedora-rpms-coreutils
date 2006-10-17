@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 12
+Release: 13
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -238,6 +238,7 @@ fi
 
 %files -f %{name}.lang
 %defattr(-,root,root)
+%dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) /etc/pam.d/su}
@@ -284,6 +285,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Oct 17 2006 Tim Waugh <twaugh@redhat.com> 5.97-13
+- Own LC_TIME locale directories (bug #210751).
+
 * Wed Oct  4 2006 Tim Waugh <twaugh@redhat.com> 5.97-12
 - Fixed 'cp -Z' when destination exists, again (bug #189967).
 
