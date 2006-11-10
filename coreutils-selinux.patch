@@ -2672,9 +2672,9 @@
  %D
  Device number in hex
  .TP
---- /dev/null	2006-10-03 09:23:15.605078000 +0100
-+++ coreutils-5.97/man/runcon.1	2006-10-03 17:18:16.000000000 +0100
-@@ -0,0 +1,43 @@
+--- coreutils-5.97/man/runcon.1	2006-10-03 17:18:16.000000000 +0100
++++ coreutils-5.97/man/runcon.1	2006-11-10 17:32:18.000000000 +0000
+@@ -0,0 +1,45 @@
 +.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
 +.SH NAME
 +runcon \- run command with specified security context 
@@ -2710,11 +2710,13 @@
 +.TP
 +\fB\-u\fR
 +change current user to the specified user
++.TP
++\fB\-\-\fR
++The \fB\-\-\fR flag indicates that \fBruncon\fR should stop processing command
++line arguments. Further arguments will be passed to COMMAND.
 +.PP
 +If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
-+the first argument is used as the complete context.  Any additional
-+arguments after \fICOMMAND\fR are interpreted as arguments to the
-+command.
++the first argument is used as the complete context.
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
@@ -2931,4 +2933,3 @@
 +.B info chcon
 +.PP
 +should give you access to the complete manual.
-

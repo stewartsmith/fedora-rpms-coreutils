@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 13
+Release: 14%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -285,6 +285,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Nov 10 2006 Tim Waugh <twaugh@redhat.com> 5.97-14
+- Clarified runcon man page (bug #213846).
+
 * Tue Oct 17 2006 Tim Waugh <twaugh@redhat.com> 5.97-13
 - Own LC_TIME locale directories (bug #210751).
 
