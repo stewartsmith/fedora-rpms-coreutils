@@ -1782,7 +1782,7 @@
 +}
 +#endif
 --- coreutils-5.97/src/stat.c.selinux	2005-12-15 21:25:53.000000000 +0000
-+++ coreutils-5.97/src/stat.c	2006-11-17 13:56:55.000000000 +0000
++++ coreutils-5.97/src/stat.c	2006-11-23 17:33:50.000000000 +0000
 @@ -42,6 +42,13 @@
  # endif
  #endif
@@ -1867,7 +1867,7 @@
  		break;
  	      }
  	    break;
-@@ -690,9 +706,17 @@
+@@ -690,9 +706,21 @@
  
  /* Stat the file system and print what we find.  */
  static bool
@@ -1877,16 +1877,20 @@
    STRUCT_STATVFS statfsbuf;
 +  SECURITY_ID_T scontext = NULL;
 +#ifdef WITH_SELINUX
-+  if(secure)
++  if(is_selinux_enabled()) {
 +    if (getfilecon(filename,&scontext)<0) {
-+      perror (filename);
-+      return false;
++      if (secure) {
++        perror (filename);
++        return false;
++      }
++      scontext = NULL;
 +    }
++  }
 +#endif
  
    if (STATFS (filename, &statfsbuf) != 0)
      {
-@@ -703,25 +727,46 @@
+@@ -703,25 +731,46 @@
  
    if (format == NULL)
      {
@@ -1942,18 +1946,18 @@
  
    if ((follow_links ? stat : lstat) (filename, &statbuf) != 0)
      {
-@@ -729,11 +774,29 @@
+@@ -729,11 +778,29 @@
        return false;
      }
  
 +#ifdef WITH_SELINUX
-+  if(secure) {
++  if(is_selinux_enabled()) {
 +    int i;
 +    if (!follow_links) 
 +      i=lgetfilecon(filename, &scontext);
 +    else
 +      i=getfilecon(filename, &scontext);
-+    if (i == -1)
++    if (i == -1 && secure)
 +      {
 +	perror (filename);
 +	return false;
@@ -1973,7 +1977,7 @@
  	}
        else
  	{
-@@ -751,16 +814,30 @@
+@@ -751,16 +818,30 @@
  	    }
  	  else
  	    {
@@ -2011,7 +2015,7 @@
    return true;
  }
  
-@@ -777,6 +854,7 @@
+@@ -777,6 +858,7 @@
  Display file or file system status.\n\
  \n\
    -L, --dereference     follow links\n\
@@ -2019,7 +2023,7 @@
    -f, --file-system     display file system status instead of file status\n\
  "), stdout);
        fputs (_("\
-@@ -836,6 +914,7 @@
+@@ -836,6 +918,7 @@
    %c   Total file nodes in file system\n\
    %d   Free file nodes in file system\n\
    %f   Free blocks in file system\n\
@@ -2027,7 +2031,7 @@
  "), stdout);
        fputs (_("\
    %i   File System ID in hex\n\
-@@ -860,6 +939,7 @@
+@@ -860,6 +943,7 @@
    bool follow_links = false;
    bool fs = false;
    bool terse = false;
@@ -2035,7 +2039,7 @@
    char *format = NULL;
    bool ok = true;
  
-@@ -871,7 +951,7 @@
+@@ -871,7 +955,7 @@
  
    atexit (close_stdout);
  
@@ -2044,7 +2048,7 @@
      {
        switch (c)
  	{
-@@ -898,6 +978,14 @@
+@@ -898,6 +982,14 @@
  	case 't':
  	  terse = true;
  	  break;
@@ -2059,7 +2063,7 @@
  
  	case_GETOPT_HELP_CHAR;
  
-@@ -916,8 +1004,8 @@
+@@ -916,8 +1008,8 @@
  
    for (i = optind; i < argc; i++)
      ok &= (fs

@@ -286,6 +286,7 @@ fi
 
 %changelog
 * Thu Nov 23 2006 Tim Waugh <twaugh@redhat.com>
+- Fixed stat's 'C' format specifier (bug #216676).
 - Misleading 'id -Z root' error message (bug #211089).
 
 * Fri Nov 10 2006 Tim Waugh <twaugh@redhat.com> 5.97-14
