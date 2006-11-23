@@ -285,6 +285,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Nov 23 2006 Tim Waugh <twaugh@redhat.com>
+- Misleading 'id -Z root' error message (bug #211089).
+
 * Fri Nov 10 2006 Tim Waugh <twaugh@redhat.com> 5.97-14
 - Clarified runcon man page (bug #213846).
 
