@@ -2138,8 +2138,8 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-5.97/src/id.c.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/id.c	2006-11-23 17:05:07.000000000 +0000
+--- coreutils-5.97/src/id.c	2006-11-23 17:05:07.000000000 +0000
++++ coreutils-5.97/src/id.c	2006-11-24 18:29:34.000000000 +0000
 @@ -37,6 +37,20 @@
  
  int getugroups ();
@@ -2226,7 +2226,7 @@
 -    error (EXIT_FAILURE, 0, _("cannot print only user and only group"));
 +#ifdef WITH_SELINUX
 +  if (argc - optind == 1)
-+    error (1, 0, _("\
++    if (just_context) error (1, 0, _("\
 +cannot print security context when user specified"));
 +
 +  if( just_context  && !selinux_enabled)
@@ -2260,9 +2260,7 @@
    else
      print_full_info (argv[optind]);
    putchar ('\n');
-@@ -407,4 +464,9 @@
-     free (groups);
-   }
+@@ -409,2 +466,7 @@
  #endif /* HAVE_GETGROUPS */
 +#ifdef WITH_SELINUX
 +  if ( context != NULL ) {

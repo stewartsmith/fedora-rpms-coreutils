@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 5.97
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -285,6 +285,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Nov 24 2006 Tim Waugh <twaugh@redhat.com> 5.97-16
+- Unbreak id (bug #217177).
+
 * Thu Nov 23 2006 Tim Waugh <twaugh@redhat.com> 5.97-15
 - Fixed stat's 'C' format specifier (bug #216676).
 - Misleading 'id -Z root' error message (bug #211089).
