@@ -135,16 +135,7 @@
    pam_end(pamh, 0);
    if (!same_session)
      setsid ();
-@@ -647,6 +692,8 @@
- Change the effective user id and group id to that of USER.\n\
- \n\
-   -, -l, --login               make the shell a login shell\n\
-+  -g --group=group             specify the primary group\n\
-+  -G --supp-group=group        specify a supplemental group\n\
-   -c, --commmand=COMMAND       pass a single COMMAND to the shell with -c\n\
-   --session-command=COMMAND    pass a single COMMAND to the shell with -c\n\
-                                and do not create a new session\n\
-@@ -676,6 +723,12 @@
+@@ -676,6 +721,12 @@
    char *shell = NULL;
    struct passwd *pw;
    struct passwd pw_copy;
@@ -157,7 +148,7 @@
  
    initialize_main (&argc, &argv);
    program_name = argv[0];
-@@ -690,7 +743,11 @@
+@@ -690,7 +741,11 @@
    simulate_login = false;
    change_environment = true;
  
@@ -170,7 +161,7 @@
      {
        switch (optc)
  	{
-@@ -720,6 +777,28 @@
+@@ -720,6 +775,28 @@
  	  shell = optarg;
  	  break;
  
@@ -199,7 +190,7 @@
  	case_GETOPT_HELP_CHAR;
  
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
-@@ -758,7 +837,20 @@
+@@ -758,7 +835,20 @@
  			  : DEFAULT_SHELL);
    endpwent ();
  
@@ -221,7 +212,7 @@
      {
  #ifdef SYSLOG_FAILURE
        log_su (pw, false);
-@@ -790,8 +882,16 @@
+@@ -790,8 +880,16 @@
    modify_environment (pw, shell);
  
  #ifndef USE_PAM

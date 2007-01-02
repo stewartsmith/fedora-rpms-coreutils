@@ -285,6 +285,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Jan  2 2007 Tim Waugh <twaugh@redhat.com>
+- Prevent 'su --help' showing runuser-only options such as --group.
+
 * Fri Nov 24 2006 Tim Waugh <twaugh@redhat.com> 5.97-16
 - Unbreak id (bug #217177).
 
