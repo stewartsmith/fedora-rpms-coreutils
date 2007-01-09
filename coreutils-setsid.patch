@@ -1,6 +1,6 @@
---- coreutils-5.97/src/su.c.setsid	2006-07-21 14:09:29.000000000 +0100
-+++ coreutils-5.97/src/su.c	2006-07-21 14:20:28.000000000 +0100
-@@ -199,9 +199,13 @@
+--- coreutils-6.7/src/su.c.setsid	2007-01-09 17:26:26.000000000 +0000
++++ coreutils-6.7/src/su.c	2007-01-09 17:26:57.000000000 +0000
+@@ -176,9 +176,13 @@
  /* If true, change some environment vars to indicate the user su'd to.  */
  static bool change_environment;
  
@@ -14,7 +14,7 @@
    {"fast", no_argument, NULL, 'f'},
    {"login", no_argument, NULL, 'l'},
    {"preserve-environment", no_argument, NULL, 'p'},
-@@ -497,6 +501,8 @@
+@@ -478,6 +482,8 @@
    if (child == 0) {  /* child shell */
    change_identity (pw);
    pam_end(pamh, 0);
@@ -23,7 +23,7 @@
  #endif
  
    if (simulate_login)
-@@ -551,13 +557,27 @@
+@@ -532,13 +538,27 @@
      sigemptyset(&action.sa_mask);
      action.sa_flags = 0;
      sigemptyset(&ourset);
@@ -55,16 +55,16 @@
    }
    if (!caught) {
      do {
-@@ -628,6 +648,8 @@
+@@ -609,6 +629,8 @@
  \n\
    -, -l, --login               make the shell a login shell\n\
-   -c, --commmand=COMMAND       pass a single COMMAND to the shell with -c\n\
+   -c, --command=COMMAND        pass a single COMMAND to the shell with -c\n\
 +  --session-command=COMMAND    pass a single COMMAND to the shell with -c\n\
 +                               and do not create a new session\n\
    -f, --fast                   pass -f to the shell (for csh or tcsh)\n\
    -m, --preserve-environment   do not reset environment variables\n\
    -p                           same as -m\n\
-@@ -650,6 +672,7 @@
+@@ -631,6 +653,7 @@
    int optc;
    const char *new_user = DEFAULT_USER;
    char *command = NULL;
@@ -72,7 +72,7 @@
    char *shell = NULL;
    struct passwd *pw;
    struct passwd pw_copy;
-@@ -675,6 +698,11 @@
+@@ -656,6 +679,11 @@
  	  command = optarg;
  	  break;
  
@@ -84,7 +84,7 @@
  	case 'f':
  	  fast_startup = true;
  	  break;
-@@ -744,6 +772,9 @@
+@@ -725,6 +753,9 @@
      }
  #endif
  

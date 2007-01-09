@@ -1,55 +1,16 @@
---- coreutils-5.97/doc/coreutils.texi.pam	2006-02-07 08:31:28.000000000 +0000
-+++ coreutils-5.97/doc/coreutils.texi	2006-08-23 10:45:26.000000000 +0100
-@@ -12768,8 +12768,11 @@
- @findex syslog
- @command{su} can optionally be compiled to use @code{syslog} to report
- failed, and optionally successful, @command{su} attempts.  (If the system
--supports @code{syslog}.)  However, GNU @command{su} does not check if the
--user is a member of the @code{wheel} group; see below.
-+supports @code{syslog}.)
-+
-+This version of @command{su} has support for using PAM for
-+authentication.  You can edit @file{/etc/pam.d/su} to customize its
-+behaviour.
+--- coreutils-6.7/src/Makefile.am.pam	2006-11-24 21:28:10.000000000 +0000
++++ coreutils-6.7/src/Makefile.am	2007-01-09 17:00:01.000000000 +0000
+@@ -103,7 +103,7 @@
+ # If necessary, add -lm to resolve use of pow in lib/strtod.c.
+ uptime_LDADD = $(LDADD) $(POW_LIB) $(GETLOADAVG_LIBS)
  
- The program accepts the following options.  Also see @ref{Common options}.
+-su_LDADD = $(LDADD) $(LIB_CRYPT)
++su_LDADD = $(LDADD) $(LIB_CRYPT) @LIB_PAM@
  
-@@ -12850,33 +12853,6 @@
- the exit status of the subshell otherwise
- @end display
- 
--@cindex wheel group, not supported
--@cindex group wheel, not supported
--@cindex fascism
--@subsection Why GNU @command{su} does not support the @samp{wheel} group
--
--(This section is by Richard Stallman.)
--
--@cindex Twenex
--@cindex MIT AI lab
--Sometimes a few of the users try to hold total power over all the
--rest.  For example, in 1984, a few users at the MIT AI lab decided to
--seize power by changing the operator password on the Twenex system and
--keeping it secret from everyone else.  (I was able to thwart this coup
--and give power back to the users by patching the kernel, but I
--wouldn't know how to do that in Unix.)
--
--However, occasionally the rulers do tell someone.  Under the usual
--@command{su} mechanism, once someone learns the root password who
--sympathizes with the ordinary users, he or she can tell the rest.  The
--``wheel group'' feature would make this impossible, and thus cement the
--power of the rulers.
--
--I'm on the side of the masses, not that of the rulers.  If you are
--used to supporting the bosses and sysadmins in whatever they do, you
--might find this idea strange at first.
--
--
- @node Process control
- @chapter Process control
- 
---- coreutils-5.97/src/su.c	2006-08-23 10:45:33.000000000 +0100
-+++ coreutils-5.97/src/su.c	2006-08-24 17:04:48.000000000 +0100
+ dir_LDADD += $(LIB_ACL)
+ ls_LDADD += $(LIB_ACL)
+--- coreutils-6.7/src/su.c.pam	2007-01-09 17:00:01.000000000 +0000
++++ coreutils-6.7/src/su.c	2007-01-09 17:16:43.000000000 +0000
 @@ -38,6 +38,16 @@
     restricts who can su to UID 0 accounts.  RMS considers that to
     be fascist.
@@ -64,10 +25,10 @@
 +
 +#endif
 +
-    Options:
-    -, -l, --login	Make the subshell a login shell.
- 			Unset all environment variables except
-@@ -81,6 +91,15 @@
+    Compile-time options:
+    -DSYSLOG_SUCCESS	Log successful su's (by default, to root) with syslog.
+    -DSYSLOG_FAILURE	Log failed su's (by default, to root) with syslog.
+@@ -59,6 +69,15 @@
     prototype (returning `int') in <unistd.h>.  */
  #define getusershell _getusershell_sys_proto_
  
@@ -81,19 +42,18 @@
 +#endif /* USE_PAM */
 +
  #include "system.h"
- #include "dirname.h"
+ #include "getpass.h"
  
-@@ -150,7 +169,9 @@
+@@ -128,15 +147,22 @@
  /* The user to become if none is specified.  */
  #define DEFAULT_USER "root"
  
 +#ifndef USE_PAM
  char *crypt ();
 +#endif
- char *getpass ();
  char *getusershell ();
  void endusershell ();
-@@ -158,8 +179,13 @@
+ void setusershell ();
  
  extern char **environ;
  
@@ -108,7 +68,7 @@
  
  /* The name this program was run with.  */
  char *program_name;
-@@ -248,7 +274,26 @@
+@@ -225,7 +251,26 @@
  }
  #endif
  
@@ -135,7 +95,7 @@
     Return true if the user gives the correct password for entry PW,
     false if not.  Return true without asking for a password if run by UID 0
     or if PW has an empty password.  */
-@@ -256,6 +301,44 @@
+@@ -233,6 +278,44 @@
  static bool
  correct_password (const struct passwd *pw)
  {
@@ -180,7 +140,7 @@
    char *unencrypted, *encrypted, *correct;
  #if HAVE_GETSPNAM && HAVE_STRUCT_SPWD_SP_PWDP
    /* Shadow passwd stuff for SVR3 and maybe other systems.  */
-@@ -280,6 +363,7 @@
+@@ -257,6 +340,7 @@
    encrypted = crypt (unencrypted, correct);
    memset (unencrypted, 0, strlen (unencrypted));
    return STREQ (encrypted, correct);
@@ -188,7 +148,7 @@
  }
  
  /* Update `environ' for the new shell based on PW, with SHELL being
-@@ -293,12 +377,18 @@
+@@ -270,12 +354,18 @@
        /* Leave TERM unchanged.  Set HOME, SHELL, USER, LOGNAME, PATH.
           Unset all other environment variables.  */
        char const *term = getenv ("TERM");
@@ -207,7 +167,7 @@
        xsetenv ("HOME", pw->pw_dir);
        xsetenv ("SHELL", shell);
        xsetenv ("USER", pw->pw_name);
-@@ -331,8 +421,13 @@
+@@ -308,8 +398,13 @@
  {
  #ifdef HAVE_INITGROUPS
    errno = 0;
@@ -222,7 +182,7 @@
    endgrent ();
  #endif
    if (setgid (pw->pw_gid))
-@@ -341,6 +436,31 @@
+@@ -318,6 +413,31 @@
      error (EXIT_FAIL, errno, _("cannot set user id"));
  }
  
@@ -254,7 +214,7 @@
  /* Run SHELL, or DEFAULT_SHELL if SHELL is empty.
     If COMMAND is nonzero, pass it to the shell with the -c option.
     Pass ADDITIONAL_ARGS to the shell as more arguments; there
-@@ -348,17 +468,49 @@
+@@ -325,17 +445,49 @@
  
  static void
  run_shell (char const *shell, char const *command, char **additional_args,
@@ -302,10 +262,10 @@
 +      if(chdir(pw->pw_dir))
 +	      error(0, errno, _("warning: cannot change directory to %s"), pw->pw_dir);
 +
-       shell_basename = base_name (shell);
+       shell_basename = last_component (shell);
        arg0 = xmalloc (strlen (shell_basename) + 2);
        arg0[0] = '-';
-@@ -383,6 +535,66 @@
+@@ -360,6 +512,66 @@
      error (0, errno, "%s", shell);
      exit (exit_status);
    }
@@ -372,7 +332,9 @@
  }
  
  /* Return true if SHELL is a restricted shell (one not returned by
-@@ -552,7 +764,7 @@
+@@ -527,9 +739,9 @@
+   shell = xstrdup (shell ? shell : pw->pw_shell);
+   modify_environment (pw, shell);
  
 +#ifndef USE_PAM
    change_identity (pw);
@@ -383,22 +345,61 @@
 -  run_shell (shell, command, argv + optind, MAX (0, argc - optind));
 +  run_shell (shell, command, argv + optind, MAX (0, argc - optind), pw);
  }
---- coreutils-5.97/src/Makefile.am.pam	2006-08-23 10:45:26.000000000 +0100
-+++ coreutils-5.97/src/Makefile.am	2006-08-23 10:45:26.000000000 +0100
-@@ -92,7 +92,7 @@
+--- coreutils-6.7/doc/coreutils.texi.pam	2006-10-27 15:30:48.000000000 +0100
++++ coreutils-6.7/doc/coreutils.texi	2007-01-09 17:00:01.000000000 +0000
+@@ -13395,8 +13395,11 @@
+ @findex syslog
+ @command{su} can optionally be compiled to use @code{syslog} to report
+ failed, and optionally successful, @command{su} attempts.  (If the system
+-supports @code{syslog}.)  However, GNU @command{su} does not check if the
+-user is a member of the @code{wheel} group; see below.
++supports @code{syslog}.)
++
++This version of @command{su} has support for using PAM for
++authentication.  You can edit @file{/etc/pam.d/su} to customize its
++behaviour.
  
- uptime_LDADD = $(LDADD) $(GETLOADAVG_LIBS)
+ The program accepts the following options.  Also see @ref{Common options}.
  
--su_LDADD = $(LDADD) $(LIB_CRYPT)
-+su_LDADD = $(LDADD) $(LIB_CRYPT) @LIB_PAM@
+@@ -13477,33 +13480,6 @@
+ the exit status of the subshell otherwise
+ @end display
  
- $(PROGRAMS): ../lib/libcoreutils.a
+-@cindex wheel group, not supported
+-@cindex group wheel, not supported
+-@cindex fascism
+-@subsection Why GNU @command{su} does not support the @samp{wheel} group
+-
+-(This section is by Richard Stallman.)
+-
+-@cindex Twenex
+-@cindex MIT AI lab
+-Sometimes a few of the users try to hold total power over all the
+-rest.  For example, in 1984, a few users at the MIT AI lab decided to
+-seize power by changing the operator password on the Twenex system and
+-keeping it secret from everyone else.  (I was able to thwart this coup
+-and give power back to the users by patching the kernel, but I
+-wouldn't know how to do that in Unix.)
+-
+-However, occasionally the rulers do tell someone.  Under the usual
+-@command{su} mechanism, once someone learns the root password who
+-sympathizes with the ordinary users, he or she can tell the rest.  The
+-``wheel group'' feature would make this impossible, and thus cement the
+-power of the rulers.
+-
+-I'm on the side of the masses, not that of the rulers.  If you are
+-used to supporting the bosses and sysadmins in whatever they do, you
+-might find this idea strange at first.
+-
+-
+ @node Process control
+ @chapter Process control
  
---- coreutils-5.97/configure.ac.pam	2006-08-23 10:45:26.000000000 +0100
-+++ coreutils-5.97/configure.ac	2006-08-23 10:45:26.000000000 +0100
-@@ -27,6 +27,13 @@
- AB_INIT()
- AM_INIT_AUTOMAKE([1.8.3 gnits dist-bzip2])
+--- coreutils-6.7/configure.ac.pam	2006-12-07 21:30:24.000000000 +0000
++++ coreutils-6.7/configure.ac	2007-01-09 17:18:04.000000000 +0000
+@@ -39,6 +39,13 @@
+ gl_INIT
+ coreutils_MACROS
  
 +dnl Give the chance to enable PAM
 +AC_ARG_ENABLE(pam, dnl
@@ -407,18 +408,6 @@
 +LIB_PAM="-ldl -lpam -lpam_misc"
 +AC_SUBST(LIB_PAM)])
 +
- gl_DEFAULT_POSIX2_VERSION
- gl_USE_SYSTEM_EXTENSIONS
- gl_PERL
---- coreutils-5.97/config.hin.pam	2006-08-23 10:45:26.000000000 +0100
-+++ coreutils-5.97/config.hin	2006-08-23 10:45:26.000000000 +0100
-@@ -1537,6 +1537,9 @@
- /* Define if you want access control list support. */
- #undef USE_ACL
- 
-+/* Define if you want to use PAM */
-+#undef USE_PAM
-+
- /* Version number of package */
- #undef VERSION
- 
+ AC_CHECK_FUNCS(uname,
+ 	OPTIONAL_BIN_PROGS="$OPTIONAL_BIN_PROGS uname\$(EXEEXT)"
+ 	MAN="$MAN uname.1")

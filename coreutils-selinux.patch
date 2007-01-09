@@ -1,5 +1,666 @@
---- /dev/null	2006-11-23 08:31:37.745607750 +0000
-+++ coreutils-5.97/src/chcon.c	2006-11-17 13:56:55.000000000 +0000
+--- coreutils-6.7/tests/help-version.selinux	2007-01-09 18:24:56.000000000 +0000
++++ coreutils-6.7/tests/help-version	2007-01-09 18:24:57.000000000 +0000
+@@ -72,6 +72,8 @@
+ 
+     # Skip `test'; it doesn't accept --help or --version.
+     test $i = test && continue;
++    test $i = chcon && continue;
++    test $i = runcon && continue;
+ 
+     # false fails even when invoked with --help or --version.
+     if test $i = false; then
+@@ -198,7 +200,7 @@
+ 
+ for i in $all_programs; do
+   # Skip these.
+-  case $i in chroot|stty|tty|false) continue;; esac
++  case $i in chroot|stty|tty|false|chcon|runcon) continue;; esac
+ 
+   rm -rf $tmp_in $tmp_in2 $tmp_dir $tmp_out
+   echo > $tmp_in
+--- coreutils-6.7/src/ls.c.selinux	2006-11-27 10:25:51.000000000 +0000
++++ coreutils-6.7/src/ls.c	2007-01-09 18:36:36.000000000 +0000
+@@ -110,6 +110,18 @@
+ 
+ #define AUTHORS "Richard Stallman", "David MacKenzie"
+ 
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>
++
++static int print_scontext       = 0;
++
++
++
++
++
++
++#endif
++
+ #define obstack_chunk_alloc malloc
+ #define obstack_chunk_free free
+ 
+@@ -132,7 +144,8 @@
+     symbolic_link,
+     sock,
+     whiteout,
+-    arg_directory
++    arg_directory,
++    command_line
+   };
+ 
+ /* Display letters and indicators for each filetype.
+@@ -175,6 +188,10 @@
+     /* For long listings, true if the file has an access control list.  */
+     bool have_acl;
+ #endif
++
++#ifdef WITH_SELINUX
++    security_context_t scontext;
++#endif
+   };
+ 
+ #if USE_ACL
+@@ -245,6 +262,9 @@
+ static void sort_files (void);
+ static void parse_ls_color (void);
+ void usage (int status);
++#ifdef WITH_SELINUX
++static void print_scontext_format (const struct fileinfo *f);
++#endif
+ 
+ /* The name this program was run with.  */
+ char *program_name;
+@@ -353,7 +373,11 @@
+     one_per_line,		/* -1 */
+     many_per_line,		/* -C */
+     horizontal,			/* -x */
+-    with_commas			/* -m */
++    with_commas,	        /* -m */
++#ifdef WITH_SELINUX
++    security_format,		/* -Z */
++#endif
++    invalid_format
+   };
+ 
+ static enum format format;
+@@ -734,6 +758,11 @@
+   SHOW_CONTROL_CHARS_OPTION,
+   SI_OPTION,
+   SORT_OPTION,
++#ifdef WITH_SELINUX
++  CONTEXT_OPTION,
++  LCONTEXT_OPTION,
++  SCONTEXT_OPTION,
++#endif
+   TIME_OPTION,
+   TIME_STYLE_OPTION
+ };
+@@ -780,6 +809,11 @@
+   {"time-style", required_argument, NULL, TIME_STYLE_OPTION},
+   {"color", optional_argument, NULL, COLOR_OPTION},
+   {"block-size", required_argument, NULL, BLOCK_SIZE_OPTION},
++#ifdef WITH_SELINUX
++  {"context", no_argument, 0, CONTEXT_OPTION},
++  {"lcontext", no_argument, 0, LCONTEXT_OPTION},
++  {"scontext", no_argument, 0, SCONTEXT_OPTION},
++#endif
+   {"author", no_argument, NULL, AUTHOR_OPTION},
+   {GETOPT_HELP_OPTION_DECL},
+   {GETOPT_VERSION_OPTION_DECL},
+@@ -789,12 +823,19 @@
+ static char const *const format_args[] =
+ {
+   "verbose", "long", "commas", "horizontal", "across",
+-  "vertical", "single-column", NULL
++  "vertical", "single-column",
++#ifdef WITH_SELINUX
++  "context",
++#endif
++  NULL
+ };
+ static enum format const format_types[] =
+ {
+   long_format, long_format, with_commas, horizontal, horizontal,
+   many_per_line, one_per_line
++#ifdef WITH_SELINUX
++  , security_format
++#endif
+ };
+ ARGMATCH_VERIFY (format_args, format_types);
+ 
+@@ -1218,6 +1259,9 @@
+ 
+   format_needs_stat = sort_type == sort_time || sort_type == sort_size
+     || format == long_format
++#ifdef WITH_SELINUX
++    || format == security_format || print_scontext
++#endif
+     || print_block_size;
+   format_needs_type = (! format_needs_stat
+ 		       && (recursive
+@@ -1248,7 +1292,7 @@
+     }
+   else
+     do
+-      gobble_file (argv[i++], unknown, NOT_AN_INODE_NUMBER, true, "");
++      gobble_file (argv[i++], command_line, NOT_AN_INODE_NUMBER, true, "");
+     while (i < argc);
+ 
+   if (files_index)
+@@ -1411,6 +1455,9 @@
+   ignore_mode = IGNORE_DEFAULT;
+   ignore_patterns = NULL;
+   hide_patterns = NULL;
++#ifdef WITH_SELINUX
++  print_scontext       = 0;
++#endif
+ 
+   /* FIXME: put this in a function.  */
+   {
+@@ -1486,7 +1533,7 @@
+   }
+ 
+   while ((c = getopt_long (argc, argv,
+-			   "abcdfghiklmnopqrstuvw:xABCDFGHI:LNQRST:UX1",
++			   "abcdfghiklmnopqrstuvw:xABCDFGHI:LNQRST:UX1Z",
+ 			   long_options, NULL)) != -1)
+     {
+       switch (c)
+@@ -1609,6 +1656,13 @@
+ 	  format = horizontal;
+ 	  break;
+ 
++#ifdef WITH_SELINUX
++	case 'Z':
++
++	  print_scontext = 1;
++	  format = security_format;
++	  break;
++#endif
+ 	case 'A':
+ 	  if (ignore_mode == IGNORE_DEFAULT)
+ 	    ignore_mode = IGNORE_DOT_AND_DOTDOT;
+@@ -1789,6 +1843,25 @@
+ 
+ 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
+ 
++#ifdef WITH_SELINUX
++
++	case CONTEXT_OPTION: /* new security format */
++
++		print_scontext = 1;
++		format = security_format;
++		break;
++	case LCONTEXT_OPTION: /* long format plus security context */
++
++		print_scontext = 1;
++		format = long_format;
++		break;
++	case SCONTEXT_OPTION: /* short form of new security format */
++
++		print_scontext = 0;
++		format = security_format;
++		break;
++#endif
++
+ 	default:
+ 	  usage (LS_FAILURE);
+ 	}
+@@ -2485,6 +2558,12 @@
+     {
+       free (files[i].name);
+       free (files[i].linkname);
++#ifdef WITH_SELINUX
++      if (files[i].scontext) {
++	freecon (files[i].scontext);
++	files[i].scontext=NULL;
++      }
++#endif
+     }
+ 
+   files_index = 0;
+@@ -2527,6 +2606,9 @@
+   memset (f, '\0', sizeof *f);
+   f->stat.st_ino = inode;
+   f->filetype = type;
++#ifdef WITH_SELINUX
++  f->scontext = NULL;
++#endif
+ 
+   if (command_line_arg
+       || format_needs_stat
+@@ -2574,6 +2656,11 @@
+ 	{
+ 	case DEREF_ALWAYS:
+ 	  err = stat (absolute_name, &f->stat);
++#ifdef WITH_SELINUX
++	  if (err>=0) 
++	    if (format == security_format || print_scontext)
++	      getfilecon(absolute_name, &f->scontext);
++#endif
+ 	  break;
+ 
+ 	case DEREF_COMMAND_LINE_ARGUMENTS:
+@@ -2582,6 +2669,11 @@
+ 	    {
+ 	      bool need_lstat;
+ 	      err = stat (absolute_name, &f->stat);
++#ifdef WITH_SELINUX
++	      if (err>=0) 
++		if (format == security_format || print_scontext)
++		  getfilecon(absolute_name, &f->scontext);
++#endif
+ 
+ 	      if (dereference == DEREF_COMMAND_LINE_ARGUMENTS)
+ 		break;
+@@ -2600,29 +2692,39 @@
+ 
+ 	default: /* DEREF_NEVER */
+ 	  err = lstat (absolute_name, &f->stat);
++#ifdef WITH_SELINUX
++	  if (err == 0)
++	    if (format == security_format || print_scontext)
++	      lgetfilecon(absolute_name, &f->scontext);
++#endif
+ 	  break;
+ 	}
+ 
+-      if (err != 0)
++      f->stat_ok = (err == 0);
++      if (!f->stat_ok)
+ 	{
+ 	  /* Failure to stat a command line argument leads to
+ 	     an exit status of 2.  For other files, stat failure
+ 	     provokes an exit status of 1.  */
+-	  file_failure (command_line_arg,
+-			_("cannot access %s"), absolute_name);
+-	  if (command_line_arg)
+-	    return 0;
++	  if (type == command_line)
++	    {
++	      file_failure (2, _("cannot access %s"), absolute_name);
++	      return 0;
++	    }
+ 
+-	  f->name = xstrdup (name);
++	  f->filetype = type;
++	  memset (&f->stat, '\0', sizeof (f->stat));
++	  f->name = xstrdup (absolute_name);
+ 	  files_index++;
+-
+ 	  return 0;
+ 	}
+ 
+-      f->stat_ok = true;
+-
+ #if USE_ACL
+-      if (format == long_format)
++      if (format == long_format
++#ifdef WITH_SELINUX
++	  || format == security_format
++#endif
++	  )
+ 	{
+ 	  int n = file_has_acl (absolute_name, &f->stat);
+ 	  f->have_acl = (0 < n);
+@@ -3158,6 +3260,16 @@
+ 	  DIRED_PUTCHAR ('\n');
+ 	}
+       break;
++
++#ifdef WITH_SELINUX
++    case security_format:
++      for (i = 0; i < files_index; i++)
++      {
++        print_scontext_format (files + i);
++        DIRED_PUTCHAR ('\n');
++      }
++      break;
++#endif
+     }
+ }
+ 
+@@ -3412,6 +3524,15 @@
+      The latter is wrong when nlink_width is zero.  */
+   p += strlen (p);
+ 
++#ifdef WITH_SELINUX
++
++  if (print_scontext)
++    {
++      sprintf (p, "%-32s ", f->scontext ? f->scontext : "");
++      p += strlen (p);
++    }
++#endif
++
+   DIRED_INDENT ();
+ 
+   if (print_owner | print_group | print_author)
+@@ -4351,6 +4472,16 @@
+   -X                         sort alphabetically by entry extension\n\
+   -1                         list one file per line\n\
+ "), stdout);
++#ifdef WITH_SELINUX
++printf(_("\nSELINUX options:\n\n\
++      --lcontext             Display security context.   Enable -l. Lines\n\
++                               will probably be too wide for most displays.\n\
++      -Z, --context          Display security context so it fits on most\n\
++                               displays.  Displays only mode, user, group,\n\
++                               security context and file name.\n\
++      --scontext             Display only security context and file name.\n\
++\n\n"));
++#endif
+       fputs (HELP_OPTION_DESCRIPTION, stdout);
+       fputs (VERSION_OPTION_DESCRIPTION, stdout);
+       fputs (_("\n\
+@@ -4374,3 +4505,70 @@
+     }
+   exit (status);
+ }
++
++#ifdef WITH_SELINUX
++
++static void
++print_scontext_format (const struct fileinfo *f)
++{
++  char modebuf[12];
++
++  /* 7 fields that may require LONGEST_HUMAN_READABLE bytes,
++     1 10-byte mode string,
++     9 spaces, one following each of these fields, and
++     1 trailing NUL byte.  */
++
++  char init_bigbuf[7 * LONGEST_HUMAN_READABLE + 10  + 9 + 1];
++  char *buf = init_bigbuf;
++  size_t bufsize = sizeof (init_bigbuf);
++  size_t s;
++  char *p;
++  const char *fmt;
++  char *user_name;
++  char *group_name;
++  int rv;
++  char *scontext;
++
++  p = buf;
++
++  if ( print_scontext ) { /* zero means terse listing */
++    filemodestring (&f->stat, modebuf);
++    modebuf[10] = (FILE_HAS_ACL (f) ? '+' : ' ');
++    modebuf[11] = '\0';
++
++    /* print mode */
++
++    (void) sprintf (p, "%s ", modebuf);
++    p += strlen (p);
++
++    /* print standard user and group */
++
++    DIRED_FPUTS (buf, stdout, p - buf);
++    format_user (f->stat.st_uid, owner_width, f->stat_ok);
++    format_group (f->stat.st_gid, group_width, f->stat_ok);
++    p = buf;
++  }
++
++  (void) sprintf (p, "%-32s ", f->scontext ?: "");
++  p += strlen (p);
++ 
++  DIRED_INDENT ();
++  DIRED_FPUTS (buf, stdout, p - buf);
++  print_name_with_quoting (f->name, f->stat.st_mode, f->linkok,
++			   f->stat_ok, f->filetype, &dired_obstack);
++ 
++  if (f->filetype == symbolic_link) {
++      if (f->linkname) {
++	  DIRED_FPUTS_LITERAL (" -> ", stdout);
++	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
++				   f->stat_ok, f->filetype, NULL);
++	  if (indicator_style != none)
++	    print_type_indicator (f->stat_ok, f->linkmode, f->filetype);
++      }
++  }
++  else {
++    if (indicator_style != none)
++      print_type_indicator (f->stat_ok, f->stat.st_mode, f->filetype);
++  }
++}
++#endif
+--- coreutils-6.7/src/cp.c.selinux	2006-12-06 11:04:22.000000000 +0000
++++ coreutils-6.7/src/cp.c	2007-01-09 18:24:57.000000000 +0000
+@@ -51,6 +51,11 @@
+ 
+ #define AUTHORS "Torbjorn Granlund", "David MacKenzie", "Jim Meyering"
+ 
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>          /* for is_selinux_enabled() */
++int selinux_enabled=0;
++#endif
++
+ /* Used by do_copy, make_dir_parents_private, and re_protect
+    to keep a list of leading directories whose protections
+    need to be fixed after copying. */
+@@ -141,6 +146,9 @@
+   {"target-directory", required_argument, NULL, 't'},
+   {"update", no_argument, NULL, 'u'},
+   {"verbose", no_argument, NULL, 'v'},
++#ifdef WITH_SELINUX
++  {"context", required_argument, NULL, 'Z'},
++#endif
+   {GETOPT_HELP_OPTION_DECL},
+   {GETOPT_VERSION_OPTION_DECL},
+   {NULL, 0, NULL, 0}
+@@ -194,6 +202,9 @@
+                                  additional attributes: links, all\n\
+ "), stdout);
+       fputs (_("\
++  -c                           same as --preserve=context\n\
++"), stdout);
++      fputs (_("\
+       --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
+       --parents                use full source file name under DIRECTORY\n\
+ "), stdout);
+@@ -219,6 +230,7 @@
+                                  destination file is missing\n\
+   -v, --verbose                explain what is being done\n\
+   -x, --one-file-system        stay on this file system\n\
++  -Z, --context=CONTEXT        set security context of copy to CONTEXT\n\
+ "), stdout);
+       fputs (HELP_OPTION_DESCRIPTION, stdout);
+       fputs (VERSION_OPTION_DESCRIPTION, stdout);
+@@ -736,6 +748,11 @@
+   x->preserve_mode = false;
+   x->preserve_timestamps = false;
+ 
++#ifdef WITH_SELINUX
++  x->preserve_security_context = false;
++  x->set_security_context = false;
++#endif
++
+   x->require_preserve = false;
+   x->recursive = false;
+   x->sparse_mode = SPARSE_AUTO;
+@@ -763,18 +780,19 @@
+       PRESERVE_TIMESTAMPS,
+       PRESERVE_OWNERSHIP,
+       PRESERVE_LINK,
++      PRESERVE_CONTEXT,
+       PRESERVE_ALL
+     };
+   static enum File_attribute const preserve_vals[] =
+     {
+       PRESERVE_MODE, PRESERVE_TIMESTAMPS,
+-      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_ALL
++      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_CONTEXT, PRESERVE_ALL
+     };
+   /* Valid arguments to the `--preserve' option. */
+   static char const* const preserve_args[] =
+     {
+       "mode", "timestamps",
+-      "ownership", "links", "all", NULL
++      "ownership", "links", "context", "all", NULL
+     };
+   ARGMATCH_VERIFY (preserve_args, preserve_vals);
+ 
+@@ -810,11 +828,16 @@
+ 	  x->preserve_links = on_off;
+ 	  break;
+ 
++	case PRESERVE_CONTEXT:
++	  x->preserve_security_context = on_off;
++	  break;
++
+ 	case PRESERVE_ALL:
+ 	  x->preserve_mode = on_off;
+ 	  x->preserve_timestamps = on_off;
+ 	  x->preserve_ownership = on_off;
+ 	  x->preserve_links = on_off;
++	  x->preserve_security_context = on_off;
+ 	  break;
+ 
+ 	default:
+@@ -839,6 +862,9 @@
+   bool copy_contents = false;
+   char *target_directory = NULL;
+   bool no_target_directory = false;
++#ifdef WITH_SELINUX
++  selinux_enabled= (is_selinux_enabled()>0);
++#endif
+ 
+   initialize_main (&argc, &argv);
+   program_name = argv[0];
+@@ -854,7 +880,11 @@
+      we'll actually use backup_suffix_string.  */
+   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+ 
++#ifdef WITH_SELINUX
++  while ((c = getopt_long (argc, argv, "abcdfHilLprst:uvxPRS:TZ:",
++#else
+   while ((c = getopt_long (argc, argv, "abdfHilLprst:uvxPRS:T",
++#endif
+ 			   long_opts, NULL))
+ 	 != -1)
+     {
+@@ -865,12 +895,13 @@
+ 				     sparse_type_string, sparse_type);
+ 	  break;
+ 
+-	case 'a':		/* Like -dpPR. */
++	case 'a':		/* Like -dpPRc. */
+ 	  x.dereference = DEREF_NEVER;
+ 	  x.preserve_links = true;
+ 	  x.preserve_ownership = true;
+ 	  x.preserve_mode = true;
+ 	  x.preserve_timestamps = true;
++	  x.preserve_security_context = true;
+ 	  x.require_preserve = true;
+ 	  x.recursive = true;
+ 	  break;
+@@ -945,6 +976,36 @@
+ 	case 'R':
+ 	  x.recursive = true;
+ 	  break;
++#ifdef WITH_SELINUX
++	case 'c':
++	  if ( x.set_security_context ) { 
++	      (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
++	    exit( 1 );
++	  }
++	  else if (selinux_enabled) 
++	    x.preserve_security_context = true;
++	  break;
++
++	case 'Z':
++	  /* politely decline if we're not on a selinux-enabled kernel. */
++	  if( !selinux_enabled ) {
++	    fprintf( stderr, "Warning:  ignoring --context (-Z). "
++		             "It requires a SELinux enabled kernel.\n" );
++	    break;
++	  }
++	  if ( x.preserve_security_context ) {
++	    (void) fprintf(stderr, "%s: cannot force target context to '%s' and preserve it\n", argv[0], optarg);
++	    exit( 1 );
++	  }
++	  x.set_security_context = true;
++	  /* if there's a security_context given set new path 
++	     components to that context, too */
++	  if ( setfscreatecon(optarg) < 0 ) {
++	    (void) fprintf(stderr, _("cannot set default security context %s\n"), optarg);
++	    exit( 1 );
++	  }
++	  break;
++#endif
+ 
+ 	case REPLY_OPTION: /* Deprecated */
+ 	  x.interactive = XARGMATCH ("--reply", optarg,
+--- coreutils-6.7/src/Makefile.am.selinux	2007-01-09 18:24:56.000000000 +0000
++++ coreutils-6.7/src/Makefile.am	2007-01-09 18:24:57.000000000 +0000
+@@ -20,14 +20,14 @@
+ EXTRA_PROGRAMS = chroot df hostid nice pinky stty su runuser uname uptime users who
+ 
+ bin_SCRIPTS = groups
+-bin_PROGRAMS = [ chgrp chown chmod cp dd dircolors du \
++bin_PROGRAMS = [ chcon chgrp chown chmod cp dd dircolors du \
+   ginstall link ln dir vdir ls mkdir \
+   mkfifo mknod mv nohup readlink rm rmdir shred stat sync touch unlink \
+   cat cksum comm csplit cut expand fmt fold head join md5sum \
+   nl od paste pr ptx sha1sum sha224sum sha256sum sha384sum sha512sum \
+   shuf sort split sum tac tail tr tsort unexpand uniq wc \
+   basename date dirname echo env expr factor false \
+-  hostname id kill logname pathchk printenv printf pwd seq sleep tee \
++  hostname id kill logname pathchk printenv printf pwd runcon seq sleep tee \
+   test true tty whoami yes \
+   base64 \
+   $(OPTIONAL_BIN_PROGS) $(DF_PROG)
+@@ -61,9 +61,9 @@
+ LDADD = ../lib/libcoreutils.a $(LIBINTL) ../lib/libcoreutils.a
+ 
+ # for eaccess in lib/euidaccess.c.
+-cp_LDADD = $(LDADD) $(LIB_EACCESS)
+-ginstall_LDADD = $(LDADD) $(LIB_EACCESS)
+-mv_LDADD = $(LDADD) $(LIB_EACCESS)
++cp_LDADD = $(LDADD) $(LIB_EACCESS) @LIB_SELINUX@
++ginstall_LDADD = $(LDADD) $(LIB_EACCESS) @LIB_SELINUX@
++mv_LDADD = $(LDADD) $(LIB_EACCESS) @LIB_SELINUX@
+ pathchk_LDADD = $(LDADD) $(LIB_EACCESS)
+ rm_LDADD = $(LDADD) $(LIB_EACCESS)
+ test_LDADD = $(LDADD) $(LIB_EACCESS)
+@@ -72,12 +72,19 @@
+ 
+ # for clock_gettime and fdatasync
+ dd_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
+-dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+-ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
++dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIB_SELINUX@
++ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIB_SELINUX@
+ pr_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+ shred_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
+ shuf_LDADD = $(LDADD) $(LIB_GETHRXTIME)
+-vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
++vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIB_SELINUX@
++chcon_LDADD = $(LDADD) @LIB_SELINUX@
++id_LDADD = $(LDADD) @LIB_SELINUX@
++mkdir_LDADD = $(LDADD) @LIB_SELINUX@
++mkfifo_LDADD = $(LDADD) @LIB_SELINUX@
++mknod_LDADD = $(LDADD) @LIB_SELINUX@
++stat_LDADD = $(LDADD) @LIB_SELINUX@
++runcon_LDADD = $(LDADD) @LIB_SELINUX@
+ 
+ ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
+ sort_LDADD = $(LDADD) $(POW_LIB) $(LIB_GETHRXTIME)
+--- coreutils-6.7/src/copy.h.selinux	2006-12-06 11:04:22.000000000 +0000
++++ coreutils-6.7/src/copy.h	2007-01-09 18:24:57.000000000 +0000
+@@ -127,6 +127,10 @@
+   bool preserve_ownership;
+   bool preserve_mode;
+   bool preserve_timestamps;
++#ifdef WITH_SELINUX
++  bool preserve_security_context;
++  bool set_security_context;
++#endif
+ 
+   /* Enabled for mv, and for cp by the --preserve=links option.
+      If true, attempt to preserve in the destination files any
+--- /dev/null	2007-01-09 12:27:07.480840763 +0000
++++ coreutils-6.7/src/chcon.c	2007-01-09 18:24:57.000000000 +0000
 @@ -0,0 +1,421 @@
 +/* chcontext -- change security context of a pathname */
 +
@@ -422,45 +1083,9 @@
 +    freecon(ref_context);
 +  exit (errors);
 +}
---- coreutils-5.97/src/mv.c.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/mv.c	2006-11-17 13:56:55.000000000 +0000
-@@ -34,6 +34,11 @@
- #include "quote.h"
- #include "remove.h"
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>          /* for is_selinux_enabled() */
-+int selinux_enabled=0;
-+#endif
-+
- /* The official name of this program (e.g., no `g' prefix).  */
- #define PROGRAM_NAME "mv"
- 
-@@ -127,6 +132,10 @@
-   x->preserve_links = true;
-   x->preserve_mode = true;
-   x->preserve_timestamps = true;
-+#ifdef WITH_SELINUX
-+  x->preserve_security_context = true;
-+  x->set_security_context = false;
-+#endif
-   x->require_preserve = false;  /* FIXME: maybe make this an option */
-   x->recursive = true;
-   x->sparse_mode = SPARSE_AUTO;  /* FIXME: maybe make this an option */
-@@ -359,6 +368,10 @@
- 
-   cp_option_init (&x);
- 
-+#ifdef WITH_SELINUX
-+  selinux_enabled= (is_selinux_enabled()>0);
-+#endif
-+
-   /* FIXME: consider not calling getenv for SIMPLE_BACKUP_SUFFIX unless
-      we'll actually use backup_suffix_string.  */
-   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
---- coreutils-5.97/src/mkdir.c.selinux	2005-06-15 00:55:47.000000000 +0100
-+++ coreutils-5.97/src/mkdir.c	2006-11-17 13:56:55.000000000 +0000
-@@ -34,11 +34,18 @@
+--- coreutils-6.7/src/mkdir.c.selinux	2006-10-22 17:54:15.000000000 +0100
++++ coreutils-6.7/src/mkdir.c	2007-01-09 18:24:57.000000000 +0000
+@@ -35,11 +35,18 @@
  
  #define AUTHORS "David MacKenzie"
  
@@ -479,7 +1104,7 @@
    {"mode", required_argument, NULL, 'm'},
    {"parents", no_argument, NULL, 'p'},
    {"verbose", no_argument, NULL, 'v'},
-@@ -60,6 +67,11 @@
+@@ -61,6 +68,11 @@
  Create the DIRECTORY(ies), if they do not already exist.\n\
  \n\
  "), stdout);
@@ -491,7 +1116,7 @@
        fputs (_("\
  Mandatory arguments to long options are mandatory for short options too.\n\
  "), stdout);
-@@ -95,7 +107,11 @@
+@@ -154,7 +166,11 @@
  
    atexit (close_stdout);
  
@@ -503,9 +1128,9 @@
      {
        switch (optc)
  	{
-@@ -108,6 +124,20 @@
+@@ -167,6 +183,20 @@
  	case 'v': /* --verbose  */
- 	  verbose_fmt_string = _("created directory %s");
+ 	  options.created_directory_format = _("created directory %s");
  	  break;
 +#ifdef WITH_SELINUX
 + 	case 'Z':
@@ -524,406 +1149,598 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-5.97/src/cp.c.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/cp.c	2006-11-17 13:56:55.000000000 +0000
-@@ -52,6 +52,11 @@
- 
- #define AUTHORS "Torbjorn Granlund", "David MacKenzie", "Jim Meyering"
+--- coreutils-6.7/src/stat.c.selinux	2006-11-27 10:25:51.000000000 +0000
++++ coreutils-6.7/src/stat.c	2007-01-09 18:24:58.000000000 +0000
+@@ -55,6 +55,13 @@
+ # include <fs_info.h>
+ #endif
  
 +#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>          /* for is_selinux_enabled() */
-+int selinux_enabled=0;
++#include <selinux/selinux.h>
++#define SECURITY_ID_T security_context_t
++#else
++#define SECURITY_ID_T char *
 +#endif
 +
- /* Used by do_copy, make_dir_parents_private, and re_protect
-    to keep a list of leading directories whose protections
-    need to be fixed after copying. */
-@@ -142,6 +147,9 @@
-   {"target-directory", required_argument, NULL, 't'},
-   {"update", no_argument, NULL, 'u'},
-   {"verbose", no_argument, NULL, 'v'},
+ #include "system.h"
+ 
+ #include "error.h"
+@@ -158,6 +165,7 @@
+ };
+ 
+ static struct option const long_options[] = {
++  {"context", no_argument, 0, 'Z'},
+   {"dereference", no_argument, NULL, 'L'},
+   {"file-system", no_argument, NULL, 'f'},
+   {"filesystem", no_argument, NULL, 'f'}, /* obsolete and undocumented alias */
+@@ -397,7 +405,7 @@
+ /* print statfs info */
+ static void
+ print_statfs (char *pformat, size_t prefix_len, char m, char const *filename,
+-	      void const *data)
++	      void const *data, SECURITY_ID_T scontext)
+ {
+   STRUCT_STATVFS const *statfsbuf = data;
+ 
+@@ -472,7 +480,10 @@
+     case 'd':
+       out_int (pformat, prefix_len, statfsbuf->f_ffree);
+       break;
+-
++    case 'C':
++      strcat (pformat, "s");
++      printf(scontext);
++      break;
+     default:
+       fputc ('?', stdout);
+       break;
+@@ -482,7 +493,7 @@
+ /* print stat info */
+ static void
+ print_stat (char *pformat, size_t prefix_len, char m,
+-	    char const *filename, void const *data)
++	    char const *filename, void const *data, SECURITY_ID_T scontext)
+ {
+   struct stat *statbuf = (struct stat *) data;
+   struct passwd *pw_ent;
+@@ -595,6 +606,10 @@
+       else
+ 	out_uint (pformat, prefix_len, statbuf->st_ctime);
+       break;
++    case 'C':
++      strcat (pformat, "s");
++      printf(pformat,scontext);
++      break;
+     default:
+       fputc ('?', stdout);
+       break;
+@@ -641,8 +656,9 @@
+ 
+ static void
+ print_it (char const *format, char const *filename,
+-	  void (*print_func) (char *, size_t, char, char const *, void const *),
+-	  void const *data)
++	  void (*print_func) (char *, size_t, char, char const *, void const *,
++			      SECURITY_ID_T ),
++	  void const *data, SECURITY_ID_T scontext)
+ {
+   /* Add 2 to accommodate our conversion of the stat `%s' format string
+      to the longer printf `%llu' one.  */
+@@ -683,7 +699,7 @@
+ 		putchar ('%');
+ 		break;
+ 	      default:
+-		print_func (dest, len + 1, *fmt_char, filename, data);
++		print_func (dest, len + 1, *fmt_char, filename, data, scontext);
+ 		break;
+ 	      }
+ 	    break;
+@@ -746,9 +762,21 @@
+ 
+ /* Stat the file system and print what we find.  */
+ static bool
+-do_statfs (char const *filename, bool terse, char const *format)
++do_statfs (char const *filename, bool terse, bool secure, char const *format)
+ {
+   STRUCT_STATVFS statfsbuf;
++  SECURITY_ID_T scontext = NULL;
 +#ifdef WITH_SELINUX
-+  {"context", required_argument, NULL, 'Z'},
++  if(is_selinux_enabled()) {
++    if (getfilecon(filename,&scontext)<0) {
++      if (secure) {
++        perror (filename);
++        return false;
++      }
++      scontext = NULL;
++    }
++  }
 +#endif
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-   {NULL, 0, NULL, 0}
-@@ -195,6 +203,9 @@
-                                  additional attributes: links, all\n\
+ 
+   if (STATFS (filename, &statfsbuf) != 0)
+     {
+@@ -759,25 +787,46 @@
+ 
+   if (format == NULL)
+     {
+-      format = (terse
+-		? "%n %i %l %t %s %S %b %f %a %c %d\n"
+-		: "  File: \"%n\"\n"
+-		"    ID: %-8i Namelen: %-7l Type: %T\n"
+-		"Block size: %-10s Fundamental block size: %S\n"
+-		"Blocks: Total: %-10b Free: %-10f Available: %a\n"
+-		"Inodes: Total: %-10c Free: %d\n");
++      if (terse)
++	{
++	  if (secure)
++	    format = "%n %i %l %t %s %S %b %f %a %c %d %C\n";
++	  else
++	    format = "%n %i %l %t %s %S %b %f %a %c %d\n";
++	}
++      else
++	{
++	  if (secure)
++	    format = "  File: \"%n\"\n"
++	      "    ID: %-8i Namelen: %-7l Type: %T\n"
++	      "Block size: %-10s Fundamental block size: %S\n"
++	      "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++	      "Inodes: Total: %-10c Free: %d\n"
++	      "   S_Context: %C\n";
++	  else
++	    format = "  File: \"%n\"\n"
++	      "    ID: %-8i Namelen: %-7l Type: %T\n"
++	      "Block size: %-10s Fundamental block size: %S\n"
++	      "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++	      "Inodes: Total: %-10c Free: %d\n";
++	}
+     }
+ 
+-  print_it (format, filename, print_statfs, &statfsbuf);
++  print_it (format, filename, print_statfs, &statfsbuf, scontext);
++#ifdef WITH_SELINUX
++  if (scontext != NULL)
++    freecon(scontext);
++#endif
+   return true;
+ }
+ 
+ /* stat the file and print what we find */
+ static bool
+-do_stat (char const *filename, bool follow_links, bool terse,
++do_stat (char const *filename, bool follow_links, bool terse, bool secure,
+ 	 char const *format)
+ {
+   struct stat statbuf;
++  SECURITY_ID_T scontext = NULL;
+ 
+   if ((follow_links ? stat : lstat) (filename, &statbuf) != 0)
+     {
+@@ -785,11 +834,29 @@
+       return false;
+     }
+ 
++#ifdef WITH_SELINUX
++  if(is_selinux_enabled()) {
++    int i;
++    if (!follow_links) 
++      i=lgetfilecon(filename, &scontext);
++    else
++      i=getfilecon(filename, &scontext);
++    if (i == -1 && secure)
++      {
++	perror (filename);
++	return false;
++      }
++  }
++#endif
++
+   if (format == NULL)
+     {
+       if (terse)
+ 	{
+-	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
++	   if (secure)
++	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
++	   else
++	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
+ 	}
+       else
+ 	{
+@@ -807,16 +874,30 @@
+ 	    }
+ 	  else
+ 	    {
+-	      format =
+-		"  File: %N\n"
+-		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
+-		"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
+-		"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
+-		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
++	      if (secure)
++		format =
++		  "  File: %N\n"
++		  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++		  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
++		  " Device type: %t,%T\n"
++		  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++		  "   S_Context: %C\n"
++		  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
++	      else
++		format =
++		  "  File: %N\n"
++		  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++		  "Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
++		  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++		  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
+ 	    }
+ 	}
+     }
+-  print_it (format, filename, print_stat, &statbuf);
++  print_it (format, filename, print_stat, &statbuf, scontext);
++#ifdef WITH_SELINUX
++  if (scontext) 
++    freecon(scontext);
++#endif
+   return true;
+ }
+ 
+@@ -833,6 +914,7 @@
+ Display file or file system status.\n\
+ \n\
+   -L, --dereference     follow links\n\
++  -Z, --context         print the security context \n\
+   -f, --file-system     display file system status instead of file status\n\
  "), stdout);
        fputs (_("\
-+  -c                           same as --preserve=context\n\
-+"), stdout);
-+      fputs (_("\
-       --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
-       --parents                use full source file name under DIRECTORY\n\
+@@ -892,6 +974,7 @@
+   %c   Total file nodes in file system\n\
+   %d   Free file nodes in file system\n\
+   %f   Free blocks in file system\n\
++  %C - Security context in SELinux\n\
  "), stdout);
-@@ -220,6 +231,7 @@
-                                  destination file is missing\n\
-   -v, --verbose                explain what is being done\n\
-   -x, --one-file-system        stay on this file system\n\
-+  -Z, --context=CONTEXT        set security context of copy to CONTEXT\n\
- "), stdout);
-       fputs (HELP_OPTION_DESCRIPTION, stdout);
-       fputs (VERSION_OPTION_DESCRIPTION, stdout);
-@@ -737,6 +749,11 @@
-   x->preserve_mode = false;
-   x->preserve_timestamps = false;
+       fputs (_("\
+   %i   File System ID in hex\n\
+@@ -916,6 +999,7 @@
+   bool follow_links = false;
+   bool fs = false;
+   bool terse = false;
++  bool secure = false;
+   char *format = NULL;
+   bool ok = true;
  
-+#ifdef WITH_SELINUX
-+  x->preserve_security_context = false;
-+  x->set_security_context = false;
-+#endif
-+
-   x->require_preserve = false;
-   x->recursive = false;
-   x->sparse_mode = SPARSE_AUTO;
-@@ -764,18 +781,19 @@
-       PRESERVE_TIMESTAMPS,
-       PRESERVE_OWNERSHIP,
-       PRESERVE_LINK,
-+      PRESERVE_CONTEXT,
-       PRESERVE_ALL
-     };
-   static enum File_attribute const preserve_vals[] =
+@@ -927,7 +1011,7 @@
+ 
+   atexit (close_stdout);
+ 
+-  while ((c = getopt_long (argc, argv, "c:fLt", long_options, NULL)) != -1)
++  while ((c = getopt_long (argc, argv, "c:fLtZ", long_options, NULL)) != -1)
      {
-       PRESERVE_MODE, PRESERVE_TIMESTAMPS,
--      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_ALL
-+      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_CONTEXT, PRESERVE_ALL
-     };
-   /* Valid arguments to the `--preserve' option. */
-   static char const* const preserve_args[] =
-     {
-       "mode", "timestamps",
--      "ownership", "links", "all", NULL
-+      "ownership", "links", "context", "all", NULL
-     };
-   ARGMATCH_VERIFY (preserve_args, preserve_vals);
- 
-@@ -811,11 +829,16 @@
- 	  x->preserve_links = on_off;
+       switch (c)
+ 	{
+@@ -954,6 +1038,14 @@
+ 	case 't':
+ 	  terse = true;
  	  break;
- 
-+	case PRESERVE_CONTEXT:
-+	  x->preserve_security_context = on_off;
-+	  break;
-+
- 	case PRESERVE_ALL:
- 	  x->preserve_mode = on_off;
- 	  x->preserve_timestamps = on_off;
- 	  x->preserve_ownership = on_off;
- 	  x->preserve_links = on_off;
-+	  x->preserve_security_context = on_off;
- 	  break;
- 
- 	default:
-@@ -840,6 +863,9 @@
-   bool copy_contents = false;
-   char *target_directory = NULL;
-   bool no_target_directory = false;
-+#ifdef WITH_SELINUX
-+  selinux_enabled= (is_selinux_enabled()>0);
-+#endif
- 
-   initialize_main (&argc, &argv);
-   program_name = argv[0];
-@@ -855,7 +881,11 @@
-      we'll actually use backup_suffix_string.  */
-   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
- 
-+#ifdef WITH_SELINUX
-+  while ((c = getopt_long (argc, argv, "abcdfHilLprst:uvxPRS:TZ:",
-+#else
-   while ((c = getopt_long (argc, argv, "abdfHilLprst:uvxPRS:T",
-+#endif
- 			   long_opts, NULL))
- 	 != -1)
-     {
-@@ -866,12 +896,13 @@
- 				     sparse_type_string, sparse_type);
- 	  break;
- 
--	case 'a':		/* Like -dpPR. */
-+	case 'a':		/* Like -dpPRc. */
- 	  x.dereference = DEREF_NEVER;
- 	  x.preserve_links = true;
- 	  x.preserve_ownership = true;
- 	  x.preserve_mode = true;
- 	  x.preserve_timestamps = true;
-+	  x.preserve_security_context = true;
- 	  x.require_preserve = true;
- 	  x.recursive = true;
- 	  break;
-@@ -946,6 +977,36 @@
- 	case 'R':
- 	  x.recursive = true;
- 	  break;
-+#ifdef WITH_SELINUX
-+	case 'c':
-+	  if ( x.set_security_context ) { 
-+	      (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
-+	    exit( 1 );
-+	  }
-+	  else if (selinux_enabled) 
-+	    x.preserve_security_context = true;
-+	  break;
-+
 +	case 'Z':
-+	  /* politely decline if we're not on a selinux-enabled kernel. */
-+	  if( !selinux_enabled ) {
-+	    fprintf( stderr, "Warning:  ignoring --context (-Z). "
-+		             "It requires a SELinux enabled kernel.\n" );
-+	    break;
-+	  }
-+	  if ( x.preserve_security_context ) {
-+	    (void) fprintf(stderr, "%s: cannot force target context to '%s' and preserve it\n", argv[0], optarg);
-+	    exit( 1 );
-+	  }
-+	  x.set_security_context = true;
-+	  /* if there's a security_context given set new path 
-+	     components to that context, too */
-+	  if ( setfscreatecon(optarg) < 0 ) {
-+	    (void) fprintf(stderr, _("cannot set default security context %s\n"), optarg);
-+	    exit( 1 );
++	  if((is_selinux_enabled()>0))
++	    secure = 1;
++	  else {
++	    error (0, 0, _("Kernel is not SELinux enabled"));
++	    usage (EXIT_FAILURE);
 +	  }
 +	  break;
-+#endif
  
- 	case REPLY_OPTION: /* Deprecated */
- 	  x.interactive = XARGMATCH ("--reply", optarg,
---- coreutils-5.97/src/install.c.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/install.c	2006-11-17 13:56:55.000000000 +0000
-@@ -48,6 +48,43 @@
- # include <sys/wait.h>
- #endif
+ 	case_GETOPT_HELP_CHAR;
+ 
+@@ -972,8 +1064,8 @@
+ 
+   for (i = optind; i < argc; i++)
+     ok &= (fs
+-	   ? do_statfs (argv[i], terse, format)
+-	   : do_stat (argv[i], follow_links, terse, format));
++	   ? do_statfs (argv[i], terse, secure, format)
++	   : do_stat (argv[i], follow_links, terse, secure, format));
+ 
+   exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
+ }
+--- coreutils-6.7/src/mkfifo.c.selinux	2006-10-22 17:54:15.000000000 +0100
++++ coreutils-6.7/src/mkfifo.c	2007-01-09 18:24:58.000000000 +0000
+@@ -32,11 +32,18 @@
+ 
+ #define AUTHORS "David MacKenzie"
  
 +#ifdef WITH_SELINUX
 +#include <selinux/selinux.h>          /* for is_selinux_enabled() */
-+int selinux_enabled=0;
-+static int use_default_selinux_context = 1;
-+/* Modify file context to match the specified policy,  
-+   If an error occurs the file will remain with the default directory 
-+   context.*/
-+static void setdefaultfilecon(const char *path) {
-+	struct stat st;
-+	security_context_t scontext=NULL;
-+	if (selinux_enabled != 1) {
-+		/* Indicate no context found. */
-+		return;
-+	}
-+	if (lstat(path, &st) != 0)
-+		return;
-+
-+	/* If there's an error determining the context, or it has none, 
-+	   return to allow default context */
-+	if ((matchpathcon(path, st.st_mode, &scontext) != 0) ||
-+	    (strcmp(scontext, "<<none>>") == 0)) {
-+		if (scontext != NULL) {
-+			freecon(scontext);
-+		}
-+		return;
-+	}
-+	if (lsetfilecon(path, scontext) < 0) {
-+		if (errno != ENOTSUP) {
-+			error (0, errno,
-+			       _("warning: failed to change context of %s to %s"), path, scontext);
-+		}
-+	}
-+	freecon(scontext);
-+	return;
-+}
 +#endif
 +
- #if ! HAVE_ENDGRENT
- # define endgrent() ((void) 0)
- #endif
-@@ -109,12 +146,18 @@
- static struct option const long_options[] =
+ /* The name this program was run with. */
+ char *program_name;
+ 
+ static struct option const longopts[] =
  {
-   {"backup", optional_argument, NULL, 'b'},
 +#ifdef WITH_SELINUX
 +  {"context", required_argument, NULL, 'Z'},
 +#endif
-   {"directory", no_argument, NULL, 'd'},
-   {"group", required_argument, NULL, 'g'},
    {"mode", required_argument, NULL, 'm'},
-   {"no-target-directory", no_argument, NULL, 'T'},
-   {"owner", required_argument, NULL, 'o'},
-   {"preserve-timestamps", no_argument, NULL, 'p'},
+   {GETOPT_HELP_OPTION_DECL},
+   {GETOPT_VERSION_OPTION_DECL},
+@@ -56,6 +63,11 @@
+ Create named pipes (FIFOs) with the given NAMEs.\n\
+ \n\
+ "), stdout);
 +#ifdef WITH_SELINUX
-+  {"preserve_context", no_argument, NULL, 'P'},
++      fputs (_("\
++  -Z, --context=CONTEXT   set security context (quoted string)\n\
++"), stdout);
 +#endif
-   {"strip", no_argument, NULL, 's'},
-   {"suffix", required_argument, NULL, 'S'},
-   {"target-directory", required_argument, NULL, 't'},
-@@ -154,6 +197,10 @@
-   x->stdin_tty = false;
+       fputs (_("\
+ Mandatory arguments to long options are mandatory for short options too.\n\
+ "), stdout);
+@@ -85,13 +97,32 @@
  
-   x->update = false;
-+#ifdef WITH_SELINUX
-+  x->preserve_security_context = false;
-+  x->set_security_context = false;
-+#endif
-   x->verbose = false;
-   x->dest_info = NULL;
-   x->src_info = NULL;
-@@ -195,6 +242,10 @@
-   bool no_target_directory = false;
-   int n_files;
-   char **file;
-+#ifdef WITH_SELINUX
-+ /* set iff kernel has extra selinux system calls */
-+  selinux_enabled = (is_selinux_enabled()>0);
-+#endif
+   atexit (close_stdout);
  
-   initialize_main (&argc, &argv);
-   program_name = argv[0];
-@@ -216,7 +267,11 @@
-      we'll actually use backup_suffix_string.  */
-   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
- 
+-  while ((optc = getopt_long (argc, argv, "m:", longopts, NULL)) != -1)
++  while ((optc = getopt_long (argc, argv, "m:"
 +#ifdef WITH_SELINUX
-+  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pPt:TvS:Z:", long_options,
-+#else
-   while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pt:TvS:", long_options,
++			      "Z:"
 +#endif
- 			      NULL)) != -1)
++			      , longopts, NULL)) != -1)
      {
        switch (optc)
-@@ -278,6 +333,41 @@
- 	case 'T':
- 	  no_target_directory = true;
+ 	{
+ 	case 'm':
+ 	  specified_mode = optarg;
  	  break;
 +#ifdef WITH_SELINUX
-+ 	case 'P':
-+	/* politely decline if we're not on a selinux-enabled kernel. */
-+	  if( !selinux_enabled ) {
-+ 	    fprintf( stderr, "Warning:  ignoring --preserve_context (-P) "
-+		             "because the kernel is not selinux-enabled.\n" );
-+ 	    break;
-+ 	  }
-+ 	  if ( x.set_security_context ) {
-+		  (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
-+ 	    exit( 1 );
-+ 	  }
-+ 	  x.preserve_security_context = true;
-+ 	  use_default_selinux_context = 0;
-+ 	  break ;
 + 	case 'Z':
-+ 	  /* politely decline if we're not on a selinux-enabled kernel. */
-+	  if( !selinux_enabled) {
-+ 	    fprintf( stderr, "Warning:  ignoring --context (-Z) "
-+ 		             "because the kernel is not selinux-enabled.\n" );
-+ 	    break;
-+ 	  }
-+ 	  if ( x.preserve_security_context ) {
-+
-+	     	    (void) fprintf(stderr, "%s: cannot force target context == '%s' and preserve it\n", argv[0], optarg);
-+ 	    exit( 1 );
-+ 	  }
-+ 	  use_default_selinux_context = 0;
-+	  x.set_security_context = true;
-+	  if (setfscreatecon(optarg)) {
-+ 	    (void) fprintf(stderr, "%s: cannot setup default context == '%s'\n", argv[0], optarg);
-+	    exit(1);
-+	  }
++ 	  if (!(is_selinux_enabled()>0))
++	    {
++	      fprintf( stderr, "Sorry, --context (-Z) can be used only on "
++		       "a selinux-enabled kernel.\n" );
++	      exit (1);
++	    }
++	  if (setfscreatecon(optarg))
++	    {
++	      fprintf( stderr, "Sorry, cannot set default context to %s.\n", optarg);
++	      exit (1);
++	    }
 + 	  break;
 +#endif
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
-@@ -519,6 +609,10 @@
-       ok = false;
+--- coreutils-6.7/src/mknod.c.selinux	2006-10-22 17:54:15.000000000 +0100
++++ coreutils-6.7/src/mknod.c	2007-01-09 18:24:58.000000000 +0000
+@@ -36,8 +36,15 @@
+ /* The name this program was run with. */
+ char *program_name;
+ 
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>
++#endif
++
+ static struct option const longopts[] =
+ {
++#ifdef WITH_SELINUX
++  {"context", required_argument, NULL, 'Z'},
++#endif
+   {"mode", required_argument, NULL, 'm'},
+   {GETOPT_HELP_OPTION_DECL},
+   {GETOPT_VERSION_OPTION_DECL},
+@@ -58,6 +65,11 @@
+ Create the special file NAME of the given TYPE.\n\
+ \n\
+ "), stdout);
++#ifdef WITH_SELINUX
++      fputs(_("\
++  -Z, --context=CONTEXT   set security context (quoted string)\n\
++"), stdout);
++#endif
+       fputs (_("\
+ Mandatory arguments to long options are mandatory for short options too.\n\
+ "), stdout);
+@@ -101,13 +113,31 @@
+ 
+   atexit (close_stdout);
+ 
++#ifdef WITH_SELINUX
++  while ((optc = getopt_long (argc, argv, "m:Z:", longopts, NULL)) != -1)
++#else
+   while ((optc = getopt_long (argc, argv, "m:", longopts, NULL)) != -1)
++#endif
+     {
+       switch (optc)
+ 	{
+ 	case 'm':
+ 	  specified_mode = optarg;
+ 	  break;
++#ifdef WITH_SELINUX
++ 	case 'Z':
++ 	  /* politely decline if we're not on a selinux-enabled kernel. */
++	  if( !(is_selinux_enabled()>0)) {
++ 	    fprintf( stderr, "Sorry, --context (-Z) can be used only on "
++		             "a selinux-enabled kernel.\n" );
++ 	    exit( 1 );
++ 	  }
++	  if (setfscreatecon(optarg)) {
++ 	    fprintf( stderr, "Sorry, cannot set default context to %s.\n", optarg);
++ 	    exit( 1 );
++ 	  }
++ 	  break;
++#endif
+ 	case_GETOPT_HELP_CHAR;
+ 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
+ 	default:
+--- coreutils-6.7/src/id.c.selinux	2007-01-09 18:24:57.000000000 +0000
++++ coreutils-6.7/src/id.c	2007-01-09 18:24:58.000000000 +0000
+@@ -37,6 +37,20 @@
+ 
+ int getugroups ();
+ 
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>
++static void print_context (char* context);
++/* Print the SELinux context */
++static void
++print_context(char *context)
++{
++  printf ("%s", context);
++}
++
++/* If nonzero, output only the SELinux context. -Z */
++static int just_context = 0;
++
++#endif
+ static void print_user (uid_t uid);
+ static void print_group (gid_t gid);
+ static void print_group_list (const char *username);
+@@ -55,8 +69,14 @@
+ /* True unless errors have been encountered.  */
+ static bool ok = true;
+ 
++/* The SELinux context */
++/* Set `context' to a known invalid value so print_full_info() will *
++ * know when `context' has not been set to a meaningful value.      */
++static security_context_t context=NULL;
++
+ static struct option const longopts[] =
+ {
++  {"context", no_argument, NULL, 'Z'},
+   {"group", no_argument, NULL, 'g'},
+   {"groups", no_argument, NULL, 'G'},
+   {"name", no_argument, NULL, 'n'},
+@@ -80,6 +100,7 @@
+ Print information for USERNAME, or the current user.\n\
+ \n\
+   -a              ignore, for compatibility with other versions\n\
++  -Z, --context   print only the context of the current process\n\
+   -g, --group     print only the effective group ID\n\
+   -G, --groups    print all group IDs\n\
+   -n, --name      print a name instead of a number, for -ugG\n\
+@@ -101,6 +122,7 @@
+ main (int argc, char **argv)
+ {
+   int optc;
++  int selinux_enabled=(is_selinux_enabled()>0);
+ 
+   /* If true, output the list of all group IDs. -G */
+   bool just_group_list = false;
+@@ -119,13 +141,24 @@
+ 
+   atexit (close_stdout);
+ 
+-  while ((optc = getopt_long (argc, argv, "agnruG", longopts, NULL)) != -1)
++  while ((optc = getopt_long (argc, argv, "agnruGZ", longopts, NULL)) != -1)
+     {
+       switch (optc)
+ 	{
+ 	case 'a':
+ 	  /* Ignore -a, for compatibility with SVR4.  */
+ 	  break;
++#ifdef WITH_SELINUX
++        case 'Z':
++	  /* politely decline if we're not on a selinux-enabled kernel. */
++	  if( !selinux_enabled ) {
++	    fprintf( stderr, "Sorry, --context (-Z) can be used only on "
++		             "a selinux-enabled kernel.\n" );
++	    exit( 1 );
++	  }
++          just_context = 1;
++          break;
++#endif
+ 	case 'g':
+ 	  just_group = true;
+ 	  break;
+@@ -148,8 +181,28 @@
+ 	}
      }
  
+-  if (just_user + just_group + just_group_list > 1)
+-    error (EXIT_FAILURE, 0, _("cannot print only user and only group"));
 +#ifdef WITH_SELINUX
-+  if (use_default_selinux_context)
-+    setdefaultfilecon(name);
-+#endif
-   return ok;
- }
- 
-@@ -663,6 +757,11 @@
-   -T, --no-target-directory  treat DEST as a normal file\n\
-   -v, --verbose       print the name of each directory as it is created\n\
- "), stdout);
-+      fputs (_("\
-+  -P, --preserve_context (SELinux) Preserve security context\n\
-+  -Z, --context=CONTEXT  (SELinux) Set security context of files and directories\n\
-+"), stdout);
++  if (argc - optind == 1)
++    if (just_context) error (1, 0, _("\
++cannot print security context when user specified"));
 +
-       fputs (HELP_OPTION_DESCRIPTION, stdout);
-       fputs (VERSION_OPTION_DESCRIPTION, stdout);
-       fputs (_("\
---- coreutils-5.97/src/copy.h.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/copy.h	2006-11-17 13:56:55.000000000 +0000
-@@ -127,6 +127,10 @@
-   bool preserve_ownership;
-   bool preserve_mode;
-   bool preserve_timestamps;
-+#ifdef WITH_SELINUX
-+  bool preserve_security_context;
-+  bool set_security_context;
++  if( just_context  && !selinux_enabled)
++    error (1, 0, _("\
++cannot display context when selinux not enabled"));
++
++  /* If we are on a selinux-enabled kernel, get our context.    *
++   * Otherwise, leave the context variable alone - it has *
++   * been initialized known invalid value; if we see this invalid   *
++   * value later, we will know we are on a non-selinux kernel.         */
++  if( selinux_enabled )
++    {
++      if (getcon(&context) && just_context)
++        error (1, 0, "can't get process context");
++    }
 +#endif
++
++  if (just_user + just_group + just_group_list + just_context > 1)
++    error (EXIT_FAILURE, 0, _("cannot print \"only\" of more than one choice"));
  
-   /* Enabled for mv, and for cp by the --preserve=links option.
-      If true, attempt to preserve in the destination files any
---- coreutils-5.97/src/Makefile.am.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/Makefile.am	2006-11-17 13:56:55.000000000 +0000
-@@ -20,14 +20,14 @@
- EXTRA_PROGRAMS = chroot df hostid nice pinky stty su runuser uname uptime users who
+   if (just_user + just_group + just_group_list == 0 && (use_real | use_name))
+     error (EXIT_FAILURE, 0,
+@@ -183,6 +236,10 @@
+     print_group (use_real ? rgid : egid);
+   else if (just_group_list)
+     print_group_list (argv[optind]);
++#ifdef WITH_SELINUX
++  else if (just_context)
++    print_context (context);
++#endif
+   else
+     print_full_info (argv[optind]);
+   putchar ('\n');
+@@ -407,4 +464,9 @@
+     free (groups);
+   }
+ #endif /* HAVE_GETGROUPS */
++#ifdef WITH_SELINUX
++  if ( context != NULL ) {
++    printf(" context=%s",context);
++  }
++#endif
+ }
+--- coreutils-6.7/src/mv.c.selinux	2006-10-23 10:09:10.000000000 +0100
++++ coreutils-6.7/src/mv.c	2007-01-09 18:24:58.000000000 +0000
+@@ -33,6 +33,11 @@
+ #include "quote.h"
+ #include "remove.h"
  
- bin_SCRIPTS = groups
--bin_PROGRAMS = [ chgrp chown chmod cp dd dircolors du \
-+bin_PROGRAMS = [ chgrp chown chmod chcon cp dd dircolors du \
-   ginstall link ln dir vdir ls mkdir \
-   mkfifo mknod mv nohup readlink rm rmdir shred stat sync touch unlink \
-   cat cksum comm csplit cut expand fmt fold head join md5sum \
-   nl od paste pr ptx sha1sum sha224sum sha256sum sha384sum sha512sum \
-   sort split sum tac tail tr tsort unexpand uniq wc \
-   basename date dirname echo env expr factor false \
--  hostname id kill logname pathchk printenv printf pwd seq sleep tee \
-+  hostname id kill logname pathchk printenv printf pwd runcon seq sleep tee \
-   test true tty whoami yes \
-   base64 \
-   $(OPTIONAL_BIN_PROGS) $(DF_PROG)
-@@ -52,9 +52,9 @@
- LDADD = ../lib/libcoreutils.a $(LIBINTL) ../lib/libcoreutils.a
++#ifdef WITH_SELINUX
++#include <selinux/selinux.h>          /* for is_selinux_enabled() */
++int selinux_enabled=0;
++#endif
++
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "mv"
  
- # for eaccess in lib/euidaccess.c.
--cp_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@
--ginstall_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@
--mv_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@
-+cp_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@ @LIB_SELINUX@
-+ginstall_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@ @LIB_SELINUX@
-+mv_LDADD = $(LDADD) $(LIB_EACCESS) @LIBACL@ @LIB_SELINUX@
- pathchk_LDADD = $(LDADD) $(LIB_EACCESS)
- rm_LDADD = $(LDADD) $(LIB_EACCESS)
- test_LDADD = $(LDADD) $(LIB_EACCESS)
-@@ -63,11 +63,18 @@
+@@ -126,6 +131,10 @@
+   x->preserve_links = true;
+   x->preserve_mode = true;
+   x->preserve_timestamps = true;
++#ifdef WITH_SELINUX
++  x->preserve_security_context = true;
++  x->set_security_context = false;
++#endif
+   x->require_preserve = false;  /* FIXME: maybe make this an option */
+   x->recursive = true;
+   x->sparse_mode = SPARSE_AUTO;  /* FIXME: maybe make this an option */
+@@ -357,6 +366,10 @@
  
- # for clock_gettime and fdatasync
- dd_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
--dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@
--ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@
-+dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@ @LIB_SELINUX@
-+ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@ @LIB_SELINUX@
- pr_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
- shred_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
--vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@
-+vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) @LIBACL@ @LIB_SELINUX@
-+chcon_LDADD = $(LDADD) @LIB_SELINUX@
-+id_LDADD = $(LDADD) @LIB_SELINUX@
-+mkdir_LDADD = $(LDADD) @LIB_SELINUX@
-+mkfifo_LDADD = $(LDADD) @LIB_SELINUX@
-+mknod_LDADD = $(LDADD) @LIB_SELINUX@
-+stat_LDADD = $(LDADD) @LIB_SELINUX@
-+runcon_LDADD = $(LDADD) @LIB_SELINUX@
+   cp_option_init (&x);
  
- ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
- sort_LDADD = $(LDADD) $(POW_LIB)
---- /dev/null	2006-11-23 08:31:37.745607750 +0000
-+++ coreutils-5.97/src/runcon.c	2006-11-17 13:56:55.000000000 +0000
++#ifdef WITH_SELINUX
++  selinux_enabled= (is_selinux_enabled()>0);
++#endif
++
+   /* FIXME: consider not calling getenv for SIMPLE_BACKUP_SUFFIX unless
+      we'll actually use backup_suffix_string.  */
+   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+--- /dev/null	2007-01-09 12:27:07.480840763 +0000
++++ coreutils-6.7/src/runcon.c	2007-01-09 18:24:58.000000000 +0000
 @@ -0,0 +1,253 @@
 +/*
 + * runcon [ context |
@@ -1178,1099 +1995,9 @@
 +  }
 +  return 1; /* can't reach this statement.... */
 +}
---- coreutils-5.97/src/ls.c.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/ls.c	2006-11-17 13:56:55.000000000 +0000
-@@ -135,6 +135,18 @@
- 
- #define AUTHORS "Richard Stallman", "David MacKenzie"
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>
-+
-+static int print_scontext       = 0;
-+
-+
-+
-+
-+
-+
-+#endif
-+
- #define obstack_chunk_alloc malloc
- #define obstack_chunk_free free
- 
-@@ -170,7 +182,8 @@
-     symbolic_link DT_INIT (DT_LNK),
-     sock DT_INIT (DT_SOCK),
-     arg_directory DT_INIT (2 * (DT_UNKNOWN | DT_FIFO | DT_CHR | DT_DIR | DT_BLK
--				| DT_REG | DT_LNK | DT_SOCK))
-+				| DT_REG | DT_LNK | DT_SOCK)),
-+    command_line
-   };
- 
- struct fileinfo
-@@ -179,6 +192,7 @@
-     char *name;
- 
-     struct stat stat;
-+    int stat_failed;
- 
-     /* For symbolic link, name of the file linked to, otherwise zero.  */
-     char *linkname;
-@@ -197,6 +211,10 @@
-     /* For long listings, true if the file has an access control list.  */
-     bool have_acl;
- #endif
-+
-+#ifdef WITH_SELINUX
-+    security_context_t scontext;
-+#endif
-   };
- 
- #if HAVE_ACL || USE_ACL
-@@ -232,7 +250,8 @@
- static bool file_ignored (char const *name);
- static uintmax_t gobble_file (char const *name, enum filetype type,
- 			      bool command_line_arg, char const *dirname);
--static void print_color_indicator (const char *name, mode_t mode, int linkok);
-+static void print_color_indicator (const char *name, mode_t mode, int linkok,
-+				   int stat_failed);
- static void put_indicator (const struct bin_str *ind);
- static void add_ignore_pattern (const char *pattern);
- static void attach (char *dest, const char *dirname, const char *name);
-@@ -253,7 +272,7 @@
- static void print_long_format (const struct fileinfo *f);
- static void print_many_per_line (void);
- static void print_name_with_quoting (const char *p, mode_t mode,
--				     int linkok,
-+				     int linkok, int stat_failed,
- 				     struct obstack *stack);
- static void prep_non_filename_text (void);
- static void print_type_indicator (mode_t mode);
-@@ -263,6 +282,9 @@
- static void sort_files (void);
- static void parse_ls_color (void);
- void usage (int status);
-+#ifdef WITH_SELINUX
-+static void print_scontext_format (const struct fileinfo *f);
-+#endif
- 
- /* The name this program was run with.  */
- char *program_name;
-@@ -371,7 +393,11 @@
-     one_per_line,		/* -1 */
-     many_per_line,		/* -C */
-     horizontal,			/* -x */
--    with_commas			/* -m */
-+    with_commas,	        /* -m */
-+#ifdef WITH_SELINUX
-+    security_format,		/* -Z */
-+#endif
-+    invalid_format
-   };
- 
- static enum format format;
-@@ -740,6 +766,11 @@
-   SHOW_CONTROL_CHARS_OPTION,
-   SI_OPTION,
-   SORT_OPTION,
-+#ifdef WITH_SELINUX
-+  CONTEXT_OPTION,
-+  LCONTEXT_OPTION,
-+  SCONTEXT_OPTION,
-+#endif
-   TIME_OPTION,
-   TIME_STYLE_OPTION
- };
-@@ -784,6 +815,11 @@
-   {"time-style", required_argument, NULL, TIME_STYLE_OPTION},
-   {"color", optional_argument, NULL, COLOR_OPTION},
-   {"block-size", required_argument, NULL, BLOCK_SIZE_OPTION},
-+#ifdef WITH_SELINUX
-+  {"context", no_argument, 0, CONTEXT_OPTION},
-+  {"lcontext", no_argument, 0, LCONTEXT_OPTION},
-+  {"scontext", no_argument, 0, SCONTEXT_OPTION},
-+#endif
-   {"author", no_argument, NULL, AUTHOR_OPTION},
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-@@ -793,12 +829,19 @@
- static char const *const format_args[] =
- {
-   "verbose", "long", "commas", "horizontal", "across",
--  "vertical", "single-column", NULL
-+  "vertical", "single-column",
-+#ifdef WITH_SELINUX
-+  "context",
-+#endif
-+  NULL
- };
- static enum format const format_types[] =
- {
-   long_format, long_format, with_commas, horizontal, horizontal,
-   many_per_line, one_per_line
-+#ifdef WITH_SELINUX
-+  , security_format
-+#endif
- };
- ARGMATCH_VERIFY (format_args, format_types);
- 
-@@ -1222,6 +1265,9 @@
- 
-   format_needs_stat = sort_type == sort_time || sort_type == sort_size
-     || format == long_format
-+#ifdef WITH_SELINUX
-+    || format == security_format || print_scontext
-+#endif
-     || dereference == DEREF_ALWAYS
-     || print_block_size || print_inode;
-   format_needs_type = (!format_needs_stat
-@@ -1251,7 +1297,7 @@
-     }
-   else
-     do
--      gobble_file (argv[i++], unknown, true, "");
-+      gobble_file (argv[i++], command_line, true, "");
-     while (i < argc);
- 
-   if (files_index)
-@@ -1414,6 +1460,9 @@
-   ignore_mode = IGNORE_DEFAULT;
-   ignore_patterns = NULL;
-   hide_patterns = NULL;
-+#ifdef WITH_SELINUX
-+  print_scontext       = 0;
-+#endif
- 
-   /* FIXME: put this in a function.  */
-   {
-@@ -1489,7 +1538,7 @@
-   }
- 
-   while ((c = getopt_long (argc, argv,
--			   "abcdfghiklmnopqrstuvw:xABCDFGHI:LNQRST:UX1",
-+			   "abcdfghiklmnopqrstuvw:xABCDFGHI:LNQRST:UX1Z",
- 			   long_options, NULL)) != -1)
-     {
-       switch (c)
-@@ -1608,6 +1657,13 @@
- 	  format = horizontal;
- 	  break;
- 
-+#ifdef WITH_SELINUX
-+	case 'Z':
-+
-+	  print_scontext = 1;
-+	  format = security_format;
-+	  break;
-+#endif
- 	case 'A':
- 	  if (ignore_mode == IGNORE_DEFAULT)
- 	    ignore_mode = IGNORE_DOT_AND_DOTDOT;
-@@ -1784,6 +1840,25 @@
- 
- 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
- 
-+#ifdef WITH_SELINUX
-+
-+	case CONTEXT_OPTION: /* new security format */
-+
-+		print_scontext = 1;
-+		format = security_format;
-+		break;
-+	case LCONTEXT_OPTION: /* long format plus security context */
-+
-+		print_scontext = 1;
-+		format = long_format;
-+		break;
-+	case SCONTEXT_OPTION: /* short form of new security format */
-+
-+		print_scontext = 0;
-+		format = security_format;
-+		break;
-+#endif
-+
- 	default:
- 	  usage (LS_FAILURE);
- 	}
-@@ -2468,6 +2543,12 @@
-     {
-       free (files[i].name);
-       free (files[i].linkname);
-+#ifdef WITH_SELINUX
-+      if (files[i].scontext) {
-+	freecon (files[i].scontext);
-+	files[i].scontext=NULL;
-+      }
-+#endif
-     }
- 
-   files_index = 0;
-@@ -2506,11 +2587,14 @@
-   f->linkname = NULL;
-   f->linkmode = 0;
-   f->linkok = false;
-+#ifdef WITH_SELINUX
-+  f->scontext = NULL;
-+#endif
- 
-   if (command_line_arg
-       || format_needs_stat
-       || (format_needs_type
--	  && (type == unknown
-+	  && (type == unknown || type == command_line
- 
- 	      /* FIXME: remove this disjunct.
- 		 I don't think we care about symlinks here, but for now
-@@ -2547,6 +2631,11 @@
- 	{
- 	case DEREF_ALWAYS:
- 	  err = stat (absolute_name, &f->stat);
-+#ifdef WITH_SELINUX
-+	  if (err>=0) 
-+	    if (format == security_format || print_scontext)
-+	      getfilecon(absolute_name, &f->scontext);
-+#endif
- 	  break;
- 
- 	case DEREF_COMMAND_LINE_ARGUMENTS:
-@@ -2555,6 +2644,11 @@
- 	    {
- 	      bool need_lstat;
- 	      err = stat (absolute_name, &f->stat);
-+#ifdef WITH_SELINUX
-+	      if (err>=0) 
-+		if (format == security_format || print_scontext)
-+		  getfilecon(absolute_name, &f->scontext);
-+#endif
- 
- 	      if (dereference == DEREF_COMMAND_LINE_ARGUMENTS)
- 		break;
-@@ -2573,17 +2667,41 @@
- 
- 	default: /* DEREF_NEVER */
- 	  err = lstat (absolute_name, &f->stat);
-+#ifdef WITH_SELINUX
-+	  if (err>=0) 
-+	    if (format == security_format || print_scontext)
-+	      lgetfilecon(absolute_name, &f->scontext);
-+#endif
- 	  break;
- 	}
- 
--      if (err < 0)
-+      f->stat_failed = (err < 0);
-+      if (f->stat_failed)
- 	{
--	  file_failure (command_line_arg, "%s", absolute_name);
-+	  /* We treat stat failures for files the user named special.
-+	     There is no guarantee that these files really exist so
-+	     we do not print any information.  */
-+	  if (type == command_line)
-+	    {
-+	      file_failure (1, "%s", absolute_name);
-+	      return 0;
-+	    }
-+
-+	  f->filetype = type;
-+	  memset (&f->stat, '\0', sizeof (f->stat));
-+
-+	  f->name = xstrdup (absolute_name);
-+	  files_index++;
-+
- 	  return 0;
- 	}
- 
- #if HAVE_ACL || USE_ACL
--      if (format == long_format)
-+      if (format == long_format
-+#ifdef WITH_SELINUX
-+	  || format == security_format
-+#endif
-+	      )
- 	{
- 	  int n = file_has_acl (absolute_name, &f->stat);
- 	  f->have_acl = (0 < n);
-@@ -3072,6 +3190,16 @@
- 	  DIRED_PUTCHAR ('\n');
- 	}
-       break;
-+
-+#ifdef WITH_SELINUX
-+    case security_format:
-+      for (i = 0; i < files_index; i++)
-+      {
-+        print_scontext_format (files + i);
-+        DIRED_PUTCHAR ('\n');
-+      }
-+      break;
-+#endif
-     }
- }
- 
-@@ -3179,17 +3307,19 @@
-    WIDTH.  */
- 
- static void
--format_user (uid_t u, int width)
-+format_user (uid_t u, int width, int stat_failed)
- {
--  format_user_or_group (numeric_ids ? NULL : getuser (u), u, width);
-+  format_user_or_group (stat_failed ? "?" :
-+			(numeric_ids ? NULL : getuser (u)), u, width);
- }
- 
- /* Likewise, for groups.  */
- 
- static void
--format_group (gid_t g, int width)
-+format_group (gid_t g, int width, int stat_failed)
- {
--  format_user_or_group (numeric_ids ? NULL : getgroup (g), g, width);
-+  format_user_or_group (stat_failed ? "?" :
-+			(numeric_ids ? NULL : getgroup (g)), g, width);
- }
- 
- /* Return the number of columns that format_user_or_group will print.  */
-@@ -3279,7 +3409,7 @@
-     {
-       char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-       sprintf (p, "%*s ", inode_number_width,
--	       umaxtostr (f->stat.st_ino, hbuf));
-+	       f->stat_failed ? "?" : umaxtostr (f->stat.st_ino, hbuf));
-       p += inode_number_width + 1;
-     }
- 
-@@ -3287,8 +3417,10 @@
-     {
-       char hbuf[LONGEST_HUMAN_READABLE + 1];
-       char const *blocks =
--	human_readable (ST_NBLOCKS (f->stat), hbuf, human_output_opts,
--			ST_NBLOCKSIZE, output_block_size);
-+	f->stat_failed
-+	? "?"
-+	: human_readable (ST_NBLOCKS (f->stat), hbuf, human_output_opts,
-+			  ST_NBLOCKSIZE, output_block_size);
-       int pad;
-       for (pad = block_size_width - mbswidth (blocks, 0); 0 < pad; pad--)
- 	*p++ = ' ';
-@@ -3302,10 +3434,18 @@
-   {
-     char hbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-     sprintf (p, "%s %*s ", modebuf, nlink_width,
--	     umaxtostr (f->stat.st_nlink, hbuf));
-+	     f->stat_failed ? "?" : umaxtostr (f->stat.st_nlink, hbuf));
-   }
-   p += sizeof modebuf - 2 + any_has_acl + 1 + nlink_width + 1;
- 
-+#ifdef WITH_SELINUX
-+
-+  if ( print_scontext ) {
-+    sprintf (p, "%-32s ", f->scontext ?: "");
-+    p += strlen (p);
-+  }
-+#endif
-+
-   DIRED_INDENT ();
- 
-   if (print_owner | print_group | print_author)
-@@ -3313,18 +3453,19 @@
-       DIRED_FPUTS (buf, stdout, p - buf);
- 
-       if (print_owner)
--	format_user (f->stat.st_uid, owner_width);
-+	format_user (f->stat.st_uid, owner_width, f->stat_failed);
- 
-       if (print_group)
--	format_group (f->stat.st_gid, group_width);
-+	format_group (f->stat.st_gid, group_width, f->stat_failed);
- 
-       if (print_author)
--	format_user (f->stat.st_author, author_width);
-+	format_user (f->stat.st_author, author_width, f->stat_failed);
- 
-       p = buf;
-     }
- 
--  if (S_ISCHR (f->stat.st_mode) || S_ISBLK (f->stat.st_mode))
-+  if (!f->stat_failed
-+      && (S_ISCHR (f->stat.st_mode) || S_ISBLK (f->stat.st_mode)))
-     {
-       char majorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-       char minorbuf[INT_BUFSIZE_BOUND (uintmax_t)];
-@@ -3342,8 +3483,10 @@
-     {
-       char hbuf[LONGEST_HUMAN_READABLE + 1];
-       char const *size =
--	human_readable (unsigned_file_size (f->stat.st_size),
--			hbuf, human_output_opts, 1, file_output_block_size);
-+	f->stat_failed
-+	? "?"
-+	: human_readable (unsigned_file_size (f->stat.st_size),
-+			  hbuf, human_output_opts, 1, file_output_block_size);
-       int pad;
-       for (pad = file_size_width - mbswidth (size, 0); 0 < pad; pad--)
- 	*p++ = ' ';
-@@ -3356,7 +3499,7 @@
-   s = 0;
-   *p = '\1';
- 
--  if (when_local)
-+  if (!f->stat_failed && when_local)
-     {
-       time_t six_months_ago;
-       bool recent;
-@@ -3403,15 +3546,17 @@
- 	 print it as a huge integer number of seconds.  */
-       char hbuf[INT_BUFSIZE_BOUND (intmax_t)];
-       sprintf (p, "%*s ", long_time_expected_width (),
--	       (TYPE_SIGNED (time_t)
--		? imaxtostr (when, hbuf)
--		: umaxtostr (when, hbuf)));
-+	       f->stat_failed
-+	       ? "?"
-+	       : (TYPE_SIGNED (time_t)
-+		  ? imaxtostr (when, hbuf)
-+		  : umaxtostr (when, hbuf)));
-       p += strlen (p);
-     }
- 
-   DIRED_FPUTS (buf, stdout, p - buf);
-   print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f), f->linkok,
--			   &dired_obstack);
-+			   f->stat_failed, &dired_obstack);
- 
-   if (f->filetype == symbolic_link)
-     {
-@@ -3419,7 +3564,7 @@
- 	{
- 	  DIRED_FPUTS_LITERAL (" -> ", stdout);
- 	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
--				   NULL);
-+				   f->stat_failed, NULL);
- 	  if (indicator_style != none)
- 	    print_type_indicator (f->linkmode);
- 	}
-@@ -3601,10 +3746,10 @@
- 
- static void
- print_name_with_quoting (const char *p, mode_t mode, int linkok,
--			 struct obstack *stack)
-+			 int stat_failed, struct obstack *stack)
- {
-   if (print_with_color)
--    print_color_indicator (p, mode, linkok);
-+    print_color_indicator (p, mode, linkok, stat_failed);
- 
-   if (stack)
-     PUSH_CURRENT_DIRED_POS (stack);
-@@ -3652,7 +3797,8 @@
- 	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
- 			    ST_NBLOCKSIZE, output_block_size));
- 
--  print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f), f->linkok, NULL);
-+  print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f), f->linkok,
-+			   f->stat_failed, NULL);
- 
-   if (indicator_style != none)
-     print_type_indicator (f->stat.st_mode);
-@@ -3693,7 +3839,8 @@
- }
- 
- static void
--print_color_indicator (const char *name, mode_t mode, int linkok)
-+print_color_indicator (const char *name, mode_t mode, int linkok,
-+		       int stat_failed)
- {
-   int type = C_FILE;
-   struct color_ext_type *ext;	/* Color extension */
-@@ -3732,6 +3879,8 @@
- 	type = C_CHR;
-       else if (S_ISDOOR (mode))
- 	type = C_DOOR;
-+      else if (stat_failed)
-+	type = C_ORPHAN;
- 
-       if (type == C_FILE)
- 	{
-@@ -4221,6 +4370,16 @@
-   -X                         sort alphabetically by entry extension\n\
-   -1                         list one file per line\n\
- "), stdout);
-+#ifdef WITH_SELINUX
-+printf(_("\nSELINUX options:\n\n\
-+      --lcontext             Display security context.   Enable -l. Lines\n\
-+                               will probably be too wide for most displays.\n\
-+      -Z, --context          Display security context so it fits on most\n\
-+                               displays.  Displays only mode, user, group,\n\
-+                               security context and file name.\n\
-+      --scontext             Display only security context and file name.\n\
-+\n\n"));
-+#endif
-       fputs (HELP_OPTION_DESCRIPTION, stdout);
-       fputs (VERSION_OPTION_DESCRIPTION, stdout);
-       fputs (_("\n\
-@@ -4244,3 +4403,70 @@
-     }
-   exit (status);
- }
-+
-+#ifdef WITH_SELINUX
-+
-+static void
-+print_scontext_format (const struct fileinfo *f)
-+{
-+  char modebuf[12];
-+
-+  /* 7 fields that may require LONGEST_HUMAN_READABLE bytes,
-+     1 10-byte mode string,
-+     9 spaces, one following each of these fields, and
-+     1 trailing NUL byte.  */
-+
-+  char init_bigbuf[7 * LONGEST_HUMAN_READABLE + 10  + 9 + 1];
-+  char *buf = init_bigbuf;
-+  size_t bufsize = sizeof (init_bigbuf);
-+  size_t s;
-+  char *p;
-+  const char *fmt;
-+  char *user_name;
-+  char *group_name;
-+  int rv;
-+  char *scontext;
-+
-+  p = buf;
-+
-+  if ( print_scontext ) { /* zero means terse listing */
-+    mode_string (f->stat.st_mode, modebuf);
-+    modebuf[10] = (FILE_HAS_ACL (f) ? '+' : ' ');
-+    modebuf[11] = '\0';
-+
-+    /* print mode */
-+
-+    (void) sprintf (p, "%s ", modebuf);
-+    p += strlen (p);
-+
-+    /* print standard user and group */
-+
-+    DIRED_FPUTS (buf, stdout, p - buf);
-+    format_user (f->stat.st_uid, owner_width, f->stat_failed);
-+    format_group (f->stat.st_gid, group_width, f->stat_failed);
-+    p = buf;
-+  }
-+
-+  (void) sprintf (p, "%-32s ", f->scontext ?: "");
-+  p += strlen (p);
-+ 
-+  DIRED_INDENT ();
-+  DIRED_FPUTS (buf, stdout, p - buf);
-+  print_name_with_quoting (f->name, f->stat.st_mode, f->linkok,
-+			   f->stat_failed,  &dired_obstack);
-+ 
-+  if (f->filetype == symbolic_link) {
-+      if (f->linkname) {
-+	  DIRED_FPUTS_LITERAL (" -> ", stdout);
-+	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
-+				   f->stat_failed, NULL);
-+	  if (indicator_style != none)
-+	    print_type_indicator (f->linkmode);
-+      }
-+  }
-+  else {
-+    if (indicator_style != none)
-+      print_type_indicator (f->stat.st_mode);
-+  }
-+}
-+#endif
---- coreutils-5.97/src/stat.c.selinux	2005-12-15 21:25:53.000000000 +0000
-+++ coreutils-5.97/src/stat.c	2006-11-23 17:33:50.000000000 +0000
-@@ -42,6 +42,13 @@
- # endif
- #endif
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>
-+#define SECURITY_ID_T security_context_t
-+#else
-+#define SECURITY_ID_T char *
-+#endif
-+
- #include "system.h"
- 
- #include "error.h"
-@@ -112,6 +119,7 @@
- };
- 
- static struct option const long_options[] = {
-+  {"context", no_argument, 0, 'Z'},
-   {"dereference", no_argument, NULL, 'L'},
-   {"file-system", no_argument, NULL, 'f'},
-   {"filesystem", no_argument, NULL, 'f'}, /* obsolete and undocumented alias */
-@@ -331,7 +339,7 @@
- /* print statfs info */
- static void
- print_statfs (char *pformat, size_t buf_len, char m, char const *filename,
--	      void const *data)
-+	      void const *data, SECURITY_ID_T scontext)
- {
-   STRUCT_STATVFS const *statfsbuf = data;
- 
-@@ -403,7 +411,10 @@
-       xstrcat (pformat, buf_len, PRIdMAX);
-       printf (pformat, (intmax_t) (statfsbuf->f_ffree));
-       break;
--
-+    case 'C':
-+      strcat (pformat, "s");
-+      printf(scontext);
-+      break;
-     default:
-       xstrcat (pformat, buf_len, "c");
-       printf (pformat, m);
-@@ -414,7 +425,7 @@
- /* print stat info */
- static void
- print_stat (char *pformat, size_t buf_len, char m,
--	    char const *filename, void const *data)
-+	    char const *filename, void const *data, SECURITY_ID_T scontext)
- {
-   struct stat *statbuf = (struct stat *) data;
-   struct passwd *pw_ent;
-@@ -548,6 +559,10 @@
-       xstrcat (pformat, buf_len, TYPE_SIGNED (time_t) ? "ld" : "lu");
-       printf (pformat, (unsigned long int) statbuf->st_ctime);
-       break;
-+    case 'C':
-+      strcat (pformat, "s");
-+      printf(pformat,scontext);
-+      break;
-     default:
-       xstrcat (pformat, buf_len, "c");
-       printf (pformat, m);
-@@ -595,8 +610,9 @@
- 
- static void
- print_it (char const *format, char const *filename,
--	  void (*print_func) (char *, size_t, char, char const *, void const *),
--	  void const *data)
-+	  void (*print_func) (char *, size_t, char, char const *, void const *,
-+			      SECURITY_ID_T ),
-+	  void const *data, SECURITY_ID_T scontext)
- {
-   /* Add 2 to accommodate our conversion of the stat `%s' format string
-      to the longer printf `%llu' one.  */
-@@ -627,7 +643,7 @@
- 		putchar ('%');
- 		break;
- 	      default:
--		print_func (dest, n_alloc, *fmt_char, filename, data);
-+		print_func (dest, n_alloc, *fmt_char, filename, data, scontext);
- 		break;
- 	      }
- 	    break;
-@@ -690,9 +706,21 @@
- 
- /* Stat the file system and print what we find.  */
- static bool
--do_statfs (char const *filename, bool terse, char const *format)
-+do_statfs (char const *filename, bool terse, bool secure, char const *format)
- {
-   STRUCT_STATVFS statfsbuf;
-+  SECURITY_ID_T scontext = NULL;
-+#ifdef WITH_SELINUX
-+  if(is_selinux_enabled()) {
-+    if (getfilecon(filename,&scontext)<0) {
-+      if (secure) {
-+        perror (filename);
-+        return false;
-+      }
-+      scontext = NULL;
-+    }
-+  }
-+#endif
- 
-   if (STATFS (filename, &statfsbuf) != 0)
-     {
-@@ -703,25 +731,46 @@
- 
-   if (format == NULL)
-     {
--      format = (terse
--		? "%n %i %l %t %s %S %b %f %a %c %d\n"
--		: "  File: \"%n\"\n"
--		"    ID: %-8i Namelen: %-7l Type: %T\n"
--		"Block size: %-10s Fundamental block size: %S\n"
--		"Blocks: Total: %-10b Free: %-10f Available: %a\n"
--		"Inodes: Total: %-10c Free: %d\n");
-+      if (terse)
-+	{
-+	  if (secure)
-+	    format = "%n %i %l %t %s %S %b %f %a %c %d %C\n";
-+	  else
-+	    format = "%n %i %l %t %s %S %b %f %a %c %d\n";
-+	}
-+      else
-+	{
-+	  if (secure)
-+	    format = "  File: \"%n\"\n"
-+	      "    ID: %-8i Namelen: %-7l Type: %T\n"
-+	      "Block size: %-10s Fundamental block size: %S\n"
-+	      "Blocks: Total: %-10b Free: %-10f Available: %a\n"
-+	      "Inodes: Total: %-10c Free: %d\n"
-+	      "   S_Context: %C\n";
-+	  else
-+	    format = "  File: \"%n\"\n"
-+	      "    ID: %-8i Namelen: %-7l Type: %T\n"
-+	      "Block size: %-10s Fundamental block size: %S\n"
-+	      "Blocks: Total: %-10b Free: %-10f Available: %a\n"
-+	      "Inodes: Total: %-10c Free: %d\n";
-+	}
-     }
- 
--  print_it (format, filename, print_statfs, &statfsbuf);
-+  print_it (format, filename, print_statfs, &statfsbuf, scontext);
-+#ifdef WITH_SELINUX
-+  if (scontext != NULL)
-+    freecon(scontext);
-+#endif
-   return true;
- }
- 
- /* stat the file and print what we find */
- static bool
--do_stat (char const *filename, bool follow_links, bool terse,
-+do_stat (char const *filename, bool follow_links, bool terse, bool secure,
- 	 char const *format)
- {
-   struct stat statbuf;
-+  SECURITY_ID_T scontext = NULL;
- 
-   if ((follow_links ? stat : lstat) (filename, &statbuf) != 0)
-     {
-@@ -729,11 +778,29 @@
-       return false;
-     }
- 
-+#ifdef WITH_SELINUX
-+  if(is_selinux_enabled()) {
-+    int i;
-+    if (!follow_links) 
-+      i=lgetfilecon(filename, &scontext);
-+    else
-+      i=getfilecon(filename, &scontext);
-+    if (i == -1 && secure)
-+      {
-+	perror (filename);
-+	return false;
-+      }
-+  }
-+#endif
-+
-   if (format == NULL)
-     {
-       if (terse)
- 	{
--	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
-+	   if (secure)
-+	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
-+	   else
-+	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
- 	}
-       else
- 	{
-@@ -751,16 +818,30 @@
- 	    }
- 	  else
- 	    {
--	      format =
--		"  File: %N\n"
--		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
--		"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
--		"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
--		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
-+	      if (secure)
-+		format =
-+		  "  File: %N\n"
-+		  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+		  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
-+		  " Device type: %t,%T\n"
-+		  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+		  "   S_Context: %C\n"
-+		  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
-+	      else
-+		format =
-+		  "  File: %N\n"
-+		  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+		  "Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
-+		  "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+		  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
- 	    }
- 	}
-     }
--  print_it (format, filename, print_stat, &statbuf);
-+  print_it (format, filename, print_stat, &statbuf, scontext);
-+#ifdef WITH_SELINUX
-+  if (scontext) 
-+    freecon(scontext);
-+#endif
-   return true;
- }
- 
-@@ -777,6 +858,7 @@
- Display file or file system status.\n\
- \n\
-   -L, --dereference     follow links\n\
-+  -Z, --context         print the security context \n\
-   -f, --file-system     display file system status instead of file status\n\
- "), stdout);
-       fputs (_("\
-@@ -836,6 +918,7 @@
-   %c   Total file nodes in file system\n\
-   %d   Free file nodes in file system\n\
-   %f   Free blocks in file system\n\
-+  %C - Security context in SELinux\n\
- "), stdout);
-       fputs (_("\
-   %i   File System ID in hex\n\
-@@ -860,6 +943,7 @@
-   bool follow_links = false;
-   bool fs = false;
-   bool terse = false;
-+  bool secure = false;
-   char *format = NULL;
-   bool ok = true;
- 
-@@ -871,7 +955,7 @@
- 
-   atexit (close_stdout);
- 
--  while ((c = getopt_long (argc, argv, "c:fLt", long_options, NULL)) != -1)
-+  while ((c = getopt_long (argc, argv, "c:fLtZ", long_options, NULL)) != -1)
-     {
-       switch (c)
- 	{
-@@ -898,6 +982,14 @@
- 	case 't':
- 	  terse = true;
- 	  break;
-+	case 'Z':
-+	  if((is_selinux_enabled()>0))
-+	    secure = 1;
-+	  else {
-+	    error (0, 0, _("Kernel is not SELinux enabled"));
-+	    usage (EXIT_FAILURE);
-+	  }
-+	  break;
- 
- 	case_GETOPT_HELP_CHAR;
- 
-@@ -916,8 +1008,8 @@
- 
-   for (i = optind; i < argc; i++)
-     ok &= (fs
--	   ? do_statfs (argv[i], terse, format)
--	   : do_stat (argv[i], follow_links, terse, format));
-+	   ? do_statfs (argv[i], terse, secure, format)
-+	   : do_stat (argv[i], follow_links, terse, secure, format));
- 
-   exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
- }
---- coreutils-5.97/src/mkfifo.c.selinux	2005-05-14 08:58:37.000000000 +0100
-+++ coreutils-5.97/src/mkfifo.c	2006-11-17 13:56:55.000000000 +0000
-@@ -32,11 +32,18 @@
- 
- #define AUTHORS "David MacKenzie"
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>          /* for is_selinux_enabled() */
-+#endif
-+
- /* The name this program was run with. */
- char *program_name;
- 
- static struct option const longopts[] =
- {
-+#ifdef WITH_SELINUX
-+  {"context", required_argument, NULL, 'Z'},
-+#endif
-   {"mode", required_argument, NULL, 'm'},
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-@@ -57,6 +64,11 @@
- Create named pipes (FIFOs) with the given NAMEs.\n\
- \n\
- "), stdout);
-+#ifdef WITH_SELINUX
-+      fputs (_("\
-+  -Z, --context=CONTEXT   set security context (quoted string)\n\
-+"), stdout);
-+#endif
-       fputs (_("\
- Mandatory arguments to long options are mandatory for short options too.\n\
- "), stdout);
-@@ -92,13 +104,30 @@
- #ifndef S_ISFIFO
-   error (EXIT_FAILURE, 0, _("fifo files not supported"));
- #else
-+#ifdef WITH_SELINUX
-+  while ((optc = getopt_long (argc, argv, "m:Z:", longopts, NULL)) != -1)
-+#else
-   while ((optc = getopt_long (argc, argv, "m:", longopts, NULL)) != -1)
-+#endif
-     {
-       switch (optc)
- 	{
- 	case 'm':
- 	  specified_mode = optarg;
- 	  break;
-+#ifdef WITH_SELINUX
-+ 	case 'Z':
-+ 	  if( !(is_selinux_enabled()>0)) {
-+ 	    fprintf( stderr, "Sorry, --context (-Z) can be used only on "
-+		             "a selinux-enabled kernel.\n" );
-+ 	    exit( 1 );
-+ 	  }
-+	  if (setfscreatecon(optarg)) {
-+ 	    fprintf( stderr, "Sorry, cannot set default context to %s.\n", optarg);
-+ 	    exit( 1 );
-+ 	  }
-+ 	  break;
-+#endif
- 	case_GETOPT_HELP_CHAR;
- 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
- 	default:
---- coreutils-5.97/src/id.c	2006-11-23 17:05:07.000000000 +0000
-+++ coreutils-5.97/src/id.c	2006-11-24 18:29:34.000000000 +0000
-@@ -37,6 +37,20 @@
- 
- int getugroups ();
- 
-+#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>
-+static void print_context (char* context);
-+/* Print the SELinux context */
-+static void
-+print_context(char *context)
-+{
-+  printf ("%s", context);
-+}
-+
-+/* If nonzero, output only the SELinux context. -Z */
-+static int just_context = 0;
-+
-+#endif
- static void print_user (uid_t uid);
- static void print_group (gid_t gid);
- static void print_group_list (const char *username);
-@@ -55,8 +69,14 @@
- /* True unless errors have been encountered.  */
- static bool ok = true;
- 
-+/* The SELinux context */
-+/* Set `context' to a known invalid value so print_full_info() will *
-+ * know when `context' has not been set to a meaningful value.      */
-+static security_context_t context=NULL;
-+
- static struct option const longopts[] =
- {
-+  {"context", no_argument, NULL, 'Z'},
-   {"group", no_argument, NULL, 'g'},
-   {"groups", no_argument, NULL, 'G'},
-   {"name", no_argument, NULL, 'n'},
-@@ -80,6 +100,7 @@
- Print information for USERNAME, or the current user.\n\
- \n\
-   -a              ignore, for compatibility with other versions\n\
-+  -Z, --context   print only the context of the current process\n\
-   -g, --group     print only the effective group ID\n\
-   -G, --groups    print all group IDs\n\
-   -n, --name      print a name instead of a number, for -ugG\n\
-@@ -101,6 +122,7 @@
- main (int argc, char **argv)
- {
-   int optc;
-+  int selinux_enabled=(is_selinux_enabled()>0);
- 
-   /* If true, output the list of all group IDs. -G */
-   bool just_group_list = false;
-@@ -119,13 +141,24 @@
- 
-   atexit (close_stdout);
- 
--  while ((optc = getopt_long (argc, argv, "agnruG", longopts, NULL)) != -1)
-+  while ((optc = getopt_long (argc, argv, "agnruGZ", longopts, NULL)) != -1)
-     {
-       switch (optc)
- 	{
- 	case 'a':
- 	  /* Ignore -a, for compatibility with SVR4.  */
- 	  break;
-+#ifdef WITH_SELINUX
-+        case 'Z':
-+	  /* politely decline if we're not on a selinux-enabled kernel. */
-+	  if( !selinux_enabled ) {
-+	    fprintf( stderr, "Sorry, --context (-Z) can be used only on "
-+		             "a selinux-enabled kernel.\n" );
-+	    exit( 1 );
-+	  }
-+          just_context = 1;
-+          break;
-+#endif
- 	case 'g':
- 	  just_group = true;
- 	  break;
-@@ -148,8 +181,28 @@
- 	}
-     }
- 
--  if (just_user + just_group + just_group_list > 1)
--    error (EXIT_FAILURE, 0, _("cannot print only user and only group"));
-+#ifdef WITH_SELINUX
-+  if (argc - optind == 1)
-+    if (just_context) error (1, 0, _("\
-+cannot print security context when user specified"));
-+
-+  if( just_context  && !selinux_enabled)
-+    error (1, 0, _("\
-+cannot display context when selinux not enabled"));
-+
-+  /* If we are on a selinux-enabled kernel, get our context.    *
-+   * Otherwise, leave the context variable alone - it has *
-+   * been initialized known invalid value; if we see this invalid   *
-+   * value later, we will know we are on a non-selinux kernel.         */
-+  if( selinux_enabled )
-+    {
-+      if (getcon(&context) && just_context)
-+        error (1, 0, "can't get process context");
-+    }
-+#endif
-+
-+  if (just_user + just_group + just_group_list + just_context > 1)
-+    error (EXIT_FAILURE, 0, _("cannot print \"only\" of more than one choice"));
- 
-   if (just_user + just_group + just_group_list == 0 && (use_real | use_name))
-     error (EXIT_FAILURE, 0,
-@@ -183,6 +236,10 @@
-     print_group (use_real ? rgid : egid);
-   else if (just_group_list)
-     print_group_list (argv[optind]);
-+#ifdef WITH_SELINUX
-+  else if (just_context)
-+    print_context (context);
-+#endif
-   else
-     print_full_info (argv[optind]);
-   putchar ('\n');
-@@ -409,2 +466,7 @@
- #endif /* HAVE_GETGROUPS */
-+#ifdef WITH_SELINUX
-+  if ( context != NULL ) {
-+    printf(" context=%s",context);
-+  }
-+#endif
- }
---- coreutils-5.97/src/copy.c.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/src/copy.c	2006-11-17 13:56:55.000000000 +0000
-@@ -52,6 +52,11 @@
+--- coreutils-6.7/src/copy.c.selinux	2006-12-07 07:01:16.000000000 +0000
++++ coreutils-6.7/src/copy.c	2007-01-09 18:24:58.000000000 +0000
+@@ -53,6 +53,11 @@
  #include "xreadlink.h"
  #include "yesno.h"
  
@@ -2279,12 +2006,12 @@
 +extern int  selinux_enabled;
 +#endif
 +
- #ifndef HAVE_FCHMOD
- # define HAVE_FCHMOD false
- #endif
-@@ -239,6 +244,30 @@
+ #ifndef HAVE_FCHOWN
+ # define HAVE_FCHOWN false
+ # define fchown(fd, uid, gid) (-1)
+@@ -301,6 +306,30 @@
      {
-       dest_desc = open (dst_name, O_WRONLY | O_TRUNC | O_BINARY, dst_mode);
+       dest_desc = open (dst_name, O_WRONLY | O_TRUNC | O_BINARY);
  
 +#ifdef WITH_SELINUX
 +      if (dest_desc >= 0 && selinux_enabled &&
@@ -2313,7 +2040,7 @@
        if (dest_desc < 0 && x->unlink_dest_after_failed_open)
  	{
  	  if (unlink (dst_name) != 0)
-@@ -1411,6 +1440,32 @@
+@@ -1520,6 +1549,32 @@
       In such cases, set this variable to zero.  */
    preserve_metadata = true;
  
@@ -2346,7 +2073,7 @@
    if (S_ISDIR (src_mode))
      {
        struct dir_list *dir;
-@@ -1481,7 +1536,13 @@
+@@ -1595,7 +1650,13 @@
  
        /* Are we crossing a file system boundary?  */
        if (x->one_file_system && device != 0 && device != src_sb.st_dev)
@@ -2361,7 +2088,7 @@
  
        /* Copy the contents of the directory.  */
  
-@@ -1617,6 +1678,11 @@
+@@ -1740,6 +1801,11 @@
  	    }
  	}
  
@@ -2373,7 +2100,7 @@
        /* There's no need to preserve timestamps or permissions.  */
        preserve_metadata = false;
  
-@@ -1755,6 +1821,11 @@
+@@ -1873,6 +1939,11 @@
  
  un_backup:
  
@@ -2385,107 +2112,173 @@
    /* We have failed to create the destination file.
       If we've just added a dev/ino entry via the remember_copied
       call above (i.e., unless we've just failed to create a hard link),
---- coreutils-5.97/src/mknod.c.selinux	2005-05-14 08:58:37.000000000 +0100
-+++ coreutils-5.97/src/mknod.c	2006-11-17 13:56:55.000000000 +0000
-@@ -36,8 +36,15 @@
- /* The name this program was run with. */
- char *program_name;
+--- coreutils-6.7/src/install.c.selinux	2006-12-04 09:00:28.000000000 +0000
++++ coreutils-6.7/src/install.c	2007-01-09 18:24:58.000000000 +0000
+@@ -49,6 +49,43 @@
+ # include <sys/wait.h>
+ #endif
  
 +#ifdef WITH_SELINUX
-+#include <selinux/selinux.h>
++#include <selinux/selinux.h>          /* for is_selinux_enabled() */
++int selinux_enabled=0;
++static int use_default_selinux_context = 1;
++/* Modify file context to match the specified policy,  
++   If an error occurs the file will remain with the default directory 
++   context.*/
++static void setdefaultfilecon(const char *path) {
++	struct stat st;
++	security_context_t scontext=NULL;
++	if (selinux_enabled != 1) {
++		/* Indicate no context found. */
++		return;
++	}
++	if (lstat(path, &st) != 0)
++		return;
++
++	/* If there's an error determining the context, or it has none, 
++	   return to allow default context */
++	if ((matchpathcon(path, st.st_mode, &scontext) != 0) ||
++	    (strcmp(scontext, "<<none>>") == 0)) {
++		if (scontext != NULL) {
++			freecon(scontext);
++		}
++		return;
++	}
++	if (lsetfilecon(path, scontext) < 0) {
++		if (errno != ENOTSUP) {
++			error (0, errno,
++			       _("warning: failed to change context of %s to %s"), path, scontext);
++		}
++	}
++	freecon(scontext);
++	return;
++}
 +#endif
 +
- static struct option const longopts[] =
+ #if ! HAVE_ENDGRENT
+ # define endgrent() ((void) 0)
+ #endif
+@@ -124,12 +161,18 @@
+ static struct option const long_options[] =
  {
+   {"backup", optional_argument, NULL, 'b'},
 +#ifdef WITH_SELINUX
 +  {"context", required_argument, NULL, 'Z'},
 +#endif
+   {"directory", no_argument, NULL, 'd'},
+   {"group", required_argument, NULL, 'g'},
    {"mode", required_argument, NULL, 'm'},
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-@@ -58,6 +65,11 @@
- Create the special file NAME of the given TYPE.\n\
- \n\
- "), stdout);
+   {"no-target-directory", no_argument, NULL, 'T'},
+   {"owner", required_argument, NULL, 'o'},
+   {"preserve-timestamps", no_argument, NULL, 'p'},
 +#ifdef WITH_SELINUX
-+      fputs(_("\
-+  -Z, --context=CONTEXT   set security context (quoted string)\n\
-+"), stdout);
++  {"preserve_context", no_argument, NULL, 'P'},
 +#endif
-       fputs (_("\
- Mandatory arguments to long options are mandatory for short options too.\n\
- "), stdout);
-@@ -103,13 +115,31 @@
+   {"strip", no_argument, NULL, 's'},
+   {"suffix", required_argument, NULL, 'S'},
+   {"target-directory", required_argument, NULL, 't'},
+@@ -169,6 +212,10 @@
+   x->stdin_tty = false;
  
-   specified_mode = NULL;
+   x->update = false;
++#ifdef WITH_SELINUX
++  x->preserve_security_context = false;
++  x->set_security_context = false;
++#endif
+   x->verbose = false;
+   x->dest_info = NULL;
+   x->src_info = NULL;
+@@ -222,6 +269,10 @@
+   bool no_target_directory = false;
+   int n_files;
+   char **file;
++#ifdef WITH_SELINUX
++ /* set iff kernel has extra selinux system calls */
++  selinux_enabled = (is_selinux_enabled()>0);
++#endif
+ 
+   initialize_main (&argc, &argv);
+   program_name = argv[0];
+@@ -243,7 +294,11 @@
+      we'll actually use backup_suffix_string.  */
+   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
 +#ifdef WITH_SELINUX
-+  while ((optc = getopt_long (argc, argv, "m:Z:", longopts, NULL)) != -1)
++  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pPt:TvS:Z:", long_options,
 +#else
-   while ((optc = getopt_long (argc, argv, "m:", longopts, NULL)) != -1)
+   while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pt:TvS:", long_options,
 +#endif
+ 			      NULL)) != -1)
      {
        switch (optc)
- 	{
- 	case 'm':
- 	  specified_mode = optarg;
+@@ -305,6 +360,41 @@
+ 	case 'T':
+ 	  no_target_directory = true;
  	  break;
 +#ifdef WITH_SELINUX
++ 	case 'P':
++	/* politely decline if we're not on a selinux-enabled kernel. */
++	  if( !selinux_enabled ) {
++ 	    fprintf( stderr, "Warning:  ignoring --preserve_context (-P) "
++		             "because the kernel is not selinux-enabled.\n" );
++ 	    break;
++ 	  }
++ 	  if ( x.set_security_context ) {
++		  (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
++ 	    exit( 1 );
++ 	  }
++ 	  x.preserve_security_context = true;
++ 	  use_default_selinux_context = 0;
++ 	  break ;
 + 	case 'Z':
 + 	  /* politely decline if we're not on a selinux-enabled kernel. */
-+	  if( !(is_selinux_enabled()>0)) {
-+ 	    fprintf( stderr, "Sorry, --context (-Z) can be used only on "
-+		             "a selinux-enabled kernel.\n" );
++	  if( !selinux_enabled) {
++ 	    fprintf( stderr, "Warning:  ignoring --context (-Z) "
++ 		             "because the kernel is not selinux-enabled.\n" );
++ 	    break;
++ 	  }
++ 	  if ( x.preserve_security_context ) {
++
++	     	    (void) fprintf(stderr, "%s: cannot force target context == '%s' and preserve it\n", argv[0], optarg);
 + 	    exit( 1 );
 + 	  }
++ 	  use_default_selinux_context = 0;
++	  x.set_security_context = true;
 +	  if (setfscreatecon(optarg)) {
-+ 	    fprintf( stderr, "Sorry, cannot set default context to %s.\n", optarg);
-+ 	    exit( 1 );
-+ 	  }
++ 	    (void) fprintf(stderr, "%s: cannot setup default context == '%s'\n", argv[0], optarg);
++	    exit(1);
++	  }
 + 	  break;
 +#endif
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-5.97/README.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/README	2006-11-17 13:56:55.000000000 +0000
-@@ -8,11 +8,11 @@
- The programs that can be built with this package are:
+@@ -523,6 +613,10 @@
+   else
+     return true;
  
-   [ base64
--  basename cat chgrp chmod chown chroot cksum comm cp csplit cut date dd
-+  basename cat chcon chgrp chmod chown chroot cksum comm cp csplit cut date dd
-   df dir dircolors dirname du echo env expand expr factor false fmt fold
-   ginstall groups head hostid hostname id join kill link ln logname ls
-   md5sum mkdir mkfifo mknod mv nice nl nohup od paste pathchk pinky pr
--  printenv printf ptx pwd readlink rm rmdir runuser seq sha1sum sha224sum
-+  printenv printf ptx pwd readlink rm rmdir runcon runuser seq sha1sum sha224sum
-   sha256sum sha384sum sha512sum shred sleep sort
-   split stat stty su sum sync tac tail tee test touch tr true tsort tty
-   uname unexpand uniq unlink uptime users vdir wc who whoami yes
---- coreutils-5.97/tests/help-version.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/tests/help-version	2006-11-17 13:56:55.000000000 +0000
-@@ -46,6 +46,8 @@
++#ifdef WITH_SELINUX
++  if (use_default_selinux_context)
++    setdefaultfilecon(name);
++#endif
+   return false;
+ }
  
-     # Skip `test'; it doesn't accept --help or --version.
-     test $i = test && continue;
-+    test $i = chcon && continue;
-+    test $i = runcon && continue;
- 
-     # false fails even when invoked with --help or --version.
-     if test $i = false; then
-@@ -162,7 +164,7 @@
- 
- for i in $all_programs; do
-   # Skip these.
--  case $i in chroot|stty|tty|false) continue;; esac
-+  case $i in chroot|stty|tty|false|chcon|runcon) continue;; esac
- 
-   rm -rf $tmp_in $tmp_in2 $tmp_dir $tmp_out
-   echo > $tmp_in
---- coreutils-5.97/configure.ac.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/configure.ac	2006-11-17 13:56:55.000000000 +0000
-@@ -34,6 +34,13 @@
+@@ -688,6 +782,11 @@
+   -T, --no-target-directory  treat DEST as a normal file\n\
+   -v, --verbose       print the name of each directory as it is created\n\
+ "), stdout);
++      fputs (_("\
++  -P, --preserve_context (SELinux) Preserve security context\n\
++  -Z, --context=CONTEXT  (SELinux) Set security context of files and directories\n\
++"), stdout);
++
+       fputs (HELP_OPTION_DESCRIPTION, stdout);
+       fputs (VERSION_OPTION_DESCRIPTION, stdout);
+       fputs (_("\
+--- coreutils-6.7/configure.ac.selinux	2007-01-09 18:24:55.000000000 +0000
++++ coreutils-6.7/configure.ac	2007-01-09 18:24:58.000000000 +0000
+@@ -46,6 +46,13 @@
  LIB_PAM="-ldl -lpam -lpam_misc"
  AC_SUBST(LIB_PAM)])
  
@@ -2496,164 +2289,11 @@
 +LIB_SELINUX="-lselinux"
 +AC_SUBST(LIB_SELINUX)])
 +
- gl_DEFAULT_POSIX2_VERSION
- gl_USE_SYSTEM_EXTENSIONS
- gl_PERL
---- coreutils-5.97/config.hin.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/config.hin	2006-11-17 13:56:55.000000000 +0000
-@@ -411,10 +411,6 @@
-    don't. */
- #undef HAVE_DECL_TTYNAME
- 
--/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
--   */
--#undef HAVE_DECL_TZNAME
--
- /* Define to 1 if you have the declaration of wcwidth(), and to 0 otherwise.
-    */
- #undef HAVE_DECL_WCWIDTH
-@@ -519,6 +515,9 @@
- /* Define to 1 if you have the `getdelim' function. */
- #undef HAVE_GETDELIM
- 
-+/* Define to 1 if you have the `getgrouplist' function. */
-+#undef HAVE_GETGROUPLIST
-+
- /* Define to 1 if your system has a working `getgroups' function. */
- #undef HAVE_GETGROUPS
- 
-@@ -613,9 +612,6 @@
- /* Define to 1 if you have the `lchown' function. */
- #undef HAVE_LCHOWN
- 
--/* Define to 1 if you have the `acl' library (-lacl). */
--#undef HAVE_LIBACL
--
- /* Define to 1 if you have the `dgc' library (-ldgc). */
- #undef HAVE_LIBDGC
- 
-@@ -643,10 +639,6 @@
- /* Define if you have the 'long double' type. */
- #undef HAVE_LONG_DOUBLE
- 
--/* Define to 1 if the type `long double' works and has more range or precision
--   than `double'. */
--#undef HAVE_LONG_DOUBLE_WIDER
--
- /* Define to 1 if you support file names longer than 14 characters. */
- #undef HAVE_LONG_FILE_NAMES
- 
-@@ -1442,7 +1434,7 @@
- 
- /* If using the C implementation of alloca, define if you know the
-    direction of stack growth for your system; otherwise it will be
--   automatically deduced at runtime.
-+   automatically deduced at run-time.
- 	STACK_DIRECTION > 0 => grows toward higher addresses
- 	STACK_DIRECTION < 0 => grows toward lower addresses
- 	STACK_DIRECTION = 0 => direction of growth unknown */
-@@ -1529,17 +1521,17 @@
- /* Define to 1 if unlink (dir) cannot possibly succeed. */
- #undef UNLINK_CANNOT_UNLINK_DIR
- 
--/* Define to 1 if you want getc etc. to use unlocked I/O if available.
--   Unlocked I/O can improve performance in unithreaded apps, but it is not
--   safe for multithreaded apps. */
--#undef USE_UNLOCKED_IO
--
- /* Define if you want access control list support. */
- #undef USE_ACL
- 
- /* Define if you want to use PAM */
- #undef USE_PAM
- 
-+/* Define to 1 if you want getc etc. to use unlocked I/O if available.
-+   Unlocked I/O can improve performance in unithreaded apps, but it is not
-+   safe for multithreaded apps. */
-+#undef USE_UNLOCKED_IO
-+
- /* Version number of package */
- #undef VERSION
- 
-@@ -1549,6 +1541,9 @@
- /* Define if sys/ptem.h is required for struct winsize. */
- #undef WINSIZE_IN_PTEM
- 
-+/* Define if you want to use SELINUX */
-+#undef WITH_SELINUX
-+
- /* Define to 1 if your processor stores words with the most significant byte
-    first (like Motorola and SPARC, unlike Intel and VAX). */
- #undef WORDS_BIGENDIAN
-@@ -1694,7 +1689,7 @@
- /* Define to rpl_nanosleep if the replacement function should be used. */
- #undef nanosleep
- 
--/* Define to `long int' if <sys/types.h> does not define. */
-+/* Define to `long' if <sys/types.h> does not define. */
- #undef off_t
- 
- /* Define to `int' if <sys/types.h> does not define. */
-@@ -1761,7 +1756,7 @@
- /* Define to empty if the C compiler doesn't support this keyword. */
- #undef signed
- 
--/* Define to `unsigned int' if <sys/types.h> does not define. */
-+/* Define to `unsigned' if <sys/types.h> does not define. */
- #undef size_t
- 
- /* Map `socklen_t' to `int' if it is missing. */
---- coreutils-5.97/man/ls.1.selinux	2006-06-01 08:33:14.000000000 +0100
-+++ coreutils-5.97/man/ls.1	2006-11-17 13:56:55.000000000 +0000
-@@ -201,6 +201,20 @@
- .TP
- \fB\-1\fR
- list one file per line
-+.PP
-+SELinux options:
-+.TP
-+\fB\-\-lcontext\fR
-+Display security context.   Enable \fB\-l\fR. Lines
-+will probably be too wide for most displays.
-+.TP
-+\fB\-Z\fR, \fB\-\-context\fR
-+Display security context so it fits on most
-+displays.  Displays only mode, user, group,
-+security context and file name.
-+.TP
-+\fB\-\-scontext\fR
-+Display only security context and file name.
- .TP
- \fB\-\-help\fR
- display this help and exit
---- coreutils-5.97/man/install.1.selinux	2006-05-25 18:27:35.000000000 +0100
-+++ coreutils-5.97/man/install.1	2006-11-17 13:56:55.000000000 +0000
-@@ -65,6 +65,11 @@
- .TP
- \fB\-v\fR, \fB\-\-verbose\fR
- print the name of each directory as it is created
-+.HP
-+\fB\-P\fR, \fB\-\-preserve_context\fR (SELinux) Preserve security context
-+.TP
-+\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
-+(SELinux) Set security context of files and directories
- .TP
- \fB\-\-help\fR
- display this help and exit
---- coreutils-5.97/man/id.1.selinux	2006-05-25 18:27:35.000000000 +0100
-+++ coreutils-5.97/man/id.1	2006-11-17 16:26:50.000000000 +0000
-@@ -13,6 +13,9 @@
- \fB\-a\fR
- ignore, for compatibility with other versions
- .TP
-+\fB\-Z\fR, \fB\-\-context\fR
-+print only the security context of the current process
-+.TP
- \fB\-g\fR, \fB\-\-group\fR
- print only the effective group ID
- .TP
---- coreutils-5.97/man/stat.1.selinux	2006-05-25 18:27:38.000000000 +0100
-+++ coreutils-5.97/man/stat.1	2006-11-17 13:56:55.000000000 +0000
+ AC_CHECK_FUNCS(uname,
+ 	OPTIONAL_BIN_PROGS="$OPTIONAL_BIN_PROGS uname\$(EXEEXT)"
+ 	MAN="$MAN uname.1")
+--- coreutils-6.7/man/stat.1.selinux	2006-12-07 22:45:45.000000000 +0000
++++ coreutils-6.7/man/stat.1	2007-01-09 18:24:58.000000000 +0000
 @@ -28,6 +28,9 @@
  \fB\-t\fR, \fB\-\-terse\fR
  print the information in terse form
@@ -2674,202 +2314,15 @@
  %D
  Device number in hex
  .TP
---- /dev/null	2006-11-23 08:31:37.745607750 +0000
-+++ coreutils-5.97/man/runcon.1	2006-11-17 13:56:55.000000000 +0000
-@@ -0,0 +1,45 @@
-+.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
-+.SH NAME
-+runcon \- run command with specified security context 
-+.SH SYNOPSIS
-+.B runcon
-+[\fI-c\fR] [\fI-t TYPE\fR] [\fI-l LEVEL\fR] [\fI-u USER\fR] [\fI-r ROLE\fR] \fICOMMAND\fR [\fIARGS...\fR]
-+.PP
-+or
-+.PP
-+.B runcon
-+\fICONTEXT\fR \fICOMMAND\fR [\fIargs...\fR]
-+.PP
-+.br
-+.SH DESCRIPTION
-+.PP
-+.\" Add any additional description here
-+.PP
-+Run COMMAND with completely-specified CONTEXT, or with current or
-+transitioned security context modified by one or more of LEVEL,
-+ROLE, TYPE, and USER.
-+.TP
-+\fB\-c\fR
-+compute process transition before modifying context
-+.TP
-+\fB\-t\fR
-+change current type to the specified type
-+.TP
-+\fB\-l\fR
-+change current level range to the specified range
-+.TP
-+\fB\-r\fR
-+change current role to the specified role
-+.TP
-+\fB\-u\fR
-+change current user to the specified user
-+.TP
-+\fB\-\-\fR
-+The \fB\-\-\fR flag indicates that \fBruncon\fR should stop processing command
-+line arguments. Further arguments will be passed to COMMAND.
-+.PP
-+If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
-+the first argument is used as the complete context.
-+.PP
-+Note that only carefully-chosen contexts are likely to successfully
-+run.
---- coreutils-5.97/man/Makefile.am.selinux	2006-11-17 13:56:55.000000000 +0000
-+++ coreutils-5.97/man/Makefile.am	2006-11-17 13:56:55.000000000 +0000
-@@ -11,7 +11,7 @@
-   shred.1 sleep.1 sort.1 split.1 stat.1 stty.1 \
-   su.1 sum.1 sync.1 tac.1 tail.1 tee.1 test.1 touch.1 tr.1 true.1 tsort.1 \
-   tty.1 uname.1 unexpand.1 uniq.1 unlink.1 uptime.1 users.1 vdir.1 wc.1 \
--  who.1 whoami.1 yes.1
-+  who.1 whoami.1 yes.1 chcon.1 runcon.1
- 
- man_aux = $(dist_man_MANS:.1=.x)
- 
-@@ -119,6 +119,8 @@
- who.1:		$(common_dep)	$(srcdir)/who.x		../src/who.c
- whoami.1:	$(common_dep)	$(srcdir)/whoami.x	../src/whoami.c
- yes.1:		$(common_dep)	$(srcdir)/yes.x		../src/yes.c
-+chcon.1:	$(common_dep)	$(srcdir)/chcon.x	../src/chcon.c
-+runcon.1:	$(common_dep)	$(srcdir)/runcon.x	../src/runcon.c
- 
- SUFFIXES = .x .1
- 
---- coreutils-5.97/man/cp.1.selinux	2006-05-25 18:27:33.000000000 +0100
-+++ coreutils-5.97/man/cp.1	2006-11-17 13:56:55.000000000 +0000
-@@ -57,7 +57,7 @@
- .TP
- \fB\-\-preserve\fR[=\fIATTR_LIST\fR]
- preserve the specified attributes (default:
--mode,ownership,timestamps), if possible
-+mode,ownership,timestamps) and security contexts, if possible
- additional attributes: links, all
- .TP
- \fB\-\-no\-preserve\fR=\fIATTR_LIST\fR
-@@ -105,6 +105,9 @@
- \fB\-\-help\fR
- display this help and exit
- .TP
-+\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
-+set security context of copy to CONTEXT
-+.TP
- \fB\-\-version\fR
- output version information and exit
- .PP
---- coreutils-5.97/man/mkfifo.1.selinux	2006-05-25 18:27:36.000000000 +0100
-+++ coreutils-5.97/man/mkfifo.1	2006-11-17 13:56:55.000000000 +0000
-@@ -12,6 +12,9 @@
- .PP
- Mandatory arguments to long options are mandatory for short options too.
- .TP
-+\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
-+set security context (quoted string)
-+.TP
- \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
- set permission mode (as in chmod), not a=rw \- umask
- .TP
---- coreutils-5.97/man/mknod.1.selinux	2006-05-25 18:27:36.000000000 +0100
-+++ coreutils-5.97/man/mknod.1	2006-11-17 13:56:55.000000000 +0000
-@@ -12,6 +12,9 @@
- .PP
- Mandatory arguments to long options are mandatory for short options too.
- .TP
-+\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
-+set security context (quoted string)
-+.TP
- \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
- set permission mode (as in chmod), not a=rw \- umask
- .TP
---- coreutils-5.97/man/mkdir.1.selinux	2006-05-25 18:27:35.000000000 +0100
-+++ coreutils-5.97/man/mkdir.1	2006-11-17 13:56:55.000000000 +0000
-@@ -12,6 +12,8 @@
- .PP
- Mandatory arguments to long options are mandatory for short options too.
- .TP
-+\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR (SELinux) set security context to CONTEXT
-+.TP
- \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
- set permission mode (as in chmod), not rwxrwxrwx \- umask
- .TP
---- coreutils-5.97/man/dir.1.selinux	2006-06-01 08:33:14.000000000 +0100
-+++ coreutils-5.97/man/dir.1	2006-11-17 13:56:55.000000000 +0000
-@@ -201,6 +201,20 @@
- .TP
- \fB\-1\fR
- list one file per line
-+.PP
-+SELINUX options:
-+.TP
-+\fB\-\-lcontext\fR
-+Display security context.   Enable \fB\-l\fR. Lines
-+will probably be too wide for most displays.
-+.TP
-+\fB\-\-context\fR
-+Display security context so it fits on most
-+displays.  Displays only mode, user, group,
-+security context and file name.
-+.TP
-+\fB\-\-scontext\fR
-+Display only security context and file name.
- .TP
- \fB\-\-help\fR
- display this help and exit
---- /dev/null	2006-11-23 08:31:37.745607750 +0000
-+++ coreutils-5.97/man/runcon.x	2006-11-17 13:56:55.000000000 +0000
-@@ -0,0 +1,14 @@
-+[NAME]
-+runcon \- run command with specified security context
-+[DESCRIPTION]
-+Run COMMAND with completely-specified CONTEXT, or with current or
-+transitioned security context modified by one or more of LEVEL,
-+ROLE, TYPE, and USER.
-+.PP
-+If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
-+the first argument is used as the complete context.  Any additional
-+arguments after \fICOMMAND\fR are interpreted as arguments to the
-+command.
-+.PP
-+Note that only carefully-chosen contexts are likely to successfully
-+run.
---- coreutils-5.97/man/vdir.1.selinux	2006-06-01 08:33:14.000000000 +0100
-+++ coreutils-5.97/man/vdir.1	2006-11-17 13:56:55.000000000 +0000
-@@ -201,6 +201,20 @@
- .TP
- \fB\-1\fR
- list one file per line
-+.PP
-+SELINUX options:
-+.TP
-+\fB\-\-lcontext\fR
-+Display security context.   Enable \fB\-l\fR. Lines
-+will probably be too wide for most displays.
-+.TP
-+\fB\-\-context\fR
-+Display security context so it fits on most
-+displays.  Displays only mode, user, group,
-+security context and file name.
-+.TP
-+\fB\-\-scontext\fR
-+Display only security context and file name.
- .TP
- \fB\-\-help\fR
- display this help and exit
---- /dev/null	2006-11-23 08:31:37.745607750 +0000
-+++ coreutils-5.97/man/chcon.x	2006-11-17 13:56:55.000000000 +0000
+--- /dev/null	2007-01-09 12:27:07.480840763 +0000
++++ coreutils-6.7/man/chcon.x	2007-01-09 18:24:58.000000000 +0000
 @@ -0,0 +1,4 @@
 +[NAME]
 +chcon \- change file security context
 +[DESCRIPTION]
 +.\" Add any additional description here
---- /dev/null	2006-11-23 08:31:37.745607750 +0000
-+++ coreutils-5.97/man/chcon.1	2006-11-17 13:56:55.000000000 +0000
+--- /dev/null	2007-01-09 12:27:07.480840763 +0000
++++ coreutils-6.7/man/chcon.1	2007-01-09 18:24:58.000000000 +0000
 @@ -0,0 +1,64 @@
 +.TH CHCON 1 "July 2003" "chcon (coreutils) 5.0" "User Commands"
 +.SH NAME
@@ -2935,3 +2388,255 @@
 +.B info chcon
 +.PP
 +should give you access to the complete manual.
+--- coreutils-6.7/man/dir.1.selinux	2006-12-07 22:45:41.000000000 +0000
++++ coreutils-6.7/man/dir.1	2007-01-09 18:24:58.000000000 +0000
+@@ -204,6 +204,20 @@
+ .TP
+ \fB\-1\fR
+ list one file per line
++.PP
++SELINUX options:
++.TP
++\fB\-\-lcontext\fR
++Display security context.   Enable \fB\-l\fR. Lines
++will probably be too wide for most displays.
++.TP
++\fB\-\-context\fR
++Display security context so it fits on most
++displays.  Displays only mode, user, group,
++security context and file name.
++.TP
++\fB\-\-scontext\fR
++Display only security context and file name.
+ .TP
+ \fB\-\-help\fR
+ display this help and exit
+--- coreutils-6.7/man/mkfifo.1.selinux	2006-12-07 22:45:43.000000000 +0000
++++ coreutils-6.7/man/mkfifo.1	2007-01-09 18:24:58.000000000 +0000
+@@ -12,6 +12,9 @@
+ .PP
+ Mandatory arguments to long options are mandatory for short options too.
+ .TP
++\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
++set security context (quoted string)
++.TP
+ \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
+ set file permission bits to MODE, not a=rw \- umask
+ .TP
+--- coreutils-6.7/man/Makefile.am.selinux	2007-01-09 18:24:56.000000000 +0000
++++ coreutils-6.7/man/Makefile.am	2007-01-09 18:24:58.000000000 +0000
+@@ -30,7 +30,7 @@
+   shred.1 shuf.1 sleep.1 sort.1 split.1 stat.1 \
+   su.1 sum.1 sync.1 tac.1 tail.1 tee.1 test.1 touch.1 tr.1 true.1 tsort.1 \
+   tty.1 unexpand.1 uniq.1 unlink.1 vdir.1 wc.1 \
+-  whoami.1 yes.1 $(MAN)
++  whoami.1 yes.1 chcon.1 runcon.1 $(MAN)
+ optional_mans = \
+   chroot.1 hostid.1 nice.1 pinky.1 stty.1 uname.1 uptime.1 users.1 who.1
+ 
+@@ -142,6 +142,8 @@
+ who.1:		$(common_dep)	$(srcdir)/who.x		../src/who.c
+ whoami.1:	$(common_dep)	$(srcdir)/whoami.x	../src/whoami.c
+ yes.1:		$(common_dep)	$(srcdir)/yes.x		../src/yes.c
++chcon.1:	$(common_dep)	$(srcdir)/chcon.x	../src/chcon.c
++runcon.1:	$(common_dep)	$(srcdir)/runcon.x	../src/runcon.c
+ 
+ SUFFIXES = .x .1
+ 
+--- coreutils-6.7/man/cp.1.selinux	2006-12-07 22:45:41.000000000 +0000
++++ coreutils-6.7/man/cp.1	2007-01-09 18:24:58.000000000 +0000
+@@ -57,7 +57,7 @@
+ .TP
+ \fB\-\-preserve\fR[=\fIATTR_LIST\fR]
+ preserve the specified attributes (default:
+-mode,ownership,timestamps), if possible
++mode,ownership,timestamps) and security contexts, if possible
+ additional attributes: links, all
+ .TP
+ \fB\-\-no\-preserve\fR=\fIATTR_LIST\fR
+@@ -106,6 +106,9 @@
+ \fB\-\-help\fR
+ display this help and exit
+ .TP
++\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
++set security context of copy to CONTEXT
++.TP
+ \fB\-\-version\fR
+ output version information and exit
+ .PP
+--- coreutils-6.7/man/id.1.selinux	2006-12-07 22:45:42.000000000 +0000
++++ coreutils-6.7/man/id.1	2007-01-09 18:24:58.000000000 +0000
+@@ -13,6 +13,9 @@
+ \fB\-a\fR
+ ignore, for compatibility with other versions
+ .TP
++\fB\-Z\fR, \fB\-\-context\fR
++print only the security context of the current process
++.TP
+ \fB\-g\fR, \fB\-\-group\fR
+ print only the effective group ID
+ .TP
+--- /dev/null	2007-01-09 12:27:07.480840763 +0000
++++ coreutils-6.7/man/runcon.x	2007-01-09 18:24:59.000000000 +0000
+@@ -0,0 +1,14 @@
++[NAME]
++runcon \- run command with specified security context
++[DESCRIPTION]
++Run COMMAND with completely-specified CONTEXT, or with current or
++transitioned security context modified by one or more of LEVEL,
++ROLE, TYPE, and USER.
++.PP
++If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
++the first argument is used as the complete context.  Any additional
++arguments after \fICOMMAND\fR are interpreted as arguments to the
++command.
++.PP
++Note that only carefully-chosen contexts are likely to successfully
++run.
+--- /dev/null	2007-01-09 12:27:07.480840763 +0000
++++ coreutils-6.7/man/runcon.1	2007-01-09 18:24:59.000000000 +0000
+@@ -0,0 +1,45 @@
++.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
++.SH NAME
++runcon \- run command with specified security context 
++.SH SYNOPSIS
++.B runcon
++[\fI-c\fR] [\fI-t TYPE\fR] [\fI-l LEVEL\fR] [\fI-u USER\fR] [\fI-r ROLE\fR] \fICOMMAND\fR [\fIARGS...\fR]
++.PP
++or
++.PP
++.B runcon
++\fICONTEXT\fR \fICOMMAND\fR [\fIargs...\fR]
++.PP
++.br
++.SH DESCRIPTION
++.PP
++.\" Add any additional description here
++.PP
++Run COMMAND with completely-specified CONTEXT, or with current or
++transitioned security context modified by one or more of LEVEL,
++ROLE, TYPE, and USER.
++.TP
++\fB\-c\fR
++compute process transition before modifying context
++.TP
++\fB\-t\fR
++change current type to the specified type
++.TP
++\fB\-l\fR
++change current level range to the specified range
++.TP
++\fB\-r\fR
++change current role to the specified role
++.TP
++\fB\-u\fR
++change current user to the specified user
++.TP
++\fB\-\-\fR
++The \fB\-\-\fR flag indicates that \fBruncon\fR should stop processing command
++line arguments. Further arguments will be passed to COMMAND.
++.PP
++If none of \fI-c\fR, \fI-t\fR, \fI-u\fR, \fI-r\fR, or \fI-l\fR, is specified,
++the first argument is used as the complete context.
++.PP
++Note that only carefully-chosen contexts are likely to successfully
++run.
+--- coreutils-6.7/man/mknod.1.selinux	2006-12-07 22:45:43.000000000 +0000
++++ coreutils-6.7/man/mknod.1	2007-01-09 18:24:59.000000000 +0000
+@@ -12,6 +12,9 @@
+ .PP
+ Mandatory arguments to long options are mandatory for short options too.
+ .TP
++\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
++set security context (quoted string)
++.TP
+ \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
+ set file permission bits to MODE, not a=rw \- umask
+ .TP
+--- coreutils-6.7/man/ls.1.selinux	2006-12-07 22:45:42.000000000 +0000
++++ coreutils-6.7/man/ls.1	2007-01-09 18:24:59.000000000 +0000
+@@ -204,6 +204,20 @@
+ .TP
+ \fB\-1\fR
+ list one file per line
++.PP
++SELinux options:
++.TP
++\fB\-\-lcontext\fR
++Display security context.   Enable \fB\-l\fR. Lines
++will probably be too wide for most displays.
++.TP
++\fB\-Z\fR, \fB\-\-context\fR
++Display security context so it fits on most
++displays.  Displays only mode, user, group,
++security context and file name.
++.TP
++\fB\-\-scontext\fR
++Display only security context and file name.
+ .TP
+ \fB\-\-help\fR
+ display this help and exit
+--- coreutils-6.7/man/mkdir.1.selinux	2006-12-07 22:45:43.000000000 +0000
++++ coreutils-6.7/man/mkdir.1	2007-01-09 18:24:59.000000000 +0000
+@@ -12,6 +12,8 @@
+ .PP
+ Mandatory arguments to long options are mandatory for short options too.
+ .TP
++\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR (SELinux) set security context to CONTEXT
++.TP
+ \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
+ set file mode (as in chmod), not a=rwx \- umask
+ .TP
+--- coreutils-6.7/man/vdir.1.selinux	2006-12-07 22:45:46.000000000 +0000
++++ coreutils-6.7/man/vdir.1	2007-01-09 18:24:59.000000000 +0000
+@@ -204,6 +204,20 @@
+ .TP
+ \fB\-1\fR
+ list one file per line
++.PP
++SELINUX options:
++.TP
++\fB\-\-lcontext\fR
++Display security context.   Enable \fB\-l\fR. Lines
++will probably be too wide for most displays.
++.TP
++\fB\-\-context\fR
++Display security context so it fits on most
++displays.  Displays only mode, user, group,
++security context and file name.
++.TP
++\fB\-\-scontext\fR
++Display only security context and file name.
+ .TP
+ \fB\-\-help\fR
+ display this help and exit
+--- coreutils-6.7/man/install.1.selinux	2006-12-07 22:45:42.000000000 +0000
++++ coreutils-6.7/man/install.1	2007-01-09 18:24:59.000000000 +0000
+@@ -66,6 +66,11 @@
+ .TP
+ \fB\-v\fR, \fB\-\-verbose\fR
+ print the name of each directory as it is created
++.HP
++\fB\-P\fR, \fB\-\-preserve_context\fR (SELinux) Preserve security context
++.TP
++\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
++(SELinux) Set security context of files and directories
+ .TP
+ \fB\-\-help\fR
+ display this help and exit
+--- coreutils-6.7/README.selinux	2007-01-09 18:24:56.000000000 +0000
++++ coreutils-6.7/README	2007-01-09 18:24:59.000000000 +0000
+@@ -7,11 +7,11 @@
+ 
+ The programs that can be built with this package are:
+ 
+-  [ base64 basename cat chgrp chmod chown chroot cksum comm cp csplit cut date
++  [ base64 basename cat chcon chgrp chmod chown chroot cksum comm cp csplit cut date
+   dd df dir dircolors dirname du echo env expand expr factor false fmt fold
+   ginstall groups head hostid hostname id join kill link ln logname ls
+   md5sum mkdir mkfifo mknod mv nice nl nohup od paste pathchk pinky pr
+-  printenv printf ptx pwd readlink rm rmdir runuser seq sha1sum sha224sum sha256sum
++  printenv printf ptx pwd readlink rm rmdir runcon runuser seq sha1sum sha224sum sha256sum
+   sha384sum sha512sum shred shuf sleep sort split stat stty su sum sync tac
+   tail tee test touch tr true tsort tty uname unexpand uniq unlink uptime
+   users vdir wc who whoami yes

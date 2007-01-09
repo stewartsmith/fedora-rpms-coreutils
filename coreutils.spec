@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 5.97
-Release: 16%{?dist}
+Version: 6.7
+Release: 1%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,15 +20,9 @@ Source202:  su-l.pamd
 Source203:  runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-sort-compatibility.patch
-Patch2: coreutils-rename.patch
-Patch10: coreutils-newhashes.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
-Patch107: fileutils-4.1.10-timestyle.patch
-Patch182: coreutils-acl.patch
-Patch183: coreutils-df-cifs.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -47,8 +41,6 @@ Patch900: coreutils-setsid.patch
 Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
-Patch913: coreutils-afs.patch
-Patch914: coreutils-autoconf.patch
 Patch915: coreutils-split-pam.patch
 
 #SELINUX Patch
@@ -80,15 +72,9 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .sort-compatibility
-%patch2 -p1 -b .rename
-%patch10 -p1 -b .newhashes
 
 # Our patches
 %patch100 -p1 -b .chgrp
-%patch107 -p1 -b .timestyle
-%patch182 -p1 -b .acl
-%patch183 -p1 -b .df-cifs
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -105,8 +91,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
-%patch913 -p1 -b .afs
-%patch914 -p1 -b .autoconf
 %patch915 -p1 -b .splitl
 
 #SELinux
@@ -285,6 +269,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Jan  9 2007 Tim Waugh <twaugh@redhat.com> 6.7-1
+- 6.7.  No longer need sort-compatibility, rename, newhashes, timestyle,
+  acl, df-cifs, afs or autoconf patches.
+
 * Tue Jan  2 2007 Tim Waugh <twaugh@redhat.com>
 - Prevent 'su --help' showing runuser-only options such as --group.
 
