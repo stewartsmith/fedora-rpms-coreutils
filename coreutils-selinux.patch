@@ -285,7 +285,7 @@
 -	  f->name = xstrdup (name);
 +	  f->filetype = type;
 +	  memset (&f->stat, '\0', sizeof (f->stat));
-+	  f->name = xstrdup (absolute_name);
++	  f->name = xstrdup (name);
  	  files_index++;
 -
  	  return 0;
