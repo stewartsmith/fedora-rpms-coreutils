@@ -2301,7 +2301,7 @@
 @@ -0,0 +1,64 @@
 +.TH CHCON 1 "July 2003" "chcon (coreutils) 5.0" "User Commands"
 +.SH NAME
-+chcon \- change security context
++chcon \- change SELinux security context
 +.SH SYNOPSIS
 +.B chcon
 +[\fIOPTION\fR]...\fI CONTEXT FILE\fR...
@@ -2473,7 +2473,7 @@
 @@ -0,0 +1,45 @@
 +.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
 +.SH NAME
-+runcon \- run command with specified security context 
++runcon \- run command with specified SELinux security context 
 +.SH SYNOPSIS
 +.B runcon
 +[\fI-c\fR] [\fI-t TYPE\fR] [\fI-l LEVEL\fR] [\fI-u USER\fR] [\fI-r ROLE\fR] \fICOMMAND\fR [\fIARGS...\fR]
