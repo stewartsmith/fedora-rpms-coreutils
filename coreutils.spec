@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -47,7 +47,7 @@ Patch915: coreutils-split-pam.patch
 Patch950: coreutils-selinux.patch
 
 BuildRoot: %_tmppath/%{name}-root
-BuildRequires:	gettext libtermcap-devel bison
+BuildRequires:	gettext bison
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires:	texinfo >= 4.3
 BuildRequires: autoconf >= 2.58, automake >= 1.8
@@ -269,6 +269,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Jan 19 2007 Tim Waugh <twaugh@redhat.com> 6.7-2
+- Build does not require libtermcap-devel.
+
 * Tue Jan  9 2007 Tim Waugh <twaugh@redhat.com> 6.7-1
 - 6.7.  No longer need sort-compatibility, rename, newhashes, timestyle,
   acl, df-cifs, afs or autoconf patches.
