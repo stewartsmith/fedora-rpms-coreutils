@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -202,7 +202,7 @@ done
 # and install-info'll faill badly because of doubles
 for file in sh-utils.info textutils.info fileutils.info; do
 	if [ -f /usr/share/info/$file.bz2 ]; then
-		/sbin/install-info /usr/share/info/$file.bz2 --dir=/usr/share/info/dir --remove &> /dev/null
+		/sbin/install-info /usr/share/info/$file.bz2 --dir=/usr/share/info/dir --remove &> /dev/null || :
 	fi
 done
 
@@ -269,6 +269,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jan 22 2007 Tim Waugh <twaugh@redhat.com> 6.7-3
+- Make scriptlet unconditionally succeed (bug #223681).
+
 * Fri Jan 19 2007 Tim Waugh <twaugh@redhat.com> 6.7-2
 - Build does not require libtermcap-devel.
 
