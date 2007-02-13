@@ -1,17 +1,14 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
-BuildRequires: libselinux-devel >= 1.25.6-1
-BuildRequires: libacl-devel
-Requires: libselinux >= 1.25.6-1
-
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
-Source101:	DIR_COLORS
-Source102:	DIR_COLORS.xterm
+Source101:  DIR_COLORS
+Source102:  DIR_COLORS.xterm
 Source105:  colorls.sh
 Source106:  colorls.csh
 Source200:  su.pamd
@@ -46,23 +43,26 @@ Patch915: coreutils-split-pam.patch
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
 
-BuildRoot: %_tmppath/%{name}-root
-BuildRequires:	gettext bison
-%{?!nopam:BuildRequires: pam-devel}
-BuildRequires:	texinfo >= 4.3
+BuildRequires: libselinux-devel >= 1.25.6-1
+BuildRequires: libacl-devel
+BuildRequires: gettext bison
+BuildRequires: texinfo >= 4.3
 BuildRequires: autoconf >= 2.58, automake >= 1.8
-Prereq:		/sbin/install-info
+%{?!nopam:BuildRequires: pam-devel}
+
+Requires: libselinux >= 1.25.6-1
+Requires: /sbin/install-info
+Requires: grep, findutils
 %{?!nopam:Requires: pam >= 0.66-12}
-Prereq: grep, findutils
 
 # Require a C library that doesn't put LC_TIME files in our way.
 Conflicts: glibc < 2.2
 
-Provides:	fileutils = %version, sh-utils = %version, stat, textutils = %version
-Obsoletes:	fileutils sh-utils stat textutils
+Provides: fileutils = %version, sh-utils = %version, stat, textutils = %version
+Obsoletes: fileutils <= %version, sh-utils <= %version, stat, textutils <= %version
 
 # readlink(1) moved here from tetex.
-Conflicts:  tetex < 1.0.7-66
+Conflicts: tetex < 1.0.7-66
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -115,23 +115,19 @@ aclocal -I m4
 autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
-	--enable-selinux \
-	DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
+           --enable-selinux \
+           DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 make all %{?_smp_mflags} \
-	%{?!nopam:CPPFLAGS="-DUSE_PAM"} \
-	su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
+         %{?!nopam:CPPFLAGS="-DUSE_PAM"} \
+         su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
 
 [[ -f ChangeLog && -f ChangeLog.bz2  ]] || bzip2 -9f ChangeLog
-
-# Run the test suite.
-make check
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 perl -pi -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
-pushd po
-make pl.gmo
-popd
+%check
+make check
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -144,7 +140,7 @@ make mandir=$RPM_BUILD_ROOT%{_mandir} install-man
 if [ -d $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
    mkdir -p $RPM_BUILD_ROOT/%{_datadir}/locale/ja/LC_MESSAGES
    mv $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES/*mo \
-		$RPM_BUILD_ROOT/%{_datadir}/locale/ja/LC_MESSAGES
+      $RPM_BUILD_ROOT/%{_datadir}/locale/ja/LC_MESSAGES
    rm -rf $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC
 fi
 
@@ -153,7 +149,7 @@ mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
 for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
 do
-	mv $RPM_BUILD_ROOT/{%_bindir,bin}/$f 
+    mv $RPM_BUILD_ROOT/{%_bindir,bin}/$f 
 done
 
 # chroot was in /usr/sbin :
@@ -173,7 +169,7 @@ install -m 755 src/runuser $RPM_BUILD_ROOT/sbin
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
-	rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/$i.1}
+    rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/$i.1}
 done
 
 %{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
@@ -186,23 +182,23 @@ bzip2 -f9 old/*/C* || :
 %find_lang %name
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
-rm -f $RPM_BUILD_ROOT%{_datadir}/info/dir
+rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %pre
 # Remove these old glibc files on upgrade (bug #84090).
-for file in $(find /usr/share/locale -type f -name LC_TIME); do
-	[ -x /bin/rm ] && /bin/rm -f "$file"
+for file in $(find %{_datadir}/locale -type f -name LC_TIME); do
+    [ -x /bin/rm ] && /bin/rm -f "$file"
 done
 
 # We must desinstall theses info files since they're merged in
 # coreutils.info. else their postun'll be runned too last
 # and install-info'll faill badly because of doubles
 for file in sh-utils.info textutils.info fileutils.info; do
-	if [ -f /usr/share/info/$file.bz2 ]; then
-		/sbin/install-info /usr/share/info/$file.bz2 --dir=/usr/share/info/dir --remove &> /dev/null || :
+    if [ -f %{_infodir}/$file.bz2 ]; then
+        /sbin/install-info %{_infodir}/$file.bz2 --dir=%{_infodir}/dir --remove &> /dev/null || :
 	fi
 done
 
@@ -210,7 +206,7 @@ done
 if [ $1 = 0 ]; then
     [ -f %{_infodir}/%{name}.info.gz ] && \
       /sbin/install-info --delete %{_infodir}/%{name}.info.gz \
-	%{_infodir}/dir || :
+                         %{_infodir}/dir || :
 fi
 
 %post
@@ -229,7 +225,7 @@ fi
 %{?!nopam:%config(noreplace) /etc/pam.d/su-l}
 %{?!nopam:%config(noreplace) /etc/pam.d/runuser}
 %{?!nopam:%config(noreplace) /etc/pam.d/runuser-l}
-%doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
+%doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
 /bin/basename
 /bin/cat
 /bin/chgrp
@@ -269,6 +265,15 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Feb 13 2007 Tim Waugh <twaugh@redhat.com> 6.7-4
+- Ship COPYING file (bug #225655).
+- Use datadir and infodir macros in %%pre scriptlet (bug #225655).
+- Use spaces not tabs (bug #225655).
+- Fixed build root.
+- Change prereq to requires (bug #225655).
+- Explicitly version some obsoletes tags (bug #225655).
+- Removed obsolete pl translation fix.
+
 * Mon Jan 22 2007 Tim Waugh <twaugh@redhat.com> 6.7-3
 - Make scriptlet unconditionally succeed (bug #223681).
 
