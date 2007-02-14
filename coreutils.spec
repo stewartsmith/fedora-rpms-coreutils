@@ -7,14 +7,14 @@ Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
-Source101:  DIR_COLORS
-Source102:  DIR_COLORS.xterm
-Source105:  colorls.sh
-Source106:  colorls.csh
-Source200:  su.pamd
-Source201:  runuser.pamd
-Source202:  su-l.pamd
-Source203:  runuser-l.pamd
+Source101:  coreutils-DIR_COLORS
+Source102:  coreutils-DIR_COLORS.xterm
+Source105:  coreutils-colorls.sh
+Source106:  coreutils-colorls.csh
+Source200:  coreutils-su.pamd
+Source201:  coreutils-runuser.pamd
+Source202:  coreutils-su-l.pamd
+Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 
@@ -188,18 +188,13 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 rm -rf $RPM_BUILD_ROOT
 
 %pre
-# Remove these old glibc files on upgrade (bug #84090).
-for file in $(find %{_datadir}/locale -type f -name LC_TIME); do
-    [ -x /bin/rm ] && /bin/rm -f "$file"
-done
-
-# We must desinstall theses info files since they're merged in
-# coreutils.info. else their postun'll be runned too last
-# and install-info'll faill badly because of doubles
+# We must deinstall these info files since they're merged in
+# coreutils.info. else their postun'll be run too late
+# and install-info will fail badly because of duplicates
 for file in sh-utils.info textutils.info fileutils.info; do
     if [ -f %{_infodir}/$file.bz2 ]; then
         /sbin/install-info %{_infodir}/$file.bz2 --dir=%{_infodir}/dir --remove &> /dev/null || :
-	fi
+    fi
 done
 
 %preun
@@ -266,6 +261,8 @@ fi
 
 %changelog
 * Wed Feb 14 2007 Tim Waugh <twaugh@redhat.com>
+- Removed unnecessary stuff in pre scriptlet (bug #225655).
+- Prefix sources with 'coreutils-' (bug #225655).
 - Avoid %%makeinstall (bug #225655).
 
 * Tue Feb 13 2007 Tim Waugh <twaugh@redhat.com> 6.7-4
