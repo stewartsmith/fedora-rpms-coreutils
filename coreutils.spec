@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -260,7 +260,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Wed Feb 14 2007 Tim Waugh <twaugh@redhat.com>
+* Wed Feb 14 2007 Tim Waugh <twaugh@redhat.com> 6.7-5
 - Removed unnecessary stuff in pre scriptlet (bug #225655).
 - Prefix sources with 'coreutils-' (bug #225655).
 - Avoid %%makeinstall (bug #225655).
