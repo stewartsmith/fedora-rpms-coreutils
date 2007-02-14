@@ -131,7 +131,7 @@ make check
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%makeinstall
+make DESTDIR=$RPM_BUILD_ROOT install
 
 # man pages are not installed with make install
 make mandir=$RPM_BUILD_ROOT%{_mandir} install-man
@@ -265,6 +265,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Feb 14 2007 Tim Waugh <twaugh@redhat.com>
+- Avoid %%makeinstall (bug #225655).
+
 * Tue Feb 13 2007 Tim Waugh <twaugh@redhat.com> 6.7-4
 - Ship COPYING file (bug #225655).
 - Use datadir and infodir macros in %%pre scriptlet (bug #225655).
