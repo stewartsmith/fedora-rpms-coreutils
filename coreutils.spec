@@ -158,10 +158,10 @@ mv $RPM_BUILD_ROOT/{%_bindir,%_sbindir}/chroot
 for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
-install -c -m644 %SOURCE101 $RPM_BUILD_ROOT/etc/
-install -c -m644 %SOURCE102 $RPM_BUILD_ROOT/etc/
-install -c -m755 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d
-install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d
+install -c -m644 %SOURCE101 $RPM_BUILD_ROOT/etc/DIR_COLORS
+install -c -m644 %SOURCE102 $RPM_BUILD_ROOT/etc/DIR_COLORS.xterm
+install -c -m755 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d/colorls.sh
+install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d/colorls.csh
 
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
