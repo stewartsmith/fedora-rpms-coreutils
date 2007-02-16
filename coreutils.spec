@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -58,8 +58,8 @@ Requires: grep, findutils
 # Require a C library that doesn't put LC_TIME files in our way.
 Conflicts: glibc < 2.2
 
-Provides: fileutils = %version, sh-utils = %version, stat, textutils = %version
-Obsoletes: fileutils <= %version, sh-utils <= %version, stat, textutils <= %version
+Provides: fileutils = %version, sh-utils = %version, stat = %version, textutils = %version
+Obsoletes: fileutils <= %version, sh-utils <= %version, stat <= %version, textutils <= %version
 
 # readlink(1) moved here from tetex.
 Conflicts: tetex < 1.0.7-66
@@ -160,8 +160,8 @@ for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 install -c -m644 %SOURCE101 $RPM_BUILD_ROOT/etc/DIR_COLORS
 install -c -m644 %SOURCE102 $RPM_BUILD_ROOT/etc/DIR_COLORS.xterm
-install -c -m755 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d/colorls.sh
-install -c -m755 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d/colorls.csh
+install -c -m644 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d/colorls.sh
+install -c -m644 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d/colorls.csh
 
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
@@ -260,6 +260,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Feb 16 2007 Tim Waugh <twaugh@redhat.com> 6.7-6
+- Provide version for stat (bug #225655).
+- Fixed permissions on profile scripts (bug #225655).
+
 * Wed Feb 14 2007 Tim Waugh <twaugh@redhat.com> 6.7-5
 - Removed unnecessary stuff in pre scriptlet (bug #225655).
 - Prefix sources with 'coreutils-' (bug #225655).
