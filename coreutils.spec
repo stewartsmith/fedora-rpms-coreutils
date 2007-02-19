@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -51,15 +51,23 @@ BuildRequires: autoconf >= 2.58, automake >= 1.8
 %{?!nopam:BuildRequires: pam-devel}
 
 Requires: libselinux >= 1.25.6-1
-Requires: /sbin/install-info
-Requires: grep, findutils
+Requires(pre): /sbin/install-info
+Requires(preun): /sbin/install-info
+Requires(post): /sbin/install-info
+Requires(post): grep
 %{?!nopam:Requires: pam >= 0.66-12}
 
 # Require a C library that doesn't put LC_TIME files in our way.
 Conflicts: glibc < 2.2
 
-Provides: fileutils = %version, sh-utils = %version, stat = %version, textutils = %version
-Obsoletes: fileutils <= %version, sh-utils <= %version, stat <= %version, textutils <= %version
+Provides: fileutils = %{version}-%{release}
+Provides: sh-utils = %{version}-%{release}
+Provides: stat = %{version}-%{release}
+Provides: textutils = %{version}-%{release}
+Obsoletes: fileutils <= 4.1.9
+Obsoletes: sh-utils <= 2.0.12
+Obsoletes: stat <= 3.3
+Obsoletes: textutils <= 2.0.21
 
 # readlink(1) moved here from tetex.
 Conflicts: tetex < 1.0.7-66
@@ -121,8 +129,6 @@ make all %{?_smp_mflags} \
          %{?!nopam:CPPFLAGS="-DUSE_PAM"} \
          su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
 
-[[ -f ChangeLog && -f ChangeLog.bz2  ]] || bzip2 -9f ChangeLog
-
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 perl -pi -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
@@ -144,6 +150,8 @@ if [ -d $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
    rm -rf $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC
 fi
 
+bzip2 -9f ChangeLog
+
 # let be compatible with old fileutils, sh-utils and textutils packages :
 mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
@@ -157,11 +165,11 @@ mv $RPM_BUILD_ROOT/{%_bindir,%_sbindir}/chroot
 # {cat,sort,cut} were previously moved from bin to /usr/bin and linked into 
 for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 
-mkdir -p $RPM_BUILD_ROOT/etc/profile.d
-install -c -m644 %SOURCE101 $RPM_BUILD_ROOT/etc/DIR_COLORS
-install -c -m644 %SOURCE102 $RPM_BUILD_ROOT/etc/DIR_COLORS.xterm
-install -c -m644 %SOURCE105 $RPM_BUILD_ROOT/etc/profile.d/colorls.sh
-install -c -m644 %SOURCE106 $RPM_BUILD_ROOT/etc/profile.d/colorls.csh
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
+install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.xterm
+install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
+install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
@@ -169,15 +177,16 @@ install -m 755 src/runuser $RPM_BUILD_ROOT/sbin
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
-    rm -f $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/$i.1}
+    rm $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/$i.1}
 done
 
-%{?!nopam:install -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
-%{?!nopam:install -m 644 %SOURCE202 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su-l}
-%{?!nopam:install -m 644 %SOURCE201 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser}
-%{?!nopam:install -m 644 %SOURCE203 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser-l}
+%{?!nopam:install -p -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
+%{?!nopam:install -p -m 644 %SOURCE202 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su-l}
+%{?!nopam:install -p -m 644 %SOURCE201 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser}
+%{?!nopam:install -p -m 644 %SOURCE203 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser-l}
 
-bzip2 -f9 old/*/C* || :
+# Compress ChangeLogs from before the fileutils/textutils/etc merge
+bzip2 -f9 old/*/C*
 
 %find_lang %name
 
@@ -200,7 +209,7 @@ done
 %preun
 if [ $1 = 0 ]; then
     [ -f %{_infodir}/%{name}.info.gz ] && \
-      /sbin/install-info --delete %{_infodir}/%{name}.info.gz \
+      /sbin/install-info --delete %{_infodir}/%{name}.info* \
                          %{_infodir}/dir || :
 fi
 
@@ -208,18 +217,18 @@ fi
 /bin/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
   %{_infodir}/dir.rpmmodify || exit 0
     /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-[ -f %{_infodir}/%{name}.info.gz ] && \
-  /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
+[ -f %{_infodir}/%{name}.info* ] && \
+  /sbin/install-info %{_infodir}/%{name}.info* %{_infodir}/dir || :
 
 %files -f %{name}.lang
-%defattr(-,root,root)
+%defattr(-,root,root,-)
 %dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
-%{?!nopam:%config(noreplace) /etc/pam.d/su}
-%{?!nopam:%config(noreplace) /etc/pam.d/su-l}
-%{?!nopam:%config(noreplace) /etc/pam.d/runuser}
-%{?!nopam:%config(noreplace) /etc/pam.d/runuser-l}
+%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su}
+%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su-l}
+%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
+%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser-l}
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
 /bin/basename
 /bin/cat
@@ -260,6 +269,17 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Feb 19 2007 Tim Waugh <twaugh@redhat.com> 6.7-7
+- Better Obsoletes/Provides versioning (bug #225655).
+- Use better defattr (bug #225655).
+- Be info file compression tolerant (bug #225655).
+- Moved changelog compression to %%install (bug #225655).
+- Prevent upstream changes being masked (bug #225655).
+- Added a comment (bug #225655).
+- Use install -p for non-compiled files (bug #225655).
+- Use sysconfdir macro for /etc (bug #225655).
+- Use Requires(pre) etc for install-info (bug #225655).
+
 * Fri Feb 16 2007 Tim Waugh <twaugh@redhat.com> 6.7-6
 - Provide version for stat (bug #225655).
 - Fixed permissions on profile scripts (bug #225655).
