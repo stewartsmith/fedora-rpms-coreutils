@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -143,11 +143,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 make mandir=$RPM_BUILD_ROOT%{_mandir} install-man
 
 # fix japanese catalog file
-if [ -d $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
-   mkdir -p $RPM_BUILD_ROOT/%{_datadir}/locale/ja/LC_MESSAGES
-   mv $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES/*mo \
-      $RPM_BUILD_ROOT/%{_datadir}/locale/ja/LC_MESSAGES
-   rm -rf $RPM_BUILD_ROOT/%{_datadir}/locale/ja_JP.EUC
+if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
+   mkdir -p $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
+   mv $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES/*mo \
+      $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
+   rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC
 fi
 
 bzip2 -9f ChangeLog
@@ -157,11 +157,11 @@ mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
 for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
 do
-    mv $RPM_BUILD_ROOT/{%_bindir,bin}/$f 
+    mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f 
 done
 
 # chroot was in /usr/sbin :
-mv $RPM_BUILD_ROOT/{%_bindir,%_sbindir}/chroot
+mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
 # {cat,sort,cut} were previously moved from bin to /usr/bin and linked into 
 for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 
@@ -224,7 +224,7 @@ fi
 %defattr(-,root,root,-)
 %dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
-%config(noreplace) %{_sysconfdir}/profile.d/*
+%{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su-l}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
@@ -269,6 +269,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Feb 20 2007 Tim Waugh <twaugh@redhat.com> 6.7-8
+- Don't mark profile scripts as config files (bug #225655).
+- Avoid extra directory separators (bug #225655).
+
 * Mon Feb 19 2007 Tim Waugh <twaugh@redhat.com> 6.7-7
 - Better Obsoletes/Provides versioning (bug #225655).
 - Use better defattr (bug #225655).
