@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.7
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -106,7 +106,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
-perl -pi -e 's/basic-1//g' tests/stty/Makefile*
+sed -i -e 's/basic-1//g' tests/stty/Makefile*
 
 chmod a+x tests/sort/sort-mb-tests
 
@@ -130,7 +130,7 @@ make all %{?_smp_mflags} \
          su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
-perl -pi -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
+sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
 %check
 make check
@@ -200,25 +200,20 @@ rm -rf $RPM_BUILD_ROOT
 # We must deinstall these info files since they're merged in
 # coreutils.info. else their postun'll be run too late
 # and install-info will fail badly because of duplicates
-for file in sh-utils.info textutils.info fileutils.info; do
-    if [ -f %{_infodir}/$file.bz2 ]; then
-        /sbin/install-info %{_infodir}/$file.bz2 --dir=%{_infodir}/dir --remove &> /dev/null || :
-    fi
+for file in sh-utils textutils fileutils; do
+    /sbin/install-info --delete %{_infodir}/$file.info* --dir=%{_infodir}/dir &> /dev/null || :
 done
 
 %preun
 if [ $1 = 0 ]; then
-    [ -f %{_infodir}/%{name}.info.gz ] && \
-      /sbin/install-info --delete %{_infodir}/%{name}.info* \
-                         %{_infodir}/dir || :
+    /sbin/install-info --delete %{_infodir}/%{name}.info* %{_infodir}/dir || :
 fi
 
 %post
 /bin/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
   %{_infodir}/dir.rpmmodify || exit 0
     /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-[ -f %{_infodir}/%{name}.info* ] && \
-  /sbin/install-info %{_infodir}/%{name}.info* %{_infodir}/dir || :
+/sbin/install-info %{_infodir}/%{name}.info* %{_infodir}/dir || :
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
@@ -269,6 +264,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Feb 22 2007 Tim Waugh <twaugh@redhat.com> 6.7-9
+- Use sed instead of perl for text replacement (bug #225655).
+- Use install-info scriptlets from the guidelines (bug #225655).
+
 * Tue Feb 20 2007 Tim Waugh <twaugh@redhat.com> 6.7-8
 - Don't mark profile scripts as config files (bug #225655).
 - Avoid extra directory separators (bug #225655).
