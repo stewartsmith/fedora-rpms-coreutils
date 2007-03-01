@@ -1,12 +1,13 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 6.7
-Release: 9%{?dist}
+Version: 6.8
+Release: 1%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
+#Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
+Source0: http://meyering.net/cu/%{name}-%{version}+-ss-2007-03-01.11.42.23+0.tar.gz
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.xterm
 Source105:  coreutils-colorls.sh
@@ -39,6 +40,7 @@ Patch907: coreutils-5.2.1-runuser.patch
 Patch908: coreutils-getgrouplist.patch
 Patch912: coreutils-overflow.patch
 Patch915: coreutils-split-pam.patch
+Patch916: coreutils-getfacl-exit-code.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
@@ -77,7 +79,7 @@ These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}+
 
 # From upstream
 
@@ -100,6 +102,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch915 -p1 -b .splitl
+%patch916 -p1 -b .getfacl-exit-code
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -264,6 +267,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Mar  1 2007 Tim Waugh <twaugh@redhat.com>
+- 6.8+, in preparation for 6.9.
+
 * Thu Feb 22 2007 Tim Waugh <twaugh@redhat.com> 6.7-9
 - Use sed instead of perl for text replacement (bug #225655).
 - Use install-info scriptlets from the guidelines (bug #225655).

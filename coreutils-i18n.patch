@@ -1,5 +1,5 @@
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.7/tests/sort/sort-mb-tests	2007-01-09 17:18:28.000000000 +0000
+--- /dev/null	2007-03-01 09:16:39.219409909 +0000
++++ coreutils-6.8+/tests/sort/sort-mb-tests	2007-03-01 15:08:24.000000000 +0000
 @@ -0,0 +1,58 @@
 +#! /bin/sh
 +case $# in
@@ -59,38 +59,38 @@
 +fi
 +test $errors = 0 || errors=1
 +exit $errors
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.7/tests/sort/mb2.I	2007-01-09 17:18:28.000000000 +0000
+--- /dev/null	2007-03-01 09:16:39.219409909 +0000
++++ coreutils-6.8+/tests/sort/mb2.I	2007-03-01 15:08:24.000000000 +0000
 @@ -0,0 +1,4 @@
 +Apple＠ＡＡ10＠＠20
 +Banana＠ＡＡ5＠＠30
 +Citrus＠ＡＡ20＠＠5
 +Cherry＠ＡＡ30＠＠10
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.7/tests/sort/mb2.X	2007-01-09 17:18:28.000000000 +0000
+--- /dev/null	2007-03-01 09:16:39.219409909 +0000
++++ coreutils-6.8+/tests/sort/mb2.X	2007-03-01 15:08:24.000000000 +0000
 @@ -0,0 +1,4 @@
 +Citrus＠ＡＡ20＠＠5
 +Cherry＠ＡＡ30＠＠10
 +Apple＠ＡＡ10＠＠20
 +Banana＠ＡＡ5＠＠30
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.7/tests/sort/mb1.I	2007-01-09 17:18:28.000000000 +0000
+--- /dev/null	2007-03-01 09:16:39.219409909 +0000
++++ coreutils-6.8+/tests/sort/mb1.I	2007-03-01 15:08:24.000000000 +0000
 @@ -0,0 +1,4 @@
 +Apple＠10
 +Banana＠5
 +Citrus＠20
 +Cherry＠30
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.7/tests/sort/mb1.X	2007-01-09 17:18:28.000000000 +0000
+--- /dev/null	2007-03-01 09:16:39.219409909 +0000
++++ coreutils-6.8+/tests/sort/mb1.X	2007-03-01 15:08:24.000000000 +0000
 @@ -0,0 +1,4 @@
 +Banana＠5
 +Apple＠10
 +Citrus＠20
 +Cherry＠30
---- coreutils-6.7/tests/sort/Makefile.am.i18n	2006-10-22 17:54:15.000000000 +0100
-+++ coreutils-6.7/tests/sort/Makefile.am	2007-01-09 17:25:00.000000000 +0000
-@@ -64,14 +64,16 @@
- nul-tab.E
+--- coreutils-6.8+/tests/sort/Makefile.am.i18n	2007-01-24 07:47:37.000000000 +0000
++++ coreutils-6.8+/tests/sort/Makefile.am	2007-03-01 15:09:59.000000000 +0000
+@@ -66,15 +66,17 @@
+ bigfield.O bigfield.E
  ##test-files-end
  
 -EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
@@ -100,6 +100,7 @@
 +EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
 +noinst_SCRIPTS = $x-tests # $x-mb-tests
  TESTS_ENVIRONMENT = \
+   CU_TEST_NAME=`basename $(abs_srcdir)`,$$tst \
    PATH="$(VG_PATH_PREFIX)`pwd`/../../src$(PATH_SEPARATOR)$$PATH"
  
  editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
@@ -109,8 +110,8 @@
  
  mk_script = $(srcdir)/../mk-script
  $(srcdir)/$x-tests: $(mk_script) Test.pm Makefile.am
---- coreutils-6.7/lib/linebuffer.h.i18n	2005-05-14 07:44:24.000000000 +0100
-+++ coreutils-6.7/lib/linebuffer.h	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/lib/linebuffer.h.i18n	2005-05-14 07:44:24.000000000 +0100
++++ coreutils-6.8+/lib/linebuffer.h	2007-03-01 15:08:24.000000000 +0000
 @@ -22,6 +22,11 @@
  
  # include <stdio.h>
@@ -133,8 +134,8 @@
  };
  
  /* Initialize linebuffer LINEBUFFER for use. */
---- coreutils-6.7/src/expand.c.i18n	2006-10-22 17:54:15.000000000 +0100
-+++ coreutils-6.7/src/expand.c	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/src/expand.c.i18n	2007-01-14 15:41:28.000000000 +0000
++++ coreutils-6.8+/src/expand.c	2007-03-01 15:08:24.000000000 +0000
 @@ -38,11 +38,28 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -329,8 +330,8 @@
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
---- coreutils-6.7/src/join.c.i18n	2006-10-22 17:54:15.000000000 +0100
-+++ coreutils-6.7/src/join.c	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/src/join.c.i18n	2007-01-14 15:41:28.000000000 +0000
++++ coreutils-6.8+/src/join.c	2007-03-01 15:08:24.000000000 +0000
 @@ -23,16 +23,30 @@
  #include <sys/types.h>
  #include <getopt.h>
@@ -774,7 +775,7 @@
  	  prfield (i, line2);
  	}
        putchar ('\n');
-@@ -862,20 +1093,41 @@
+@@ -859,20 +1090,41 @@
  
  	case 't':
  	  {
@@ -826,8 +827,8 @@
  	  }
  	  break;
  
---- coreutils-6.7/src/uniq.c.i18n	2006-10-22 17:54:15.000000000 +0100
-+++ coreutils-6.7/src/uniq.c	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/src/uniq.c.i18n	2007-01-14 15:41:28.000000000 +0000
++++ coreutils-6.8+/src/uniq.c	2007-03-01 15:08:24.000000000 +0000
 @@ -23,6 +23,16 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -877,7 +878,7 @@
  static struct option const longopts[] =
  {
    {"count", no_argument, NULL, 'c'},
-@@ -189,7 +215,7 @@
+@@ -198,7 +224,7 @@
     return a pointer to the beginning of the line's field to be compared. */
  
  static char *
@@ -886,7 +887,7 @@
  {
    size_t count;
    char *lp = line->buffer;
-@@ -210,6 +236,83 @@
+@@ -219,6 +245,83 @@
    return lp + i;
  }
  
@@ -970,7 +971,7 @@
  /* Return false if two strings OLD and NEW match, true if not.
     OLD and NEW point not to the beginnings of the lines
     but rather to the beginnings of the fields to compare.
-@@ -218,6 +321,8 @@
+@@ -227,6 +330,8 @@
  static bool
  different (char *old, char *new, size_t oldlen, size_t newlen)
  {
@@ -979,7 +980,7 @@
    if (check_chars < oldlen)
      oldlen = check_chars;
    if (check_chars < newlen)
-@@ -225,14 +330,92 @@
+@@ -234,14 +339,92 @@
  
    if (ignore_case)
      {
@@ -1077,7 +1078,7 @@
  
  /* Output the line in linebuffer LINE to standard output
     provided that the switches say it should be output.
-@@ -286,15 +469,43 @@
+@@ -295,15 +478,43 @@
      {
        char *prevfield IF_LINT (= NULL);
        size_t prevlen IF_LINT (= 0);
@@ -1121,7 +1122,7 @@
  	  if (prevline->length == 0
  	      || different (thisfield, prevfield, thislen, prevlen))
  	    {
-@@ -313,17 +524,26 @@
+@@ -322,17 +533,26 @@
        size_t prevlen;
        uintmax_t match_count = 0;
        bool first_delimiter = true;
@@ -1148,7 +1149,7 @@
  	  if (readlinebuffer (thisline, stdin) == 0)
  	    {
  	      if (ferror (stdin))
-@@ -332,6 +552,15 @@
+@@ -341,6 +561,15 @@
  	    }
  	  thisfield = find_field (thisline);
  	  thislen = thisline->length - 1 - (thisfield - thisline->buffer);
@@ -1164,7 +1165,7 @@
  	  match = !different (thisfield, prevfield, thislen, prevlen);
  	  match_count += match;
  
-@@ -364,6 +593,9 @@
+@@ -373,6 +602,9 @@
  	      SWAP_LINES (prevline, thisline);
  	      prevfield = thisfield;
  	      prevlen = thislen;
@@ -1174,7 +1175,7 @@
  	      if (!match)
  		match_count = 0;
  	    }
-@@ -408,6 +640,19 @@
+@@ -417,6 +649,19 @@
  
    atexit (close_stdout);
  
@@ -1194,8 +1195,8 @@
    skip_chars = 0;
    skip_fields = 0;
    check_chars = SIZE_MAX;
---- coreutils-6.7/src/fold.c.i18n	2006-10-24 23:35:57.000000000 +0100
-+++ coreutils-6.7/src/fold.c	2007-01-09 17:23:46.000000000 +0000
+--- coreutils-6.8+/src/fold.c.i18n	2007-02-23 12:01:47.000000000 +0000
++++ coreutils-6.8+/src/fold.c	2007-03-01 15:08:24.000000000 +0000
 @@ -23,11 +23,33 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -1599,15 +1600,16 @@
  	  break;
  
  	case 's':		/* Break at word boundaries. */
---- coreutils-6.7/src/sort.c.i18n	2006-11-13 18:14:02.000000000 +0000
-+++ coreutils-6.7/src/sort.c	2007-01-09 17:18:28.000000000 +0000
-@@ -23,9 +23,18 @@
+--- coreutils-6.8+/src/sort.c.i18n	2007-02-24 11:23:23.000000000 +0000
++++ coreutils-6.8+/src/sort.c	2007-03-01 15:10:57.000000000 +0000
+@@ -23,10 +23,19 @@
  
  #include <config.h>
  
 +#include <assert.h>
  #include <getopt.h>
  #include <sys/types.h>
+ #include <sys/wait.h>
  #include <signal.h>
 +#if HAVE_WCHAR_H
 +# include <wchar.h>
@@ -1618,9 +1620,9 @@
 +#endif
 +
  #include "system.h"
+ #include "argmatch.h"
  #include "error.h"
- #include "hard-locale.h"
-@@ -98,14 +107,38 @@
+@@ -116,14 +125,38 @@
  /* Thousands separator; if -1, then there isn't one.  */
  static int thousands_sep;
  
@@ -1660,7 +1662,7 @@
  /* The kind of blanks for '-b' to skip in various options. */
  enum blanktype { bl_start, bl_end, bl_both };
  
-@@ -243,13 +276,11 @@
+@@ -261,13 +294,11 @@
     they were read if all keys compare equal.  */
  static bool stable;
  
@@ -1677,9 +1679,9 @@
  
  /* Flag to remove consecutive duplicate lines from the output.
     Only the last of a sequence of equal lines will be output. */
-@@ -408,6 +439,44 @@
- static struct tempnode *volatile temphead;
- static struct tempnode *volatile *temptail = &temphead;
+@@ -639,6 +670,44 @@
+     update_proc (pid);
+ }
  
 +/* Function pointers. */
 +static void
@@ -1722,7 +1724,7 @@
  /* Clean up any remaining temporary files.  */
  
  static void
-@@ -561,7 +630,7 @@
+@@ -978,7 +1047,7 @@
    free (node);
  }
  
@@ -1731,7 +1733,7 @@
  
  static int
  struct_month_cmp (const void *m1, const void *m2)
-@@ -576,7 +645,7 @@
+@@ -993,7 +1062,7 @@
  /* Initialize the character class tables. */
  
  static void
@@ -1740,7 +1742,7 @@
  {
    size_t i;
  
-@@ -588,7 +657,7 @@
+@@ -1005,7 +1074,7 @@
        fold_toupper[i] = toupper (i);
      }
  
@@ -1749,7 +1751,7 @@
    /* If we're not in the "C" locale, read different names for months.  */
    if (hard_LC_TIME)
      {
-@@ -614,6 +683,64 @@
+@@ -1031,6 +1100,64 @@
  #endif
  }
  
@@ -1814,7 +1816,7 @@
  /* Specify the amount of main memory to use when sorting.  */
  static void
  specify_sort_size (char const *s)
-@@ -824,7 +951,7 @@
+@@ -1241,7 +1368,7 @@
     by KEY in LINE. */
  
  static char *
@@ -1823,7 +1825,7 @@
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t sword = key->sword;
-@@ -834,10 +961,10 @@
+@@ -1251,10 +1378,10 @@
    /* The leading field separator itself is included in a field when -t
       is absent.  */
  
@@ -1836,7 +1838,7 @@
  	  ++ptr;
  	if (ptr < lim)
  	  ++ptr;
-@@ -865,11 +992,70 @@
+@@ -1282,11 +1409,70 @@
    return ptr;
  }
  
@@ -1908,7 +1910,7 @@
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t eword = key->eword, echar = key->echar;
-@@ -882,10 +1068,10 @@
+@@ -1299,10 +1485,10 @@
       `beginning' is the first character following the delimiting TAB.
       Otherwise, leave PTR pointing at the first `blank' character after
       the preceding field.  */
@@ -1921,7 +1923,7 @@
  	  ++ptr;
  	if (ptr < lim && (eword | echar))
  	  ++ptr;
-@@ -931,10 +1117,10 @@
+@@ -1348,10 +1534,10 @@
       */
  
    /* Make LIM point to the end of (one byte past) the current field.  */
@@ -1934,7 +1936,7 @@
        if (newlim)
  	lim = newlim;
      }
-@@ -967,6 +1153,107 @@
+@@ -1384,6 +1570,107 @@
    return ptr;
  }
  
@@ -2042,7 +2044,7 @@
  /* Fill BUF reading from FP, moving buf->left bytes from the end
     of buf->buf to the beginning first.  If EOF is reached and the
     file wasn't terminated by a newline, supply one.  Set up BUF's line
-@@ -1049,8 +1336,24 @@
+@@ -1466,8 +1753,24 @@
  		  else
  		    {
  		      if (key->skipsblanks)
@@ -2069,7 +2071,7 @@
  		      line->keybeg = line_start;
  		    }
  		}
-@@ -1083,7 +1386,7 @@
+@@ -1500,7 +1803,7 @@
     hideously fast. */
  
  static int
@@ -2078,7 +2080,7 @@
  {
    while (blanks[to_uchar (*a)])
      a++;
-@@ -1093,6 +1396,25 @@
+@@ -1510,6 +1813,25 @@
    return strnumcmp (a, b, decimal_point, thousands_sep);
  }
  
@@ -2104,7 +2106,7 @@
  static int
  general_numcompare (const char *sa, const char *sb)
  {
-@@ -1126,7 +1448,7 @@
+@@ -1543,7 +1865,7 @@
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -2113,7 +2115,7 @@
  {
    size_t lo = 0;
    size_t hi = MONTHS_PER_YEAR;
-@@ -1281,11 +1603,79 @@
+@@ -1698,11 +2020,79 @@
    return diff;
  }
  
@@ -2194,7 +2196,7 @@
  {
    struct keyfield const *key = keylist;
  
-@@ -1458,6 +1848,177 @@
+@@ -1875,6 +2265,177 @@
    return key->reverse ? -diff : diff;
  }
  
@@ -2372,8 +2374,8 @@
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -2309,7 +2870,7 @@
-   atexit (close_stdout);
+@@ -2744,7 +3305,7 @@
+   initialize_exit_failure (SORT_FAILURE);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
 -#if HAVE_NL_LANGINFO
@@ -2381,7 +2383,7 @@
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -2330,6 +2891,27 @@
+@@ -2765,6 +3326,27 @@
        thousands_sep = -1;
    }
  
@@ -2409,7 +2411,7 @@
    have_read_stdin = false;
    inittables ();
  
-@@ -2544,13 +3126,35 @@
+@@ -3015,13 +3597,35 @@
  
  	case 't':
  	  {
@@ -2449,7 +2451,7 @@
  		else
  		  {
  		    /* Provoke with `sort -txx'.  Complain about
-@@ -2561,9 +3165,12 @@
+@@ -3032,9 +3636,12 @@
  			   quote (optarg));
  		  }
  	      }
@@ -2464,8 +2466,8 @@
  	  }
  	  break;
  
---- coreutils-6.7/src/unexpand.c.i18n	2006-10-22 17:54:15.000000000 +0100
-+++ coreutils-6.7/src/unexpand.c	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/src/unexpand.c.i18n	2007-01-14 15:41:28.000000000 +0000
++++ coreutils-6.8+/src/unexpand.c	2007-03-01 15:08:24.000000000 +0000
 @@ -39,11 +39,28 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -2718,8 +2720,8 @@
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
---- coreutils-6.7/src/pr.c.i18n	2006-10-24 23:59:25.000000000 +0100
-+++ coreutils-6.7/src/pr.c	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/src/pr.c.i18n	2007-01-14 15:41:28.000000000 +0000
++++ coreutils-6.8+/src/pr.c	2007-03-01 15:08:24.000000000 +0000
 @@ -313,6 +313,32 @@
  
  #include <getopt.h>
@@ -3442,8 +3444,8 @@
  /* We've just printed some files and need to clean up things before
     looking for more options and printing the next batch of files.
  
---- coreutils-6.7/src/cut.c.i18n	2006-11-27 10:25:51.000000000 +0000
-+++ coreutils-6.7/src/cut.c	2007-01-09 17:18:28.000000000 +0000
+--- coreutils-6.8+/src/cut.c.i18n	2007-01-14 15:41:28.000000000 +0000
++++ coreutils-6.8+/src/cut.c	2007-03-01 15:08:24.000000000 +0000
 @@ -29,6 +29,11 @@
  #include <assert.h>
  #include <getopt.h>
@@ -3709,7 +3711,7 @@
  /* Read from stream STREAM, printing to standard output any selected fields.  */
  
  static void
-@@ -691,13 +830,192 @@
+@@ -692,13 +831,192 @@
      }
  }
  
@@ -3905,7 +3907,7 @@
  }
  
  /* Process file FILE to standard output.
-@@ -747,6 +1065,8 @@
+@@ -748,6 +1066,8 @@
    bool ok;
    bool delim_specified = false;
    char *spec_list_string IF_LINT(= NULL);
@@ -3914,7 +3916,7 @@
  
    initialize_main (&argc, &argv);
    program_name = argv[0];
-@@ -769,7 +1089,6 @@
+@@ -770,7 +1090,6 @@
        switch (optc)
  	{
  	case 'b':
@@ -3922,7 +3924,7 @@
  	  /* Build the byte list. */
  	  if (operating_mode != undefined_mode)
  	    FATAL_ERROR (_("only one type of list may be specified"));
-@@ -777,6 +1096,14 @@
+@@ -778,6 +1097,14 @@
  	  spec_list_string = optarg;
  	  break;
  
@@ -3937,7 +3939,7 @@
  	case 'f':
  	  /* Build the field list. */
  	  if (operating_mode != undefined_mode)
-@@ -788,10 +1115,35 @@
+@@ -789,10 +1116,35 @@
  	case 'd':
  	  /* New delimiter. */
  	  /* Interpret -d '' to mean `use the NUL byte as the delimiter.'  */
@@ -3977,7 +3979,7 @@
  	  break;
  
  	case OUTPUT_DELIMITER_OPTION:
-@@ -804,6 +1156,7 @@
+@@ -805,6 +1157,7 @@
  	  break;
  
  	case 'n':
@@ -3985,7 +3987,7 @@
  	  break;
  
  	case 's':
-@@ -826,7 +1179,7 @@
+@@ -827,7 +1180,7 @@
    if (operating_mode == undefined_mode)
      FATAL_ERROR (_("you must specify a list of bytes, characters, or fields"));
  
@@ -3994,7 +3996,7 @@
      FATAL_ERROR (_("an input delimiter may be specified only\
   when operating on fields"));
  
-@@ -853,15 +1206,34 @@
+@@ -854,15 +1207,34 @@
      }
  
    if (!delim_specified)
