@@ -204,19 +204,19 @@ rm -rf $RPM_BUILD_ROOT
 # coreutils.info. else their postun'll be run too late
 # and install-info will fail badly because of duplicates
 for file in sh-utils textutils fileutils; do
-    /sbin/install-info --delete %{_infodir}/$file.info* --dir=%{_infodir}/dir &> /dev/null || :
+    /sbin/install-info --delete %{_infodir}/$file.info --dir=%{_infodir}/dir &> /dev/null || :
 done
 
 %preun
 if [ $1 = 0 ]; then
-    /sbin/install-info --delete %{_infodir}/%{name}.info* %{_infodir}/dir || :
+    /sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
 fi
 
 %post
 /bin/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
   %{_infodir}/dir.rpmmodify || exit 0
     /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-/sbin/install-info %{_infodir}/%{name}.info* %{_infodir}/dir || :
+/sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
@@ -267,7 +267,10 @@ fi
 /sbin/runuser
 
 %changelog
-* Thu Mar  1 2007 Tim Waugh <twaugh@redhat.com>
+* Fri Mar  9 2007 Tim Waugh <twaugh@redhat.com>
+- Better install-info scriptlets (bug #225655).
+
+* Thu Mar  1 2007 Tim Waugh <twaugh@redhat.com> 6.8-1
 - 6.8+, in preparation for 6.9.
 
 * Thu Feb 22 2007 Tim Waugh <twaugh@redhat.com> 6.7-9
