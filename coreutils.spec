@@ -1,13 +1,12 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 6.8
+Version: 6.9
 Release: 1%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-#Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
-Source0: http://meyering.net/cu/%{name}-%{version}+-ss-2007-03-01.11.42.23+0.tar.gz
+Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.xterm
 Source105:  coreutils-colorls.sh
@@ -79,7 +78,7 @@ These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
-%setup -q -n %{name}-%{version}+
+%setup -q
 
 # From upstream
 
@@ -267,6 +266,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Mar 26 2007 Tim Waugh <twaugh@redhat.com> 6.9-1
+- 6.9.
+
 * Fri Mar  9 2007 Tim Waugh <twaugh@redhat.com>
 - Better install-info scriptlets (bug #225655).
 

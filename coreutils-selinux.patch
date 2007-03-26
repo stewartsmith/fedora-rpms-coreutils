@@ -1,5 +1,5 @@
---- coreutils-6.8+/tests/help-version.selinux	2007-03-01 15:52:06.000000000 +0000
-+++ coreutils-6.8+/tests/help-version	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/tests/help-version.selinux	2007-03-23 11:59:21.000000000 +0000
++++ coreutils-6.9/tests/help-version	2007-03-23 11:59:21.000000000 +0000
 @@ -72,6 +72,8 @@
  
      # Skip `test'; it doesn't accept --help or --version.
@@ -18,8 +18,8 @@
  
    rm -rf $tmp_in $tmp_in2 $tmp_dir $tmp_out
    echo > $tmp_in
---- coreutils-6.8+/src/ls.c.selinux	2007-03-01 06:51:46.000000000 +0000
-+++ coreutils-6.8+/src/ls.c	2007-03-01 15:53:13.000000000 +0000
+--- coreutils-6.9/src/ls.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/ls.c	2007-03-23 11:59:21.000000000 +0000
 @@ -111,6 +111,18 @@
  
  #define AUTHORS "Richard Stallman", "David MacKenzie"
@@ -400,8 +400,8 @@
 +  }
 +}
 +#endif
---- coreutils-6.8+/src/cp.c.selinux	2007-02-04 09:52:39.000000000 +0000
-+++ coreutils-6.8+/src/cp.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/cp.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/cp.c	2007-03-23 11:59:21.000000000 +0000
 @@ -51,6 +51,11 @@
  
  #define AUTHORS "Torbjorn Granlund", "David MacKenzie", "Jim Meyering"
@@ -567,8 +567,8 @@
  
  	case REPLY_OPTION: /* Deprecated */
  	  x.interactive = XARGMATCH ("--reply", optarg,
---- coreutils-6.8+/src/Makefile.am.selinux	2007-03-01 15:52:06.000000000 +0000
-+++ coreutils-6.8+/src/Makefile.am	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/Makefile.am.selinux	2007-03-23 11:59:21.000000000 +0000
++++ coreutils-6.9/src/Makefile.am	2007-03-23 11:59:21.000000000 +0000
 @@ -19,14 +19,14 @@
  EXTRA_PROGRAMS = chroot df hostid nice pinky stty su runuser uname uptime users who
  
@@ -622,8 +622,8 @@
  
  ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
  sort_LDADD = $(LDADD) $(POW_LIB) $(LIB_GETHRXTIME)
---- coreutils-6.8+/src/copy.h.selinux	2007-01-30 07:19:49.000000000 +0000
-+++ coreutils-6.8+/src/copy.h	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/copy.h.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/copy.h	2007-03-23 11:59:21.000000000 +0000
 @@ -127,6 +127,10 @@
    bool preserve_ownership;
    bool preserve_mode;
@@ -635,8 +635,8 @@
  
    /* Enabled for mv, and for cp by the --preserve=links option.
       If true, attempt to preserve in the destination files any
---- /dev/null	2007-03-01 09:16:39.219409909 +0000
-+++ coreutils-6.8+/src/chcon.c	2007-03-01 15:52:06.000000000 +0000
+--- /dev/null	2007-03-23 08:54:03.819414923 +0000
++++ coreutils-6.9/src/chcon.c	2007-03-23 11:59:21.000000000 +0000
 @@ -0,0 +1,421 @@
 +/* chcontext -- change security context of a pathname */
 +
@@ -1059,8 +1059,8 @@
 +    freecon(ref_context);
 +  exit (errors);
 +}
---- coreutils-6.8+/src/mkdir.c.selinux	2007-01-14 15:41:28.000000000 +0000
-+++ coreutils-6.8+/src/mkdir.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/mkdir.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/mkdir.c	2007-03-23 11:59:21.000000000 +0000
 @@ -35,11 +35,18 @@
  
  #define AUTHORS "David MacKenzie"
@@ -1125,8 +1125,8 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-6.8+/src/stat.c.selinux	2007-03-01 06:51:46.000000000 +0000
-+++ coreutils-6.8+/src/stat.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/stat.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/stat.c	2007-03-23 11:59:21.000000000 +0000
 @@ -55,6 +55,13 @@
  # include <fs_info.h>
  #endif
@@ -1418,8 +1418,8 @@
  
    exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
  }
---- coreutils-6.8+/src/mkfifo.c.selinux	2007-01-14 15:41:28.000000000 +0000
-+++ coreutils-6.8+/src/mkfifo.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/mkfifo.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/mkfifo.c	2007-03-23 11:59:21.000000000 +0000
 @@ -32,11 +32,18 @@
  
  #define AUTHORS "David MacKenzie"
@@ -1485,8 +1485,8 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-6.8+/src/mknod.c.selinux	2007-01-14 15:41:28.000000000 +0000
-+++ coreutils-6.8+/src/mknod.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/mknod.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/mknod.c	2007-03-23 11:59:21.000000000 +0000
 @@ -36,8 +36,15 @@
  /* The name this program was run with. */
  char *program_name;
@@ -1547,8 +1547,8 @@
  	case_GETOPT_HELP_CHAR;
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  	default:
---- coreutils-6.8+/src/id.c.selinux	2007-03-01 15:52:06.000000000 +0000
-+++ coreutils-6.8+/src/id.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/id.c.selinux	2007-03-23 11:59:21.000000000 +0000
++++ coreutils-6.9/src/id.c	2007-03-23 11:59:21.000000000 +0000
 @@ -37,6 +37,20 @@
  
  int getugroups ();
@@ -1679,8 +1679,8 @@
 +  }
 +#endif
  }
---- coreutils-6.8+/src/mv.c.selinux	2007-01-30 07:19:49.000000000 +0000
-+++ coreutils-6.8+/src/mv.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/mv.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/mv.c	2007-03-23 11:59:21.000000000 +0000
 @@ -33,6 +33,11 @@
  #include "quote.h"
  #include "remove.h"
@@ -1715,8 +1715,8 @@
    /* FIXME: consider not calling getenv for SIMPLE_BACKUP_SUFFIX unless
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
---- /dev/null	2007-03-01 09:16:39.219409909 +0000
-+++ coreutils-6.8+/src/runcon.c	2007-03-01 15:52:06.000000000 +0000
+--- /dev/null	2007-03-23 08:54:03.819414923 +0000
++++ coreutils-6.9/src/runcon.c	2007-03-23 11:59:21.000000000 +0000
 @@ -0,0 +1,253 @@
 +/*
 + * runcon [ context |
@@ -1971,9 +1971,9 @@
 +  }
 +  return 1; /* can't reach this statement.... */
 +}
---- coreutils-6.8+/src/copy.c.selinux	2007-03-01 06:51:46.000000000 +0000
-+++ coreutils-6.8+/src/copy.c	2007-03-01 15:52:06.000000000 +0000
-@@ -53,6 +53,11 @@
+--- coreutils-6.9/src/copy.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/copy.c	2007-03-23 12:00:30.000000000 +0000
+@@ -54,6 +54,11 @@
  #include "xreadlink.h"
  #include "yesno.h"
  
@@ -1985,7 +1985,7 @@
  #ifndef HAVE_FCHOWN
  # define HAVE_FCHOWN false
  # define fchown(fd, uid, gid) (-1)
-@@ -301,6 +306,30 @@
+@@ -302,6 +307,30 @@
      {
        dest_desc = open (dst_name, O_WRONLY | O_TRUNC | O_BINARY);
  
@@ -2016,7 +2016,7 @@
        if (dest_desc < 0 && x->unlink_dest_after_failed_open)
  	{
  	  if (unlink (dst_name) != 0)
-@@ -1534,6 +1563,32 @@
+@@ -1539,6 +1568,32 @@
       In such cases, set this variable to zero.  */
    preserve_metadata = true;
  
@@ -2049,22 +2049,18 @@
    if (S_ISDIR (src_mode))
      {
        struct dir_list *dir;
-@@ -1606,7 +1661,13 @@
- 
-       /* Are we crossing a file system boundary?  */
-       if (x->one_file_system && device != 0 && device != src_sb.st_dev)
--	return true;
-+	{
+@@ -1614,6 +1669,10 @@
+ 	{
+ 	  /* Here, we are crossing a file system boundary and cp's -x option
+ 	     is in effect: so don't copy the contents of this directory. */
 +#ifdef WITH_SELINUX
 +	  if (x->preserve_security_context && selinux_enabled)
 +	    setfscreatecon(NULL);
 +#endif
-+	  return true;
-+	}
- 
-       /* Copy the contents of the directory.  */
- 
-@@ -1756,6 +1817,11 @@
+ 	}
+       else
+ 	{
+@@ -1762,6 +1821,11 @@
  	    }
  	}
  
@@ -2076,7 +2072,7 @@
        /* There's no need to preserve timestamps or permissions.  */
        preserve_metadata = false;
  
-@@ -1889,6 +1955,11 @@
+@@ -1895,6 +1959,11 @@
  
  un_backup:
  
@@ -2088,8 +2084,8 @@
    /* We have failed to create the destination file.
       If we've just added a dev/ino entry via the remember_copied
       call above (i.e., unless we've just failed to create a hard link),
---- coreutils-6.8+/src/install.c.selinux	2007-02-10 15:04:45.000000000 +0000
-+++ coreutils-6.8+/src/install.c	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/src/install.c.selinux	2007-03-18 21:36:43.000000000 +0000
++++ coreutils-6.9/src/install.c	2007-03-23 11:59:21.000000000 +0000
 @@ -49,6 +49,43 @@
  # include <sys/wait.h>
  #endif
@@ -2240,7 +2236,7 @@
    return false;
  }
  
-@@ -688,6 +782,11 @@
+@@ -687,6 +781,11 @@
    -T, --no-target-directory  treat DEST as a normal file\n\
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
@@ -2252,8 +2248,8 @@
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\
---- coreutils-6.8+/configure.ac.selinux	2007-03-01 15:52:06.000000000 +0000
-+++ coreutils-6.8+/configure.ac	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/configure.ac.selinux	2007-03-23 11:59:21.000000000 +0000
++++ coreutils-6.9/configure.ac	2007-03-23 11:59:21.000000000 +0000
 @@ -48,6 +48,13 @@
  LIB_PAM="-ldl -lpam -lpam_misc"
  AC_SUBST(LIB_PAM)])
@@ -2268,8 +2264,8 @@
  AC_CHECK_FUNCS(uname,
  	OPTIONAL_BIN_PROGS="$OPTIONAL_BIN_PROGS uname\$(EXEEXT)"
  	MAN="$MAN uname.1")
---- coreutils-6.8+/man/stat.1.selinux	2007-03-01 07:05:38.000000000 +0000
-+++ coreutils-6.8+/man/stat.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/stat.1.selinux	2007-03-22 21:21:53.000000000 +0000
++++ coreutils-6.9/man/stat.1	2007-03-23 11:59:21.000000000 +0000
 @@ -28,6 +28,9 @@
  \fB\-t\fR, \fB\-\-terse\fR
  print the information in terse form
@@ -2290,15 +2286,15 @@
  %D
  Device number in hex
  .TP
---- /dev/null	2007-03-01 09:16:39.219409909 +0000
-+++ coreutils-6.8+/man/chcon.x	2007-03-01 15:52:06.000000000 +0000
+--- /dev/null	2007-03-23 08:54:03.819414923 +0000
++++ coreutils-6.9/man/chcon.x	2007-03-23 11:59:21.000000000 +0000
 @@ -0,0 +1,4 @@
 +[NAME]
 +chcon \- change file security context
 +[DESCRIPTION]
 +.\" Add any additional description here
---- /dev/null	2007-03-01 09:16:39.219409909 +0000
-+++ coreutils-6.8+/man/chcon.1	2007-03-01 15:52:06.000000000 +0000
+--- /dev/null	2007-03-23 08:54:03.819414923 +0000
++++ coreutils-6.9/man/chcon.1	2007-03-23 11:59:21.000000000 +0000
 @@ -0,0 +1,64 @@
 +.TH CHCON 1 "July 2003" "chcon (coreutils) 5.0" "User Commands"
 +.SH NAME
@@ -2364,8 +2360,8 @@
 +.B info chcon
 +.PP
 +should give you access to the complete manual.
---- coreutils-6.8+/man/dir.1.selinux	2007-03-01 07:05:37.000000000 +0000
-+++ coreutils-6.8+/man/dir.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/dir.1.selinux	2007-03-22 21:21:48.000000000 +0000
++++ coreutils-6.9/man/dir.1	2007-03-23 11:59:21.000000000 +0000
 @@ -205,6 +205,20 @@
  .TP
  \fB\-1\fR
@@ -2387,8 +2383,8 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-6.8+/man/mkfifo.1.selinux	2007-02-27 12:41:10.000000000 +0000
-+++ coreutils-6.8+/man/mkfifo.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/mkfifo.1.selinux	2007-03-22 21:21:51.000000000 +0000
++++ coreutils-6.9/man/mkfifo.1	2007-03-23 11:59:21.000000000 +0000
 @@ -12,6 +12,9 @@
  .PP
  Mandatory arguments to long options are mandatory for short options too.
@@ -2399,8 +2395,8 @@
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set file permission bits to MODE, not a=rw \- umask
  .TP
---- coreutils-6.8+/man/Makefile.am.selinux	2007-03-01 15:52:06.000000000 +0000
-+++ coreutils-6.8+/man/Makefile.am	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/Makefile.am.selinux	2007-03-23 11:59:21.000000000 +0000
++++ coreutils-6.9/man/Makefile.am	2007-03-23 11:59:21.000000000 +0000
 @@ -29,7 +29,7 @@
    shred.1 shuf.1 sleep.1 sort.1 split.1 stat.1 \
    su.1 sum.1 sync.1 tac.1 tail.1 tee.1 test.1 touch.1 tr.1 true.1 tsort.1 \
@@ -2419,8 +2415,8 @@
  
  SUFFIXES = .x .1
  
---- coreutils-6.8+/man/cp.1.selinux	2007-02-27 12:41:07.000000000 +0000
-+++ coreutils-6.8+/man/cp.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/cp.1.selinux	2007-03-22 21:21:47.000000000 +0000
++++ coreutils-6.9/man/cp.1	2007-03-23 11:59:21.000000000 +0000
 @@ -57,7 +57,7 @@
  .TP
  \fB\-\-preserve\fR[=\fIATTR_LIST\fR]
@@ -2440,8 +2436,8 @@
  \fB\-\-version\fR
  output version information and exit
  .PP
---- coreutils-6.8+/man/id.1.selinux	2007-02-27 12:41:09.000000000 +0000
-+++ coreutils-6.8+/man/id.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/id.1.selinux	2007-03-22 21:21:50.000000000 +0000
++++ coreutils-6.9/man/id.1	2007-03-23 11:59:21.000000000 +0000
 @@ -13,6 +13,9 @@
  \fB\-a\fR
  ignore, for compatibility with other versions
@@ -2452,8 +2448,8 @@
  \fB\-g\fR, \fB\-\-group\fR
  print only the effective group ID
  .TP
---- /dev/null	2007-03-01 09:16:39.219409909 +0000
-+++ coreutils-6.8+/man/runcon.x	2007-03-01 15:52:06.000000000 +0000
+--- /dev/null	2007-03-23 08:54:03.819414923 +0000
++++ coreutils-6.9/man/runcon.x	2007-03-23 11:59:21.000000000 +0000
 @@ -0,0 +1,14 @@
 +[NAME]
 +runcon \- run command with specified security context
@@ -2469,8 +2465,8 @@
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
---- /dev/null	2007-03-01 09:16:39.219409909 +0000
-+++ coreutils-6.8+/man/runcon.1	2007-03-01 15:52:06.000000000 +0000
+--- /dev/null	2007-03-23 08:54:03.819414923 +0000
++++ coreutils-6.9/man/runcon.1	2007-03-23 11:59:21.000000000 +0000
 @@ -0,0 +1,45 @@
 +.TH RUNCON "1" "February 2005" "runcon (coreutils) 5.0" "selinux"
 +.SH NAME
@@ -2517,8 +2513,8 @@
 +.PP
 +Note that only carefully-chosen contexts are likely to successfully
 +run.
---- coreutils-6.8+/man/mknod.1.selinux	2007-02-27 12:41:10.000000000 +0000
-+++ coreutils-6.8+/man/mknod.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/mknod.1.selinux	2007-03-22 21:21:51.000000000 +0000
++++ coreutils-6.9/man/mknod.1	2007-03-23 11:59:21.000000000 +0000
 @@ -12,6 +12,9 @@
  .PP
  Mandatory arguments to long options are mandatory for short options too.
@@ -2529,8 +2525,8 @@
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set file permission bits to MODE, not a=rw \- umask
  .TP
---- coreutils-6.8+/man/ls.1.selinux	2007-03-01 07:05:38.000000000 +0000
-+++ coreutils-6.8+/man/ls.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/ls.1.selinux	2007-03-22 21:21:51.000000000 +0000
++++ coreutils-6.9/man/ls.1	2007-03-23 11:59:21.000000000 +0000
 @@ -205,6 +205,20 @@
  .TP
  \fB\-1\fR
@@ -2552,8 +2548,8 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-6.8+/man/mkdir.1.selinux	2007-02-27 12:41:10.000000000 +0000
-+++ coreutils-6.8+/man/mkdir.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/mkdir.1.selinux	2007-03-22 21:21:51.000000000 +0000
++++ coreutils-6.9/man/mkdir.1	2007-03-23 11:59:21.000000000 +0000
 @@ -12,6 +12,8 @@
  .PP
  Mandatory arguments to long options are mandatory for short options too.
@@ -2563,8 +2559,8 @@
  \fB\-m\fR, \fB\-\-mode\fR=\fIMODE\fR
  set file mode (as in chmod), not a=rwx \- umask
  .TP
---- coreutils-6.8+/man/vdir.1.selinux	2007-03-01 07:05:38.000000000 +0000
-+++ coreutils-6.8+/man/vdir.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/vdir.1.selinux	2007-03-22 21:21:55.000000000 +0000
++++ coreutils-6.9/man/vdir.1	2007-03-23 11:59:21.000000000 +0000
 @@ -205,6 +205,20 @@
  .TP
  \fB\-1\fR
@@ -2586,8 +2582,8 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-6.8+/man/install.1.selinux	2007-02-27 12:41:09.000000000 +0000
-+++ coreutils-6.8+/man/install.1	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/man/install.1.selinux	2007-03-22 21:21:50.000000000 +0000
++++ coreutils-6.9/man/install.1	2007-03-23 11:59:21.000000000 +0000
 @@ -67,6 +67,11 @@
  .TP
  \fB\-v\fR, \fB\-\-verbose\fR
@@ -2600,8 +2596,8 @@
  .TP
  \fB\-\-help\fR
  display this help and exit
---- coreutils-6.8+/README.selinux	2007-03-01 15:52:06.000000000 +0000
-+++ coreutils-6.8+/README	2007-03-01 15:52:06.000000000 +0000
+--- coreutils-6.9/README.selinux	2007-03-23 11:59:21.000000000 +0000
++++ coreutils-6.9/README	2007-03-23 11:59:21.000000000 +0000
 @@ -7,11 +7,11 @@
  
  The programs that can be built with this package are:
