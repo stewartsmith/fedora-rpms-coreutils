@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -51,7 +51,7 @@ BuildRequires: texinfo >= 4.3
 BuildRequires: autoconf >= 2.58, automake >= 1.8
 %{?!nopam:BuildRequires: pam-devel}
 
-Requires: libselinux >= 1.25.6-1
+Requires(post): libselinux >= 1.25.6-1
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
@@ -266,6 +266,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Apr 02 2007 Karsten Hopp <karsten@redhat.com> 6.9-2
+- /bin/mv in %%post requires libselinux
+
 * Mon Mar 26 2007 Tim Waugh <twaugh@redhat.com> 6.9-1
 - 6.9.
 
