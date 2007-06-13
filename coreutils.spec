@@ -18,6 +18,7 @@ Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-futimens.patch
+Patch2: coreutils-ls-x.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -83,6 +84,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .futimens
+%patch2 -p1 -b .ls-x
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -269,6 +271,7 @@ fi
 
 %changelog
 * Wed Jun 13 2007 Tim Waugh <twaugh@redhat.com>
+- Fixed 'ls -x' output (bug #240298).
 - Disambiguate futimens() from the glibc implementation (bug #242321).
 
 * Mon Apr 02 2007 Karsten Hopp <karsten@redhat.com> 6.9-2
