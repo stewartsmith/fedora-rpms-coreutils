@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -270,7 +270,7 @@ fi
 /sbin/runuser
 
 %changelog
-* Wed Jun 13 2007 Tim Waugh <twaugh@redhat.com>
+* Wed Jun 13 2007 Tim Waugh <twaugh@redhat.com> 6.9-3
 - Fixed 'ls -x' output (bug #240298).
 - Disambiguate futimens() from the glibc implementation (bug #242321).
 
