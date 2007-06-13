@@ -115,6 +115,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 sed -i -e 's/basic-1//g' tests/stty/Makefile*
 
 chmod a+x tests/sort/sort-mb-tests
+chmod a+x tests/ls/x-option
 
 %build
 %ifarch s390 s390x
