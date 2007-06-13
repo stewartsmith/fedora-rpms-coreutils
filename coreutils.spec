@@ -17,6 +17,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-futimens.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -81,6 +82,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .futimens
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -266,6 +268,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jun 13 2007 Tim Waugh <twaugh@redhat.com>
+- Disambiguate futimens() from the glibc implementation (bug #242321).
+
 * Mon Apr 02 2007 Karsten Hopp <karsten@redhat.com> 6.9-2
 - /bin/mv in %%post requires libselinux
 
