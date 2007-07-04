@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -195,7 +195,16 @@ done
 # Compress ChangeLogs from before the fileutils/textutils/etc merge
 bzip2 -f9 old/*/C*
 
-%find_lang %name
+# Use hard links instead of symbolic links for LC_TIME files (bug #246729).
+find %{buildroot}%{_datadir}/locale -type l | \
+(while read link
+ do
+   target=$(readlink "$link")
+   rm -f "$link"
+   ln "$(dirname "$link")/$target" "$link"
+ done)
+
+%find_lang %name --all-name
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
@@ -271,6 +280,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jul  4 2007 Tim Waugh <twaugh@redhat.com> 6.9-4
+- Use hard links instead of symbolic links for LC_TIME files (bug #246729).
+
 * Wed Jun 13 2007 Tim Waugh <twaugh@redhat.com> 6.9-3
 - Fixed 'ls -x' output (bug #240298).
 - Disambiguate futimens() from the glibc implementation (bug #242321).
