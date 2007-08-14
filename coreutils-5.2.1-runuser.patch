@@ -304,14 +304,6 @@
    shred.1 shuf.1 sleep.1 sort.1 split.1 stat.1 \
    su.1 sum.1 sync.1 tac.1 tail.1 tee.1 test.1 touch.1 tr.1 true.1 tsort.1 \
    tty.1 unexpand.1 uniq.1 unlink.1 vdir.1 wc.1 \
-@@ -105,6 +105,7 @@
- readlink.1:	$(common_dep)	$(srcdir)/readlink.x	../src/readlink.c
- rm.1:		$(common_dep)	$(srcdir)/rm.x		../src/rm.c
- rmdir.1:	$(common_dep)	$(srcdir)/rmdir.x	../src/rmdir.c
-+runuser.1:	$(common_dep)	$(srcdir)/runuser.x	../src/su.c
- seq.1:		$(common_dep)	$(srcdir)/seq.x		../src/seq.c
- sha1sum.1:	$(common_dep)	$(srcdir)/sha1sum.x	../src/md5sum.c
- sha224sum.1:	$(common_dep)	$(srcdir)/sha224sum.x	../src/md5sum.c
 --- /dev/null	2007-01-09 09:38:07.860075128 +0000
 +++ coreutils-6.7/man/runuser.x	2007-01-09 17:27:56.000000000 +0000
 @@ -0,0 +1,4 @@
