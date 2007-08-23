@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -280,6 +280,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Aug 23 2007 Pete Graner <pgraner@redhat.com> - 6.9-7
+- Fix typo in spec file. (CVS merge conflict leftovers)
+
 * Thu Aug 23 2007 Pete Graner <pgraner@redhat.com> - 6.9-6
 - Remove --all-name from spec file its now provided in the upstream rpm's find-lang.sh
 - Rebuild
@@ -288,7 +291,6 @@ fi
 - Don't generate runuser.1 since we ship a complete manpage for it
   (bug #241662).
 
->>>>>>> 1.175
 * Wed Jul  4 2007 Tim Waugh <twaugh@redhat.com> 6.9-4
 - Use hard links instead of symbolic links for LC_TIME files (bug #246729).
 
