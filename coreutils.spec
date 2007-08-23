@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -204,7 +204,7 @@ find %{buildroot}%{_datadir}/locale -type l | \
    ln "$(dirname "$link")/$target" "$link"
  done)
 
-%find_lang %name --all-name
+%find_lang %name
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
@@ -280,10 +280,15 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Aug 23 2007 Pete Graner <pgraner@redhat.com> - 6.9-6
+- Remove --all-name from spec file its now provided in the upstream rpm's find-lang.sh
+- Rebuild
+
 * Tue Aug 14 2007 Tim Waugh <twaugh@redhat.com> 6.9-5
 - Don't generate runuser.1 since we ship a complete manpage for it
   (bug #241662).
 
+>>>>>>> 1.175
 * Wed Jul  4 2007 Tim Waugh <twaugh@redhat.com> 6.9-4
 - Use hard links instead of symbolic links for LC_TIME files (bug #246729).
 
