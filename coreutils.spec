@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPL
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,7 @@ Source203:  coreutils-runuser-l.pamd
 # From upstream
 Patch1: coreutils-futimens.patch
 Patch2: coreutils-ls-x.patch
+Patch3: coreutils-6.9-cp-i-u.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -85,6 +86,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # From upstream
 %patch1 -p1 -b .futimens
 %patch2 -p1 -b .ls-x
+%patch3 -p1 -b .cp-i-u
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -280,6 +282,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Oct 25 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-8
+- applied upstream patch for cp and mv(#248591)
+
 * Thu Aug 23 2007 Pete Graner <pgraner@redhat.com> - 6.9-7
 - Fix typo in spec file. (CVS merge conflict leftovers)
 
