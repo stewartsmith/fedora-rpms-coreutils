@@ -1,8 +1,8 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 8%{?dist}
-License: GPL
+Release: 9%{?dist}
+License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -282,6 +282,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Oct 29 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-9
+- applied upstream patch for runuser to coreutils-selinux.patch(#232652)
+- License tag to GPLv2+
+
 * Thu Oct 25 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-8
 - applied upstream patch for cp and mv(#248591)
 

@@ -1717,7 +1717,7 @@
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
 --- /dev/null	2007-03-23 08:54:03.819414923 +0000
 +++ coreutils-6.9/src/runcon.c	2007-03-23 11:59:21.000000000 +0000
-@@ -0,0 +1,253 @@
+@@ -0,0 +1,252 @@
 +/*
 + * runcon [ context |
 + *         ( [ -c ] [ -r role ] [-t type] [ -u user ] [ -l levelrange ] )
@@ -1803,7 +1803,6 @@
 +  textdomain (PACKAGE);
 +  
 +  while (1) {
-+    int c;
 +    int this_option_optind = optind ? optind : 1;
 +    int option_index = 0;
 +    static struct option long_options[] = {
@@ -1816,7 +1815,7 @@
 +      { "version", 0, &show_version, 1 },
 +      { 0, 0, 0, 0 }
 +    };
-+    c = getopt_long(argc, argv, "r:t:u:l:c", long_options, &option_index);
++    int c = getopt_long(argc, argv, "+r:t:u:l:c", long_options, &option_index);
 +    if ( c == -1 ) {
 +      break;
 +    }
