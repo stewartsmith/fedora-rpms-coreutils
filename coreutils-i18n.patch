@@ -2196,7 +2196,7 @@
  {
    struct keyfield const *key = keylist;
  
-@@ -1875,6 +2265,177 @@
+@@ -1875,6 +2265,179 @@
    return key->reverse ? -diff : diff;
  }
  
@@ -2232,7 +2232,9 @@
 +      size_t lenb = limb <= textb ? 0 : limb - textb;
 +
 +      /* Actually compare the fields. */
-+      if (key->numeric | key->general_numeric)
++      if (key->random)
++        diff = compare_random (texta, lena, textb, lenb);
++      else if (key->numeric | key->general_numeric)
 +	{
 +	  char savea = *lima, saveb = *limb;
 +
@@ -2373,7 +2375,7 @@
 +
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
- 
+
 @@ -2744,7 +3305,7 @@
    initialize_exit_failure (SORT_FAILURE);
  
