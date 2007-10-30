@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -46,6 +46,8 @@ Patch916: coreutils-getfacl-exit-code.patch
 
 #SELINUX Patch
 Patch950: coreutils-selinux.patch
+#SELINUX Patch fix to allow cp -a rewrite file on different filesystem
+Patch951: coreutils-6.9-requiresecuritycontext.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -111,6 +113,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #SELinux
 %patch950 -p1 -b .selinux
+%patch951 -p1 -b .require-preserve
 
 # Don't run basic-1 test, since it breaks when run in the background
 # (bug #102033).
@@ -282,6 +285,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Oct 30 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-11
+- allow cp -a to rewrite file on different filesystem(#219900)
+  (based on upstream patch)
+
 * Mon Oct 29 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-10
 - modified coreutils-i18n.patch because of sort -R in
   a non C locales(fix by Andreas Schwab) (#249315)
