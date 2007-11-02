@@ -1,6 +1,6 @@
 diff -ur coreutils-6.9-orig/src/install.c coreutils-6.9/src/install.c
---- a/src/install.c 2007-10-30 12:34:07.000000000 +0100
-+++ b/src/install.c 2007-10-30 15:41:15.000000000 +0100
+--- coreutils-6.9-orig/src/install.c 2007-10-30 12:34:07.000000000 +0100
++++ coreutils-6.9/src/install.c 2007-10-30 15:41:15.000000000 +0100
 @@ -174,6 +174,7 @@
    x->preserve_mode = false;
    x->preserve_timestamps = false;
@@ -10,8 +10,8 @@ diff -ur coreutils-6.9-orig/src/install.c coreutils-6.9/src/install.c
    x->sparse_mode = SPARSE_AUTO;
    x->symbolic_link = false;
 diff -ur coreutils-6.9-orig/src/mv.c coreutils-6.9/src/mv.c
---- a/src/mv.c 2007-10-30 12:34:07.000000000 +0100
-+++ b/src/mv.c 2007-10-30 15:34:37.000000000 +0100
+--- coreutils-6.9-orig/src/mv.c 2007-10-30 12:34:07.000000000 +0100
++++ coreutils-6.9/src/mv.c 2007-10-30 15:34:37.000000000 +0100
 @@ -131,6 +131,7 @@
    x->preserve_timestamps = true;
    x->preserve_security_context = selinux_enabled;

@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,7 @@ Source203:  coreutils-runuser-l.pamd
 Patch1: coreutils-futimens.patch
 Patch2: coreutils-ls-x.patch
 Patch3: coreutils-6.9-cp-i-u.patch
+Patch4: coreutils-6.9-du-ls-upstream.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -89,6 +90,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch1 -p1 -b .futimens
 %patch2 -p1 -b .ls-x
 %patch3 -p1 -b .cp-i-u
+%patch4 -p1 -b .du-ls
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -285,6 +287,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Nov 02 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-12
+- added some upstream supported dircolors TERMs(#239266)
+- fixed du output for unaccesible dirs(#250089)
+- a bit of upstream tunning for symlinks
+
 * Tue Oct 30 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-11
 - allow cp -a to rewrite file on different filesystem(#219900)
   (based on upstream patch)

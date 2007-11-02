@@ -1,0 +1,88 @@
+Fixes some small bugs (merged upstream patches)
+Fixed RedHat Bugzillas: 250089(fix by jplans@redhat.com), 239266 
+
+diff -Naurp coreutils-5.2.1/lib/fts.c coreutils-5.2.1.new/lib/fts.c
+--- coreutils-5.2.1/lib/fts.c	2003-12-20 10:05:23.000000000 -0800
++++ coreutils-5.2.1.new/lib/fts.c	2007-06-14 11:38:00.696001000 -0700
+@@ -685,7 +685,7 @@ fts_read(sp)
+			   /* If fts_build's call to fts_safe_changedir failed
+			   because it was not able to fchdir into a
+			   subdirectory, tell the caller.  */
+-			if (p->fts_errno)
++			if (p->fts_errno && p->fts_info != FTS_DNR)
+				p->fts_info = FTS_ERR;
+			LEAVE_DIR (sp, p, "2");
+			return (p);
+		}
+diff -ur coreutils-6.9-orig/src/du.c coreutils-6.9/src/du.c
+--- coreutils-6.9-orig/src/du.c
++++ coreutils-6.9/src/du.c
+     duinfo_add (&dulvl[level].ent, &dui);
+ 
+   /* Even if this directory is unreadable or we can't chdir into it,
+-     do let its size contribute to the total, ... */
++     do let its size contribute to the total. */
+   duinfo_add (&tot_dui, &dui);
+ 
+-  /* ... but don't print out a total for it, since without the size(s)
+-     of any potential entries, it could be very misleading.  */
+-  if (ent->fts_info == FTS_DNR)
+-    return ok;
+-
+   /* If we're not counting an entry, e.g., because it's a hard link
+      to a file we've already counted (and --count-links), then don't
+      print a line for it.  */
+diff -urNp coreutils-6.9-orig/src/dircolors.hin coreutils-6.9/src/dircolors.hin
+--- coreutils-6.9-orig/src/dircolors.hin	2007-03-18 22:36:43.000000000 +0100
++++ coreutils-6.9/src/dircolors.hin	2007-11-02 12:27:03.000000000 +0100
+@@ -27,6 +27,7 @@ TERM cons25
+ TERM console
+ TERM cygwin
+ TERM dtterm
++TERM eterm-color
+ TERM gnome
+ TERM konsole
+ TERM kterm
+@@ -40,6 +40,7 @@ TERM rxvt-cygwin
+ TERM rxvt-cygwin-native
+ TERM rxvt-unicode
+ TERM screen
++TERM screen-256color
+ TERM screen-bce
+ TERM screen-w
+ TERM screen.linux
+@@ -46,7 +47,9 @@ TERM screen-w
+ TERM screen.linux
+ TERM vt100
+ TERM xterm
++TERM xterm-16color
+ TERM xterm-256color
++TERM xterm-88color
+ TERM xterm-color
+ TERM xterm-debian
+
+diff -ur a/src/ls.c b/src/ls.c
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -1168,7 +1168,7 @@ main (int argc, char **argv)
+     {
+       /* Avoid following symbolic links when possible.  */
+       if (is_colored (C_ORPHAN)
+-	  || is_colored (C_EXEC)
++	  || (is_colored (C_EXEC) && color_symlink_as_referent)
+	  || (is_colored (C_MISSING) && format == long_format))
+	check_symlink_color = true;
+ 
+@@ -2713,6 +2713,12 @@ gobble_file (char const *name, enum filetype type, ino_t inode,
+          free (linkname);
+        }
+ 
++      /* When not distinguishing types of symlinks, pretend we know that
++        it is stat'able, so that it will be colored as a regular symlink,
++        and not as an orphan.  */
++      if (S_ISLNK (f->stat.st_mode) && !check_symlink_color)
++       f->linkok = true;
++
+       if (S_ISLNK (f->stat.st_mode))
+        f->filetype = symbolic_link;
+       else if (S_ISDIR (f->stat.st_mode))
