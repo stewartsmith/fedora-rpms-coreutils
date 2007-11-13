@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -287,6 +287,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Nov 13 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-13
+- fixed bug in selinux patch which caused bad preserving
+  of security context in install(#319231)
+
 * Fri Nov 02 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-12
 - added some upstream supported dircolors TERMs(#239266)
 - fixed du output for unaccesible dirs(#250089)
