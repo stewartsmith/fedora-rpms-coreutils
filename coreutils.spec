@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -24,6 +24,7 @@ Patch4: coreutils-6.9-du-ls-upstream.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
+Patch101: coreutils-getdateYYYYMMDD.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -94,6 +95,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # Our patches
 %patch100 -p1 -b .chgrp
+%patch101 -p1 -b .getdate
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -287,6 +289,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Nov 23 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-14
+- fixed bug in handling YYYYMMDD date format with relative
+  signed offset(#377821)
+
 * Tue Nov 13 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-13
 - fixed bug in selinux patch which caused bad preserving
   of security context in install(#319231)
