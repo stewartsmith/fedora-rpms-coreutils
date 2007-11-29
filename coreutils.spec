@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -289,6 +289,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Nov 29 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-15
+- completed fix of wrong colored broken symlinks in ls(#404511)
+
 * Fri Nov 23 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-14
 - fixed bug in handling YYYYMMDD date format with relative
   signed offset(#377821)
