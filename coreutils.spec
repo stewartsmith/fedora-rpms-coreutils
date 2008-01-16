@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.9
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPLv2+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -291,6 +291,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jan 16 2008 Ondrej Vasik <ovasik@redhat.com> - 6.9-17
+- added several missing colored TERMs(including rxvt-unicode,
+  screen-256color and xterm-256color) to DIR_COLORS and
+  DIR_COLORS.xterm(#239266) 
+
 * Wed Dec 05 2007 Ondrej Vasik <ovasik@redhat.com> - 6.9-16
 - fix displaying of security context in stat(#411181)
 
