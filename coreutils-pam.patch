@@ -177,13 +177,13 @@
 +    pam_close_session(pamh, 0);
 +    pam_end(pamh, PAM_ABORT);
 +#endif
-     error (EXIT_FAIL, errno, _("cannot set groups"));
+     error (EXIT_FAILURE, errno, _("cannot set groups"));
 +  }
    endgrent ();
  #endif
    if (setgid (pw->pw_gid))
 @@ -318,6 +413,31 @@
-     error (EXIT_FAIL, errno, _("cannot set user id"));
+     error (EXIT_FAILURE, errno, _("cannot set user id"));
  }
  
 +#ifdef USE_PAM
@@ -397,7 +397,7 @@
  
 --- coreutils-6.7/configure.ac.pam	2006-12-07 21:30:24.000000000 +0000
 +++ coreutils-6.7/configure.ac	2007-01-09 17:18:04.000000000 +0000
-@@ -39,6 +39,13 @@
+@@ -44,6 +44,13 @@
  gl_INIT
  coreutils_MACROS
  
@@ -408,6 +408,6 @@
 +LIB_PAM="-ldl -lpam -lpam_misc"
 +AC_SUBST(LIB_PAM)])
 +
- AC_CHECK_FUNCS(uname,
- 	OPTIONAL_BIN_PROGS="$OPTIONAL_BIN_PROGS uname\$(EXEEXT)"
- 	MAN="$MAN uname.1")
+ AC_FUNC_FORK
+
+ optional_bin_progs=

@@ -1,15 +1,15 @@
 --- coreutils-5.97/src/uname.c.sysinfo	2005-09-15 20:57:04.000000000 +0100
 +++ coreutils-5.97/src/uname.c	2006-08-24 17:15:56.000000000 +0100
-@@ -155,7 +155,7 @@
+@@ -263,7 +263,7 @@
+ int
  main (int argc, char **argv)
  {
-   int c;
 -  static char const unknown[] = "unknown";
 +  static char unknown[] = "unknown";
  
    /* Mask indicating which elements to print. */
    unsigned int toprint = 0;
-@@ -249,13 +249,35 @@
+@@ -306,13 +306,35 @@
  
    if (toprint & PRINT_PROCESSOR)
      {
@@ -46,7 +46,7 @@
  #endif
  #ifdef UNAME_PROCESSOR
        if (element == unknown)
-@@ -293,7 +315,7 @@
+@@ -348,7 +370,7 @@
  
    if (toprint & PRINT_HARDWARE_PLATFORM)
      {
@@ -55,7 +55,7 @@
  #if HAVE_SYSINFO && defined SI_PLATFORM
        {
  	static char hardware_platform[257];
-@@ -301,6 +323,14 @@
+@@ -356,6 +378,14 @@
  			  hardware_platform, sizeof hardware_platform))
  	  element = hardware_platform;
        }

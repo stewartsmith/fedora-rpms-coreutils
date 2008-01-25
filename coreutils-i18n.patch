@@ -89,8 +89,8 @@
 +Cherry＠30
 --- coreutils-6.8+/tests/sort/Makefile.am.i18n	2007-01-24 07:47:37.000000000 +0000
 +++ coreutils-6.8+/tests/sort/Makefile.am	2007-03-01 15:09:59.000000000 +0000
-@@ -66,15 +66,17 @@
- bigfield.O bigfield.E
+@@ -66,12 +66,14 @@
+ bigfield.O bigfield.E obs-inval.O obs-inval.E realloc-buf.O realloc-buf.E
  ##test-files-end
  
 -EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen)
@@ -99,9 +99,6 @@
 +
 +EXTRA_DIST = Test.pm $x-tests $(explicit) $(maint_gen) mb1.I mb1.X mb2.I mb2.X
 +noinst_SCRIPTS = $x-tests # $x-mb-tests
- TESTS_ENVIRONMENT = \
-   CU_TEST_NAME=`basename $(abs_srcdir)`,$$tst \
-   PATH="$(VG_PATH_PREFIX)`pwd`/../../src$(PATH_SEPARATOR)$$PATH"
  
  editpl = sed -e 's,@''PERL''@,$(PERL),g' -e 's,@''srcdir''@,$(srcdir),g'
  
@@ -1096,7 +1093,7 @@
 +	  mbstate_t thisstate;
 +#endif
 +
- 	  if (readlinebuffer (thisline, stdin) == 0)
+ 	  if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
  	    break;
  	  thisfield = find_field (thisline);
  	  thislen = thisline->length - 1 - (thisfield - thisline->buffer);
@@ -1130,7 +1127,7 @@
 +      mbstate_t prevstate;
 +#endif
  
-       if (readlinebuffer (prevline, stdin) == 0)
+       if (readlinebuffer_delim (prevline, stdin, delimiter) == 0)
  	goto closefiles;
        prevfield = find_field (prevline);
        prevlen = prevline->length - 1 - (prevfield - prevline->buffer);
@@ -1146,7 +1143,7 @@
 +#if HAVE_MBRTOWC
 +	  mbstate_t thisstate;
 +#endif
- 	  if (readlinebuffer (thisline, stdin) == 0)
+ 	  if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
  	    {
  	      if (ferror (stdin))
 @@ -341,6 +561,15 @@
@@ -3612,7 +3609,7 @@
  	  fieldstr++;
  
 @@ -387,14 +464,16 @@
- 	      if (value == 0)
+ 	      if (!rhs_specified)
  		{
  		  /* `n-'.  From `initial' to end of line. */
 -		  eol_range_start = initial;
@@ -3625,7 +3622,7 @@
  		{
  		  /* `m-n' or `-n' (1-n). */
  		  if (value < initial)
--		    FATAL_ERROR (_("invalid byte or field list"));
+-		    FATAL_ERROR (_("invalid decreasing range"));
 +		    FATAL_ERROR (_("invalid byte, character or field list"));
  
  		  /* Is there already a range going to end of line? */

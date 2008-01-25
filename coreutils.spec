@@ -1,14 +1,15 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 6.9
-Release: 17%{?dist}
-License: GPLv2+
+Version: 6.10
+Release: 1%{?dist}
+License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.bz2
+Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.lzma
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.xterm
+Source103:  coreutils-DIR_COLORS.256color
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 Source200:  coreutils-su.pamd
@@ -17,14 +18,10 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-futimens.patch
-Patch2: coreutils-ls-x.patch
-Patch3: coreutils-6.9-cp-i-u.patch
-Patch4: coreutils-6.9-du-ls-upstream.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
-Patch101: coreutils-getdateYYYYMMDD.patch
+Patch101: coreutils-6.10-configuration.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -46,17 +43,18 @@ Patch912: coreutils-overflow.patch
 Patch915: coreutils-split-pam.patch
 Patch916: coreutils-getfacl-exit-code.patch
 
-#SELINUX Patch
+#SELINUX Patch - implements Redhat changes 
+#(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
-#SELINUX Patch fix to allow cp -a rewrite file on different filesystem
-Patch951: coreutils-6.9-requiresecuritycontext.patch
-Patch952: coreutils-6.9-statsecuritycontext.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
 BuildRequires: gettext bison
 BuildRequires: texinfo >= 4.3
-BuildRequires: autoconf >= 2.58, automake >= 1.8
+BuildRequires: lzma
+BuildRequires: autoconf >= 2.58
+#dist-lzma required
+BuildRequires: automake >= 1.10.1 
 %{?!nopam:BuildRequires: pam-devel}
 
 Requires(post): libselinux >= 1.25.6-1
@@ -73,11 +71,12 @@ Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
 Provides: stat = %{version}-%{release}
 Provides: textutils = %{version}-%{release}
+Obsoletes: mktemp
+Provides: mktemp = %{version}-%{release}
 Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
 Obsoletes: textutils <= 2.0.21
-
 # readlink(1) moved here from tetex.
 Conflicts: tetex < 1.0.7-66
 
@@ -86,17 +85,17 @@ These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
-%setup -q
+#do not unpack in setup because of lzma is not yet supported in setup macro
+%setup -q -c -T
+cd ..
+lzma -dc %SOURCE0 | tar xf -
+cd %name-%version
 
 # From upstream
-%patch1 -p1 -b .futimens
-%patch2 -p1 -b .ls-x
-%patch3 -p1 -b .cp-i-u
-%patch4 -p1 -b .du-ls
 
 # Our patches
 %patch100 -p1 -b .chgrp
-%patch101 -p1 -b .getdate
+%patch101 -p1 -b .configure
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -118,15 +117,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 #SELinux
 %patch950 -p1 -b .selinux
-%patch951 -p1 -b .require-preserve
-%patch952 -p1 -b .statsecuritycontext
-
-# Don't run basic-1 test, since it breaks when run in the background
-# (bug #102033).
-sed -i -e 's/basic-1//g' tests/stty/Makefile*
 
 chmod a+x tests/sort/sort-mb-tests
-chmod a+x tests/ls/x-option
 
 %build
 %ifarch s390 s390x
@@ -142,6 +134,7 @@ autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
            --enable-selinux \
+           --enable-install-program=su,hostname \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 make all %{?_smp_mflags} \
          %{?!nopam:CPPFLAGS="-DUSE_PAM"} \
@@ -173,7 +166,7 @@ bzip2 -9f ChangeLog
 # let be compatible with old fileutils, sh-utils and textutils packages :
 mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
-for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
+for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
 do
     mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f 
 done
@@ -186,6 +179,7 @@ for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
 install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.xterm
+install -p -c -m644 %SOURCE103 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.256color
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
@@ -280,6 +274,7 @@ fi
 /bin/stty
 %attr(4755,root,root) /bin/su
 /bin/sync
+/bin/mktemp
 /bin/touch
 /bin/true
 /bin/uname
@@ -291,6 +286,23 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Jan 25 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-1
+- New upstream release(changed %%prep because of lack of lzma
+  support in %%setup macro)
+- License GPLv3+
+- removed patches cp-i-u,du-ls-upstream,statsecuritycontext,
+  futimens,getdateYYYYMMDD,ls-x
+- modified patches to be compilable after upstream changes
+- selinux patch reworked to have backward compatibility with
+  F8(cp,ls and stat behaviour differ from upstream in SELinux
+  options)
+- su-l/runuser-l pam file usage a bit documented(#368721)
+- more TERMs for DIR_COLORS, added colors for audio files,
+  more image/compress file types(taken from upstream 
+  dircolors.hin)
+- new file DIR_COLORS.256color which takes advantage from 
+  256color term types-not really used yet(#429121)
+
 * Wed Jan 16 2008 Ondrej Vasik <ovasik@redhat.com> - 6.9-17
 - added several missing colored TERMs(including rxvt-unicode,
   screen-256color and xterm-256color) to DIR_COLORS and
