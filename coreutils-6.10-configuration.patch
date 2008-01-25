@@ -1,0 +1,12 @@
+diff -urp coreutils-6.10-orig/src/Makefile.am coreutils-6.10/src/Makefile.am
+--- coreutils-6.10-orig/src/Makefile.am	2008-01-11 11:34:22.000000000 +0100
++++ coreutils-6.10/src/Makefile.am	2008-01-23 14:52:26.000000000 +0100
+@@ -170,7 +170,7 @@ install_su =						\
+     echo " chown root $(installed_su)";			\
+     chown root $(installed_su);				\
+     echo " chmod $(setuid_root_mode) $(installed_su)";	\
+-    chmod $(setuid_root_mode) $(installed_su)		\
++    chmod $(setuid_root_mode) $(installed_su);		\
+   else							\
+     :;							\
+   fi
