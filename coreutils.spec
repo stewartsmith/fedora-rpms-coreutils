@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -22,6 +22,7 @@ Source203:  coreutils-runuser-l.pamd
 # Our patches
 Patch100: coreutils-chgrp.patch
 Patch101: coreutils-6.10-configuration.patch
+Patch102: coreutils-6.10-manpages.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -71,8 +72,9 @@ Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
 Provides: stat = %{version}-%{release}
 Provides: textutils = %{version}-%{release}
-Obsoletes: mktemp
-Provides: mktemp = %{version}-%{release}
+#old mktemp package had epoch 3, so we have to use 4 for coreutils
+Provides: mktemp = 4:%{version}-%{release}
+Obsoletes: mktemp < 4:%{version}-%{release}
 Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
@@ -96,6 +98,7 @@ cd %name-%version
 # Our patches
 %patch100 -p1 -b .chgrp
 %patch101 -p1 -b .configure
+%patch102 -p1 -b .manpages
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -286,6 +289,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jan 28 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-2
+- some manpages improvements(#406981,#284881)
+- fix non-versioned obsoletes of mktemp(#430407)
+
 * Fri Jan 25 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-1
 - New upstream release(changed %%prep because of lack of lzma
   support in %%setup macro)

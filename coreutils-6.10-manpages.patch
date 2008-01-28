@@ -1,0 +1,34 @@
+diff -urp coreutils-6.10-orig/man/md5sum.1 coreutils-6.10/man/md5sum.1
+--- coreutils-6.10-orig/man/md5sum.1	2008-01-28 14:33:16.000000000 +0100
++++ coreutils-6.10/man/md5sum.1	2008-01-28 14:54:29.000000000 +0100
+@@ -19,6 +19,7 @@ read MD5 sums from the FILEs and check t
+ .TP
+ \fB\-t\fR, \fB\-\-text\fR
+ read in text mode (default)
++Note: There is no difference between binary and text mode on GNU system.
+ .SS "The following two options are useful only when verifying checksums:"
+ .TP
+ \fB\-\-status\fR
+diff -urp coreutils-6.10-orig/man/sort.1 coreutils-6.10/man/sort.1
+--- coreutils-6.10-orig/man/sort.1	2008-01-28 14:33:17.000000000 +0100
++++ coreutils-6.10/man/sort.1	2008-01-28 16:02:28.000000000 +0100
+@@ -56,7 +56,7 @@ compress temporaries with PROG;
+ decompress them with PROG \fB\-d\fR
+ .TP
+ \fB\-k\fR, \fB\-\-key\fR=\fIPOS1[\fR,POS2]
+-start a key at POS1, end it at POS2 (origin 1)
++start a key at POS1, end it at POS2 (origin 1) - when no POS2 is specified, end of line is used
+ .TP
+ \fB\-m\fR, \fB\-\-merge\fR
+ merge already sorted files; do not sort
+@@ -103,8 +103,8 @@ With no FILE, or when FILE is \-, read s
+ .PP
+ *** WARNING ***
+ The locale specified by the environment affects sort order.
+-Set LC_ALL=C to get the traditional sort order that uses
+-native byte values.
++Set LC_ALL=C (by "export LC_ALL=C") to get the traditional 
++sort order that uses native byte values.
+ .SH AUTHOR
+ Written by Mike Haertel and Paul Eggert.
+ .SH "REPORTING BUGS"
