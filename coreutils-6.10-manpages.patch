@@ -1,11 +1,12 @@
 diff -urp coreutils-6.10-orig/man/md5sum.1 coreutils-6.10/man/md5sum.1
 --- coreutils-6.10-orig/man/md5sum.1	2008-01-28 14:33:16.000000000 +0100
 +++ coreutils-6.10/man/md5sum.1	2008-01-28 14:54:29.000000000 +0100
-@@ -19,6 +19,7 @@ read MD5 sums from the FILEs and check t
+@@ -19,6 +19,8 @@ read MD5 sums from the FILEs and check t
  .TP
  \fB\-t\fR, \fB\-\-text\fR
  read in text mode (default)
-+Note: There is no difference between binary and text mode on GNU system.
++.br
++\fBNote:\fR There is no difference between binary and text mode option on GNU system.
  .SS "The following two options are useful only when verifying checksums:"
  .TP
  \fB\-\-status\fR
