@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -23,6 +23,7 @@ Source203:  coreutils-runuser-l.pamd
 Patch100: coreutils-chgrp.patch
 Patch101: coreutils-6.10-configuration.patch
 Patch102: coreutils-6.10-manpages.patch
+Patch103: coreutils-6.10-longoptions.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -99,6 +100,7 @@ cd %name-%version
 %patch100 -p1 -b .chgrp
 %patch101 -p1 -b .configure
 %patch102 -p1 -b .manpages
+%patch103 -p1 -b .longopt
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -289,6 +291,18 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jan 31 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-3
+- fix unability of echo to display certain strings(added --
+  separator, #431005)
+- do not require only one long_opt for certain commands 
+  e.g. sleep, yes - but use first usable (#431005)
+- do not override userspecified LS_COLORS variable, but
+  use it for colored ls(#430827)
+- discard errors from dircolors to /dev/null + some tuning 
+  of lscolor sh/csh scripts(#430823)
+- do not consider files with SELinux security context as
+  files having ACL in ls long format(#430779)
+
 * Mon Jan 28 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-2
 - some manpages improvements(#406981,#284881)
 - fix non-versioned obsoletes of mktemp(#430407)

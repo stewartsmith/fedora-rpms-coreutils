@@ -243,7 +243,7 @@ diff -urp coreutils-6.10-orig/man/vdir.1 coreutils-6.10/man/vdir.1
 diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
 --- coreutils-6.10-orig/src/copy.c	2008-01-05 23:59:11.000000000 +0100
 +++ coreutils-6.10/src/copy.c	2008-01-25 17:23:17.000000000 +0100
-@@ -370,9 +367,10 @@ copy_reg (char const *src_name, char con
+@@ -371,9 +371,10 @@ copy_reg (char const *src_name, char con
  	  security_context_t con = NULL;
  	  if (getfscreatecon (&con) < 0)
  	    {
@@ -255,7 +255,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  		  return_val = false;
  		  goto close_src_and_dst_desc;
  		}
-@@ -383,11 +387,12 @@ copy_reg (char const *src_name, char con
+@@ -383,11 +384,12 @@ copy_reg (char const *src_name, char con
  	    {
  	      if (fsetfilecon (dest_desc, con) < 0)
  		{
@@ -271,7 +271,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  		      return_val = false;
  		      freecon (con);
  		      goto close_src_and_dst_desc;
-@@ -1630,11 +1635,12 @@ copy_internal (char const *src_name, cha
+@@ -1630,11 +1632,12 @@ copy_internal (char const *src_name, cha
  	{
  	  if (setfscreatecon (con) < 0)
  	    {
@@ -287,7 +287,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  		  freecon (con);
  		  return false;
  		}
-@@ -1644,12 +1650,14 @@ copy_internal (char const *src_name, cha
+@@ -1644,12 +1647,14 @@ copy_internal (char const *src_name, cha
        else
  	{
  	  if (errno != ENOTSUP && errno != ENODATA)
@@ -308,7 +308,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  	    }
  	}
      }
-@@ -1735,6 +1743,8 @@ copy_internal (char const *src_name, cha
+@@ -1735,6 +1740,8 @@ copy_internal (char const *src_name, cha
  	{
  	  /* Here, we are crossing a file system boundary and cp's -x option
  	     is in effect: so don't copy the contents of this directory. */
@@ -532,6 +532,18 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    };
  
  /* Display letters and indicators for each filetype.
+@@ -177,8 +178,9 @@ struct fileinfo
+        exists, otherwise false.  */
+     bool linkok;
+ 
+-    /* For long listings, true if the file has an access control list,
+-       or an SELinux security context.  */
++    /* For long listings, true if the file has an access control list.
++       Unlike with upstream not true for SELinux scontext(#430779) as
++       this removes possibility to detect ACL via ls */
+     bool have_acl;
+   };
+ 
 @@ -241,6 +242,7 @@ static void queue_directory (char const 
  static void sort_files (void);
  static void parse_ls_color (void);
@@ -709,6 +721,26 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  	{
  	  bool have_acl = false;
  	  int attr_len = (do_deref
+@@ -2667,9 +2694,7 @@ gobble_file (char const *name, enum file
+ 			  : lgetfilecon (absolute_name, &f->scontext));
+ 	  err = (attr_len < 0);
+ 
+-	  if (err == 0)
+-	    have_acl = ! STREQ ("unlabeled", f->scontext);
+-	  else
++	  if (err != 0)
+ 	    {
+ 	      f->scontext = UNKNOWN_SECURITY_CONTEXT;
+ 
+@@ -2681,7 +2706,7 @@ gobble_file (char const *name, enum file
+ 		err = 0;
+ 	    }
+ 
+-	  if (err == 0 && ! have_acl && format == long_format)
++	  if (err == 0 && format == long_format)
+ 	    {
+ 	      int n = file_has_acl (absolute_name, &f->stat);
+ 	      err = (n < 0);
 @@ -3255,6 +3281,13 @@ print_current_files (void)
  	  print_long_format (sorted_file[i]);
  	  DIRED_PUTCHAR ('\n');
@@ -1124,12 +1156,17 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
 diff -urp coreutils-6.10-orig/tests/misc/selinux coreutils-6.10/tests/misc/selinux
 --- coreutils-6.10-orig/tests/misc/selinux	2008-01-11 11:34:22.000000000 +0100
 +++ coreutils-6.10/tests/misc/selinux	2008-01-25 18:17:59.000000000 +0100
-@@ -32,7 +32,7 @@ chcon $ctx f d p 2>/dev/null || {
+@@ -32,12 +32,10 @@ chcon $ctx f d p 2>/dev/null || {
  
  # inspect that context with both ls -Z and stat.
  for i in d f p; do
 -  c=`ls -dogZ $i|cut -d' ' -f3`; test x$c = x$ctx || fail=1
-+  c=`ls -dogZ $i|cut -d' ' -f4`; test x$c = x$ctx || fail=1
++  c=`ls -dogZ $i|cut -d' ' -f5`; test x$c = x$ctx || fail=1
    c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
  done
- 
+
+-# ensure that ls -l output includes the "+".
+-c=`ls -l f|cut -c11`; test "$c" = + || fail=1
+
+ # Copy each to a new directory and ensure that context is preserved.
+ cp -r --preserve=all d f p s1 || fail=1
