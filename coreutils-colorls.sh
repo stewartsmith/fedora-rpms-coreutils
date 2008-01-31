@@ -4,6 +4,7 @@ if [ -n "$LS_COLORS" ]; then
   alias ll='ls -l --color=tty' 2>/dev/null
 	alias l.='ls -d .* --color=tty' 2>/dev/null
 	alias ls='ls --color=tty' 2>/dev/null
+  return
 fi
 
 alias ll='ls -l' 2>/dev/null
