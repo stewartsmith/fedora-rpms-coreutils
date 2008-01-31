@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -291,6 +291,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jan 31 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-4
+- forgotten return in colorls.sh change
+
 * Thu Jan 31 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-3
 - fix unability of echo to display certain strings(added --
   separator, #431005)
