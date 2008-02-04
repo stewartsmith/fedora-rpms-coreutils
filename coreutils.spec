@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -291,6 +291,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Feb  4 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-5
+- enabled 256-color support in colorls shell scripts(#429121)
+- fixed syntax error in csh script(#431315)
+
 * Thu Jan 31 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-4
 - forgotten return in colorls.sh change
 
