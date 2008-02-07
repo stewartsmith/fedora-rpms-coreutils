@@ -67,19 +67,19 @@ OTHER_WRITABLE 48;5;10;38;5;21 # dir that is other-writable (o+w) and not sticky
 STICKY 48;5;21;38;5;15	# dir with the sticky bit set (+t) and not other-writable
 
 # This is for files with execute permission:
-EXEC 01;38;5;10
+EXEC 01;38;5;34
 
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
 # (and any comments you want to add after a '#')
 # executables (bright green)
-.cmd 01;38;5;10
-.exe 01;38;5;10
-.com 01;38;5;10
-.btm 01;38;5;10
-.bat 01;38;5;10
-.sh  01;38;5;10
-.csh 01;38;5;10
+.cmd 01;38;5;34
+.exe 01;38;5;34
+.com 01;38;5;34
+.btm 01;38;5;34
+.bat 01;38;5;34
+.sh  01;38;5;34
+.csh 01;38;5;34
  # archives or compressed (bright red)
 .tar 01;38;5;9 
 .tgz 01;38;5;9
@@ -148,14 +148,14 @@ EXEC 01;38;5;10
 .yuv 01;38;5;13
 .svg 01;38;5;13
 # audio formats (cyan)
-.aac 00;38;5;14
-.au 00;38;5;14
-.flac 00;38;5;14
-.mid 00;38;5;14
-.midi 00;38;5;14
-.mka 00;38;5;14
-.mp3 00;38;5;14
-.mpc 00;38;5;14
-.ogg 00;38;5;14
-.ra 00;38;5;14
-.wav 00;38;5;14
+.aac 00;38;5;45
+.au 00;38;5;45
+.flac 00;38;5;45
+.mid 00;38;5;45
+.midi 00;38;5;45
+.mka 00;38;5;45
+.mp3 00;38;5;45
+.mpc 00;38;5;45
+.ogg 00;38;5;45
+.ra 00;38;5;45
+.wav 00;38;5;45

@@ -508,6 +508,14 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  	  x.preserve_security_context = true;
  	  use_default_selinux_context = false;
  	  break;
+@@ -432,6 +432,7 @@ main (int argc, char **argv)
+ 	      break;
+ 	    }
+ 	  scontext = optarg;
++	  x.set_security_context = true;
+ 	  use_default_selinux_context = false;
+ 	  break;
+ 	case_GETOPT_HELP_CHAR;
 @@ -825,8 +831,8 @@ Mandatory arguments to long options are 
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
