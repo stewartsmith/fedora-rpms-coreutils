@@ -16,7 +16,7 @@ if ($?TERM) then
   endif
 endif
 if ( -e "/etc/DIR_COLORS.256color" ) then
-  if ( "`tput colors 2>/dev/null`" == "256" ) then
+  if ( "`tput colors`" == "256" ) then
      set COLORS=/etc/DIR_COLORS.256color
   endif 
 endif
@@ -29,7 +29,7 @@ endif
 
 if ( ! -e "$COLORS" ) exit
 
-eval `dircolors -c $COLORS 2>/dev/null`
+eval `dircolors -c $COLORS`
 
 if ( "$LS_COLORS" == '' ) exit
 set color_none=`sed -n '/^COLOR.*none/Ip' < $COLORS`
