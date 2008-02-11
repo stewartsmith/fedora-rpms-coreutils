@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -245,7 +245,7 @@ fi
 %defattr(-,root,root,-)
 %dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
-%{_sysconfdir}/profile.d/*
+%config %{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su-l}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
@@ -291,6 +291,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Feb 11 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-7
+- keep old csh/sh usermodified colorls shell scripts
+  but use the new ones(#432154)
+
 * Thu Feb  7 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-6
 - better 256-color support in colorls shell scripts
 - color tuning(based on feedback in #429121)
