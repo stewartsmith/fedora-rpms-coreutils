@@ -7,7 +7,7 @@ if [ -z "$LS_COLORS" ]; then
   COLORS=/etc/DIR_COLORS
   [ -e "/etc/DIR_COLORS.$TERM" ] && COLORS="/etc/DIR_COLORS.$TERM"
   [ -e "/etc/DIR_COLORS.256color" ] && \
-     [ "`tput colors 2>/dev/null`" = "256" ] && \
+     [ "`infocmp $TERM | sed -n 's/.*colors#\([0-9]\+\).*/\1/p'`" = "256" ] && \
      COLORS="/etc/DIR_COLORS.256color"
   [ -e "$HOME/.dircolors" ] && COLORS="$HOME/.dircolors"
   [ -e "$HOME/.dir_colors" ] && COLORS="$HOME/.dir_colors"
