@@ -40,6 +40,6 @@ endif
 unset color_none
 
 finish:
-alias ll 'ls -l --color=tty'
-alias l. 'ls -d .* --color=tty'
-alias ls 'ls --color=tty'
+alias ll 'ls -l --color=auto'
+alias l. 'ls -d .* --color=auto'
+alias ls 'ls --color=auto'

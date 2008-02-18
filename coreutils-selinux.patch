@@ -489,6 +489,37 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
    x->recursive = false;
    x->sparse_mode = SPARSE_AUTO;
    x->symbolic_link = false;
+@@ -199,7 +199,6 @@ cp_option_init (struct cp_options *x)
+   x->src_info = NULL;
+ }
+ 
+-#ifdef ENABLE_WHEN_MATCHPATHCON_IS_MORE_EFFICIENT
+ /* Modify file context to match the specified policy.
+    If an error occurs the file will remain with the default directory
+    context.  */
+@@ -266,13 +265,6 @@ setdefaultfilecon (char const *file)
+   freecon (scontext);
+   return;
+ }
+-#else
+-static void
+-setdefaultfilecon (char const *file)
+-{
+-  (void) file;
+-}
+-#endif
+ 
+ /* FILE is the last operand of this command.  Return true if FILE is a
+    directory.  But report an error there is a problem accessing FILE,
+@@ -346,7 +338,7 @@ main (int argc, char **argv)
+      we'll actually use backup_suffix_string.  */
+   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+ 
+-  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pt:TvS:Z:", long_options,
++  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pPt:TvS:Z:", long_options,
+ 			      NULL)) != -1)
+     {
+       switch (optc)
 @@ -408,6 +409,7 @@ main (int argc, char **argv)
  	  no_target_directory = true;
  	  break;
