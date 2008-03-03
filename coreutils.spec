@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1:coreutils-6.10-verbose.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -95,6 +96,7 @@ lzma -dc %SOURCE0 | tar xf -
 cd %name-%version
 
 # From upstream
+%patch1 -p1 -b .verbose
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -245,7 +247,7 @@ fi
 %defattr(-,root,root,-)
 %dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
-%config %{_sysconfdir}/profile.d/*
+%config(noreplace) %{_sysconfdir}/profile.d/*
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su-l}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
@@ -291,6 +293,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Mar  3 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-9
+- consolidation of verbose output to stdout (upstream)
+
 * Mon Feb 18 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-8
 - use default security context in install - broken by 
   coreutils-6.10 update(#319231)
