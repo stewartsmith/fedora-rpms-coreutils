@@ -1,7 +1,7 @@
 #! /bin/csh -f
 # color-ls initialization
 if ( $?LS_COLORS ) then
-  if ( $LS_COLORS != "" ) then
+  if ( "$LS_COLORS" != "" ) then
      #do not override user specified LS_COLORS and use them
      goto finish
   endif

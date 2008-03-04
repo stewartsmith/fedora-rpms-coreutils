@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,7 +18,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1:coreutils-6.10-verbose.patch
+Patch1: coreutils-6.10-verbose.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -293,6 +293,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Mar  4 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-10
+- colorls.csh missing doublequotes (#435789)
+- fixed possibility to localize verbose outputs
+
 * Mon Mar  3 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-9
 - consolidation of verbose output to stdout (upstream)
 
