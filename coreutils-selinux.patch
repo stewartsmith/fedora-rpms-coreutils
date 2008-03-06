@@ -1099,7 +1099,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  /* stat the file and print what we find */
  static bool
 -do_stat (char const *filename, bool terse, char const *format)
-+do_stat (char const *filename, bool secure , bool terse, char const *format)
++do_stat (char const *filename, bool terse, bool secure, char const *format)
  {
    struct stat statbuf;
  

@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -293,6 +293,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Mar  6 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-11
+- fixed broken order of params in stat(#435669)
+
 * Tue Mar  4 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-10
 - colorls.csh missing doublequotes (#435789)
 - fixed possibility to localize verbose outputs
