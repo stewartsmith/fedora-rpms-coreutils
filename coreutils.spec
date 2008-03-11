@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,7 @@ Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-6.10-verbose.patch
+Patch2: coreutils-dddoubleclose.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -97,6 +98,7 @@ cd %name-%version
 
 # From upstream
 %patch1 -p1 -b .verbose
+%patch2 -p1 -b .doubleclose
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -293,6 +295,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Mar 11 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-12
+- fixed harmless double close of stdout in dd(#436368)
+
 * Thu Mar  6 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-11
 - fixed broken order of params in stat(#435669)
 
