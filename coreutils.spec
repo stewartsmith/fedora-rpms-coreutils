@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -25,7 +25,7 @@ Patch2: coreutils-dddoubleclose.patch
 Patch100: coreutils-chgrp.patch
 Patch101: coreutils-6.10-configuration.patch
 Patch102: coreutils-6.10-manpages.patch
-Patch103: coreutils-6.10-longoptions.patch
+#Patch103: coreutils-6.10-longoptions.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -104,7 +104,7 @@ cd %name-%version
 %patch100 -p1 -b .chgrp
 %patch101 -p1 -b .configure
 %patch102 -p1 -b .manpages
-%patch103 -p1 -b .longopt
+#%patch103 -p1 -b .longopt
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -295,6 +295,12 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Mar 17 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-13
+- disable echo option separator behavior(added by #431005,
+  request for removal #437653 + upstream)
+- temporarily disabled longoptions change until full 
+  clarification upstreamery (#431005)
+
 * Tue Mar 11 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-12
 - fixed harmless double close of stdout in dd(#436368)
 
