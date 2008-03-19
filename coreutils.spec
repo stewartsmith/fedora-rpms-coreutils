@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,7 @@ Source203:  coreutils-runuser-l.pamd
 # From upstream
 Patch1: coreutils-6.10-verbose.patch
 Patch2: coreutils-dddoubleclose.patch
+Patch3: coreutils-mvatomic.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -99,6 +100,7 @@ cd %name-%version
 # From upstream
 %patch1 -p1 -b .verbose
 %patch2 -p1 -b .doubleclose
+%patch3 -p1 -b .atomic
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -295,6 +297,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Mar 19 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-14
+- mv: never unlink a destination file before calling rename
+  (upstream, #438076)
+
 * Mon Mar 17 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-13
 - disable echo option separator behavior(added by #431005,
   request for removal #437653 + upstream)
