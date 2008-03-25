@@ -72,8 +72,8 @@ index 0000000..d1029aa
 +  mv --version
 +fi
 +
++. $srcdir/../strace
 +. $srcdir/../test-lib.sh
-+require_strace_
 +
 +# Before the fix, mv would unnecessarily unlink the destination symlink:
 +#   $ rm -f a b b2; touch a b; ln b b2; strace -e unlink /p/bin/mv a b
