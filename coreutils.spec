@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -297,6 +297,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Mar 26 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-15
+- covered correct handling for some test conditions failures
+  e.g. root build+selinux active and not running mcstrans(d)
+  or selinux enforcing (#436717)
+
 * Wed Mar 19 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-14
 - mv: never unlink a destination file before calling rename
   (upstream, #438076)

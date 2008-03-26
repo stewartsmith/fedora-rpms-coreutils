@@ -23,4 +23,85 @@ diff -urp coreutils-6.10-orig/gnulib-tests/test-getaddrinfo.c coreutils-6.10/gnu
 +
        return 1;
      }
+
+diff -urNp coreutils-6.10-orig/tests/misc/chcon coreutils-6.10/tests/misc/chcon
+--- coreutils-6.10-orig/tests/misc/chcon	2008-01-05 23:59:11.000000000 +0100
++++ coreutils-6.10/tests/misc/chcon	2008-03-26 13:19:37.000000000 +0100
+@@ -21,9 +21,15 @@ u1=root
+ r1=object_r
+ t1=tmp_t
+ ctx=$u1:$r1:$t1
+-chcon $ctx f || fail=1
++chcon $ctx f 2>outerror || fail=1
+ stat --printf='f|%C\n' f > out || fail=1
+ 
++cat <<\EOF > experror || fail=1
++chcon: failed to change context of `f' to `root:object_r:tmp_t': Invalid argument
++EOF
++
++compare outerror experror >/dev/null && skip_test_ "Missing mcstransd, skipping the test"
++
+ # Use --reference.
+ chcon --ref=f g || fail=1
+ stat --printf='g|%C\n' g >> out || fail=1
+@@ -38,8 +38,9 @@ stat --printf='g|%C\n' g >> out || fail=
+ u2=user_u
+ r2=object_r
+ t2=file_t
+-l2=SystemLow-SystemHigh
+-for i in --user=$u2 --role=$r2 --type=$t2 --range=$l2; do
++#do not set range here, it will fail in enforcing mode, requires permissive
++#l2=SystemLow-SystemHigh 
++for i in --user=$u2 --role=$r2 --type=$t2; do
+   chcon $i f || fail=1
+   stat --printf="f|$i|"'%C\n' f >> out || fail=1
+ done
+@@ -56,12 +57,24 @@ g|$ctx
+ f|--user=$u2|$u2:$r1:$t1
+ f|--role=$r2|$u2:$r2:$t1
+ f|--type=$t2|$u2:$r2:$t2
+-f|--range=$l2|$u2:$r2:$t2:$l2
+-f|-uroot|root:object_r:file_t:SystemLow-SystemHigh
+-f|-robject_r|root:object_r:file_t:SystemLow-SystemHigh
+-f|-ttmp_t|root:object_r:tmp_t:SystemLow-SystemHigh
++f|-uroot|root:object_r:file_t
++f|-robject_r|root:object_r:file_t
++f|-ttmp_t|root:object_r:tmp_t
+ EOF
+ 
+ compare out exp || fail=1
+ 
++SELINUX_MODE=$(getenforce)
++if [ $SELINUX_MODE == "Permissive" ]; then
++#check running range for Permisive mode
++l2=SystemLow-SystemHigh
++chcon --range=$l2 f || fail
++stat --printf="f|--range=$l2|"'%C\n' f >> permout || fail=1
++cat <<EOF > permexp || fail=1
++f|--range=$l2|root:object_r:tmp_t:SystemLow-SystemHigh
++EOF
++
++compare permout permexp || fail=1
++fi
++
+ (exit $fail); exit $fail
+diff -urNp coreutils-6.10-orig/tests/cp/cp-a-selinux coreutils-6.10/tests/cp/cp-a-selinux
+--- coreutils-6.10-orig/tests/cp/cp-a-selinux	2008-01-05 23:59:11.000000000 +0100
++++ coreutils-6.10/tests/cp/cp-a-selinux	2008-03-26 13:52:24.000000000 +0100
+@@ -27,6 +27,16 @@ PRIV_CHECK_ARG=require-root . $srcdir/..
+ . $srcdir/../test-lib.sh
+ require_selinux_
+ 
++#check for missing mcstrans(d)
++touch f || fail=1
++chcon root:object_r:tmp_t f 2>outerror || fail=1
++
++cat <<\EOF > experror || fail=1
++chcon: failed to change context of `f' to `root:object_r:tmp_t': Invalid argument
++EOF
++
++compare outerror experror && skip_test_ "Missing mcstransd, skipping the test"
++
+ cwd=`pwd`
+ cleanup_() { cd /; umount "$cwd/mnt"; }
  
