@@ -1,0 +1,103 @@
+diff -urNp coreutils-6.10-orig/src/mkdir.c coreutils-6.10/src/mkdir.c
+--- coreutils-6.10-orig/src/mkdir.c	2008-03-27 14:42:40.000000000 +0100
++++ coreutils-6.10/src/mkdir.c	2008-03-27 14:51:48.000000000 +0100
+@@ -211,7 +211,7 @@ main (int argc, char **argv)
+   if (scontext && setfscreatecon (scontext) < 0)
+     error (EXIT_FAILURE, errno,
+ 	   _("failed to set default file creation context to %s"),
+-	   quote (optarg));
++	   quote (scontext));
+ 
+   if (options.make_ancestor_function || specified_mode)
+     {
+diff -urNp coreutils-6.10-orig/src/paste.c coreutils-6.10/src/paste.c
+--- coreutils-6.10-orig/src/paste.c	2007-11-25 14:23:31.000000000 +0100
++++ coreutils-6.10/src/paste.c	2008-03-27 14:47:02.000000000 +0100
+@@ -42,6 +42,7 @@
+ #include <sys/types.h>
+ #include "system.h"
+ #include "error.h"
++#include "quotearg.h"
+ 
+ /* The official name of this program (e.g., no `g' prefix).  */
+ #define PROGRAM_NAME "paste"
+@@ -79,12 +80,17 @@ static struct option const longopts[] =
+ /* Set globals delims and delim_end.  Copy STRPTR to DELIMS, converting
+    backslash representations of special characters in STRPTR to their actual
+    values. The set of possible backslash characters has been expanded beyond
+-   that recognized by the Unix version.  */
++   that recognized by the Unix version.
++   Return 0 upon success.
++   If the string ends in an odd number of backslashes, ignore the
++   final backslash and return nonzero.  */   
+ 
+-static void
++static int
+ collapse_escapes (char const *strptr)
+ {
+   char *strout = xstrdup (strptr);
++  bool backslash_at_end = false;
++
+   delims = strout;
+ 
+   while (*strptr)
+@@ -123,6 +129,15 @@ collapse_escapes (char const *strptr)
+ 	      *strout++ = '\v';
+ 	      break;
+ 
++	    case '\\':
++	      *strout++ = '\\';
++	      break;
++
++	    case '\0':
++	      backslash_at_end = true;
++	      goto done;
++
++
+ 	    default:
+ 	      *strout++ = *strptr;
+ 	      break;
+@@ -130,7 +145,11 @@ collapse_escapes (char const *strptr)
+ 	  strptr++;
+ 	}
+     }
++
++	done:;
++
+   delim_end = strout;
++  return backslash_at_end ? 1 : 0;
+ }
+ 
+ /* Report a write error and exit.  */
+@@ -481,7 +500,15 @@ main (int argc, char **argv)
+   if (optind == argc)
+     argv[argc++] = "-";
+ 
+-  collapse_escapes (delim_arg);
++  if (collapse_escapes (delim_arg))
++    {
++      /* Don't use the default quoting style, because that would double the
++	 number of displayed backslashes, making the diagnostic look bogus.  */
++      set_quoting_style (NULL, escape_quoting_style);
++      error (EXIT_FAILURE, 0,
++	     _("delimiter list ends with an unescaped backslash: %s"),
++	     quotearg_colon (delim_arg));
++    }
+ 
+   if (!serial_merge)
+     ok = paste_parallel (argc - optind, &argv[optind]);
+diff -urNp coreutils-6.10-orig/src/ptx.c coreutils-6.10/src/ptx.c
+--- coreutils-6.10-orig/src/ptx.c	2007-11-25 14:23:31.000000000 +0100
++++ coreutils-6.10/src/ptx.c	2008-03-27 14:53:24.000000000 +0100
+@@ -387,6 +387,11 @@ copy_unescaped_string (const char *strin
+ 	    string++;
+ 	    break;
+ 
++	    case '\0':		/* lone backslash at end of string */
++	      /* ignore it */
++	      break;
++
++
+ 	  default:
+ 	    *cursor++ = '\\';
+ 	    *cursor++ = *string++;

@@ -1,8 +1,9 @@
 #! /bin/csh -f
 # color-ls initialization
-if ( $?LS_COLORS ) then
-  if ( "$LS_COLORS" != "" ) then
-     #do not override user specified LS_COLORS and use them
+if ( $?USER_LS_COLORS ) then
+  if ( "$USER_LS_COLORS" != "" ) then
+     #when USER_LS_COLORS defined do not override user 
+     #specified LS_COLORS and use them
      goto finish
   endif
 endif
