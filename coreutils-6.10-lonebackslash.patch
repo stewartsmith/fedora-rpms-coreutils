@@ -1,15 +1,3 @@
-diff -urNp coreutils-6.10-orig/src/mkdir.c coreutils-6.10/src/mkdir.c
---- coreutils-6.10-orig/src/mkdir.c	2008-03-27 14:42:40.000000000 +0100
-+++ coreutils-6.10/src/mkdir.c	2008-03-27 14:51:48.000000000 +0100
-@@ -211,7 +211,7 @@ main (int argc, char **argv)
-   if (scontext && setfscreatecon (scontext) < 0)
-     error (EXIT_FAILURE, errno,
- 	   _("failed to set default file creation context to %s"),
--	   quote (optarg));
-+	   quote (scontext));
- 
-   if (options.make_ancestor_function || specified_mode)
-     {
 diff -urNp coreutils-6.10-orig/src/paste.c coreutils-6.10/src/paste.c
 --- coreutils-6.10-orig/src/paste.c	2007-11-25 14:23:31.000000000 +0100
 +++ coreutils-6.10/src/paste.c	2008-03-27 14:47:02.000000000 +0100

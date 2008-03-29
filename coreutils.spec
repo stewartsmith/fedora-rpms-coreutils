@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -22,6 +22,7 @@ Patch1: coreutils-6.10-verbose.patch
 Patch2: coreutils-dddoubleclose.patch
 Patch3: coreutils-mvatomic.patch
 Patch4: coreutils-6.10-lonebackslash.patch
+Patch5: coreutils-6.10-mkscontextsegfault.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -103,6 +104,7 @@ cd %name-%version
 %patch2 -p1 -b .doubleclose
 %patch3 -p1 -b .atomic
 %patch4 -p1 -b .backslash
+%patch5 -p1 -b .mksegfault
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -132,6 +134,7 @@ cd %name-%version
 %patch950 -p1 -b .selinux
 
 chmod a+x tests/sort/sort-mb-tests
+chmod a+x tests/mkdir/selinux
 
 %build
 %ifarch s390 s390x
@@ -299,6 +302,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Sat Mar 29 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-17
+- better workaround of glibc getoptc change(factor test)
+- don't segfault mknod, mkfifo with invalid-selinux-context
+
 * Thu Mar 27 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-16
 - keep LS_COLORS when USER_LS_COLORS defined
 - someupstream fixes:
