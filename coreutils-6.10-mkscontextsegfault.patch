@@ -56,7 +56,7 @@ diff -urNp coreutils-6.10-orig/tests/mkdir/Makefile.am coreutils-6.10/tests/mkdi
 diff -urNp coreutils-6.10-orig/tests/mkdir/selinux coreutils-6.10/tests/mkdir/selinux
 --- coreutils-6.10-orig/tests/mkdir/selinux	1970-01-01 01:00:00.000000000 +0100
 +++ coreutils-6.10/tests/mkdir/selinux	2008-03-29 17:58:25.000000000 +0100
-@@ -0,0 +1,53 @@
+@@ -0,0 +1,50 @@
 +#!/bin/sh
 +# ensure that an invalid context doesn't cause a segfault
 +
@@ -87,26 +87,23 @@ diff -urNp coreutils-6.10-orig/tests/mkdir/selinux coreutils-6.10/tests/mkdir/se
 +. $srcdir/../test-lib.sh
 +
 +c=invalid-selinux-context
-+
 +fail=0
-+mkdir -Z $c dir-arg 2> out && fail=1
-+cat <<EOF > exp || fail=1
-+mkdir: failed to set default file creation context to \`$c': Invalid argument
-+EOF
-+compare out exp || fail=1
++msg="failed to set default file creation context to \`$c':"
 +
-+# Until coreutils-6.10.150, mknod and mkfifo had the same problem:
++# Test each of mkdir, mknod, mkfifo with "-Z invalid-context".
 +
-+mknod -Z $c b p 2> out && fail=1
-+cat <<EOF > exp || fail=1
-+mknod: failed to set default file creation context to \`$c': Invalid argument
-+EOF
-+compare out exp || fail=1
++for cmd_w_arg in 'mkdir dir' 'mknod b p' 'mkfifo f'; do
++  $cmd_w_arg -Z $c 2> out && fail=1
++  set $cmd_w_arg; cmd=$1
++  echo "$cmd: $msg" > exp || fail=1
 +
-+mkfifo -Z $c f 2> out && fail=1
-+cat <<EOF > exp || fail=1
-+mkfifo: failed to set default file creation context to \`$c': Invalid argument
-+EOF
-+compare out exp || fail=1
++  # Some systems fail with ENOTSUP, or EINVAL, or even ENOENT.
++  sed					\
++    -e 's/ Invalid argument$//'		\
++    -e 's/ Operation not supported$//'	\
++    -e 's/ No such file or directory$//' out > k || fail=1
++  mv k out || fail=1
++  compare out exp || fail=1
++done
 +
 +(exit $fail); exit $fail
