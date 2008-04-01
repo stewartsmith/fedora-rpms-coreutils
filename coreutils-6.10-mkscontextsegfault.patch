@@ -41,17 +41,6 @@ diff -urNp coreutils-6.10-orig/src/mknod.c coreutils-6.10/src/mknod.c
  
    /* Only check the first character, to allow mnemonic usage like
       `mknod /dev/rst0 character 18 0'. */
-diff -urNp coreutils-6.10-orig/tests/mkdir/Makefile.am coreutils-6.10/tests/mkdir/Makefile.am
---- coreutils-6.10-orig/tests/mkdir/Makefile.am	2007-11-25 14:23:31.000000000 +0100
-+++ coreutils-6.10/tests/mkdir/Makefile.am	2008-03-29 17:56:51.000000000 +0100
-@@ -8,6 +8,7 @@ TESTS = \
-   p-v \
-   parents \
-   perm \
-+#  selinux \
-   special-1 \
-   t-slash \
-   writable-under-readonly
 diff -urNp coreutils-6.10-orig/tests/mkdir/selinux coreutils-6.10/tests/mkdir/selinux
 --- coreutils-6.10-orig/tests/mkdir/selinux	1970-01-01 01:00:00.000000000 +0100
 +++ coreutils-6.10/tests/mkdir/selinux	2008-03-29 17:58:25.000000000 +0100
