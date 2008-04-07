@@ -341,6 +341,15 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
+@@ -175,7 +175,7 @@ Copy SOURCE to DEST, or multiple SOURCE(
+ Mandatory arguments to long options are mandatory for short options too.\n\
+ "), stdout);
+       fputs (_("\
+-  -a, --archive                same as -dpR\n\
++  -a, --archive                same as -cdpR\n\
+       --backup[=CONTROL]       make a backup of each existing destination file\n\
+   -b                           like --backup but does not accept an argument\n\
+       --copy-contents          copy contents of special files when recursive\n\
 @@ -200,6 +201,9 @@ Mandatory arguments to long options are 
                                   additional attributes: context, links, all\n\
  "), stdout);

@@ -333,7 +333,7 @@
 +-, \fB\-l\fR, \fB\-\-login\fR
 +make the shell a login shell, uses runuser-l PAM file instead of default one.
 +.TP
-+\fB\-c\fR, \fB\-\-commmand\fR=\fICOMMAND\fR
++\fB\-c\fR, \fB\-\-command\fR=\fICOMMAND\fR
 +pass a single COMMAND to the shell with \fB\-c\fR
 +.TP
 +\fB\-f\fR, \fB\-\-fast\fR

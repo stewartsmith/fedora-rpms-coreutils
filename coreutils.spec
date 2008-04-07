@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -53,6 +53,7 @@ Patch916: coreutils-getfacl-exit-code.patch
 #SELINUX Patch - implements Redhat changes 
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
+Patch951: coreutils-selinuxmanpages.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -132,9 +133,18 @@ cd %name-%version
 
 #SELinux
 %patch950 -p1 -b .selinux
+%patch951 -p1 -b .selinuxman
 
 chmod a+x tests/sort/sort-mb-tests
 chmod a+x tests/mkdir/selinux
+
+#fix typos/mistakes in localized documentation(#439410, #440056)
+for pofile in $(find ./po/*.p*)
+do
+   sed -i 's/-dpR/-cdpR/' "$pofile"
+   sed -i 's/commmand/command/' "$pofile"
+done
+
 
 %build
 %ifarch s390 s390x
@@ -302,6 +312,12 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Apr  7 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-18
+- fix colorls.sh syntax with Zsh (#440652)
+- mention that cp -a includes -c option + mention cp -c 
+  option in manpages (#440056)
+- fix typo in runuser manpages (#439410)
+
 * Sat Mar 29 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-17
 - better workaround of glibc getoptc change(factor test)
 - don't segfault mknod, mkfifo with invalid-selinux-context
