@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -312,6 +312,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Apr 14 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-19
+- fix possible build-failure typo in i18n patch(#442205)
+
 * Mon Apr  7 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-18
 - fix colorls.sh syntax with Zsh (#440652)
 - mention that cp -a includes -c option + mention cp -c 

@@ -3946,8 +3946,8 @@
 -	    FATAL_ERROR (_("the delimiter must be a single character"));
 -	  delim = optarg[0];
 -	  delim_specified = true;
-+#if HAVE_MBRTOWC
 +	    {
++#if HAVE_MBRTOWC
 +	      if(MB_CUR_MAX > 1)
 +		{
 +		  mbstate_t state;
