@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -23,6 +23,7 @@ Patch2: coreutils-dddoubleclose.patch
 Patch3: coreutils-mvatomic.patch
 Patch4: coreutils-6.10-lonebackslash.patch
 Patch5: coreutils-6.10-mkscontextsegfault.patch
+Patch6: coreutils-6.10-md5sha1sum.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -106,6 +107,7 @@ cd %name-%version
 %patch3 -p1 -b .atomic
 %patch4 -p1 -b .backslash
 %patch5 -p1 -b .mksegfault
+%patch6 -p1 -b .mda5sum
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -312,6 +314,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Apr 15 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-20
+- fix possible segfault in sha1sum/md5sum command
+
 * Mon Apr 14 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-19
 - fix possible build-failure typo in i18n patch(#442205)
 
