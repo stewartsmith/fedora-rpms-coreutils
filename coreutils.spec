@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.10
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -314,6 +314,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Apr 18 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-21
+- fix wrong checksum line handling in sha1sum -c 
+  command(#439531)
+
 * Tue Apr 15 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-20
 - fix possible segfault in sha1sum/md5sum command
 
