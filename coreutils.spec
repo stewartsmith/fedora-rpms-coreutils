@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 6.10
-Release: 21%{?dist}
+Version: 6.11
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,12 +18,6 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-6.10-verbose.patch
-Patch2: coreutils-dddoubleclose.patch
-Patch3: coreutils-mvatomic.patch
-Patch4: coreutils-6.10-lonebackslash.patch
-Patch5: coreutils-6.10-mkscontextsegfault.patch
-Patch6: coreutils-6.10-md5sha1sum.patch
 
 # Our patches
 Patch100: coreutils-chgrp.patch
@@ -102,12 +96,6 @@ lzma -dc %SOURCE0 | tar xf -
 cd %name-%version
 
 # From upstream
-%patch1 -p1 -b .verbose
-%patch2 -p1 -b .doubleclose
-%patch3 -p1 -b .atomic
-%patch4 -p1 -b .backslash
-%patch5 -p1 -b .mksegfault
-%patch6 -p1 -b .mda5sum
 
 # Our patches
 %patch100 -p1 -b .chgrp
@@ -138,7 +126,6 @@ cd %name-%version
 %patch951 -p1 -b .selinuxman
 
 chmod a+x tests/sort/sort-mb-tests
-chmod a+x tests/mkdir/selinux
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 for pofile in $(find ./po/*.p*)
@@ -314,6 +301,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Apr 21 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-1
+- New upstream release 6.11 
+- removed accepted patches + few minor patch changes
+
 * Fri Apr 18 2008 Ondrej Vasik <ovasik@redhat.com> - 6.10-21
 - fix wrong checksum line handling in sha1sum -c 
   command(#439531)
