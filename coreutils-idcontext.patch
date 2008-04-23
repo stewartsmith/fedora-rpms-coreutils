@@ -1,0 +1,116 @@
+
+From 2247d30eac99d1cb80d77b7713ad3e155dbd90c9 Mon Sep 17 00:00:00 2001
+From: =?utf-8?q?Ond=C5=99ej=20Va=C5=A1=C3=ADk?= <ovasik@redhat.com>
+Date: Wed, 23 Apr 2008 12:38:54 +0200
+Subject: [PATCH] id will now show selinux context only when used without specified user
+
+* NEWS: Mention new behaviour
+* src/id.c: Tiny change to not show SELinux context when user is specified.
+* tests/misc/Makefile.am: List new test
+* tests/misc/id-context : Test for id program which checks if SELinux 
+is displayed where it should be.
+Problem reported by Ronny Buchmann in http://bugzilla.redhat.com/443485.
+
+Signed-off-by: Ondřej Vašík <ovasik@redhat.com>
+Signed-off-by: Jim Meyering <meyering@redhat.com>
+---
+ NEWS                  |    4 ++++
+ src/id.c              |   10 +++++-----
+ tests/Makefile.am     |    1 +
+ tests/misc/id-context |   36 +++++++++++++++++++++++++++++++++++++
+ 4 files changed, 46 insertions(+), 5 deletions(-)
+ create mode 100755 tests/misc/id-context
+ 
+diff --git a/NEWS b/NEWS
+index 04893c6..ef3feda 100644
+--- a/NEWS
++++ b/NEWS
+@@ -75,6 +75,10 @@ GNU coreutils NEWS                                    -*- outline -*-
+   id and groups work around an AFS-related bug whereby those programs
+   would print an invalid group number, when given no user-name argument.
+ 
++  id will now show selinux context only when used without specified
++  user. Showing SELinux context of user who executed id command could 
++  be misleading.
++
+   ls --color no longer outputs unnecessary escape sequences
+ 
+   seq gives better diagnostics for invalid formats.
+diff --git a/src/id.c b/src/id.c
+index a178714..cbf75a5 100644
+--- a/src/id.c
++++ b/src/id.c
+@@ -179,11 +179,11 @@ main (int argc, char **argv)
+ cannot display context when selinux not enabled or when displaying the id\n\
+ of a different user"));
+ 
+-  /* If we are on a selinux-enabled kernel, get our context.
+-     Otherwise, leave the context variable alone - it has
+-     been initialized known invalid value; if we see this invalid
+-     value later, we will know we are on a non-selinux kernel.  */
+-  if (selinux_enabled)
++  /* If we are on a selinux-enabled kernel and no user is specified, 
++     get our context. Otherwise, leave the context variable alone - 
++     it has been initialized known invalid value and will be not
++     displayed in print_full_info() */
++  if (selinux_enabled && argc == optind)
+     {
+       if (getcon (&context) && just_context)
+         error (EXIT_FAILURE, 0, _("can't get process context"));
+diff --git a/tests/misc/Makefile.am b/tests/misc/Makefile.am
+index 3e491be..3658a02 100644
+--- a/tests/misc/Makefile.am
++++ b/tests/misc/Makefile.am
+@@ -69,6 +69,7 @@ TESTS = \
+   groups-version \
+   head-c \
+   head-pos \
++  id-context \
+   md5sum \
+   md5sum-newline \
+   mknod \
+diff --git a/tests/misc/id-context b/tests/misc/id-context
+new file mode 100755
+index 0000000..1bb830c
+--- /dev/null
++++ b/tests/misc/id-context
+@@ -0,0 +1,36 @@
++#!/bin/sh
++# Ensure that "id" outputs SELinux context only without specified user
++# Copyright (C) 2008 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if test "$VERBOSE" = yes; then
++  set -x
++  id --version
++fi
++
++. $top_srcdir/tests/test-lib.sh
++# Require selinux - when selinux is disabled, id never prints scontext
++require_selinux_
++
++fail=0
++
++#check without specified user, context string should be present
++id | grep context= >/dev/null || fail=1
++
++#check with specified user, no context string should be present
++# But if the current user is nameless, skip this part.
++id -nu > /dev/null && id $(id -nu) | grep "context=" >/dev/null && fail=1
++
++(exit $fail); exit $fail
+-- 
+1.5.2.2
+

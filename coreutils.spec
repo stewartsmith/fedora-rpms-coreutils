@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -24,6 +24,8 @@ Patch100: coreutils-chgrp.patch
 Patch101: coreutils-6.10-configuration.patch
 Patch102: coreutils-6.10-manpages.patch
 #Patch103: coreutils-6.10-longoptions.patch
+Patch104: coreutils-idcontext.patch
+Patch105: coreutils-testnonenglish.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -102,6 +104,8 @@ cd %name-%version
 %patch101 -p1 -b .configure
 %patch102 -p1 -b .manpages
 #%patch103 -p1 -b .longopt
+%patch104 -p1 -b .idcontext
+%patch105 -p1 -b .noneng
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -301,6 +305,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Apr 23 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-2
+- Do not show misleading scontext in id command when user
+  is specified (#443485)
+- Avoid possible test failures on non-english locales
+
 * Mon Apr 21 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-1
 - New upstream release 6.11 
 - removed accepted patches + few minor patch changes
