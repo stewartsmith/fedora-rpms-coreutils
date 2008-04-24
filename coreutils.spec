@@ -58,6 +58,7 @@ BuildRequires: gettext bison
 BuildRequires: texinfo >= 4.3
 BuildRequires: lzma
 BuildRequires: autoconf >= 2.58
+BuildRequires: strace
 #dist-lzma required
 BuildRequires: automake >= 1.10.1 
 %{?!nopam:BuildRequires: pam-devel}
@@ -130,6 +131,7 @@ cd %name-%version
 %patch951 -p1 -b .selinuxman
 
 chmod a+x tests/sort/sort-mb-tests
+chmod a+x tests/misc/id-context
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 for pofile in $(find ./po/*.p*)
