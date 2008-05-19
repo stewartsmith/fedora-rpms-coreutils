@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.11
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -58,7 +58,6 @@ BuildRequires: gettext bison
 BuildRequires: texinfo >= 4.3
 BuildRequires: lzma
 BuildRequires: autoconf >= 2.58
-BuildRequires: strace
 #dist-lzma required
 BuildRequires: automake >= 1.10.1 
 %{?!nopam:BuildRequires: pam-devel}
@@ -155,7 +154,7 @@ autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
            --enable-selinux \
-           --enable-install-program=su,hostname \
+           --enable-install-program=su,hostname,arch \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 make all %{?_smp_mflags} \
          %{?!nopam:CPPFLAGS="-DUSE_PAM"} \
@@ -187,7 +186,7 @@ bzip2 -9f ChangeLog
 # let be compatible with old fileutils, sh-utils and textutils packages :
 mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
-for f in basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
+for f in arch basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
 do
     mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f 
 done
@@ -267,6 +266,7 @@ fi
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
 %{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser-l}
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
+/bin/arch
 /bin/basename
 /bin/cat
 /bin/chgrp
@@ -307,6 +307,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 19 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-3
+- added arch utility (from util-linux-ng)
+- do not show executable file types without executable bit
+  in colored ls as executable
+
 * Wed Apr 23 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-2
 - Do not show misleading scontext in id command when user
   is specified (#443485)
