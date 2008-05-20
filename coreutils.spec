@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.11
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -51,6 +51,7 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
+Patch952: coreutils-6.11-matchpathconinstall.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -128,6 +129,8 @@ cd %name-%version
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+%patch952 -p1 -b .matchcon
+
 
 chmod a+x tests/sort/sort-mb-tests
 chmod a+x tests/misc/id-context
@@ -307,6 +310,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue May 20 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-4
+- fixed a HUGE memory leak in install binary(#447410)
+
 * Mon May 19 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-3
 - added arch utility (from util-linux-ng)
 - do not show executable file types without executable bit
