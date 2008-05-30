@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.11
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -26,6 +26,7 @@ Patch102: coreutils-6.10-manpages.patch
 #Patch103: coreutils-6.10-longoptions.patch
 Patch104: coreutils-idcontext.patch
 Patch105: coreutils-testnonenglish.patch
+Patch106: coreutils-6.11-sparc-shafix.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -107,6 +108,7 @@ cd %name-%version
 #%patch103 -p1 -b .longopt
 %patch104 -p1 -b .idcontext
 %patch105 -p1 -b .noneng
+%patch106 -p1 -b .sparc
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -310,6 +312,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu May 29 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 6.11-5
+- fix SHA256/SHA512 to work on sparc
+
 * Tue May 20 2008 Ondrej Vasik <ovasik@redhat.com> - 6.11-4
 - fixed a HUGE memory leak in install binary(#447410)
 
