@@ -34,7 +34,7 @@
 +#endif
  
 +#ifndef AUTHORS
- #define AUTHORS "David MacKenzie"
+ #define AUTHORS proper_name ("David MacKenzie")
 +#endif
  
  #if HAVE_PATHS_H

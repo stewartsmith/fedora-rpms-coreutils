@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 6.11
-Release: 5%{?dist}
+Version: 6.12
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,13 +20,10 @@ Source203:  coreutils-runuser-l.pamd
 # From upstream
 
 # Our patches
-Patch100: coreutils-chgrp.patch
-Patch101: coreutils-6.10-configuration.patch
-Patch102: coreutils-6.10-manpages.patch
-#Patch103: coreutils-6.10-longoptions.patch
-Patch104: coreutils-idcontext.patch
-Patch105: coreutils-testnonenglish.patch
-Patch106: coreutils-6.11-sparc-shafix.patch
+Patch100: coreutils-6.10-configuration.patch
+Patch101: coreutils-6.10-manpages.patch
+#Patch102: coreutils-6.10-longoptions.patch
+Patch103: coreutils-6.11-sparc-shafix.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -102,13 +99,10 @@ cd %name-%version
 # From upstream
 
 # Our patches
-%patch100 -p1 -b .chgrp
-%patch101 -p1 -b .configure
-%patch102 -p1 -b .manpages
-#%patch103 -p1 -b .longopt
-%patch104 -p1 -b .idcontext
-%patch105 -p1 -b .noneng
-%patch106 -p1 -b .sparc
+%patch100 -p1 -b .configure
+%patch101 -p1 -b .manpages
+#%patch102 -p1 -b .longopt
+%patch103 -p1 -b .sparc
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -131,10 +125,9 @@ cd %name-%version
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
-%patch952 -p1 -b .matchcon
 
 
-chmod a+x tests/sort/sort-mb-tests
+chmod a+x tests/misc/sort-mb-tests
 chmod a+x tests/misc/id-context
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
@@ -153,7 +146,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fPIC -O1"
 export CFLAGS="$RPM_OPT_FLAGS -fpic"
 %endif
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
-touch aclocal.m4 configure config.hin Makefile.in */Makefile.in */*/Makefile.in
+touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
 autoconf --force
 automake --copy --add-missing
@@ -312,6 +305,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jun 02 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-1
+- New upstream release 6.12, adapted patches
+
 * Thu May 29 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 6.11-5
 - fix SHA256/SHA512 to work on sparc
 
