@@ -18,6 +18,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-futimensatkoji.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -97,6 +98,7 @@ lzma -dc %SOURCE0 | tar xf -
 cd %name-%version
 
 # From upstream
+%patch1 -p1 -b .kojifutimensat
 
 # Our patches
 %patch100 -p1 -b .configure
