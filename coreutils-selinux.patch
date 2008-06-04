@@ -743,7 +743,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
        f->stat_ok = true;
  
 -      if (format == long_format || print_scontext)
-+      if (format == long_format || format == security_format)
++      if (format == long_format || format == security_format || print_scontext)
  	{
  	  bool have_acl = false;
  	  int attr_len = (do_deref

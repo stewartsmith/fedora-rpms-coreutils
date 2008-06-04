@@ -1,3 +1,18 @@
+diff --git a/lib/utimens.c b/lib/utimens.c
+index 134310b..18a8e7c 100644
+--- a/lib/utimens.c
++++ b/lib/utimens.c
+@@ -103,6 +103,10 @@ gl_futimens (int fd ATTRIBUTE_UNUSED,
+   if (fd < 0)
+     {
+       int result = utimensat (AT_FDCWD, file, timespec, 0);
++      /* Work around what might be a koji xen kernel bug):
++	 http://bugzilla.redhat.com/442352 */
++      if (result == 280)
++	result = 0;
+       if (result == 0 || errno != ENOSYS)
+         return result;
+     }
 diff -urN coreutils-6.12-orig/tests/misc/cut coreutils-6.12/tests/misc/cut
 --- coreutils-6.12-orig/tests/misc/cut	2008-05-17 08:41:11.000000000 +0200
 +++ coreutils-6.12/tests/misc/cut	2008-06-02 11:13:08.000000000 +0200
