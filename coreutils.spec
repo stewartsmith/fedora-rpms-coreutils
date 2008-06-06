@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -25,6 +25,7 @@ Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
 #Patch102: coreutils-6.10-longoptions.patch
 Patch103: coreutils-6.11-sparc-shafix.patch
+Patch104: coreutils-6.12-utimenstouchcp.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -105,6 +106,7 @@ cd %name-%version
 %patch101 -p1 -b .manpages
 #%patch102 -p1 -b .longopt
 %patch103 -p1 -b .sparc
+%patch104 -p1 -b .utimensat
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -131,6 +133,7 @@ cd %name-%version
 
 chmod a+x tests/misc/sort-mb-tests
 chmod a+x tests/misc/id-context
+chmod a+x tests/misc/utimensat-touchcp
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 for pofile in $(find ./po/*.p*)
@@ -206,6 +209,8 @@ install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.c
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
 install -m 755 src/runuser $RPM_BUILD_ROOT/sbin
+# do not ship runuser in /usr/bin/runuser
+rm -rf $RPM_BUILD_ROOT/usr/bin/runuser
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
@@ -307,6 +312,12 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Jun 06 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-3
+- workaround for koji failures(#449910, #442352) now 
+  preserves timestamps correctly - fallback to supported
+  functions, added test case
+- runuser binary is no longer doubled in /usr/bin/runuser
+
 * Wed Jun 04 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-2
 - workaround for strange koji failures(#449910,#442352)
 - fixed ls -ZC segfault(#449866, introduced by 6.10-1 
