@@ -240,6 +240,23 @@ diff -urp coreutils-6.10-orig/man/vdir.1 coreutils-6.10/man/vdir.1
  .TP
  \fB\-\-help\fR
  display this help and exit
+diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
+--- coreutils-6.12-orig/src/chcon.c	2008-05-26 08:40:32.000000000 +0200
++++ coreutils-6.12/src/chcon.c	2008-06-16 14:43:24.000000000 +0200
+@@ -302,9 +302,11 @@ process_file (FTS *fts, FTSENT *ent)
+ 
+   if (ok)
+     {
+-      if (verbose)
+-	printf (_("changing security context of %s"),
++      if (verbose) {
++	printf (_("changing security context of %s"),
+ 		quote (file_full_name));
++	putchar ('\n');
++     }
+ 
+       if (change_file_context (fts->fts_cwd_fd, file) != 0)
+ 	ok = false;
 diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
 --- coreutils-6.10-orig/src/copy.c	2008-01-05 23:59:11.000000000 +0100
 +++ coreutils-6.10/src/copy.c	2008-01-25 17:23:17.000000000 +0100

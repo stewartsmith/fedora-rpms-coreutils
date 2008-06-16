@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -312,6 +312,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jun 16 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-4
+- print verbose output of chcon with newline after each 
+  message (#451478)
+
 * Fri Jun 06 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-3
 - workaround for koji failures(#449910, #442352) now 
   preserves timestamps correctly - fallback to supported
