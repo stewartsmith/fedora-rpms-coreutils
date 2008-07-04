@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,8 @@ Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-futimensatkoji.patch
+Patch2: coreutils-authors.patch
+Patch3: coreutils-who_texinfo.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -100,6 +102,8 @@ cd %name-%version
 
 # From upstream
 %patch1 -p1 -b .kojifutimensat
+%patch2 -p1 -b .authors
+%patch3 -p1 -b .whotexinfo
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -312,6 +316,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Jul 04 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-5
+- fix authors for basename and echo
+- fix who info pages, print last runlevel only for printable
+  chars
+
 * Mon Jun 16 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-4
 - print verbose output of chcon with newline after each 
   message (#451478)
