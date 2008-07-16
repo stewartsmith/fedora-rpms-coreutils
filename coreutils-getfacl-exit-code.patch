@@ -20,4 +20,4 @@
 +acl2=`cd b && getfacl file`
  test "$acl1" = "$acl2" || fail=1
  
- exit $fail
+ (exit $fail); exit $fail

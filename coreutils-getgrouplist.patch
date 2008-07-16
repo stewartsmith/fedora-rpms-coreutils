@@ -10,65 +10,12 @@ diff -urp coreutils-6.10-orig/lib/getugroups.c coreutils-6.10/lib/getugroups.c
 +
  #include "getugroups.h"
  
- #include <stdio.h> /* grp.h on alpha OSF1 V2.0 uses "FILE *". */
+ #include <limits.h>
 @@ -114,3 +117,4 @@ getugroups (int maxcount, GETGROUPS_T *g
  
    return count;
  }
 +#endif	/* have getgrouplist */
-diff -urp coreutils-6.10-orig/lib/mgetgroups.c coreutils-6.10/lib/mgetgroups.c
---- coreutils-6.10-orig/lib/mgetgroups.c	2007-11-25 14:23:31.000000000 +0100
-+++ coreutils-6.10/lib/mgetgroups.c	2008-01-24 16:41:15.000000000 +0100
-@@ -43,9 +43,17 @@ mgetgroups (const char *username, gid_t 
-   int ng;
-   GETGROUPS_T *g;
- 
--  max_n_groups = (username
--		  ? getugroups (0, NULL, username, gid)
--		  : getgroups (0, NULL));
-+    if (!username)
-+      max_n_groups = getgroups(0, NULL);
-+  else 
-+   {
-+#ifdef HAVE_GETGROUPLIST
-+      max_n_groups = 0;
-+      getgrouplist (username, gid, NULL, &max_n_groups);
-+#else
-+      max_n_groups = getugroups (0, NULL, username, gid);
-+#endif
-+   }
- 
-   /* If we failed to count groups with NULL for a buffer,
-      try again with a non-NULL one, just in case.  */
-@@ -62,9 +70,25 @@ mgetgroups (const char *username, gid_t 
-   if (g == NULL)
-     return -1;
- 
--  ng = (username
--	? getugroups (max_n_groups, g, username, gid)
--	: getgroups (max_n_groups, g));
-+  if (!username)
-+    ng = getgroups (max_n_groups, g);
-+  else
-+    {
-+#ifdef HAVE_GETGROUPLIST
-+	  int e;
-+	  ng = max_n_groups;
-+	  while ((e = getgrouplist (username, gid, g, &ng)) == -1
-+		 && ng > max_n_groups)
-+	    {
-+	      max_n_groups = ng;
-+	      g = xrealloc (g, max_n_groups * sizeof (GETGROUPS_T));
-+	    }
-+	  if (e == -1)
-+	    ng = -1;
-+#else
-+	  ng = getugroups (max_n_groups, g, username, gid);
-+#endif
-+    }
- 
-   if (ng < 0)
-     {
 diff -urp coreutils-6.10-orig/m4/jm-macros.m4 coreutils-6.10/m4/jm-macros.m4
 --- coreutils-6.10-orig/m4/jm-macros.m4	2007-11-25 14:23:31.000000000 +0100
 +++ coreutils-6.10/m4/jm-macros.m4	2008-01-24 16:42:00.000000000 +0100

@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -316,6 +316,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jul 16 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-6
+- Get rid off fuzz in patches
+
 * Fri Jul 04 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-5
 - fix authors for basename and echo
 - fix who info pages, print last runlevel only for printable

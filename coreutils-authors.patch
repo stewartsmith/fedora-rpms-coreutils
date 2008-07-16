@@ -20,8 +20,8 @@ index 38e8879..69b708f 100644
 -#define AUTHORS proper_name ("FIXME unknown")
 +#define AUTHORS proper_name ("David MacKenzie")
  
- void
- usage (int status)
+ /* The name this program was run with. */
+ char *program_name;
 diff --git a/AUTHORS b/AUTHORS
 index 404cf70..666edc1 100644
 --- a/AUTHORS

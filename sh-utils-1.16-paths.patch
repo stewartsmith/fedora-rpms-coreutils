@@ -1,7 +1,7 @@
 --- sh-utils-1.16/src/su.c.badpaths	Mon Apr 14 14:26:55 1997
 +++ sh-utils-1.16/src/su.c	Sun Aug 17 14:11:31 EDT 2003
 @@ -147,6 +147,15 @@
- #define DEFAULT_ROOT_LOGIN_PATH "/usr/ucb:/bin:/usr/bin:/etc"
+ # define DEFAULT_ROOT_LOGIN_PATH "/usr/ucb:/bin:/usr/bin:/etc"
  #endif
  
 +/* The default paths which get set are both bogus and oddly influenced

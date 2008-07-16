@@ -273,12 +273,12 @@
 +runuser_CFLAGS = -DRUNUSER -DAUTHORS="\"David MacKenzie, Dan Walsh\""
 +runuser_LDADD = $(LDADD) $(LIB_CRYPT) @LIB_PAM@
 +
- $(PROGRAMS): ../lib/libcoreutils.a
+ stat_LDADD = $(LDADD) $(LIB_SELINUX)
  
- SUFFIXES = .sh
+ # Append $(LIBICONV) to each program that uses proper_name_utf8.
 @@ -126,7 +130,7 @@
- 	chmod +x $@-t
- 	mv $@-t $@
+   `sed -n '/.*COPYRIGHT_YEAR = \([0-9][0-9][0-9][0-9]\) };/s//\1/p' \
+     $(top_srcdir)/lib/version-etc.c`
  
 -all-local: su$(EXEEXT)
 +all-local: su$(EXEEXT) runuser

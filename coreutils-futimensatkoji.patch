@@ -90,10 +90,10 @@ index 25bc965..134310b 100644
 -# endif
 +#endif
  
-        /* Prefer EBADF to ENOSYS if both error numbers apply.  */
-        if (errno == ENOSYS)
+ 	/* Prefer EBADF to ENOSYS if both error numbers apply.  */
+ 	if (errno == ENOSYS)
 @@ -170,9 +180,9 @@ gl_futimens (int fd ATTRIBUTE_UNUSED,
-        return -1;
+ 	return -1;
        }
  
 -# if HAVE_WORKING_UTIMES

@@ -379,17 +379,8 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +/* The number of bytes used for tab. */
 +static size_t tablen = 0;
  
- static struct option const longopts[] =
- {
-@@ -190,6 +206,8 @@
- 
- /* Fill in the `fields' structure in LINE.  */
- 
-+/* Fill in the `fields' structure in LINE.  */
-+
- static void
- xfields (struct line *line)
- {
+ /* If nonzero, check that the input is correctly ordered. */
+ static enum
 @@ -199,10 +217,11 @@
    if (ptr == lim)
      return;
@@ -549,22 +540,10 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +  extract_field (line, ptr, lim - ptr);
 +}
 +#endif
-+
- /* Read a line from FP into LINE and split it into fields.
-    Return true if successful.  */
- 
-@@ -249,6 +410,11 @@
-   line->nfields_allocated = 0;
-   line->nfields = 0;
-   line->fields = NULL;
-+#if HAVE_MBRTOWC
-+  if (MB_CUR_MAX > 1)
-+    xfields_multibyte (line);
-+  else
-+#endif
-   xfields (line);
-   return true;
- }
++ 
+ static struct line *
+ dup_line (const struct line *old)
+ {
 @@ -377,11 +601,18 @@
  
  /* Print the join of LINE1 and LINE2.  */
@@ -703,7 +682,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 -  size_t len2;		/* Length of fields to compare.  */
 +  char *beg[2];
 +  char *copy[2];
-+  size_t len[2]; /* Length of fields to compare.  */
++  size_t len[2]; 	/* Length of fields to compare.  */
    int diff;
 +  int i, j;
  
@@ -830,7 +809,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +  return len[0] - len[1];
  }
  
- /* Check that successive input lines PREV and CURRENT from input file 
+ /* Check that successive input lines PREV and CURRENT from input file
 --- coreutils-6.8+/src/uniq.c.i18n	2007-01-14 15:41:28.000000000 +0000
 +++ coreutils-6.8+/src/uniq.c	2007-03-01 15:08:24.000000000 +0000
 @@ -23,6 +23,16 @@
@@ -1237,7 +1216,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
  /* The official name of this program (e.g., no `g' prefix).  */
 @@ -35,23 +57,44 @@
  
- #define AUTHORS "David MacKenzie"
+ #define AUTHORS proper_name ("David MacKenzie")
  
 +#define FATAL_ERROR(Message)                                            \
 +  do                                                                    \
@@ -1819,7 +1798,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +
  /* Specify the amount of main memory to use when sorting.  */
  static void
- specify_sort_size (char const *s)
+ specify_sort_size (int oi, char c, char const *s)
 @@ -1241,7 +1368,7 @@
     by KEY in LINE. */
  
@@ -4043,3 +4022,18 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
      }
  
    if (optind == argc)
+diff -urNp coreutils-6.12/src/join.c coreutils-6.12-orig/src/join.c
+--- coreutils-6.12/src/join.c	2008-07-16 14:08:01.000000000 +0200
++++ coreutils-6.12-orig/src/join.c	2008-07-16 14:07:02.000000000 +0200
+@@ -489,6 +489,11 @@ get_line (FILE *fp, struct line *line, i
+   line->nfields_allocated = 0;
+   line->nfields = 0;
+   line->fields = NULL;
++#if HAVE_MBRTOWC
++  if (MB_CUR_MAX > 1)
++    xfields_multibyte (line);
++  else
++#endif
+   xfields (line);
+ 
+   if (prevline[which - 1])
