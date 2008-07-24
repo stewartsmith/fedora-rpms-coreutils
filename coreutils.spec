@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -54,6 +54,8 @@ Patch916: coreutils-getfacl-exit-code.patch
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 Patch952: coreutils-6.11-matchpathconinstall.patch
+Patch953: coreutils-6.12-dd-fullblock.patch
+Patch954: coreutils-6.12-ls-libcap.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -64,6 +66,7 @@ BuildRequires: autoconf >= 2.58
 #dist-lzma required
 BuildRequires: automake >= 1.10.1 
 %{?!nopam:BuildRequires: pam-devel}
+BuildRequires: libcap-devel >= 2.0.6
 
 Requires(post): libselinux >= 1.25.6-1
 Requires(pre): /sbin/install-info
@@ -71,6 +74,7 @@ Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Requires(post): grep
 %{?!nopam:Requires: pam >= 0.66-12}
+Requires(post): libcap >= 2.0.6
 
 # Require a C library that doesn't put LC_TIME files in our way.
 Conflicts: glibc < 2.2
@@ -133,11 +137,14 @@ cd %name-%version
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+%patch953 -p1 -b .dd-fullblock
+%patch954 -p1 -b .ls-libcap
 
 
 chmod a+x tests/misc/sort-mb-tests
 chmod a+x tests/misc/id-context
 chmod a+x tests/misc/utimensat-touchcp
+chmod a+x tests/ls/capability
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 for pofile in $(find ./po/*.p*)
@@ -316,6 +323,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jul 24 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-7
+- dd: iflag=fullblock now read full blocks if possible
+  (#431997, #449263)
+- ls: --color now highlights files with capabilities (#449985)
+
 * Wed Jul 16 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-6
 - Get rid off fuzz in patches
 

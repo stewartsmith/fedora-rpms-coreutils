@@ -1,0 +1,181 @@
+From 9f8be4b0b83d1e0cbf1326f8cb7e077d026d9b0b Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Wed, 23 Jul 2008 11:29:21 +0200
+Subject: [PATCH] dd: iflag=fullblock now read full blocks if possible
+* src/dd.c (iread_fullblock): New function for reading full blocks.
+(scanargs): Check for new parameter iflag=fullblock.
+(skip): Use iread_fnc pointer instead of iread function.
+(dd_copy): Use iread_fnc pointer instead of iread function.
+* tests/dd/misc: Add test for dd - read full blocks.
+* doc/coretuils.texi: Mention new parameter iflag=fullblock.
+* NEWS: Mentioned the change.
+
+---
+ NEWS               |    4 ++++
+ doc/coreutils.texi |    6 ++++++
+ src/dd.c           |   39 +++++++++++++++++++++++++++++++++++++--
+ tests/dd/misc      |    9 +++++++++
+ 4 files changed, 56 insertions(+), 2 deletions(-)
+
+diff --git a/doc/coreutils.texi b/doc/coreutils.texi
+index 81e3b91..b95f8dc 100644
+--- a/doc/coreutils.texi
++++ b/doc/coreutils.texi
+@@ -7719,6 +7719,12 @@ platforms that distinguish binary from text I/O.
+ Use text I/O.  Like @samp{binary}, this option has no effect on
+ standard platforms.
+ 
++@item fullblock
++@opindex fullblock
++Read full blocks from input if possible. read() may return early
++if a full block is not available, so retry until data is available
++or end of file is reached. This flag can be used only for the iflag option.
++
+ @end table
+ 
+ These flags are not supported on all systems, and @samp{dd} rejects
+diff --git a/src/dd.c b/src/dd.c
+index ead9574..1b620df 100644
+--- a/src/dd.c
++++ b/src/dd.c
+@@ -225,6 +225,9 @@ static sig_atomic_t volatile interrupt_signal;
+ /* A count of the number of pending info signals that have been received.  */
+ static sig_atomic_t volatile info_signal_count;
+ 
++/* Function used for read (to handle iflag=fullblock parameter) */
++static ssize_t (*iread_fnc) (int fd, char *buf, size_t size);
++
+ /* A longest symbol in the struct symbol_values tables below.  */
+ #define LONGEST_SYMBOL "fdatasync"
+ 
+@@ -257,6 +260,7 @@ static struct symbol_value const conversions[] =
+ };
+ 
+ /* Flags, for iflag="..." and oflag="...".  */
++#define O_FULLBLOCK 010000000 /* Read only full blocks from input */
+ static struct symbol_value const flags[] =
+ {
+   {"append",	O_APPEND},
+@@ -271,6 +275,7 @@ static struct symbol_value const flags[] =
+   {"nonblock",	O_NONBLOCK},
+   {"sync",	O_SYNC},
+   {"text",	O_TEXT},
++  {"fullblock", O_FULLBLOCK}, /* Read only full blocks from input */
+   {"",		0}
+ };
+ 
+@@ -762,6 +767,27 @@ iread (int fd, char *buf, size_t size)
+     }
+ }
+ 
++/* Wrapper around iread function which reads full blocks if possible */
++static ssize_t
++iread_fullblock (int fd, char *buf, size_t size)
++{
++  ssize_t nread = 0;
++
++  while (0 < size)
++    {
++      ssize_t ncurr = iread(fd, buf, size);
++      if (ncurr < 0)
++	return ncurr;
++      if (ncurr == 0)
++	break;
++      nread += ncurr;
++      buf   += ncurr;
++      size  -= ncurr;
++    }
++
++  return nread;
++}
++
+ /* Write to FD the buffer BUF of size SIZE, processing any signals
+    that arrive.  Return the number of bytes written, setting errno if
+    this is less than SIZE.  Keep trying if there are partial
+@@ -1000,6 +1026,15 @@ scanargs (int argc, char *const *argv)
+   if (input_flags & (O_DSYNC | O_SYNC))
+     input_flags |= O_RSYNC;
+ 
++  if (output_flags & O_FULLBLOCK)
++    {
++      error (0, 0, "%s: %s", _("invalid output flag"), "'fullblock'");
++      usage (EXIT_FAILURE);
++    }
++  iread_fnc = (input_flags & O_FULLBLOCK)?
++    iread_fullblock:
++    iread;
++
+   if (multiple_bits_set (conversions_mask & (C_ASCII | C_EBCDIC | C_IBM)))
+     error (EXIT_FAILURE, 0, _("cannot combine any two of {ascii,ebcdic,ibm}"));
+   if (multiple_bits_set (conversions_mask & (C_BLOCK | C_UNBLOCK)))
+@@ -1197,7 +1232,7 @@ skip (int fdesc, char const *file, uintmax_t records, size_t blocksize,
+ 
+       do
+ 	{
+-	  ssize_t nread = iread (fdesc, buf, blocksize);
++	  ssize_t nread = iread_fnc (fdesc, buf, blocksize);
+ 	  if (nread < 0)
+ 	    {
+ 	      if (fdesc == STDIN_FILENO)
+@@ -1508,7 +1543,7 @@ dd_copy (void)
+ 		(conversions_mask & (C_BLOCK | C_UNBLOCK)) ? ' ' : '\0',
+ 		input_blocksize);
+ 
+-      nread = iread (STDIN_FILENO, ibuf, input_blocksize);
++      nread = iread_fnc (STDIN_FILENO, ibuf, input_blocksize);
+ 
+       if (nread == 0)
+ 	break;			/* EOF.  */
+diff --git a/tests/dd/misc b/tests/dd/misc
+index d54fbfa..24e5eba 100755
+--- a/tests/dd/misc
++++ b/tests/dd/misc
+@@ -88,6 +88,15 @@ fi
+ outbytes=`echo x | dd bs=3 ibs=10 obs=10 conv=sync 2>/dev/null | wc -c`
+ test "$outbytes" -eq 3 || fail=1
+ 
++(echo a; sleep .1; echo b) \
++  | LC_ALL=C dd bs=4 status=noxfer iflag=fullblock >out 2>err || fail=1
++echo "a
++b" > out_ok
++echo "1+0 records in
++1+0 records out" > err_ok
++compare out out_ok || fail=1
++compare err err_ok || fail=1
++
+ test $fail -eq 0 && fail=$warn
+ 
+ (exit $fail); exit $fail
+diff -ruN coreutils-6.12.old/doc/coreutils.info coreutils-6.12/doc/coreutils.info
+--- coreutils-6.12.old/doc/coreutils.info	2008-07-24 12:49:57.000000000 +0200
++++ coreutils-6.12/doc/coreutils.info	2008-07-24 12:52:17.000000000 +0200
+@@ -6112,6 +6112,12 @@
+           Use text I/O.  Like `binary', this option has no effect on
+           standard platforms.
+ 
++    'fullblock'
++          Read full blocks from input if possible. read() may return
++	  early if a full block is not available, so retry until data
++	  is available or end of file is reached. This flag can be used
++	  only for the iflag option.
++
+ 
+      These flags are not supported on all systems, and `dd' rejects
+      attempts to use them when they are not supported.  When reading
+diff -ruN coreutils-6.12.old/man/dd.1 coreutils-6.12/man/dd.1
+--- coreutils-6.12.old/man/dd.1	2008-07-24 12:51:06.000000000 +0200
++++ coreutils-6.12/man/dd.1	2008-07-24 12:59:06.000000000 +0200
+@@ -111,6 +111,13 @@
+ .TP
+ direct
+ use direct I/O for data
++.PP
++FLAG symbols only for iflag option:
++.TP
++fullblock
++Read full blocks from input if possible. read() may return early
++if a full block is not available, so retry until data is available
++or end of file is reached.
+ .IP
+ directory fail unless a directory
+ dsync     use synchronized I/O for data

@@ -1,0 +1,257 @@
+From 7634188624dc7f48c047b29fab3715dc7a468059 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Wed, 23 Jul 2008 09:52:05 +0200
+Subject: [PATCH] ls: --color now highlights files with capabilities, too
+* configure.ac: New option: --disable-libcap.  Check for libcap usability.
+* src/Makefile.am (dir_LDADD, ls_LDADD, ...): Append $(LIB_CAP).
+* src/ls.c: [HAVE_CAP] Include <sys/capability.h>.
+(has_capability): New function for capability detection.
+(print_color_indicator): Colorize file with capability.
+* src/dircolors.c: Update color lists.
+* src/dircolors.hin: Mention new CAPABILITY color attribute.
+* tests/ls/capability: Test for ls - colorize file with capability.
+* tests/Makefile.am (TESTS): Add ls/capability.
+* NEWS: Mention the change.
+
+---
+ NEWS                |    2 ++
+ configure.ac        |   13 +++++++++++++
+ src/Makefile.am     |    6 +++---
+ src/dircolors.c     |    4 ++--
+ src/dircolors.hin   |    1 +
+ src/ls.c            |   43 +++++++++++++++++++++++++++++++++++++++++--
+ tests/Makefile.am   |    1 +
+ tests/ls/capability |   43 +++++++++++++++++++++++++++++++++++++++++++
+ 8 files changed, 106 insertions(+), 7 deletions(-)
+ create mode 100755 tests/ls/capability
+
+diff -ruN coreutils-6.12.old/configure.ac coreutils-6.12/configure.ac
+--- coreutils-6.12.old/configure.ac	2008-07-24 14:16:32.000000000 +0200
++++ coreutils-6.12/configure.ac	2008-07-24 14:18:51.000000000 +0200
+@@ -58,6 +58,19 @@
+ LIB_SELINUX="-lselinux"
+ AC_SUBST(LIB_SELINUX)])
+ 
++dnl Check whether libcap is usable
++AC_ARG_ENABLE([libcap],
++  AC_HELP_STRING([--disable-libcap], [disable libcap support]),
++  AC_MSG_WARN([libcap support disabled by user]),
++  [AC_CHECK_LIB([cap], [cap_get_file],
++    [AC_CHECK_HEADER([sys/capability.h],
++      [LIB_CAP="-lcap" AC_DEFINE(HAVE_CAP, 1, [libcap usability])],
++      [AC_MSG_WARN([header sys/capability.h was not found, support for libcap will not be built])]
++      )],
++    [AC_MSG_WARN([libcap library was not found or not usable, support for libcap will not be built])])
++    ])
++AC_SUBST([LIB_CAP])
++
+ AC_FUNC_FORK
+ 
+ optional_bin_progs=
+diff -ruN coreutils-6.12.orig/src/Makefile.am coreutils-6.12/src/Makefile.am
+--- coreutils-6.12.orig/src/Makefile.am	2008-07-10 12:30:03.000000000 +0200
++++ coreutils-6.12/src/Makefile.am	2008-07-24 13:18:43.000000000 +0200
+@@ -98,15 +98,15 @@
+ 
+ # for clock_gettime and fdatasync
+ dd_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
+-dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX)
++dir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX) $(LIB_CAP)
+ id_LDADD = $(LDADD) $(LIB_SELINUX)
+-ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX)
++ls_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX) $(LIB_CAP)
+ mktemp_LDADD = $(LDADD) $(LIB_GETHRXTIME)
+ pr_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+ shred_LDADD = $(LDADD) $(LIB_GETHRXTIME) $(LIB_FDATASYNC)
+ shuf_LDADD = $(LDADD) $(LIB_GETHRXTIME)
+ tac_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+-vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX)
++vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX) $(LIB_CAP)
+ tac_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
+ 
+ ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
+diff --git a/src/dircolors.c b/src/dircolors.c
+index 56194f7..79109b9 100644
+--- a/src/dircolors.c
++++ b/src/dircolors.c
+@@ -63,14 +63,14 @@ static const char *const slack_codes[] =
+   "SYMLINK", "ORPHAN", "MISSING", "FIFO", "PIPE", "SOCK", "BLK", "BLOCK",
+   "CHR", "CHAR", "DOOR", "EXEC", "LEFT", "LEFTCODE", "RIGHT", "RIGHTCODE",
+   "END", "ENDCODE", "SUID", "SETUID", "SGID", "SETGID", "STICKY",
+-  "OTHER_WRITABLE", "OWR", "STICKY_OTHER_WRITABLE", "OWT", NULL
++  "OTHER_WRITABLE", "OWR", "STICKY_OTHER_WRITABLE", "OWT", "CAPABILITY", NULL
+ };
+ 
+ static const char *const ls_codes[] =
+ {
+   "no", "no", "fi", "rs", "di", "ln", "ln", "ln", "or", "mi", "pi", "pi",
+   "so", "bd", "bd", "cd", "cd", "do", "ex", "lc", "lc", "rc", "rc", "ec", "ec",
+-  "su", "su", "sg", "sg", "st", "ow", "ow", "tw", "tw", NULL
++  "su", "su", "sg", "sg", "st", "ow", "ow", "tw", "tw", "ca", NULL
+ };
+ #define array_len(Array) (sizeof (Array) / sizeof *(Array))
+ verify (array_len (slack_codes) == array_len (ls_codes));
+diff --git a/src/dircolors.hin b/src/dircolors.hin
+index 38914c8..5137cc6 100644
+--- a/src/dircolors.hin
++++ b/src/dircolors.hin
+@@ -77,6 +77,7 @@ CHR 40;33;01	# character device driver
+ ORPHAN 40;31;01 # symlink to nonexistent file, or non-stat'able file
+ SETUID 37;41	# file that is setuid (u+s)
+ SETGID 30;43	# file that is setgid (g+s)
++CAPABILITY 30;41	# file with capability
+ STICKY_OTHER_WRITABLE 30;42 # dir that is sticky and other-writable (+t,o+w)
+ OTHER_WRITABLE 34;42 # dir that is other-writable (o+w) and not sticky
+ STICKY 37;44	# dir with the sticky bit set (+t) and not other-writable
+diff --git a/src/ls.c b/src/ls.c
+index 4b69f7d..9bc66a1 100644
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -38,6 +38,10 @@
+ #include <config.h>
+ #include <sys/types.h>
+ 
++#ifdef HAVE_CAP
++# include <sys/capability.h>
++#endif
++
+ #if HAVE_TERMIOS_H
+ # include <termios.h>
+ #endif
+@@ -513,14 +517,14 @@ enum indicator_no
+     C_LEFT, C_RIGHT, C_END, C_RESET, C_NORM, C_FILE, C_DIR, C_LINK,
+     C_FIFO, C_SOCK,
+     C_BLK, C_CHR, C_MISSING, C_ORPHAN, C_EXEC, C_DOOR, C_SETUID, C_SETGID,
+-    C_STICKY, C_OTHER_WRITABLE, C_STICKY_OTHER_WRITABLE
++    C_STICKY, C_OTHER_WRITABLE, C_STICKY_OTHER_WRITABLE, C_CAP
+   };
+ 
+ static const char *const indicator_name[]=
+   {
+     "lc", "rc", "ec", "rs", "no", "fi", "di", "ln", "pi", "so",
+     "bd", "cd", "mi", "or", "ex", "do", "su", "sg", "st",
+-    "ow", "tw", NULL
++    "ow", "tw", "ca", NULL
+   };
+ 
+ struct color_ext_type
+@@ -553,6 +557,7 @@ static struct bin_str color_indicator[] =
+     { LEN_STR_PAIR ("37;44") },		/* st: sticky: black on blue */
+     { LEN_STR_PAIR ("34;42") },		/* ow: other-writable: blue on green */
+     { LEN_STR_PAIR ("30;42") },		/* tw: ow w/ sticky: black on green */
++    { LEN_STR_PAIR ("30;41") },		/* capability: black on red */
+   };
+ 
+ /* FIXME: comment  */
+@@ -3896,6 +3901,38 @@ print_type_indicator (bool stat_ok, mode_t mode, enum filetype type)
+     DIRED_PUTCHAR (c);
+ }
+ 
++#ifdef HAVE_CAP
++static bool
++/* Return true if NAME has a capability (see linux/capability.h) */
++has_capability (const char *name)
++{
++  cap_t cap_d;
++  char *result;
++  bool has_cap;
++
++  cap_d = cap_get_file (name);
++  if (cap_d == NULL)
++    return false;
++
++  result = cap_to_text (cap_d, NULL);
++  cap_free (cap_d);
++  if (!result)
++    return false;
++
++  /* check if human-readable capability string is empty */
++  has_cap = !!*result;
++
++  cap_free (result);
++  return has_cap;
++}
++#else
++static bool
++has_capability (const char *name)
++{
++  return false;
++}
++#endif
++
+ /* Returns whether any color sequence was printed. */
+ static bool
+ print_color_indicator (const char *name, mode_t mode, int linkok,
+@@ -3923,6 +3960,8 @@ print_color_indicator (const char *name, mode_t mode, int linkok,
+ 	    type = C_SETUID;
+ 	  else if ((mode & S_ISGID) != 0)
+ 	    type = C_SETGID;
++	  else if (has_capability (name))
++	    type = C_CAP;
+ 	  else if ((mode & S_IXUGO) != 0)
+ 	    type = C_EXEC;
+ 	}
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index c2da630..309d174 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -313,6 +313,7 @@ TESTS =						\
+   ln/misc					\
+   ln/sf-1					\
+   ln/target-1					\
++  ls/capability					\
+   ls/color-dtype-dir				\
+   ls/dangle					\
+   ls/dired					\
+diff --git a/tests/ls/capability b/tests/ls/capability
+new file mode 100755
+index 0000000..549e06b
+--- /dev/null
++++ b/tests/ls/capability
+@@ -0,0 +1,43 @@
++#!/bin/sh
++# Ensure "ls --color" properly colorizes file with capability.
++
++# Copyright (C) 2008 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if test "$VERBOSE" = yes; then
++  set -x
++  ls --version
++fi
++
++. $srcdir/test-lib.sh
++require_root_
++
++(setcap --help) 2>&1 |grep 'usage: setcap' > /dev/null \
++  || skip_test_ "setcap utility not found"
++fail=0
++
++# Don't let a different umask perturb the results.
++umask 22
++
++touch test
++setcap cap_net_bind_service=ep test \
++  || framework_failure
++code='30;41'
++LS_COLORS="ca=$code" \
++  ls --color=always test > out || fail=1
++printf "\033[0m\033[${code}mtest\033[0m\n\033[m" > out_ok || fail=1
++compare out out_ok || fail=1
++
++(exit $fail); exit $fail
+-- 
+1.5.4.1
+
