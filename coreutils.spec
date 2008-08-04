@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -28,6 +28,7 @@ Patch101: coreutils-6.10-manpages.patch
 #Patch102: coreutils-6.10-longoptions.patch
 Patch103: coreutils-6.11-sparc-shafix.patch
 Patch104: coreutils-6.12-utimenstouchcp.patch
+Patch105: coreutils-6.12-dd-fullblock.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -54,8 +55,10 @@ Patch916: coreutils-getfacl-exit-code.patch
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 Patch952: coreutils-6.11-matchpathconinstall.patch
-Patch953: coreutils-6.12-dd-fullblock.patch
+
+# ls enhancements (must be applied after SELINUX patches)
 Patch954: coreutils-6.12-ls-libcap.patch
+Patch955: coreutils-6.12-ls-constant_mem.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -115,6 +118,7 @@ cd %name-%version
 #%patch102 -p1 -b .longopt
 %patch103 -p1 -b .sparc
 %patch104 -p1 -b .utimensat
+%patch105 -p1 -b .dd-fullblock
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -137,8 +141,10 @@ cd %name-%version
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
-%patch953 -p1 -b .dd-fullblock
+
+# ls enhancements (must be applied after SELINUX patches)
 %patch954 -p1 -b .ls-libcap
+%patch955 -p1 -b .ls-constant_mem
 
 
 chmod a+x tests/misc/sort-mb-tests
@@ -323,6 +329,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Aug 04 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-8
+- ls -U1 now uses constant memory
+
 * Wed Jul 24 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-7
 - dd: iflag=fullblock now read full blocks if possible
   (#431997, #449263)
