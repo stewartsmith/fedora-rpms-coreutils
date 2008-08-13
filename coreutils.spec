@@ -329,6 +329,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Aug 13 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-9
+- mention that DISPLAY and XAUTHORITY envvars are preserved
+  for pam_xauth in su -l (#450505)
+
 * Mon Aug 04 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-8
 - ls -U1 now uses constant memory
 
