@@ -21,6 +21,8 @@ Source203:  coreutils-runuser-l.pamd
 Patch1: coreutils-futimensatkoji.patch
 Patch2: coreutils-authors.patch
 Patch3: coreutils-who_texinfo.patch
+#Patch4: coreutils-6.12-date_timerelsnumber.patch
+Patch5: coreutils-6.12-seqdecimalutf8.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -54,7 +56,6 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
-Patch952: coreutils-6.11-matchpathconinstall.patch
 
 # ls enhancements (must be applied after SELINUX patches)
 Patch954: coreutils-6.12-ls-libcap.patch
@@ -69,7 +70,7 @@ BuildRequires: autoconf >= 2.58
 #dist-lzma required
 BuildRequires: automake >= 1.10.1 
 %{?!nopam:BuildRequires: pam-devel}
-BuildRequires: libcap-devel >= 2.0.6
+#BuildRequires: libcap-devel >= 2.0.6
 
 Requires(post): libselinux >= 1.25.6-1
 Requires(pre): /sbin/install-info
@@ -111,6 +112,8 @@ cd %name-%version
 %patch1 -p1 -b .kojifutimensat
 %patch2 -p1 -b .authors
 %patch3 -p1 -b .whotexinfo
+#%patch4 -p1 -b .getdate
+%patch5 -p1 -b .sequtf8
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -329,6 +332,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Sep 29 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-10
+- seq should no longer fail to display final number of some
+  float usages of seq with utf8 locales(#463556)
+
 * Wed Aug 13 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-9
 - mention that DISPLAY and XAUTHORITY envvars are preserved
   for pam_xauth in su -l (#450505)
