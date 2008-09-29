@@ -70,7 +70,7 @@ BuildRequires: autoconf >= 2.58
 #dist-lzma required
 BuildRequires: automake >= 1.10.1 
 %{?!nopam:BuildRequires: pam-devel}
-#BuildRequires: libcap-devel >= 2.0.6
+BuildRequires: libcap-devel >= 2.0.6
 
 Requires(post): libselinux >= 1.25.6-1
 Requires(pre): /sbin/install-info
