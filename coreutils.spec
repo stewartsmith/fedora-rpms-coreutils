@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -73,6 +73,7 @@ BuildRequires: automake >= 1.10.1
 BuildRequires: libcap-devel >= 2.0.6
 
 Requires(post): libselinux >= 1.25.6-1
+Requires:       libattr
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
@@ -332,6 +333,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Oct 06 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-11
+- added requires for libattr (#465569)
+
 * Mon Sep 29 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-10
 - seq should no longer fail to display final number of some
   float usages of seq with utf8 locales(#463556)
