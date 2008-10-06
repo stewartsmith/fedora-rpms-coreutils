@@ -1,16 +1,17 @@
-diff -urNp coreutils-6.12-orig/lib/utimens.c coreutils-6.12/lib/utimens.c
---- coreutils-6.12-orig/lib/utimens.c	2008-06-06 12:49:08.000000000 +0200
-+++ coreutils-6.12/lib/utimens.c	2008-06-06 12:52:24.000000000 +0200
-@@ -103,6 +103,17 @@ gl_futimens (int fd ATTRIBUTE_UNUSED,
+diff -Naurp coreutils-6.12.orig/lib/utimens.c coreutils-6.12/lib/utimens.c
+--- coreutils-6.12.orig/lib/utimens.c	2008-10-06 16:21:11.000000000 -0400
++++ coreutils-6.12/lib/utimens.c	2008-10-06 16:26:33.000000000 -0400
+@@ -103,6 +103,18 @@ gl_futimens (int fd ATTRIBUTE_UNUSED,
    if (fd < 0)
      {
        int result = utimensat (AT_FDCWD, file, timespec, 0);
 +# ifdef __linux__
-+       /* Work around what might be a kernel bug:
++       /* Work around xen kernel bug:
 +        http://bugzilla.redhat.com/442352
 +        http://bugzilla.redhat.com/449910
-+        It appears that utimensat can mistakenly return 280 rather
-+        than 0 to indicate success.
++        When running on a sufficiently old (pre-RHEL5.3) x86_64 xen
++        kernel, utimensat can mistakenly return its syscall number (280 on
++        x86_64) rather than the proper ENOSYS code, due to a xen bug.
 +        FIXME: remove in 2010 or whenever the offending kernels
 +        are no longer in common use.  */
 +       if (0 < result)
@@ -19,16 +20,17 @@ diff -urNp coreutils-6.12-orig/lib/utimens.c coreutils-6.12/lib/utimens.c
        if (result == 0 || errno != ENOSYS)
          return result;
      }
-@@ -110,6 +121,17 @@ gl_futimens (int fd ATTRIBUTE_UNUSED,
+@@ -110,6 +122,18 @@ gl_futimens (int fd ATTRIBUTE_UNUSED,
  #if HAVE_FUTIMENS
    {
      int result = futimens (fd, timespec);
 +# ifdef __linux__
-+       /* Work around what might be a kernel bug:
++       /* Work around xen kernel bug:
 +        http://bugzilla.redhat.com/442352
 +        http://bugzilla.redhat.com/449910
-+        It appears that utimens can mistakenly return 280 rather
-+        than 0 to indicate success.
++        When running on a sufficiently old (pre-RHEL5.3) x86_64 xen
++        kernel, utimensat can mistakenly return its syscall number (280 on
++        x86_64) rather than the proper ENOSYS code, due to a xen bug.
 +        FIXME: remove in 2010 or whenever the offending kernels
 +        are no longer in common use.  */
 +    if (0 < result)
@@ -37,9 +39,9 @@ diff -urNp coreutils-6.12-orig/lib/utimens.c coreutils-6.12/lib/utimens.c
      if (result == 0 || errno != ENOSYS)
        return result;
    }
-diff -urNp coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
---- coreutils-6.12-orig/tests/Makefile.am	2008-06-05 10:52:49.000000000 +0200
-+++ coreutils-6.12/tests/Makefile.am	2008-06-05 13:23:02.000000000 +0200
+diff -Naurp coreutils-6.12.orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
+--- coreutils-6.12.orig/tests/Makefile.am	2008-10-06 16:21:11.000000000 -0400
++++ coreutils-6.12/tests/Makefile.am	2008-10-06 16:22:04.000000000 -0400
 @@ -215,6 +215,7 @@ TESTS =						\
    misc/tty-eof					\
    misc/unexpand					\
@@ -48,9 +50,9 @@ diff -urNp coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.a
    chmod/c-option				\
    chmod/equal-x					\
    chmod/equals					\
-diff -urNp coreutils-6.12-orig/tests/misc/utimensat-touchcp coreutils-6.12/tests/misc/utimensat-touchcp
---- coreutils-6.12-orig/tests/misc/utimensat-touchcp	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-6.12/tests/misc/utimensat-touchcp	2008-06-05 13:22:01.000000000 +0200
+diff -Naurp coreutils-6.12.orig/tests/misc/utimensat-touchcp coreutils-6.12/tests/misc/utimensat-touchcp
+--- coreutils-6.12.orig/tests/misc/utimensat-touchcp	1969-12-31 19:00:00.000000000 -0500
++++ coreutils-6.12/tests/misc/utimensat-touchcp	2008-10-06 16:22:04.000000000 -0400
 @@ -0,0 +1,33 @@
 +#!/bin/sh
 +# Make sure touch -r and cp -pr works without hanging.

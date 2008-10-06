@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -23,6 +23,7 @@ Patch2: coreutils-authors.patch
 Patch3: coreutils-who_texinfo.patch
 #Patch4: coreutils-6.12-date_timerelsnumber.patch
 Patch5: coreutils-6.12-seqdecimalutf8.patch
+Patch6: coreutils-6.12-catch-known-testsuite-failures.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -115,6 +116,7 @@ cd %name-%version
 %patch3 -p1 -b .whotexinfo
 #%patch4 -p1 -b .getdate
 %patch5 -p1 -b .sequtf8
+%patch6 -p1 -b .tests
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -333,6 +335,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Oct 06 2008 Jarod Wilson <jarod@redhat.com> - 6.12-12
+- fix up potential test failures when building in certain
+  slightly quirky environments (part of bz#442352)
+
 * Mon Oct 06 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-11
 - added requires for libattr (#465569)
 
