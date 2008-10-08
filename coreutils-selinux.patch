@@ -89,15 +89,6 @@ diff -urp coreutils-6.10-orig/man/chcon.1 coreutils-6.10/man/chcon.1
  With \fB\-\-reference\fR, change the security context of each FILE to that of RFILE.
  .TP
  \fB\-c\fR, \fB\-\-changes\fR
-@@ -74,6 +74,8 @@ License GPLv3+: GNU GPL version 3 or lat
- .br
- This is free software: you are free to change and redistribute it.
- There is NO WARRANTY, to the extent permitted by law.
-+.SH "REPORTING BUGS"
-+Report bugs to <https://bugzilla.redhat.com/bugzilla>.
- .SH "SEE ALSO"
- The full documentation for
- .B chcon
 diff -urp coreutils-6.10-orig/man/id.1 coreutils-6.10/man/id.1
 --- coreutils-6.10-orig/man/id.1	2008-01-25 12:34:24.000000000 +0100
 +++ coreutils-6.10/man/id.1	2008-01-25 14:40:22.000000000 +0100

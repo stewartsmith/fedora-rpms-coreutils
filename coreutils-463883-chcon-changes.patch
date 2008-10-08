@@ -1,0 +1,59 @@
+diff -urNp coreutils-6.12-orig/man/chcon.1 coreutils-6.12/man/chcon.1
+--- coreutils-6.12-orig/man/chcon.1	2008-10-08 14:45:59.000000000 +0200
++++ coreutils-6.12/man/chcon.1	2008-10-08 16:35:55.000000000 +0200
+@@ -17,9 +17,6 @@ chcon \- change file SELinux security co
+ Change the SELinux security context of each FILE to CONTEXT.
+ With \fB\-\-reference\fR, change the security context of each FILE to that of RFILE.
+ .TP
+-\fB\-c\fR, \fB\-\-changes\fR
+-like verbose but report only when a change is made
+-.TP
+ \fB\-h\fR, \fB\-\-no\-dereference\fR
+ affect symbolic links instead of any referenced file
+ .TP
+diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
+--- coreutils-6.12-orig/src/chcon.c	2008-10-08 14:45:59.000000000 +0200
++++ coreutils-6.12/src/chcon.c	2008-10-08 16:28:36.000000000 +0200
+@@ -35,25 +35,6 @@
+   proper_name ("Russell Coker"), \
+   proper_name ("Jim Meyering")
+ 
+-enum Change_status
+-{
+-  CH_NOT_APPLIED,
+-  CH_SUCCEEDED,
+-  CH_FAILED,
+-  CH_NO_CHANGE_REQUESTED
+-};
+-
+-enum Verbosity
+-{
+-  /* Print a message for each file that is processed.  */
+-  V_high,
+-
+-  /* Print a message for each file whose attributes we change.  */
+-  V_changes_only,
+-
+-  /* Do not be verbose.  This is the default. */
+-  V_off
+-};
+ 
+ /* The name the program was run with. */
+ char *program_name;
+@@ -374,7 +355,6 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
+ Change the security context of each FILE to CONTEXT.\n\
+ With --reference, change the security context of each FILE to that of RFILE.\n\
+ \n\
+-  -c, --changes          like verbose but report only when a change is made\n\
+   -h, --no-dereference   affect symbolic links instead of any referenced file\n\
+ "), stdout);
+       fputs (_("\
+@@ -435,7 +415,7 @@ main (int argc, char **argv)
+ 
+   atexit (close_stdout);
+ 
+-  while ((optc = getopt_long (argc, argv, "HLPRchvu:r:t:l:", long_options, NULL))
++  while ((optc = getopt_long (argc, argv, "HLPRhvu:r:t:l:", long_options, NULL))
+ 	 != -1)
+     {
+       switch (optc)

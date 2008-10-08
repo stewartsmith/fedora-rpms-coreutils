@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -57,6 +57,7 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
+Patch952: coreutils-463883-chcon-changes.patch
 
 # ls enhancements (must be applied after SELINUX patches)
 Patch954: coreutils-6.12-ls-libcap.patch
@@ -104,11 +105,7 @@ These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
-#do not unpack in setup because of lzma is not yet supported in setup macro
-%setup -q -c -T
-cd ..
-lzma -dc %SOURCE0 | tar xf -
-cd %name-%version
+%setup -q
 
 # From upstream
 %patch1 -p1 -b .kojifutimensat
@@ -147,6 +144,7 @@ cd %name-%version
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+%patch952 -p1 -b .changeonly
 
 # ls enhancements (must be applied after SELINUX patches)
 %patch954 -p1 -b .ls-libcap
@@ -214,12 +212,12 @@ mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
 for f in arch basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
 do
-    mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f 
+    mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f
 done
 
 # chroot was in /usr/sbin :
 mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
-# {cat,sort,cut} were previously moved from bin to /usr/bin and linked into 
+# {cat,sort,cut} were previously moved from bin to /usr/bin and linked into
 for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
@@ -335,6 +333,12 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Oct 08 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-13
+- remove unimplemented (never accepted by upstream) option
+  for chcon changes only. Removed from help and man.
+- remove ugly lzma hack as lzma is now supported by setup
+  macro
+
 * Mon Oct 06 2008 Jarod Wilson <jarod@redhat.com> - 6.12-12
 - fix up potential test failures when building in certain
   slightly quirky environments (part of bz#442352)
