@@ -31,9 +31,9 @@ diff -urp coreutils-6.10-orig/man/cp.1 coreutils-6.10/man/cp.1
  .TP
  \fB\-x\fR, \fB\-\-one\-file\-system\fR
  stay on this file system
++.TP
 +\fB\-Z\fR, \fB\-\-context\fR=\fICONTEXT\fR
 +(SELinux) set SELinux security context of copy to CONTEXT
-+.TP
  .TP
  \fB\-\-help\fR
  display this help and exit
@@ -384,24 +384,12 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
  
    x->require_preserve = false;
    x->recursive = false;
-@@ -867,8 +873,10 @@ decode_preserve_arg (char const *arg, st
- 	  x->preserve_timestamps = on_off;
- 	  x->preserve_ownership = on_off;
- 	  x->preserve_links = on_off;
--	  if (selinux_enabled)
-+	  if (selinux_enabled) {
- 	    x->preserve_security_context = on_off;
-+      x->require_preserve_context = on_off;
-+    }
- 	  break;
- 
- 	default:
 @@ -909,7 +917,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
 -  while ((c = getopt_long (argc, argv, "abdfHilLprst:uvxPRS:T",
-+  while ((c = getopt_long (argc, argv, "abcdfHilLprst:uvxPRS:TZ",
++  while ((c = getopt_long (argc, argv, "abcdfHilLprst:uvxPRS:TZ:",
  			   long_opts, NULL))
  	 != -1)
      {

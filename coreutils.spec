@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -333,6 +333,12 @@ fi
 /sbin/runuser
 
 %changelog
+* Sun Oct 12 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-14
+- cp -Z now correctly separated in man page (#466646)
+- cp -Z works again (#466653)
+- make preservation of SELinux CTX non-mandatory for
+  preserve=all cp option
+
 * Wed Oct 08 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-13
 - remove unimplemented (never accepted by upstream) option
   for chcon changes only. Removed from help and man.
