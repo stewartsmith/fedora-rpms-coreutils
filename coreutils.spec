@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -21,9 +21,10 @@ Source203:  coreutils-runuser-l.pamd
 Patch1: coreutils-futimensatkoji.patch
 Patch2: coreutils-authors.patch
 Patch3: coreutils-who_texinfo.patch
-#Patch4: coreutils-6.12-date_timerelsnumber.patch
+Patch4: coreutils-6.12-date_timerelsnumber.patch
 Patch5: coreutils-6.12-seqdecimalutf8.patch
 Patch6: coreutils-6.12-catch-known-testsuite-failures.patch
+Patch7: coreutils-446294-lsexitstatuses.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -111,9 +112,10 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch1 -p1 -b .kojifutimensat
 %patch2 -p1 -b .authors
 %patch3 -p1 -b .whotexinfo
-#%patch4 -p1 -b .getdate
+%patch4 -p1 -b .getdate
 %patch5 -p1 -b .sequtf8
 %patch6 -p1 -b .tests
+%patch7 -p1 -b .lsexit
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -129,7 +131,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch706 -p1 -b .pam
 %patch713 -p1 -b .langinfo
 %patch715 -p1 -b .sysinfo
-
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
@@ -333,6 +334,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Oct 13 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-15
+- fix several date issues(e.g. countable dayshifts, ignoring
+  some cases of relative offset, locales conversions...)
+- clarify ls exit statuses documentation (#446294)
+
 * Sun Oct 12 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-14
 - cp -Z now correctly separated in man page (#466646)
 - cp -Z works again (#466653)
