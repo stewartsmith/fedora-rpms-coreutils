@@ -1,16 +1,3 @@
-diff -urNp coreutils-6.12-orig/man/chcon.1 coreutils-6.12/man/chcon.1
---- coreutils-6.12-orig/man/chcon.1	2008-10-08 14:45:59.000000000 +0200
-+++ coreutils-6.12/man/chcon.1	2008-10-08 16:35:55.000000000 +0200
-@@ -17,9 +17,6 @@ chcon \- change file SELinux security co
- Change the SELinux security context of each FILE to CONTEXT.
- With \fB\-\-reference\fR, change the security context of each FILE to that of RFILE.
- .TP
--\fB\-c\fR, \fB\-\-changes\fR
--like verbose but report only when a change is made
--.TP
- \fB\-h\fR, \fB\-\-no\-dereference\fR
- affect symbolic links instead of any referenced file
- .TP
 diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
 --- coreutils-6.12-orig/src/chcon.c	2008-10-08 14:45:59.000000000 +0200
 +++ coreutils-6.12/src/chcon.c	2008-10-08 16:28:36.000000000 +0200

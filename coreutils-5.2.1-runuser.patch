@@ -1,16 +1,29 @@
---- coreutils-6.10/tests/misc/help-version.runuser	
-+++ coreutils-6.10/tests/misc/help-version	
-@@ -168,6 +168,7 @@
- seq_args=10
- sleep_args=0
- su_args=--version
-+runuser_args=--version
- 
- # I'd rather not run sync, since it spins up disks that I've
- # deliberately caused to spin down (but not unmounted).
---- coreutils-6.10/README.runuser	
-+++ coreutils-6.10/README	
-@@ -11,8 +11,8 @@
+diff -urNp coreutils-6.12-orig/AUTHORS coreutils-6.12/AUTHORS
+--- coreutils-6.12-orig/AUTHORS	2008-10-21 14:58:31.000000000 +0200
++++ coreutils-6.12/AUTHORS	2008-10-21 15:00:05.000000000 +0200
+@@ -63,6 +63,7 @@ pwd: Jim Meyering
+ readlink: Dmitry V. Levin
+ rm: Paul Rubin, David MacKenzie, Richard Stallman, Jim Meyering
+ rmdir: David MacKenzie
++runuser: David MacKenzie, Dan Walsh
+ runcon: Russell Coker
+ seq: Ulrich Drepper
+ sha1sum: Ulrich Drepper, Scott Miller, David Madore
+diff -urNp coreutils-6.12-orig/man/Makefile.am coreutils-6.12/man/Makefile.am
+--- coreutils-6.12-orig/man/Makefile.am	2008-05-06 11:28:24.000000000 +0200
++++ coreutils-6.12/man/Makefile.am	2008-10-21 15:00:13.000000000 +0200
+@@ -93,6 +93,7 @@ readlink.1:	$(common_dep)	$(srcdir)/read
+ rm.1:		$(common_dep)	$(srcdir)/rm.x		../src/rm.c
+ rmdir.1:	$(common_dep)	$(srcdir)/rmdir.x	../src/rmdir.c
+ runcon.1:	$(common_dep)	$(srcdir)/runcon.x	../src/runcon.c
++runuser.1:	$(common_dep)	$(srcdir)/runuser.x	../src/su.c
+ seq.1:		$(common_dep)	$(srcdir)/seq.x		../src/seq.c
+ sha1sum.1:	$(common_dep)	$(srcdir)/sha1sum.x	../src/md5sum.c
+ sha224sum.1:	$(common_dep)	$(srcdir)/sha224sum.x	../src/md5sum.c
+diff -urNp coreutils-6.12-orig/README coreutils-6.12/README
+--- coreutils-6.12-orig/README	2008-05-15 20:44:37.000000000 +0200
++++ coreutils-6.12/README	2008-10-21 14:59:29.000000000 +0200
+@@ -12,8 +12,8 @@ The programs that can be built with this
    factor false fmt fold groups head hostid hostname id install join kill
    link ln logname ls md5sum mkdir mkfifo mknod mktemp mv nice nl nohup
    od paste pathchk pinky pr printenv printf ptx pwd readlink rm rmdir
@@ -19,11 +32,44 @@
 +  runcon runuser seq sha1sum sha224sum sha256sum sha384sum sha512sum shred
 +  shuf sleep sort split stat stty su sum sync tac tail tee test touch tr true
    tsort tty uname unexpand uniq unlink uptime users vdir wc who whoami yes
-
+ 
  See the file NEWS for a list of major changes in the current release.
---- coreutils-6.7/src/su.c.runuser	2007-01-09 17:27:56.000000000 +0000
-+++ coreutils-6.7/src/su.c	2007-01-09 17:30:12.000000000 +0000
-@@ -110,9 +110,15 @@
+diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
+--- coreutils-6.12-orig/src/Makefile.am	2008-10-21 14:58:31.000000000 +0200
++++ coreutils-6.12/src/Makefile.am	2008-10-21 14:59:58.000000000 +0200
+@@ -38,7 +38,7 @@ EXTRA_PROGRAMS = \
+   shuf sort split sum tac tail tr tsort unexpand uniq wc \
+   basename date dirname echo env expr factor false \
+   id kill logname pathchk printenv printf pwd \
+-  runcon seq sleep tee \
++  runcon runuser seq sleep tee \
+   test true tty whoami yes \
+   base64
+ 
+@@ -142,6 +142,10 @@ cp_LDADD += $(LIB_ACL)
+ mv_LDADD += $(LIB_ACL)
+ ginstall_LDADD += $(LIB_ACL)
+ 
++runuser_SOURCES = su.c
++runuser_CFLAGS = -DRUNUSER -DAUTHORS="\"David MacKenzie, Dan Walsh\""
++runuser_LDADD = $(LDADD) $(LIB_CRYPT) @LIB_PAM@
++
+ stat_LDADD = $(LDADD) $(LIB_SELINUX)
+ 
+ # Append $(LIBICONV) to each program that uses proper_name_utf8.
+@@ -159,7 +163,7 @@ RELEASE_YEAR = \
+   `sed -n '/.*COPYRIGHT_YEAR = \([0-9][0-9][0-9][0-9]\) };/s//\1/p' \
+     $(top_srcdir)/lib/version-etc.c`
+ 
+-all-local: su$(EXEEXT)
++all-local: su$(EXEEXT) runuser
+ 
+ installed_su = $(DESTDIR)$(bindir)/`echo su|sed '$(transform)'`
+ 
+diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
+--- coreutils-6.12-orig/src/su.c	2008-10-21 14:58:31.000000000 +0200
++++ coreutils-6.12/src/su.c	2008-10-21 15:07:05.000000000 +0200
+@@ -109,9 +109,15 @@
  #include "error.h"
  
  /* The official name of this program (e.g., no `g' prefix).  */
@@ -39,7 +85,7 @@
  
  #if HAVE_PATHS_H
  # include <paths.h>
-@@ -150,6 +156,10 @@
+@@ -149,6 +155,10 @@
  #ifndef USE_PAM
  char *crypt ();
  #endif
@@ -50,7 +96,7 @@
  char *getusershell ();
  void endusershell ();
  void setusershell ();
-@@ -157,7 +167,11 @@
+@@ -156,7 +166,11 @@ void setusershell ();
  extern char **environ;
  
  static void run_shell (char const *, char const *, char **, size_t,
@@ -63,7 +109,7 @@
  #ifdef USE_PAM
  	;
  #else
-@@ -187,6 +201,10 @@
+@@ -186,6 +200,10 @@ static struct option const longopts[] =
    {"login", no_argument, NULL, 'l'},
    {"preserve-environment", no_argument, NULL, 'p'},
    {"shell", required_argument, NULL, 's'},
@@ -74,7 +120,7 @@
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -288,10 +306,12 @@
+@@ -287,10 +305,12 @@ correct_password (const struct passwd *p
    retval = pam_start(PROGRAM_NAME, pw->pw_name, &conv, &pamh);
    PAM_BAIL_P;
  
@@ -87,7 +133,7 @@
  
    caller = getpwuid(getuid());
    if(caller != NULL && caller->pw_name != NULL) {
-@@ -308,6 +328,11 @@
+@@ -307,6 +327,11 @@ correct_password (const struct passwd *p
      retval = pam_set_item(pamh, PAM_TTY, tty_name);
      PAM_BAIL_P;
    }
@@ -99,7 +145,7 @@
    retval = pam_authenticate(pamh, 0);
    PAM_BAIL_P;
    retval = pam_acct_mgmt(pamh, 0);
-@@ -317,6 +342,7 @@
+@@ -316,6 +341,7 @@ correct_password (const struct passwd *p
      PAM_BAIL_P;
    }
    PAM_BAIL_P;
@@ -107,7 +153,7 @@
    /* must be authenticated if this point was reached */
    return 1;
  #else /* !USE_PAM */
-@@ -398,11 +424,22 @@
+@@ -397,11 +423,22 @@ modify_environment (const struct passwd 
  /* Become the user and group(s) specified by PW.  */
  
  static void
@@ -132,7 +178,7 @@
  #ifdef USE_PAM
      pam_close_session(pamh, 0);
      pam_end(pamh, PAM_ABORT);
-@@ -449,7 +486,11 @@
+@@ -448,7 +485,11 @@ pam_copyenv (pam_handle_t *pamh)
  
  static void
  run_shell (char const *shell, char const *command, char **additional_args,
@@ -145,7 +191,7 @@
  {
    size_t n_args = 1 + fast_startup + 2 * !!command + n_additional_args + 1;
    char const **args = xnmalloc (n_args, sizeof *args);
-@@ -480,7 +521,11 @@
+@@ -479,7 +520,11 @@ run_shell (char const *shell, char const
  
    child = fork();
    if (child == 0) {  /* child shell */
@@ -158,7 +204,42 @@
    pam_end(pamh, 0);
    if (!same_session)
      setsid ();
-@@ -657,6 +702,12 @@
+@@ -623,6 +668,26 @@ usage (int status)
+   else
+     {
+       printf (_("Usage: %s [OPTION]... [-] [USER [ARG]...]\n"), program_name);
++#ifdef RUNUSER
++      fputs (_("\
++Change the effective user id and group id to that of USER.  No PAM hooks\n\
++are run, and there will be no password prompt.  This command is useful\n\
++when run as the root user.  If run as a non-root user without privilege\n\
++to set user ID, the command will fail.\n\
++\n\
++  -, -l, --login               make the shell a login shell, uses runuser-l\n\
++                               PAM file instead of default one\n\
++  -g --group=group             specify the primary group\n\
++  -G --supp-group=group        specify a supplemental group\n\
++  -c, --command=COMMAND        pass a single COMMAND to the shell with -c\n\
++  --session-command=COMMAND    pass a single COMMAND to the shell with -c\n\
++                               and do not create a new session\n\
++  -f, --fast                   pass -f to the shell (for csh or tcsh)\n\
++  -m, --preserve-environment   do not reset environment variables\n\
++  -p                           same as -m\n\
++  -s, --shell=SHELL            run SHELL if /etc/shells allows it\n\
++"), stdout);
++#else
+       fputs (_("\
+ Change the effective user id and group id to that of USER.\n\
+ \n\
+@@ -635,6 +700,7 @@ Change the effective user id and group i
+   -p                           same as -m\n\
+   -s, --shell=SHELL            run SHELL if /etc/shells allows it\n\
+ "), stdout);
++#endif
+       fputs (HELP_OPTION_DESCRIPTION, stdout);
+       fputs (VERSION_OPTION_DESCRIPTION, stdout);
+       fputs (_("\
+@@ -656,6 +722,12 @@ main (int argc, char **argv)
    char *shell = NULL;
    struct passwd *pw;
    struct passwd pw_copy;
@@ -171,7 +252,7 @@
  
    initialize_main (&argc, &argv);
    program_name = argv[0];
-@@ -671,7 +722,11 @@
+@@ -670,7 +742,11 @@ main (int argc, char **argv)
    simulate_login = false;
    change_environment = true;
  
@@ -184,7 +265,7 @@
      {
        switch (optc)
  	{
-@@ -701,6 +756,28 @@
+@@ -700,6 +776,28 @@ main (int argc, char **argv)
  	  shell = optarg;
  	  break;
  
@@ -213,7 +294,7 @@
  	case_GETOPT_HELP_CHAR;
  
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
-@@ -739,7 +816,20 @@
+@@ -738,7 +836,20 @@ main (int argc, char **argv)
  			  : DEFAULT_SHELL);
    endpwent ();
  
@@ -235,7 +316,7 @@
      {
  #ifdef SYSLOG_FAILURE
        log_su (pw, false);
-@@ -771,8 +861,16 @@
+@@ -770,8 +881,16 @@ main (int argc, char **argv)
    modify_environment (pw, shell);
  
  #ifndef USE_PAM
@@ -254,132 +335,29 @@
 +#endif
 +	     );
  }
---- coreutils-6.10/src/Makefile.am.runuser	
-+++ coreutils-6.10/src/Makefile.am	
-@@ -38,7 +38,7 @@
-   shuf sort split sum tac tail tr tsort unexpand uniq wc \
-   basename date dirname echo env expr factor false \
-   id kill logname pathchk printenv printf pwd \
--  runcon seq sleep tee \
-+  runcon runuser seq sleep tee \
-   test true tty whoami yes \
-   base64
-
-@@ -112,6 +112,10 @@
- mv_LDADD += $(LIB_ACL)
- ginstall_LDADD += $(LIB_ACL)
+diff -urNp coreutils-6.12-orig/tests/misc/help-version coreutils-6.12/tests/misc/help-version
+--- coreutils-6.12-orig/tests/misc/help-version	2008-05-27 13:39:18.000000000 +0200
++++ coreutils-6.12/tests/misc/help-version	2008-10-21 14:59:16.000000000 +0200
+@@ -146,6 +146,7 @@ printf_args=foo
+ seq_args=10
+ sleep_args=0
+ su_args=--version
++runuser_args=--version
  
-+runuser_SOURCES = su.c
-+runuser_CFLAGS = -DRUNUSER -DAUTHORS="\"David MacKenzie, Dan Walsh\""
-+runuser_LDADD = $(LDADD) $(LIB_CRYPT) @LIB_PAM@
-+
- stat_LDADD = $(LDADD) $(LIB_SELINUX)
- 
- # Append $(LIBICONV) to each program that uses proper_name_utf8.
-@@ -126,7 +130,7 @@
-   `sed -n '/.*COPYRIGHT_YEAR = \([0-9][0-9][0-9][0-9]\) };/s//\1/p' \
-     $(top_srcdir)/lib/version-etc.c`
- 
--all-local: su$(EXEEXT)
-+all-local: su$(EXEEXT) runuser
- 
- installed_su = $(DESTDIR)$(bindir)/`echo su|sed '$(transform)'`
- 
---- coreutils-6.10/AUTHORS.runuser
-+++ coreutils-6.10/AUTHORS	
-@@ -60,6 +60,7 @@
- readlink: Dmitry V. Levin
- rm: Paul Rubin, David MacKenzie, Richard Stallman, Jim Meyering
- rmdir: David MacKenzie
-+runuser: David MacKenzie, Dan Walsh
- runcon: Russell Coker
- seq: Ulrich Drepper
- sha1sum: Ulrich Drepper, Scott Miller, David Madore
---- coreutils-6.10/man/Makefile.am.runuser
-+++ coreutils-6.10/man/Makefile.am
-@@ -92,6 +92,7 @@
- rm.1:		$(common_dep)	$(srcdir)/rm.x		../src/rm.c
- rmdir.1:	$(common_dep)	$(srcdir)/rmdir.x	../src/rmdir.c
- runcon.1:	$(common_dep)	$(srcdir)/runcon.x	../src/runcon.c
-+runuser.1:	$(common_dep)	$(srcdir)/runuser.x	../src/su.c
- seq.1:		$(common_dep)	$(srcdir)/seq.x		../src/seq.c
- sha1sum.1:	$(common_dep)	$(srcdir)/sha1sum.x	../src/md5sum.c
- sha224sum.1:	$(common_dep)	$(srcdir)/sha224sum.x	../src/md5sum.c
+ # I'd rather not run sync, since it spins up disks that I've
+ # deliberately caused to spin down (but not unmounted).
 --- /dev/null	2007-01-09 09:38:07.860075128 +0000
 +++ coreutils-6.7/man/runuser.x	2007-01-09 17:27:56.000000000 +0000
-@@ -0,0 +1,4 @@
+@@ -0,0 +1,12 @@
 +[NAME]
 +runuser \- run a shell with substitute user and group IDs
 +[DESCRIPTION]
 +.\" Add any additional description here
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.10/man/runuser.1	2007-01-09 17:27:56.000000000 +0000
-@@ -0,0 +1,68 @@
-+.\" DO NOT MODIFY THIS FILE!  It was generated by help2man 1.33.
-+.TH RUNUSER "1" "September 2004" "runuser (coreutils) 5.2.1" "User Commands"
-+.SH NAME
-+runuser \- run a shell with substitute user and group IDs, similar to su, but will not run PAM hooks
-+.SH SYNOPSIS
-+.B runuser
-+[\fIOPTION\fR]... [\fI-\fR] [\fIUSER \fR[\fIARG\fR]...]
-+.SH DESCRIPTION
-+.\" Add any additional description here
-+.PP
-+Change the effective user id and group id to that of USER.  No PAM hooks
-+are run, and there will be no password prompt.  This command is useful
-+when run as the root user.  If run as a non-root user without privilege
-+to set user ID, the command will fail.
++[SEE ALSO]
 +.TP
-+-, \fB\-l\fR, \fB\-\-login\fR
-+make the shell a login shell, uses runuser-l PAM file instead of default one.
++More detailed Texinfo documentation could be found by command
 +.TP
-+\fB\-c\fR, \fB\-\-command\fR=\fICOMMAND\fR
-+pass a single COMMAND to the shell with \fB\-c\fR
++\t\fBinfo su invocation\fR\t
 +.TP
-+\fB\-f\fR, \fB\-\-fast\fR
-+pass \fB\-f\fR to the shell (for csh or tcsh)
-+.TP
-+\fB\-g\fR, \fB\-\-group\fR=\fIGROUP\fR
-+specify the primary group
-+.TP
-+\fB\-G\fR, \fB\-\-supp-group\fR=\fIGROUP\fR
-+specify a supplemental group
-+.TP
-+\fB\-m\fR, \fB\-\-preserve\-environment\fR
-+do not reset environment variables
-+.TP
-+\fB\-p\fR
-+same as \fB\-m\fR
-+.TP
-+\fB\-s\fR, \fB\-\-shell\fR=\fISHELL\fR
-+run SHELL if /etc/shells allows it
-+.TP
-+\fB\-\-help\fR
-+display this help and exit
-+.TP
-+\fB\-\-version\fR
-+output version information and exit
-+.PP
-+A mere - implies \fB\-l\fR.   If USER not given, assume root.
-+.SH AUTHOR
-+Written by David MacKenzie, Dan Walsh.
-+.SH "REPORTING BUGS"
-+Report bugs to <bug-coreutils@gnu.org>.
-+.SH COPYRIGHT
-+Copyright \(co 2004 Free Software Foundation, Inc.
++since the command \fBrunuser\fR is trimmed down version of command \fBrunuser\fR.
 +.br
-+This is free software; see the source for copying conditions.  There is NO
-+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-+.SH "SEE ALSO"
-+Since this command is trimmed down version of su use you can use the su manual.
-+The full documentation for
-+.B su
-+is maintained as a Texinfo manual.  If the
-+.B info
-+and
-+.B su
-+programs are properly installed at your site, the command
-+.IP
-+.B info coreutils su
-+.PP
-+should give you access to the complete manual.

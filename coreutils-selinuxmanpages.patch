@@ -1,25 +1,3 @@
-diff -urNp coreutils-6.10-orig/man/cp.1 coreutils-6.10/man/cp.1
---- coreutils-6.10-orig/man/cp.1	2008-04-07 14:46:37.000000000 +0200
-+++ coreutils-6.10/man/cp.1	2008-04-07 15:34:17.000000000 +0200
-@@ -19,7 +19,7 @@ Copy SOURCE to DEST, or multiple SOURCE(
- Mandatory arguments to long options are mandatory for short options too.
- .TP
- \fB\-a\fR, \fB\-\-archive\fR
--same as \fB\-dpR\fR
-+same as \fB\-cdpR\fR
- .TP
- \fB\-\-backup\fR[=\fICONTROL\fR]
- make a backup of each existing destination file
-@@ -55,6 +55,9 @@ never follow symbolic links in SOURCE
- \fB\-p\fR
- same as \fB\-\-preserve\fR=\fImode\fR,ownership,timestamps
- .TP
-+\fB\-c\fR
-+same as \fB\-\-preserve\fR=context\fR
-+.TP
- \fB\-\-preserve\fR[=\fIATTR_LIST\fR]
- preserve the specified attributes (default:
- mode,ownership,timestamps), if possible
 diff -urNp coreutils-6.10-orig/doc/coreutils.info coreutils-6.10/doc/coreutils.info
 --- coreutils-6.10-orig/doc/coreutils.info	2008-04-07 17:52:11.000000000 +0200
 +++ coreutils-6.10/doc/coreutils.info	2008-04-07 18:03:27.000000000 +0200

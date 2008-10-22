@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -54,7 +54,7 @@ Patch912: coreutils-overflow.patch
 Patch915: coreutils-split-pam.patch
 Patch916: coreutils-getfacl-exit-code.patch
 
-#SELINUX Patch - implements Redhat changes 
+#SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
@@ -71,7 +71,7 @@ BuildRequires: texinfo >= 4.3
 BuildRequires: lzma
 BuildRequires: autoconf >= 2.58
 #dist-lzma required
-BuildRequires: automake >= 1.10.1 
+BuildRequires: automake >= 1.10.1
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires: libcap-devel >= 2.0.6
 
@@ -181,6 +181,10 @@ automake --copy --add-missing
            --enable-selinux \
            --enable-install-program=su,hostname,arch \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
+
+# Regenerate manpages
+touch man/*.x
+
 make all %{?_smp_mflags} \
          %{?!nopam:CPPFLAGS="-DUSE_PAM"} \
          su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
@@ -334,6 +338,14 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Oct 21 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-16
+- make possible to disable capability in ls due to
+  performance impact when not cached(#467508)
+- do not patch generated manpages - generate them at build
+  time
+- do not mistakenly display -g and -G runuser option in su
+  --help output
+
 * Mon Oct 13 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-15
 - fix several date issues(e.g. countable dayshifts, ignoring
   some cases of relative offset, locales conversions...)

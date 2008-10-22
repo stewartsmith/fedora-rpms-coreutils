@@ -139,7 +139,7 @@ index 4b69f7d..9bc66a1 100644
      { LEN_STR_PAIR ("37;44") },		/* st: sticky: black on blue */
      { LEN_STR_PAIR ("34;42") },		/* ow: other-writable: blue on green */
      { LEN_STR_PAIR ("30;42") },		/* tw: ow w/ sticky: black on green */
-+    { LEN_STR_PAIR ("30;41") },		/* capability: black on red */
++    { LEN_STR_PAIR ("30;41") },		/* ca: black on red */
    };
  
  /* FIXME: comment  */
@@ -186,7 +186,7 @@ index 4b69f7d..9bc66a1 100644
  	    type = C_SETUID;
  	  else if ((mode & S_ISGID) != 0)
  	    type = C_SETGID;
-+	  else if (has_capability (name))
++	  else if (is_colored (C_CAP) && has_capability (name))
 +	    type = C_CAP;
  	  else if ((mode & S_IXUGO) != 0)
  	    type = C_EXEC;
