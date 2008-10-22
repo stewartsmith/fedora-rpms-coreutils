@@ -28,7 +28,7 @@ diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
  /* The name the program was run with. */
  char *program_name;
 @@ -374,7 +355,6 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
- Change the security context of each FILE to CONTEXT.\n\
+ Change the SELinux security context of each FILE to CONTEXT.\n\
  With --reference, change the security context of each FILE to that of RFILE.\n\
  \n\
 -  -c, --changes          like verbose but report only when a change is made\n\
