@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 6.12
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -83,6 +83,7 @@ Requires(post): /sbin/install-info
 Requires(post): grep
 %{?!nopam:Requires: pam >= 0.66-12}
 Requires(post): libcap >= 2.0.6
+Requires:       ncurses
 
 # Require a C library that doesn't put LC_TIME files in our way.
 Conflicts: glibc < 2.2
@@ -338,6 +339,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Nov 03 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-17
+- Requires: ncurses (#469277)
+
 * Wed Oct 21 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-16
 - make possible to disable capability in ls due to
   performance impact when not cached(#467508)
