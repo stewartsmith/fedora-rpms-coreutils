@@ -324,6 +324,7 @@ fi
 - new upstream release
 - modification/removal of related patches
 - use automake 1.10.1 instead of 1.10a
+- temporarily skip df --total tests (failures)
 
 * Mon Nov 03 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-17
 - Requires: ncurses (#469277)

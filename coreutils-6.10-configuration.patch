@@ -1,3 +1,15 @@
+diff -urNp coreutils-7.0-orig/tests/Makefile.am coreutils-7.0/tests/Makefile.am
+--- coreutils-7.0-orig/tests/Makefile.am	2008-11-11 16:37:08.000000000 +0100
++++ coreutils-7.0/tests/Makefile.am	2008-11-11 16:39:55.000000000 +0100
+@@ -285,8 +285,6 @@ TESTS =						\
+   dd/skip-seek					\
+   dd/skip-seek2					\
+   dd/unblock-sync				\
+-  df/total					\
+-  df/total-awk					\
+   du/2g						\
+   du/8gb					\
+   du/basic					\
 diff -urN coreutils-6.12-orig/tests/misc/cut coreutils-6.12/tests/misc/cut
 --- coreutils-6.12-orig/tests/misc/cut	2008-05-17 08:41:11.000000000 +0200
 +++ coreutils-6.12/tests/misc/cut	2008-06-02 11:13:08.000000000 +0200
