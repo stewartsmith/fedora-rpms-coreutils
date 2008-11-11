@@ -3,7 +3,7 @@ diff -urNp coreutils-6.12-orig/AUTHORS coreutils-6.12/AUTHORS
 +++ coreutils-6.12/AUTHORS	2008-10-21 15:00:05.000000000 +0200
 @@ -63,6 +63,7 @@ pwd: Jim Meyering
  readlink: Dmitry V. Levin
- rm: Paul Rubin, David MacKenzie, Richard Stallman, Jim Meyering
+ rm: Paul Rubin, David MacKenzie, Richard M. Stallman, Jim Meyering
  rmdir: David MacKenzie
 +runuser: David MacKenzie, Dan Walsh
  runcon: Russell Coker
@@ -23,17 +23,21 @@ diff -urNp coreutils-6.12-orig/man/Makefile.am coreutils-6.12/man/Makefile.am
 diff -urNp coreutils-6.12-orig/README coreutils-6.12/README
 --- coreutils-6.12-orig/README	2008-05-15 20:44:37.000000000 +0200
 +++ coreutils-6.12/README	2008-10-21 14:59:29.000000000 +0200
-@@ -12,8 +12,8 @@ The programs that can be built with this
+@@ -12,10 +12,10 @@ The programs that can be built with this
    factor false fmt fold groups head hostid hostname id install join kill
    link ln logname ls md5sum mkdir mkfifo mknod mktemp mv nice nl nohup
    od paste pathchk pinky pr printenv printf ptx pwd readlink rm rmdir
 -  runcon seq sha1sum sha224sum sha256sum sha384sum sha512sum shred shuf
--  sleep sort split stat stty su sum sync tac tail tee test touch tr true
+-  sleep sort split stat stty su sum sync tac tail tee test timeout touch tr
+-  true truncate tsort tty uname unexpand uniq unlink uptime users vdir wc who
+-  whoami yes
 +  runcon runuser seq sha1sum sha224sum sha256sum sha384sum sha512sum shred
-+  shuf sleep sort split stat stty su sum sync tac tail tee test touch tr true
-   tsort tty uname unexpand uniq unlink uptime users vdir wc who whoami yes
++  shuf sleep sort split stat stty su sum sync tac tail tee test timeout touch
++  tr true truncate tsort tty uname unexpand uniq unlink uptime users vdir wc
++  who whoami yes
  
  See the file NEWS for a list of major changes in the current release.
+ 
 diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
 --- coreutils-6.12-orig/src/Makefile.am	2008-10-21 14:58:31.000000000 +0200
 +++ coreutils-6.12/src/Makefile.am	2008-10-21 14:59:58.000000000 +0200
@@ -43,7 +47,7 @@ diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
    id kill logname pathchk printenv printf pwd \
 -  runcon seq sleep tee \
 +  runcon runuser seq sleep tee \
-   test true tty whoami yes \
+   test timeout true truncate tty whoami yes \
    base64
  
 @@ -142,6 +142,10 @@ cp_LDADD += $(LIB_ACL)
@@ -251,7 +255,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
 +#endif
  
    initialize_main (&argc, &argv);
-   program_name = argv[0];
+   set_program_name (argv[0]);
 @@ -670,7 +742,11 @@ main (int argc, char **argv)
    simulate_login = false;
    change_environment = true;
@@ -343,9 +347,9 @@ diff -urNp coreutils-6.12-orig/tests/misc/help-version coreutils-6.12/tests/misc
  sleep_args=0
  su_args=--version
 +runuser_args=--version
+ timeout_args=--version
  
  # I'd rather not run sync, since it spins up disks that I've
- # deliberately caused to spin down (but not unmounted).
 --- /dev/null	2007-01-09 09:38:07.860075128 +0000
 +++ coreutils-6.7/man/runuser.x	2007-01-09 17:27:56.000000000 +0000
 @@ -0,0 +1,12 @@

@@ -25,8 +25,8 @@ diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
 -  V_off
 -};
  
- /* The name the program was run with. */
- char *program_name;
+ /* If nonzero, and the systems has support for it, change the context
+    of symbolic links rather than any files they point to.  */
 @@ -374,7 +355,6 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
  Change the SELinux security context of each FILE to CONTEXT.\n\
  With --reference, change the security context of each FILE to that of RFILE.\n\

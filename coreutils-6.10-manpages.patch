@@ -10,20 +10,10 @@ diff -urNp coreutils-6.12-orig/src/md5sum.c coreutils-6.12/src/md5sum.c
 +"), stdout);
        fputs (_("\
  \n\
- The following two options are useful only when verifying checksums:\n\
+ The following three options are useful only when verifying checksums:\n\
 diff -urNp coreutils-6.12-orig/src/sort.c coreutils-6.12/src/sort.c
 --- coreutils-6.12-orig/src/sort.c	2008-10-21 16:04:50.000000000 +0200
 +++ coreutils-6.12/src/sort.c	2008-10-22 10:52:30.000000000 +0200
-@@ -375,7 +375,8 @@ Other options:\n\
-   -C, --check=quiet, --check=silent  like -c, but do not report first bad line\n\
-       --compress-program=PROG  compress temporaries with PROG;\n\
-                               decompress them with PROG -d\n\
--  -k, --key=POS1[,POS2]     start a key at POS1, end it at POS2 (origin 1)\n\
-+  -k, --key=POS1[,POS2]     start a key at POS1, end it at POS2 (origin 1) -\n\
-+                            when no POS2 specified, end of line is used\n\
-   -m, --merge               merge already sorted files; do not sort\n\
- "), stdout);
-       fputs (_("\
 @@ -412,7 +413,7 @@ With no FILE, or when FILE is -, read st
  \n\
  *** WARNING ***\n\

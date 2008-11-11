@@ -1,0 +1,112 @@
+diff -urNp coreutils-7.0-orig/tests/df/total coreutils-7.0/tests/df/total
+--- coreutils-7.0-orig/tests/df/total	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/tests/df/total	2008-11-11 16:56:17.000000000 +0100
+@@ -30,11 +30,8 @@ umask 22
+ 
+ RE_TOTAL='^total( +(-?[0-9]+|-)){3} +-?[0-9]+%$'
+ 
+-df > tmp || fail=1
+-$EGREP "$RE_TOTAL" tmp && fail=1
+-
+-df -i > tmp || fail=1
+-$EGREP "$RE_TOTAL" tmp && fail=1
++df    | $EGREP "$RE_TOTAL" tmp && fail=1
++df -i | $EGREP "$RE_TOTAL" tmp && fail=1
+ 
+ df --total | $EGREP "$RE_TOTAL" || fail=1
+ df -i --total | $EGREP "$RE_TOTAL" || fail=1
+diff -urNp coreutils-7.0-orig/tests/df/total-awk coreutils-7.0/tests/df/total-awk
+--- coreutils-7.0-orig/tests/df/total-awk	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/tests/df/total-awk	2008-11-11 16:54:49.000000000 +0100
+@@ -23,58 +23,42 @@ fi
+ 
+ . $srcdir/test-lib.sh
+ 
+-fail=0
+-
+-# Don't let a different umask perturb the results.
+-umask 22
+-
+-echo '
+-BEGIN {
+-  total     = 0
+-  used      = 0
+-  available = 0
+-}
+-{
+-  if (NR==1 || $0==$1 || $0~/^total +(-?[0-9]+|-) +(-?[0-9]+|-) +(-?[0-9]+|-) +-?[0-9]+%$/)
+-    next
+-  if ($1~/^[0-9]/)
+-    {
+-      total     += $1
+-      used      += $2
+-      available += $3
+-    }
+-  else
+-    {
+-      total     += $2
+-      used      += $3
+-      available += $4
+-    }
+-}
+-END {
+-  print total
+-  print used
+-  print available
+-}
+-' > compute_sum.awk || fail=1
+-
+-echo '
+-/^total +(-?[0-9]+|-) +(-?[0-9]+|-) +(-?[0-9]+|-) +-?[0-9]+%$/ {
+-  print $2;
+-  print $3;
+-  print $4
+-}
+-' > parse_total.awk || fail=1
++cat <<\EOF > check-df || framework_failure
++my ($total, $used, $avail) = (0, 0, 0);
++while (<>)
++  {
++    $. == 1
++      and next;  # skip first (header) line
++    # Recognize df output lines like these:
++    # /dev/sdc1                  0       0       0    -  /c
++    # tmpfs                1536000   12965 1523035    1% /tmp
++    # total                5285932  787409 4498523   15%
++    /^(.*?) +(-?\d+|-) +(-?\d+|-) +(-?\d+|-) +(?:- |[0-9]+%)(.*)$/
++      or die "$0: invalid input line\n: $_";
++    if ($1 eq 'total' && $5 eq '')
++      {
++	$total == $2 or die "$total != $2";
++	$used  == $3 or die "$used  != $3";
++	$avail == $4 or die "$avail != $4";
++	my $line = <>;
++	defined $line
++	  and die "$0: extra line(s) after totals\n";
++	exit 0;
++      }
++    $total += $2 unless $2 eq '-';
++    $used  += $3 unless $3 eq '-';
++    $avail += $4 unless $4 eq '-';
++  }
++die "$0: missing line of totals\n";
++EOF
+ 
+ # Use --block-size=512 to keep df from printing rounded-to-kilobyte
+ # numbers which wouldn't necessarily add up to the displayed total.
+-df --block-size=512 --total |tee tmp || fail=1
+-$AWK -f compute_sum.awk tmp > out1 || fail=1
+-$AWK -f parse_total.awk tmp > out2 || fail=1
+-compare out1 out2 || fail=1
++df --total -P --block-size=512 |tee space || framework_failure
++df --total -i -P               |tee inode || framework_failure
+ 
+-df -i --block-size=512 --total |tee tmp || fail=1
+-$AWK -f compute_sum.awk tmp > out1 || fail=1
+-$AWK -f parse_total.awk tmp > out2 || fail=1
+-compare out1 out2 || fail=1
++fail=0
++$PERL -f check-df space || fail=1
++$PERL -f check-df inode || fail=1
+ 
+ Exit $fail

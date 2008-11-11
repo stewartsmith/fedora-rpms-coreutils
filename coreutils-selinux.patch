@@ -37,20 +37,6 @@ diff -urNp coreutils-6.12-orig/man/runcon.x coreutils-6.12/man/runcon.x
 diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
 --- coreutils-6.12-orig/src/chcon.c	2008-05-26 08:40:32.000000000 +0200
 +++ coreutils-6.12/src/chcon.c	2008-06-16 14:43:24.000000000 +0200
-@@ -302,9 +302,11 @@ process_file (FTS *fts, FTSENT *ent)
- 
-   if (ok)
-     {
--      if (verbose)
--	printf (_("changing security context of %s"),
-+      if (verbose) {
-+	printf (_("changing security context of %s"),
- 		quote (file_full_name));
-+	putchar ('\n');
-+     }
- 
-       if (change_file_context (fts->fts_cwd_fd, file) != 0)
- 	ok = false;
 @@ -352,7 +352,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
  "),
  	program_name, program_name, program_name);
@@ -209,8 +195,8 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
  				     sparse_type_string, sparse_type);
  	  break;
  
--	case 'a':		/* Like -dpPR. */
-+	case 'a':		/* Like -dpPRc. */
+-	case 'a':		/* Like -dpR. */
++	case 'a':		/* Like -dpRc. */
  	  x.dereference = DEREF_NEVER;
  	  x.preserve_links = true;
  	  x.preserve_ownership = true;
@@ -296,8 +282,8 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
 -  {"preserve_context", no_argument, NULL, PRESERVE_CONTEXT_OPTION},
 +  {"preserve_context", no_argument, NULL, 'P'},
    {"strip", no_argument, NULL, 's'},
+   {"strip-program", required_argument, NULL, STRIP_PROGRAM_OPTION},
    {"suffix", required_argument, NULL, 'S'},
-   {"target-directory", required_argument, NULL, 't'},
 @@ -178,6 +178,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_timestamps = false;
    x->require_preserve = false;
@@ -324,7 +310,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  	  if ( ! selinux_enabled)
  	    {
 @@ -415,6 +417,10 @@ main (int argc, char **argv)
- 			     "this kernel is not SELinux-enabled."));
+ 			     "this kernel is not SELinux-enabled"));
  	      break;
  	    }
 +    if ( x.set_security_context ) {
@@ -384,8 +370,8 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  void usage (int status);
 +static void print_scontext_format (const struct fileinfo *f);
  
- /* The name this program was run with.  */
- char *program_name;
+ /* Initial size of hash table.
+    Most hierarchies are likely to be shallower than this.  */
 @@ -314,7 +316,7 @@ static struct pending *pending_dirs;
  
  static struct timespec current_time;
@@ -871,14 +857,18 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
    char *format = NULL;
    bool ok = true;
  
-@@ -1040,9 +1071,13 @@ main (int argc, char *argv[])
+@@ -1040,13 +1071,13 @@ main (int argc, char *argv[])
  	  terse = true;
  	  break;
  
--	case 'Z':  /* FIXME: remove in 2010, warn in mid 2008 */
--	  /* Ignored, for compatibility with distributions
--	     that implemented this before upstream.  */
-+	case 'Z':  
+-	case 'Z':  /* FIXME: remove in 2010 */
+-	  /* Ignore, for compatibility with distributions
+-	     that implemented this before upstream.
+-	     But warn of impending removal.  */
+-	  error (0, 0,
+-		 _("the --context (-Z) option is obsolete and will be removed\n"
+-		   "in a future release"));
++	case 'Z':
 +    if((is_selinux_enabled()>0))
 +	    secure = 1;
 +	  else {

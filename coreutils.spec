@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
-Version: 6.12
-Release: 17%{?dist}
+Version: 7.0
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,21 +18,14 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-futimensatkoji.patch
-Patch2: coreutils-authors.patch
-Patch3: coreutils-who_texinfo.patch
-Patch4: coreutils-6.12-date_timerelsnumber.patch
-Patch5: coreutils-6.12-seqdecimalutf8.patch
-Patch6: coreutils-6.12-catch-known-testsuite-failures.patch
-Patch7: coreutils-446294-lsexitstatuses.patch
+Patch1: coreutils-446294-lsexitstatuses.patch
+Patch2: coreutils-7.0-dftotal.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
 #Patch102: coreutils-6.10-longoptions.patch
 Patch103: coreutils-6.11-sparc-shafix.patch
-Patch104: coreutils-6.12-utimenstouchcp.patch
-Patch105: coreutils-6.12-dd-fullblock.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -59,10 +52,6 @@ Patch916: coreutils-getfacl-exit-code.patch
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 Patch952: coreutils-463883-chcon-changes.patch
-
-# ls enhancements (must be applied after SELINUX patches)
-Patch954: coreutils-6.12-ls-libcap.patch
-Patch955: coreutils-6.12-ls-constant_mem.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -107,24 +96,21 @@ These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
-%setup -q
+#%setup -q
+%setup -q -c -T
+cd ..
+lzma -dc %SOURCE0 | tar xf -
+cd %name-%version
 
 # From upstream
-%patch1 -p1 -b .kojifutimensat
-%patch2 -p1 -b .authors
-%patch3 -p1 -b .whotexinfo
-%patch4 -p1 -b .getdate
-%patch5 -p1 -b .sequtf8
-%patch6 -p1 -b .tests
-%patch7 -p1 -b .lsexit
+%patch1 -p1 -b .lsexit
+%patch2 -p1 -b .dftotal
 
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
 #%patch102 -p1 -b .longopt
 %patch103 -p1 -b .sparc
-%patch104 -p1 -b .utimensat
-%patch105 -p1 -b .dd-fullblock
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -141,22 +127,21 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch915 -p1 -b .splitl
-%patch916 -p1 -b .getfacl-exit-code
+#%patch916 -p1 -b .getfacl-exit-code
 
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 %patch952 -p1 -b .changeonly
 
-# ls enhancements (must be applied after SELINUX patches)
-%patch954 -p1 -b .ls-libcap
-%patch955 -p1 -b .ls-constant_mem
-
-
 chmod a+x tests/misc/sort-mb-tests
 chmod a+x tests/misc/id-context
-chmod a+x tests/misc/utimensat-touchcp
-chmod a+x tests/ls/capability
+
+#Do require automake 1.10.1 instead of 1.10a
+for conffile in aclocal.m4 configure.ac configure $(find ./*/Makefile.in)
+do
+  sed -i 's/1.10a/1.10.1/' "$conffile"
+done
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 for pofile in $(find ./po/*.p*)
@@ -169,9 +154,9 @@ done
 %build
 %ifarch s390 s390x
 # Build at -O1 for the moment (bug #196369).
-export CFLAGS="$RPM_OPT_FLAGS -fPIC -O1"
+export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fPIC -O1"
 %else
-export CFLAGS="$RPM_OPT_FLAGS -fpic"
+export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 %endif
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
@@ -339,6 +324,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Nov 11 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-1
+- new upstream release
+- modification/removal of related patches
+- use automake 1.10.1 instead of 1.10a
+
 * Mon Nov 03 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-17
 - Requires: ncurses (#469277)
 

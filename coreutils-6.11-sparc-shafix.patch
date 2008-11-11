@@ -4,7 +4,7 @@ diff -up coreutils-6.11/src/Makefile.am.sparc coreutils-6.11/src/Makefile.am
 @@ -101,6 +101,7 @@ shred_LDADD = $(LDADD) $(LIB_GETHRXTIME)
  shuf_LDADD = $(LDADD) $(LIB_GETHRXTIME)
  tac_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
- vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX)
+ vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX) $(LIB_CAP)
 +tac_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
  
  ## If necessary, add -lm to resolve use of pow in lib/strtod.c.
@@ -13,8 +13,8 @@ diff -up coreutils-6.11/src/Makefile.in.sparc coreutils-6.11/src/Makefile.in
 --- coreutils-6.11/src/Makefile.in.sparc	2008-04-19 16:50:10.000000000 -0500
 +++ coreutils-6.11/src/Makefile.in	2008-05-29 18:40:36.000000000 -0500
 @@ -1251,6 +1251,7 @@ shuf_LDADD = $(LDADD) $(LIB_GETHRXTIME)
- tac_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
- vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX) $(LIB_ACL)
+ vdir_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME) $(LIB_SELINUX) $(LIB_CAP) \
+ 	$(LIB_ACL)
  sort_LDADD = $(LDADD) $(POW_LIB) $(LIB_GETHRXTIME)
 +tac_LDADD = $(LDADD) $(LIB_CLOCK_GETTIME)
  
