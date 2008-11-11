@@ -96,11 +96,7 @@ These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
-#%setup -q
-%setup -q -c -T
-cd ..
-lzma -dc %SOURCE0 | tar xf -
-cd %name-%version
+%setup -q
 
 # From upstream
 %patch1 -p1 -b .lsexit
