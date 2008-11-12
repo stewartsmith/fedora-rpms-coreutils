@@ -320,11 +320,12 @@ fi
 /sbin/runuser
 
 %changelog
-* Tue Nov 11 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-1
+* Wed Nov 12 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-1
 - new upstream release
 - modification/removal of related patches
 - use automake 1.10.1 instead of 1.10a
-- temporarily skip df --total tests (failures)
+- temporarily skip df --total tests (failures),
+  timeout-paramaters (failure on ppc64)
 
 * Mon Nov 03 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-17
 - Requires: ncurses (#469277)

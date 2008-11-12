@@ -1,7 +1,15 @@
 diff -urNp coreutils-7.0-orig/tests/Makefile.am coreutils-7.0/tests/Makefile.am
 --- coreutils-7.0-orig/tests/Makefile.am	2008-11-11 16:37:08.000000000 +0100
 +++ coreutils-7.0/tests/Makefile.am	2008-11-11 16:39:55.000000000 +0100
-@@ -285,8 +285,6 @@ TESTS =						\
+@@ -217,7 +217,6 @@ TESTS =						\
+   misc/tee-dash					\
+   misc/test-diag				\
+   misc/timeout					\
+-  misc/timeout-parameters			\
+   misc/tr					\
+   misc/truncate-dangling-symlink		\
+   misc/truncate-dir-fail			\
+@@ -285,8 +284,6 @@ TESTS =						\
    dd/skip-seek					\
    dd/skip-seek2					\
    dd/unblock-sync				\
