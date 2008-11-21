@@ -1,7 +1,7 @@
 Summary: The GNU core utilities: a set of tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -66,6 +66,9 @@ BuildRequires: libcap-devel >= 2.0.6
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
+#util-linux-ng requirement is here only to prevent /bin/arch conflict
+#(could be removed after F-11/F-12 split, no idea how to solve it better)
+Requires:				util-linux-ng >= 2.14
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
@@ -133,19 +136,13 @@ the old GNU fileutils, sh-utils, and textutils packages.
 chmod a+x tests/misc/sort-mb-tests
 chmod a+x tests/misc/id-context
 
-#Do require automake 1.10.1 instead of 1.10a
-for conffile in aclocal.m4 configure.ac configure $(find ./*/Makefile.in)
-do
-  sed -i 's/1.10a/1.10.1/' "$conffile"
-done
+sed -i 's/1.10a/1.10.1/' configure.ac
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
-for pofile in $(find ./po/*.p*)
-do
-   sed -i 's/-dpR/-cdpR/' "$pofile"
-   sed -i 's/commmand/command/' "$pofile"
-done
-
+find ./po/ -name "*.p*" | xargs \
+ sed -i \
+ -e 's/-dpR/-cdpR/' \
+ -e 's/commmand/command/'
 
 %build
 %ifarch s390 s390x
@@ -155,6 +152,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fPIC -O1"
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 %endif
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
+#autoreconf -i -v
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
 autoconf --force
@@ -320,6 +318,12 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Nov 21 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0.2
+- added requirements for util-linux-ng >= 2.14
+  because of file conflict in update from F-8/F-9(#472445)
+- some sed cleanup, df totaltests patch changes (not working
+  correctly yet :( )
+
 * Wed Nov 12 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-1
 - new upstream release
 - modification/removal of related patches

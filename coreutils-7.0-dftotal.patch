@@ -1,24 +1,46 @@
 diff -urNp coreutils-7.0-orig/tests/df/total coreutils-7.0/tests/df/total
 --- coreutils-7.0-orig/tests/df/total	2008-09-27 19:28:54.000000000 +0200
-+++ coreutils-7.0/tests/df/total	2008-11-11 16:56:17.000000000 +0100
-@@ -30,11 +30,8 @@ umask 22
++++ coreutils-7.0/tests/df/total	2008-11-12 12:29:24.000000000 +0100
+@@ -18,7 +18,7 @@
+ 
+ if test "$VERBOSE" = yes; then
+   set -x
+-  ls --version
++  df --version
+ fi
+ 
+ . $srcdir/test-lib.sh
+@@ -30,13 +30,10 @@ umask 22
  
  RE_TOTAL='^total( +(-?[0-9]+|-)){3} +-?[0-9]+%$'
  
 -df > tmp || fail=1
 -$EGREP "$RE_TOTAL" tmp && fail=1
--
++df > tmp    && $EGREP "$RE_TOTAL" tmp && fail=1
++df -i > tmp && $EGREP "$RE_TOTAL" tmp && fail=1
+ 
 -df -i > tmp || fail=1
 -$EGREP "$RE_TOTAL" tmp && fail=1
-+df    | $EGREP "$RE_TOTAL" tmp && fail=1
-+df -i | $EGREP "$RE_TOTAL" tmp && fail=1
+-
+-df --total | $EGREP "$RE_TOTAL" || fail=1
+-df -i --total | $EGREP "$RE_TOTAL" || fail=1
++df --total >tmp && $EGREP "$RE_TOTAL" tmp || fail=1
++df -i --total >tmp && $EGREP "$RE_TOTAL" tmp || fail=1
  
- df --total | $EGREP "$RE_TOTAL" || fail=1
- df -i --total | $EGREP "$RE_TOTAL" || fail=1
+ Exit $fail
 diff -urNp coreutils-7.0-orig/tests/df/total-awk coreutils-7.0/tests/df/total-awk
 --- coreutils-7.0-orig/tests/df/total-awk	2008-09-27 19:28:54.000000000 +0200
 +++ coreutils-7.0/tests/df/total-awk	2008-11-11 16:54:49.000000000 +0100
-@@ -23,58 +23,42 @@ fi
+@@ -18,7 +18,7 @@
+ 
+ if test "$VERBOSE" = yes; then
+   set -x
+-  ls --version
++  df --version
+ fi
+ 
+ . $srcdir/test-lib.sh
+@@ -23,58 +23,44 @@ fi
  
  . $srcdir/test-lib.sh
  
@@ -98,14 +120,16 @@ diff -urNp coreutils-7.0-orig/tests/df/total-awk coreutils-7.0/tests/df/total-aw
 -$AWK -f compute_sum.awk tmp > out1 || fail=1
 -$AWK -f parse_total.awk tmp > out2 || fail=1
 -compare out1 out2 || fail=1
-+df --total -P --block-size=512 |tee space || framework_failure
-+df --total -i -P               |tee inode || framework_failure
++fail=0
++df --total -P --block-size=512 >space || fail=1
++cat space # this helps when debugging any test failure
++df --total -i -P               >inode || fail=1
++cat inode
  
 -df -i --block-size=512 --total |tee tmp || fail=1
 -$AWK -f compute_sum.awk tmp > out1 || fail=1
 -$AWK -f parse_total.awk tmp > out2 || fail=1
 -compare out1 out2 || fail=1
-+fail=0
 +$PERL -f check-df space || fail=1
 +$PERL -f check-df inode || fail=1
  
