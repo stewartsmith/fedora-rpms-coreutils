@@ -1,7 +1,7 @@
-Summary: The GNU core utilities: a set of tools commonly used in shell scripts
+Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -318,7 +318,10 @@ fi
 /sbin/runuser
 
 %changelog
-* Fri Nov 21 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0.2
+* Tue Nov 25 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-3
+- package summary tuning
+
+* Fri Nov 21 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-2
 - added requirements for util-linux-ng >= 2.14
   because of file conflict in update from F-8/F-9(#472445)
 - some sed cleanup, df totaltests patch changes (not working
