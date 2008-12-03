@@ -1,33 +1,3 @@
-diff -urNp coreutils-7.0-orig/tests/df/total coreutils-7.0/tests/df/total
---- coreutils-7.0-orig/tests/df/total	2008-09-27 19:28:54.000000000 +0200
-+++ coreutils-7.0/tests/df/total	2008-11-12 12:29:24.000000000 +0100
-@@ -18,7 +18,7 @@
- 
- if test "$VERBOSE" = yes; then
-   set -x
--  ls --version
-+  df --version
- fi
- 
- . $srcdir/test-lib.sh
-@@ -30,13 +30,10 @@ umask 22
- 
- RE_TOTAL='^total( +(-?[0-9]+|-)){3} +-?[0-9]+%$'
- 
--df > tmp || fail=1
--$EGREP "$RE_TOTAL" tmp && fail=1
-+df > tmp    && $EGREP "$RE_TOTAL" tmp && fail=1
-+df -i > tmp && $EGREP "$RE_TOTAL" tmp && fail=1
- 
--df -i > tmp || fail=1
--$EGREP "$RE_TOTAL" tmp && fail=1
--
--df --total | $EGREP "$RE_TOTAL" || fail=1
--df -i --total | $EGREP "$RE_TOTAL" || fail=1
-+df --total >tmp && $EGREP "$RE_TOTAL" tmp || fail=1
-+df -i --total >tmp && $EGREP "$RE_TOTAL" tmp || fail=1
- 
- Exit $fail
 diff -urNp coreutils-7.0-orig/tests/df/total-awk coreutils-7.0/tests/df/total-awk
 --- coreutils-7.0-orig/tests/df/total-awk	2008-09-27 19:28:54.000000000 +0200
 +++ coreutils-7.0/tests/df/total-awk	2008-11-11 16:54:49.000000000 +0100
@@ -40,7 +10,16 @@ diff -urNp coreutils-7.0-orig/tests/df/total-awk coreutils-7.0/tests/df/total-aw
  fi
  
  . $srcdir/test-lib.sh
-@@ -23,58 +23,44 @@ fi
+@@ -24,6 +24,8 @@
+ 
+ . $srcdir/test-lib.sh
+ 
++ df || skip_test_ "df fails"
++
+ fail=0
+ 
+ # Don't let a different umask perturb the results.
+@@ -23,58 +25,44 @@ fi
  
  . $srcdir/test-lib.sh
  

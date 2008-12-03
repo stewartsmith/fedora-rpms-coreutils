@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,7 @@ Source203:  coreutils-runuser-l.pamd
 # From upstream
 Patch1: coreutils-446294-lsexitstatuses.patch
 Patch2: coreutils-7.0-dftotal.patch
+Patch3: coreutils-7.0-expr-removebignumoptions.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -104,6 +105,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # From upstream
 %patch1 -p1 -b .lsexit
 %patch2 -p1 -b .dftotal
+%patch3 -p1 -b .bignum
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -318,6 +320,13 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Dec 04 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-4
+- fixed syntax error w/ "expr" command using negative
+  string/integer as first (i.e expr -125) - due to
+  complexity of changes used diff against upstream git-head
+  (#474434)
+- enable total-awk test again (and skip it when df not working)
+
 * Tue Nov 25 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-3
 - package summary tuning
 
