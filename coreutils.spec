@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -320,6 +320,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Dec 04 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-5
+- fix info documentation for expr command as well(#474434)
+
 * Thu Dec 04 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-4
 - fixed syntax error w/ "expr" command using negative
   string/integer as first (i.e expr -125) - due to

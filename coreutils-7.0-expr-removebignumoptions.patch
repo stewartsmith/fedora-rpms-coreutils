@@ -1,3 +1,26 @@
+diff -urNp coreutils-7.0-orig/doc/coreutils.texi coreutils-7.0/doc/coreutils.texi
+--- coreutils-7.0-orig/doc/coreutils.texi	2008-12-03 23:57:52.000000000 +0100
++++ coreutils-7.0/doc/coreutils.texi	2008-12-04 00:00:51.000000000 +0100
+@@ -11167,17 +11167,8 @@ types, but if a numeric overflow occurs 
+ with support for the GNU MP library, @command{expr}, it
+ uses arbitrary-precision arithmetic.
+ 
+-Apart from @option{--help} and @option{--version} (@pxref{Common
+-options}), the following options are supported:
+-
+-@table @samp
+-@item --bignum
+-Perform arithmetic operations using unlimited precision via the GNU MP library.
+-@item --no-bignum
+-Use only limited-precision native operations.
+-In the event of numeric overflow, @command{expr} fails,
+-even if GNU MP is available.
+-@end table
++The only options are @option{--help} and @option{--version}.  @xref{Common
++options}.  Options must precede operands.
+ 
+ @cindex exit status of @command{expr}
+ Exit status:
 diff -urNp coreutils-7.0-orig/src/expr.c coreutils-7.0/src/expr.c
 --- coreutils-7.0-orig/src/expr.c	2008-08-24 22:58:15.000000000 +0200
 +++ coreutils-7.0/src/expr.c	2008-10-21 15:47:06.000000000 +0200
