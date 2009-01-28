@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -66,7 +66,8 @@ BuildRequires: autoconf >= 2.58
 BuildRequires: automake >= 1.10.1
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires: libcap-devel >= 2.0.6
-Requires: libattr-devel
+BuildRequires: libattr-devel
+BuildRequires: attr
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
@@ -327,6 +328,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jan 28 2009 Kamil Dudka <kdudka@redhat.com> - 7.0-7
+- added BuildRequires for libattr-devel and attr
+
 * Wed Jan 28 2009 Kamil Dudka <kdudka@redhat.com> - 7.0-6
 - cp/mv: add --no-clobber (-n) option to not overwrite target
 - cp/mv: add xattr support (#202823)
