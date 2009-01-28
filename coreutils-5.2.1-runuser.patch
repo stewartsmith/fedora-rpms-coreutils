@@ -1,6 +1,6 @@
-diff -urNp coreutils-6.12-orig/AUTHORS coreutils-6.12/AUTHORS
---- coreutils-6.12-orig/AUTHORS	2008-10-21 14:58:31.000000000 +0200
-+++ coreutils-6.12/AUTHORS	2008-10-21 15:00:05.000000000 +0200
+diff -urNp coreutils-7.0.orig/AUTHORS coreutils-7.0/AUTHORS
+--- coreutils-7.0.orig/AUTHORS	2008-08-24 22:58:15.000000000 +0200
++++ coreutils-7.0/AUTHORS	2009-01-28 18:11:00.316247411 +0100
 @@ -63,6 +63,7 @@ pwd: Jim Meyering
  readlink: Dmitry V. Levin
  rm: Paul Rubin, David MacKenzie, Richard M. Stallman, Jim Meyering
@@ -9,9 +9,9 @@ diff -urNp coreutils-6.12-orig/AUTHORS coreutils-6.12/AUTHORS
  runcon: Russell Coker
  seq: Ulrich Drepper
  sha1sum: Ulrich Drepper, Scott Miller, David Madore
-diff -urNp coreutils-6.12-orig/man/Makefile.am coreutils-6.12/man/Makefile.am
---- coreutils-6.12-orig/man/Makefile.am	2008-05-06 11:28:24.000000000 +0200
-+++ coreutils-6.12/man/Makefile.am	2008-10-21 15:00:13.000000000 +0200
+diff -urNp coreutils-7.0.orig/man/Makefile.am coreutils-7.0/man/Makefile.am
+--- coreutils-7.0.orig/man/Makefile.am	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/man/Makefile.am	2009-01-28 18:11:00.317247417 +0100
 @@ -93,6 +93,7 @@ readlink.1:	$(common_dep)	$(srcdir)/read
  rm.1:		$(common_dep)	$(srcdir)/rm.x		../src/rm.c
  rmdir.1:	$(common_dep)	$(srcdir)/rmdir.x	../src/rmdir.c
@@ -20,9 +20,25 @@ diff -urNp coreutils-6.12-orig/man/Makefile.am coreutils-6.12/man/Makefile.am
  seq.1:		$(common_dep)	$(srcdir)/seq.x		../src/seq.c
  sha1sum.1:	$(common_dep)	$(srcdir)/sha1sum.x	../src/md5sum.c
  sha224sum.1:	$(common_dep)	$(srcdir)/sha224sum.x	../src/md5sum.c
-diff -urNp coreutils-6.12-orig/README coreutils-6.12/README
---- coreutils-6.12-orig/README	2008-05-15 20:44:37.000000000 +0200
-+++ coreutils-6.12/README	2008-10-21 14:59:29.000000000 +0200
+diff -urNp coreutils-7.0.orig/man/runuser.x coreutils-7.0/man/runuser.x
+--- coreutils-7.0.orig/man/runuser.x	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/man/runuser.x	2009-01-28 18:11:00.321247443 +0100
+@@ -0,0 +1,12 @@
++[NAME]
++runuser \- run a shell with substitute user and group IDs
++[DESCRIPTION]
++.\" Add any additional description here
++[SEE ALSO]
++.TP
++More detailed Texinfo documentation could be found by command
++.TP
++\t\fBinfo su invocation\fR\t
++.TP
++since the command \fBrunuser\fR is trimmed down version of command \fBrunuser\fR.
++.br
+diff -urNp coreutils-7.0.orig/README coreutils-7.0/README
+--- coreutils-7.0.orig/README	2008-08-24 22:30:10.000000000 +0200
++++ coreutils-7.0/README	2009-01-28 18:11:00.318247424 +0100
 @@ -12,10 +12,10 @@ The programs that can be built with this
    factor false fmt fold groups head hostid hostname id install join kill
    link ln logname ls md5sum mkdir mkfifo mknod mktemp mv nice nl nohup
@@ -38,9 +54,9 @@ diff -urNp coreutils-6.12-orig/README coreutils-6.12/README
  
  See the file NEWS for a list of major changes in the current release.
  
-diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
---- coreutils-6.12-orig/src/Makefile.am	2008-10-21 14:58:31.000000000 +0200
-+++ coreutils-6.12/src/Makefile.am	2008-10-21 14:59:58.000000000 +0200
+diff -urNp coreutils-7.0.orig/src/Makefile.am coreutils-7.0/src/Makefile.am
+--- coreutils-7.0.orig/src/Makefile.am	2009-01-28 18:10:10.756926000 +0100
++++ coreutils-7.0/src/Makefile.am	2009-01-28 18:11:59.658631933 +0100
 @@ -38,7 +38,7 @@ EXTRA_PROGRAMS = \
    shuf sort split sum tac tail tr tsort unexpand uniq wc \
    basename date dirname echo env expr factor false \
@@ -50,9 +66,9 @@ diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
    test timeout true truncate tty whoami yes \
    base64
  
-@@ -142,6 +142,10 @@ cp_LDADD += $(LIB_ACL)
- mv_LDADD += $(LIB_ACL)
- ginstall_LDADD += $(LIB_ACL)
+@@ -154,6 +154,10 @@ cp_LDADD += $(LIB_ACL) $(LIB_XATTR)
+ mv_LDADD += $(LIB_ACL) $(LIB_XATTR)
+ ginstall_LDADD += $(LIB_ACL) $(LIB_XATTR)
  
 +runuser_SOURCES = su.c
 +runuser_CFLAGS = -DRUNUSER -DAUTHORS="\"David MacKenzie, Dan Walsh\""
@@ -61,7 +77,7 @@ diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
  stat_LDADD = $(LDADD) $(LIB_SELINUX)
  
  # Append $(LIBICONV) to each program that uses proper_name_utf8.
-@@ -159,7 +163,7 @@ RELEASE_YEAR = \
+@@ -173,7 +177,7 @@ RELEASE_YEAR = \
    `sed -n '/.*COPYRIGHT_YEAR = \([0-9][0-9][0-9][0-9]\) };/s//\1/p' \
      $(top_srcdir)/lib/version-etc.c`
  
@@ -70,9 +86,9 @@ diff -urNp coreutils-6.12-orig/src/Makefile.am coreutils-6.12/src/Makefile.am
  
  installed_su = $(DESTDIR)$(bindir)/`echo su|sed '$(transform)'`
  
-diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
---- coreutils-6.12-orig/src/su.c	2008-10-21 14:58:31.000000000 +0200
-+++ coreutils-6.12/src/su.c	2008-10-21 15:07:05.000000000 +0200
+diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
+--- coreutils-7.0.orig/src/su.c	2009-01-28 18:10:10.801926000 +0100
++++ coreutils-7.0/src/su.c	2009-01-28 18:11:00.320247437 +0100
 @@ -109,9 +109,15 @@
  #include "error.h"
  
@@ -113,7 +129,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
  #ifdef USE_PAM
  	;
  #else
-@@ -186,6 +200,10 @@ static struct option const longopts[] =
+@@ -183,6 +197,10 @@ static struct option const longopts[] =
    {"login", no_argument, NULL, 'l'},
    {"preserve-environment", no_argument, NULL, 'p'},
    {"shell", required_argument, NULL, 's'},
@@ -124,7 +140,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -287,10 +305,12 @@ correct_password (const struct passwd *p
+@@ -284,10 +302,12 @@ correct_password (const struct passwd *p
    retval = pam_start(PROGRAM_NAME, pw->pw_name, &conv, &pamh);
    PAM_BAIL_P;
  
@@ -137,7 +153,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
  
    caller = getpwuid(getuid());
    if(caller != NULL && caller->pw_name != NULL) {
-@@ -307,6 +327,11 @@ correct_password (const struct passwd *p
+@@ -304,6 +324,11 @@ correct_password (const struct passwd *p
      retval = pam_set_item(pamh, PAM_TTY, tty_name);
      PAM_BAIL_P;
    }
@@ -149,7 +165,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
    retval = pam_authenticate(pamh, 0);
    PAM_BAIL_P;
    retval = pam_acct_mgmt(pamh, 0);
-@@ -316,6 +341,7 @@ correct_password (const struct passwd *p
+@@ -313,6 +338,7 @@ correct_password (const struct passwd *p
      PAM_BAIL_P;
    }
    PAM_BAIL_P;
@@ -157,7 +173,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
    /* must be authenticated if this point was reached */
    return 1;
  #else /* !USE_PAM */
-@@ -397,11 +423,22 @@ modify_environment (const struct passwd 
+@@ -394,11 +420,22 @@ modify_environment (const struct passwd 
  /* Become the user and group(s) specified by PW.  */
  
  static void
@@ -182,7 +198,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
  #ifdef USE_PAM
      pam_close_session(pamh, 0);
      pam_end(pamh, PAM_ABORT);
-@@ -448,7 +485,11 @@ pam_copyenv (pam_handle_t *pamh)
+@@ -445,7 +482,11 @@ pam_copyenv (pam_handle_t *pamh)
  
  static void
  run_shell (char const *shell, char const *command, char **additional_args,
@@ -195,7 +211,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
  {
    size_t n_args = 1 + fast_startup + 2 * !!command + n_additional_args + 1;
    char const **args = xnmalloc (n_args, sizeof *args);
-@@ -479,7 +520,11 @@ run_shell (char const *shell, char const
+@@ -476,7 +517,11 @@ run_shell (char const *shell, char const
  
    child = fork();
    if (child == 0) {  /* child shell */
@@ -208,7 +224,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
    pam_end(pamh, 0);
    if (!same_session)
      setsid ();
-@@ -623,6 +668,26 @@ usage (int status)
+@@ -620,6 +665,26 @@ usage (int status)
    else
      {
        printf (_("Usage: %s [OPTION]... [-] [USER [ARG]...]\n"), program_name);
@@ -235,7 +251,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
        fputs (_("\
  Change the effective user id and group id to that of USER.\n\
  \n\
-@@ -635,6 +700,7 @@ Change the effective user id and group i
+@@ -632,6 +697,7 @@ Change the effective user id and group i
    -p                           same as -m\n\
    -s, --shell=SHELL            run SHELL if /etc/shells allows it\n\
  "), stdout);
@@ -243,7 +259,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\
-@@ -656,6 +722,12 @@ main (int argc, char **argv)
+@@ -653,6 +719,12 @@ main (int argc, char **argv)
    char *shell = NULL;
    struct passwd *pw;
    struct passwd pw_copy;
@@ -256,7 +272,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
  
    initialize_main (&argc, &argv);
    set_program_name (argv[0]);
-@@ -670,7 +742,11 @@ main (int argc, char **argv)
+@@ -667,7 +739,11 @@ main (int argc, char **argv)
    simulate_login = false;
    change_environment = true;
  
@@ -269,7 +285,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
      {
        switch (optc)
  	{
-@@ -700,6 +776,28 @@ main (int argc, char **argv)
+@@ -697,6 +773,28 @@ main (int argc, char **argv)
  	  shell = optarg;
  	  break;
  
@@ -298,7 +314,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
  	case_GETOPT_HELP_CHAR;
  
  	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
-@@ -738,7 +836,20 @@ main (int argc, char **argv)
+@@ -735,7 +833,20 @@ main (int argc, char **argv)
  			  : DEFAULT_SHELL);
    endpwent ();
  
@@ -320,7 +336,7 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
      {
  #ifdef SYSLOG_FAILURE
        log_su (pw, false);
-@@ -770,8 +881,16 @@ main (int argc, char **argv)
+@@ -767,8 +878,16 @@ main (int argc, char **argv)
    modify_environment (pw, shell);
  
  #ifndef USE_PAM
@@ -339,10 +355,10 @@ diff -urNp coreutils-6.12-orig/src/su.c coreutils-6.12/src/su.c
 +#endif
 +	     );
  }
-diff -urNp coreutils-6.12-orig/tests/misc/help-version coreutils-6.12/tests/misc/help-version
---- coreutils-6.12-orig/tests/misc/help-version	2008-05-27 13:39:18.000000000 +0200
-+++ coreutils-6.12/tests/misc/help-version	2008-10-21 14:59:16.000000000 +0200
-@@ -146,6 +146,7 @@ printf_args=foo
+diff -urNp coreutils-7.0.orig/tests/misc/help-version coreutils-7.0/tests/misc/help-version
+--- coreutils-7.0.orig/tests/misc/help-version	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/tests/misc/help-version	2009-01-28 18:11:00.321247443 +0100
+@@ -148,6 +148,7 @@ printf_args=foo
  seq_args=10
  sleep_args=0
  su_args=--version
@@ -350,18 +366,3 @@ diff -urNp coreutils-6.12-orig/tests/misc/help-version coreutils-6.12/tests/misc
  timeout_args=--version
  
  # I'd rather not run sync, since it spins up disks that I've
---- /dev/null	2007-01-09 09:38:07.860075128 +0000
-+++ coreutils-6.7/man/runuser.x	2007-01-09 17:27:56.000000000 +0000
-@@ -0,0 +1,12 @@
-+[NAME]
-+runuser \- run a shell with substitute user and group IDs
-+[DESCRIPTION]
-+.\" Add any additional description here
-+[SEE ALSO]
-+.TP
-+More detailed Texinfo documentation could be found by command
-+.TP
-+\t\fBinfo su invocation\fR\t
-+.TP
-+since the command \fBrunuser\fR is trimmed down version of command \fBrunuser\fR.
-+.br

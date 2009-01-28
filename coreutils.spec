@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.0
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -21,6 +21,8 @@ Source203:  coreutils-runuser-l.pamd
 Patch1: coreutils-446294-lsexitstatuses.patch
 Patch2: coreutils-7.0-dftotal.patch
 Patch3: coreutils-7.0-expr-removebignumoptions.patch
+Patch4: coreutils-7.0-cp-mv-n.patch
+Patch5: coreutils-7.0-xattr.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -64,6 +66,7 @@ BuildRequires: autoconf >= 2.58
 BuildRequires: automake >= 1.10.1
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires: libcap-devel >= 2.0.6
+Requires: libattr-devel
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
@@ -106,6 +109,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch1 -p1 -b .lsexit
 %patch2 -p1 -b .dftotal
 %patch3 -p1 -b .bignum
+%patch4 -p1 -b .cpmvn
+%patch5 -p1 -b .xattr
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -137,6 +142,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 chmod a+x tests/misc/sort-mb-tests
 chmod a+x tests/misc/id-context
+chmod a+x tests/mv/mv-n
+chmod a+x tests/misc/xattr
 
 sed -i 's/1.10a/1.10.1/' configure.ac
 
@@ -320,6 +327,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Jan 28 2009 Kamil Dudka <kdudka@redhat.com> - 7.0-6
+- cp/mv: add --no-clobber (-n) option to not overwrite target
+- cp/mv: add xattr support (#202823)
+
 * Thu Dec 04 2008 Ondrej Vasik <ovasik@redhat.com> - 7.0-5
 - fix info documentation for expr command as well(#474434)
 

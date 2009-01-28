@@ -1,6 +1,6 @@
-diff -urp coreutils-6.10-orig/configure.ac coreutils-6.10/configure.ac
---- coreutils-6.10-orig/configure.ac	2008-01-25 12:32:33.000000000 +0100
-+++ coreutils-6.10/configure.ac	2008-01-25 14:10:34.000000000 +0100
+diff -urp coreutils-7.0.orig/configure.ac coreutils-7.0/configure.ac
+--- coreutils-7.0.orig/configure.ac	2009-01-28 17:18:16.790672000 +0100
++++ coreutils-7.0/configure.ac	2009-01-28 17:18:52.757913913 +0100
 @@ -51,6 +51,13 @@ AC_ARG_ENABLE(pam, dnl
  LIB_PAM="-ldl -lpam -lpam_misc"
  AC_SUBST(LIB_PAM)])
@@ -15,18 +15,18 @@ diff -urp coreutils-6.10-orig/configure.ac coreutils-6.10/configure.ac
  AC_FUNC_FORK
  
  optional_bin_progs=
-diff -urNp coreutils-6.12-orig/man/chcon.x coreutils-6.12/man/chcon.x
---- coreutils-6.12-orig/man/chcon.x	2008-03-07 17:05:53.000000000 +0100
-+++ coreutils-6.12/man/chcon.x	2008-10-21 15:53:43.000000000 +0200
+diff -urp coreutils-7.0.orig/man/chcon.x coreutils-7.0/man/chcon.x
+--- coreutils-7.0.orig/man/chcon.x	2008-03-07 17:05:53.000000000 +0100
++++ coreutils-7.0/man/chcon.x	2009-01-28 17:18:52.759913926 +0100
 @@ -1,4 +1,4 @@
  [NAME]
 -chcon \- change file security context
 +chcon \- change file SELinux security context
  [DESCRIPTION]
  .\" Add any additional description here
-diff -urNp coreutils-6.12-orig/man/runcon.x coreutils-6.12/man/runcon.x
---- coreutils-6.12-orig/man/runcon.x	2008-03-07 17:05:53.000000000 +0100
-+++ coreutils-6.12/man/runcon.x	2008-10-21 15:54:01.000000000 +0200
+diff -urp coreutils-7.0.orig/man/runcon.x coreutils-7.0/man/runcon.x
+--- coreutils-7.0.orig/man/runcon.x	2008-03-07 17:05:53.000000000 +0100
++++ coreutils-7.0/man/runcon.x	2009-01-28 17:18:52.760913933 +0100
 @@ -1,5 +1,5 @@
  [NAME]
 -runcon \- run command with specified security context
@@ -34,10 +34,10 @@ diff -urNp coreutils-6.12-orig/man/runcon.x coreutils-6.12/man/runcon.x
  [DESCRIPTION]
  Run COMMAND with completely-specified CONTEXT, or with current or
  transitioned security context modified by one or more of LEVEL,
-diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
---- coreutils-6.12-orig/src/chcon.c	2008-05-26 08:40:32.000000000 +0200
-+++ coreutils-6.12/src/chcon.c	2008-06-16 14:43:24.000000000 +0200
-@@ -352,7 +352,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
+diff -urp coreutils-7.0.orig/src/chcon.c coreutils-7.0/src/chcon.c
+--- coreutils-7.0.orig/src/chcon.c	2008-08-24 22:30:10.000000000 +0200
++++ coreutils-7.0/src/chcon.c	2009-01-28 17:18:52.761913940 +0100
+@@ -366,7 +366,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
  "),
  	program_name, program_name, program_name);
        fputs (_("\
@@ -46,10 +46,10 @@ diff -urNp coreutils-6.12-orig/src/chcon.c coreutils-6.12/src/chcon.c
  With --reference, change the security context of each FILE to that of RFILE.\n\
  \n\
    -c, --changes          like verbose but report only when a change is made\n\
-diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
---- coreutils-6.10-orig/src/copy.c	2008-01-05 23:59:11.000000000 +0100
-+++ coreutils-6.10/src/copy.c	2008-01-25 17:23:17.000000000 +0100
-@@ -371,9 +371,10 @@ copy_reg (char const *src_name, char con
+diff -urp coreutils-7.0.orig/src/copy.c coreutils-7.0/src/copy.c
+--- coreutils-7.0.orig/src/copy.c	2009-01-28 17:18:16.748671000 +0100
++++ coreutils-7.0/src/copy.c	2009-01-28 17:18:52.762913947 +0100
+@@ -449,9 +449,10 @@ copy_reg (char const *src_name, char con
  	  security_context_t con = NULL;
  	  if (getfscreatecon (&con) < 0)
  	    {
@@ -61,7 +61,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  		  return_val = false;
  		  goto close_src_and_dst_desc;
  		}
-@@ -383,11 +384,12 @@ copy_reg (char const *src_name, char con
+@@ -461,11 +462,12 @@ copy_reg (char const *src_name, char con
  	    {
  	      if (fsetfilecon (dest_desc, con) < 0)
  		{
@@ -77,7 +77,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  		      return_val = false;
  		      freecon (con);
  		      goto close_src_and_dst_desc;
-@@ -1630,11 +1632,12 @@ copy_internal (char const *src_name, cha
+@@ -1714,11 +1716,12 @@ copy_internal (char const *src_name, cha
  	{
  	  if (setfscreatecon (con) < 0)
  	    {
@@ -93,7 +93,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  		  freecon (con);
  		  return false;
  		}
-@@ -1644,12 +1647,14 @@ copy_internal (char const *src_name, cha
+@@ -1728,12 +1731,14 @@ copy_internal (char const *src_name, cha
        else
  	{
  	  if (errno != ENOTSUP && errno != ENODATA)
@@ -114,7 +114,7 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  	    }
  	}
      }
-@@ -1735,6 +1740,8 @@ copy_internal (char const *src_name, cha
+@@ -1819,6 +1824,8 @@ copy_internal (char const *src_name, cha
  	{
  	  /* Here, we are crossing a file system boundary and cp's -x option
  	     is in effect: so don't copy the contents of this directory. */
@@ -123,9 +123,9 @@ diff -urp coreutils-6.10-orig/src/copy.c coreutils-6.10/src/copy.c
  	}
        else
  	{
-diff -urp coreutils-6.10-orig/src/copy.h coreutils-6.10/src/copy.h
---- coreutils-6.10-orig/src/copy.h	2008-01-05 23:58:25.000000000 +0100
-+++ coreutils-6.10/src/copy.h	2008-01-25 16:29:21.000000000 +0100
+diff -urp coreutils-7.0.orig/src/copy.h coreutils-7.0/src/copy.h
+--- coreutils-7.0.orig/src/copy.h	2009-01-28 17:18:16.748671000 +0100
++++ coreutils-7.0/src/copy.h	2009-01-28 17:18:52.763913953 +0100
 @@ -141,6 +141,9 @@ struct cp_options
    bool preserve_mode;
    bool preserve_timestamps;
@@ -136,10 +136,10 @@ diff -urp coreutils-6.10-orig/src/copy.h coreutils-6.10/src/copy.h
    /* Enabled for mv, and for cp by the --preserve=links option.
       If true, attempt to preserve in the destination files any
       logical hard links between the source files.  If used with cp's
-diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
---- coreutils-6.10-orig/src/cp.c	2008-01-11 12:19:53.000000000 +0100
-+++ coreutils-6.10/src/cp.c	2008-01-25 16:26:22.000000000 +0100
-@@ -147,6 +147,7 @@ static struct option const long_opts[] =
+diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
+--- coreutils-7.0.orig/src/cp.c	2009-01-28 17:18:16.750671000 +0100
++++ coreutils-7.0/src/cp.c	2009-01-28 17:20:29.109561384 +0100
+@@ -148,6 +148,7 @@ static struct option const long_opts[] =
    {"target-directory", required_argument, NULL, 't'},
    {"update", no_argument, NULL, 'u'},
    {"verbose", no_argument, NULL, 'v'},
@@ -147,7 +147,7 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -175,7 +175,7 @@ Copy SOURCE to DEST, or multiple SOURCE(
+@@ -175,7 +176,7 @@ Copy SOURCE to DEST, or multiple SOURCE(
  Mandatory arguments to long options are mandatory for short options too.\n\
  "), stdout);
        fputs (_("\
@@ -156,8 +156,8 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
        --backup[=CONTROL]       make a backup of each existing destination file\n\
    -b                           like --backup but does not accept an argument\n\
        --copy-contents          copy contents of special files when recursive\n\
-@@ -200,6 +201,9 @@ Mandatory arguments to long options are 
-                                  additional attributes: context, links, all\n\
+@@ -206,6 +207,9 @@ Mandatory arguments to long options are 
+                                  all\n\
  "), stdout);
        fputs (_("\
 +  -c                           same as --preserve=context\n\
@@ -166,7 +166,7 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
        --parents                use full source file name under DIRECTORY\n\
  "), stdout);
-@@ -225,6 +229,7 @@ Mandatory arguments to long options are 
+@@ -231,6 +235,7 @@ Mandatory arguments to long options are 
                                   destination file is missing\n\
    -v, --verbose                explain what is being done\n\
    -x, --one-file-system        stay on this file system\n\
@@ -174,24 +174,24 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
  "), stdout);
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
-@@ -774,6 +779,7 @@ cp_option_init (struct cp_options *x)
+@@ -780,6 +785,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_timestamps = false;
    x->preserve_security_context = false;
    x->require_preserve_context = false;
 +  x->set_security_context = false;
+   x->preserve_xattr = false;
+   x->require_preserve_xattr = false;
  
-   x->require_preserve = false;
-   x->recursive = false;
-@@ -909,7 +917,7 @@ main (int argc, char **argv)
+@@ -925,7 +931,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
--  while ((c = getopt_long (argc, argv, "abdfHilLprst:uvxPRS:T",
-+  while ((c = getopt_long (argc, argv, "abcdfHilLprst:uvxPRS:TZ:",
+-  while ((c = getopt_long (argc, argv, "abdfHilLnprst:uvxPRS:T",
++  while ((c = getopt_long (argc, argv, "abcdfHilLnprst:uvxPRS:TZ:",
  			   long_opts, NULL))
  	 != -1)
      {
-@@ -920,13 +928,15 @@ main (int argc, char **argv)
+@@ -936,13 +942,15 @@ main (int argc, char **argv)
  				     sparse_type_string, sparse_type);
  	  break;
  
@@ -209,7 +209,7 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
  	  x.recursive = true;
  	  break;
  
-@@ -940,6 +950,16 @@ main (int argc, char **argv)
+@@ -956,6 +964,16 @@ main (int argc, char **argv)
  	  copy_contents = true;
  	  break;
  
@@ -226,7 +226,7 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
  	case 'd':
  	  x.preserve_links = true;
  	  x.dereference = DEREF_NEVER;
-@@ -1052,6 +1072,27 @@ main (int argc, char **argv)
+@@ -1072,6 +1090,27 @@ main (int argc, char **argv)
  	  x.one_file_system = true;
  	  break;
  
@@ -254,10 +254,10 @@ diff -urp coreutils-6.10-orig/src/cp.c coreutils-6.10/src/cp.c
  	case 'S':
  	  make_backups = true;
  	  backup_suffix_string = optarg;
-diff -urp coreutils-6.10-orig/src/id.c coreutils-6.10/src/id.c
---- coreutils-6.10-orig/src/id.c	2008-01-05 23:59:11.000000000 +0100
-+++ coreutils-6.10/src/id.c	2008-01-25 17:13:53.000000000 +0100
-@@ -110,7 +110,7 @@ int
+diff -urp coreutils-7.0.orig/src/id.c coreutils-7.0/src/id.c
+--- coreutils-7.0.orig/src/id.c	2008-08-24 22:58:15.000000000 +0200
++++ coreutils-7.0/src/id.c	2009-01-28 17:18:52.766913973 +0100
+@@ -106,7 +106,7 @@ int
  main (int argc, char **argv)
  {
    int optc;
@@ -266,11 +266,10 @@ diff -urp coreutils-6.10-orig/src/id.c coreutils-6.10/src/id.c
  
    /* If true, output the list of all group IDs. -G */
    bool just_group_list = false;
-diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
---- coreutils-6.10-orig/src/install.c	2008-01-05 23:59:11.000000000 +0100
-+++ coreutils-6.10/src/install.c	2008-01-25 17:32:42.000000000 +0100
-
-@@ -146,11 +146,11 @@ static struct option const long_options[
+diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
+--- coreutils-7.0.orig/src/install.c	2009-01-28 17:18:16.751671000 +0100
++++ coreutils-7.0/src/install.c	2009-01-28 17:18:52.767913980 +0100
+@@ -152,11 +152,11 @@ static struct option const long_options[
    {"no-target-directory", no_argument, NULL, 'T'},
    {"owner", required_argument, NULL, 'o'},
    {"preserve-timestamps", no_argument, NULL, 'p'},
@@ -284,7 +283,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
    {"strip", no_argument, NULL, 's'},
    {"strip-program", required_argument, NULL, STRIP_PROGRAM_OPTION},
    {"suffix", required_argument, NULL, 'S'},
-@@ -178,6 +178,7 @@ cp_option_init (struct cp_options *x)
+@@ -185,6 +185,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_timestamps = false;
    x->require_preserve = false;
    x->require_preserve_context = false;
@@ -292,7 +291,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
    x->recursive = false;
    x->sparse_mode = SPARSE_AUTO;
    x->symbolic_link = false;
-@@ -346,7 +338,7 @@ main (int argc, char **argv)
+@@ -361,7 +362,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
@@ -301,7 +300,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  			      NULL)) != -1)
      {
        switch (optc)
-@@ -408,6 +409,7 @@ main (int argc, char **argv)
+@@ -428,6 +429,7 @@ main (int argc, char **argv)
  	  no_target_directory = true;
  	  break;
  
@@ -309,7 +308,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  	case PRESERVE_CONTEXT_OPTION:
  	  if ( ! selinux_enabled)
  	    {
-@@ -415,6 +417,10 @@ main (int argc, char **argv)
+@@ -435,6 +437,10 @@ main (int argc, char **argv)
  			     "this kernel is not SELinux-enabled"));
  	      break;
  	    }
@@ -320,7 +319,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  	  x.preserve_security_context = true;
  	  use_default_selinux_context = false;
  	  break;
-@@ -432,6 +432,7 @@ main (int argc, char **argv)
+@@ -446,6 +452,7 @@ main (int argc, char **argv)
  	      break;
  	    }
  	  scontext = optarg;
@@ -328,7 +327,7 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  	  use_default_selinux_context = false;
  	  break;
  	case_GETOPT_HELP_CHAR;
-@@ -825,8 +831,8 @@ Mandatory arguments to long options are 
+@@ -850,8 +857,8 @@ Mandatory arguments to long options are 
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
        fputs (_("\
@@ -339,10 +338,10 @@ diff -urp coreutils-6.10-orig/src/install.c coreutils-6.10/src/install.c
  "), stdout);
  
        fputs (HELP_OPTION_DESCRIPTION, stdout);
-diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
---- coreutils-6.10-orig/src/ls.c	2008-01-11 11:34:22.000000000 +0100
-+++ coreutils-6.10/src/ls.c	2008-01-25 15:34:49.000000000 +0100
-@@ -134,7 +134,8 @@ enum filetype
+diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
+--- coreutils-7.0.orig/src/ls.c	2009-01-28 17:18:16.705671000 +0100
++++ coreutils-7.0/src/ls.c	2009-01-28 17:18:52.770914000 +0100
+@@ -139,7 +139,8 @@ enum filetype
      symbolic_link,
      sock,
      whiteout,
@@ -352,7 +351,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    };
  
  /* Display letters and indicators for each filetype.
-@@ -177,8 +178,9 @@ struct fileinfo
+@@ -182,8 +183,9 @@ struct fileinfo
         exists, otherwise false.  */
      bool linkok;
  
@@ -364,7 +363,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
      bool have_acl;
    };
  
-@@ -241,6 +242,7 @@ static void queue_directory (char const 
+@@ -246,6 +248,7 @@ static void queue_directory (char const 
  static void sort_files (void);
  static void parse_ls_color (void);
  void usage (int status);
@@ -372,7 +371,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  
  /* Initial size of hash table.
     Most hierarchies are likely to be shallower than this.  */
-@@ -314,7 +316,7 @@ static struct pending *pending_dirs;
+@@ -315,7 +318,7 @@ static struct pending *pending_dirs;
  
  static struct timespec current_time;
  
@@ -381,7 +380,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  static char UNKNOWN_SECURITY_CONTEXT[] = "?";
  
  /* Whether any of the files has an ACL.  This affects the width of the
-@@ -354,7 +356,9 @@ enum format
+@@ -355,7 +358,9 @@ enum format
      one_per_line,		/* -1 */
      many_per_line,		/* -C */
      horizontal,			/* -x */
@@ -392,7 +391,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    };
  
  static enum format format;
-@@ -731,6 +735,9 @@ enum
+@@ -744,6 +749,9 @@ enum
    SHOW_CONTROL_CHARS_OPTION,
    SI_OPTION,
    SORT_OPTION,
@@ -402,7 +401,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    TIME_OPTION,
    TIME_STYLE_OPTION
  };
-@@ -776,7 +783,9 @@ static struct option const long_options[
+@@ -789,7 +797,9 @@ static struct option const long_options[
    {"time-style", required_argument, NULL, TIME_STYLE_OPTION},
    {"color", optional_argument, NULL, COLOR_OPTION},
    {"block-size", required_argument, NULL, BLOCK_SIZE_OPTION},
@@ -413,7 +412,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    {"author", no_argument, NULL, AUTHOR_OPTION},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-@@ -786,12 +795,12 @@ static struct option const long_options[
+@@ -799,12 +809,12 @@ static struct option const long_options[
  static char const *const format_args[] =
  {
    "verbose", "long", "commas", "horizontal", "across",
@@ -428,7 +427,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  };
  ARGMATCH_VERIFY (format_args, format_types);
  
-@@ -1236,7 +1245,7 @@ main (int argc, char **argv)
+@@ -1251,7 +1261,7 @@ main (int argc, char **argv)
  
    format_needs_stat = sort_type == sort_time || sort_type == sort_size
      || format == long_format
@@ -437,7 +436,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
      || print_block_size;
    format_needs_type = (! format_needs_stat
  		       && (recursive
-@@ -1267,7 +1276,7 @@ main (int argc, char **argv)
+@@ -1282,7 +1292,7 @@ main (int argc, char **argv)
      }
    else
      do
@@ -446,7 +445,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
      while (i < argc);
  
    if (cwd_n_used)
-@@ -1429,7 +1438,7 @@ decode_switches (int argc, char **argv)
+@@ -1445,7 +1455,7 @@ decode_switches (int argc, char **argv)
    ignore_mode = IGNORE_DEFAULT;
    ignore_patterns = NULL;
    hide_patterns = NULL;
@@ -455,7 +454,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  
    /* FIXME: put this in a function.  */
    {
-@@ -1811,13 +1820,27 @@ decode_switches (int argc, char **argv)
+@@ -1827,13 +1837,27 @@ decode_switches (int argc, char **argv)
  	  break;
  
  	case 'Z':
@@ -484,7 +483,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  	default:
  	  usage (LS_FAILURE);
  	}
-@@ -2517,8 +2540,10 @@ clear_files (void)
+@@ -2547,8 +2571,10 @@ clear_files (void)
        struct fileinfo *f = sorted_file[i];
        free (f->name);
        free (f->linkname);
@@ -497,7 +496,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
      }
  
    cwd_n_used = 0;
-@@ -2560,6 +2585,7 @@ gobble_file (char const *name, enum file
+@@ -2590,6 +2616,7 @@ gobble_file (char const *name, enum file
    memset (f, '\0', sizeof *f);
    f->stat.st_ino = inode;
    f->filetype = type;
@@ -505,7 +504,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  
    if (command_line_arg
        || format_needs_stat
-@@ -2659,7 +2685,7 @@ gobble_file (char const *name, enum file
+@@ -2689,7 +2716,7 @@ gobble_file (char const *name, enum file
  
        f->stat_ok = true;
  
@@ -514,7 +513,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  	{
  	  bool have_acl = false;
  	  int attr_len = (do_deref
-@@ -2667,9 +2694,7 @@ gobble_file (char const *name, enum file
+@@ -2708,9 +2735,7 @@ gobble_file (char const *name, enum file
  	      f->scontext = xstrdup ("unlabeled");
  	    }
  
@@ -525,7 +524,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  	    {
  	      f->scontext = UNKNOWN_SECURITY_CONTEXT;
  
-@@ -2681,7 +2706,7 @@ gobble_file (char const *name, enum file
+@@ -2722,7 +2747,7 @@ gobble_file (char const *name, enum file
  		err = 0;
  	    }
  
@@ -534,7 +533,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
  	    {
  	      int n = file_has_acl (absolute_name, &f->stat);
  	      err = (n < 0);
-@@ -3255,6 +3281,13 @@ print_current_files (void)
+@@ -3297,6 +3322,13 @@ print_current_files (void)
  	  print_long_format (sorted_file[i]);
  	  DIRED_PUTCHAR ('\n');
  	}
@@ -548,7 +547,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
        break;
      }
  }
-@@ -3481,7 +3514,7 @@ print_long_format (const struct fileinfo
+@@ -3482,7 +3514,7 @@ print_long_format (const struct fileinfo
  	 The latter is wrong when inode_number_width is zero.  */
        p += strlen (p);
      }
@@ -557,7 +556,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    if (print_block_size)
      {
        char hbuf[LONGEST_HUMAN_READABLE + 1];
-@@ -3510,9 +3543,15 @@ print_long_format (const struct fileinfo
+@@ -3511,9 +3543,15 @@ print_long_format (const struct fileinfo
       The latter is wrong when nlink_width is zero.  */
    p += strlen (p);
  
@@ -574,7 +573,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
      {
        DIRED_FPUTS (buf, stdout, p - buf);
  
-@@ -3525,9 +3564,6 @@ print_long_format (const struct fileinfo
+@@ -3526,9 +3564,6 @@ print_long_format (const struct fileinfo
        if (print_author)
  	format_user (f->stat.st_author, author_width, f->stat_ok);
  
@@ -584,7 +583,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
        p = buf;
      }
  
-@@ -3864,9 +3900,6 @@ print_file_name_and_frills (const struct
+@@ -3867,9 +3902,6 @@ print_file_name_and_frills (const struct
  	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
  			    ST_NBLOCKSIZE, output_block_size));
  
@@ -594,7 +593,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f), f->linkok,
  			   f->stat_ok, f->filetype, NULL);
  
-@@ -4030,9 +4063,6 @@ length_of_file_name_and_frills (const st
+@@ -4077,9 +4109,6 @@ length_of_file_name_and_frills (const st
  					  output_block_size))
  		: block_size_width);
  
@@ -604,7 +603,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
    quote_name (NULL, f->name, filename_quoting_options, &name_width);
    len += name_width;
  
-@@ -4461,9 +4491,16 @@ Mandatory arguments to long options are 
+@@ -4510,9 +4539,16 @@ Mandatory arguments to long options are 
    -w, --width=COLS           assume screen width instead of current value\n\
    -x                         list entries by lines instead of by columns\n\
    -X                         sort alphabetically by entry extension\n\
@@ -622,7 +621,7 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\n\
-@@ -4487,3 +4524,67 @@ Exit status is 0 if OK, 1 if minor probl
+@@ -4541,3 +4577,67 @@ Exit status:\n\
      }
    exit (status);
  }
@@ -690,10 +689,10 @@ diff -urp coreutils-6.10-orig/src/ls.c coreutils-6.10/src/ls.c
 +      print_type_indicator (f->stat_ok, f->stat.st_mode, f->filetype);
 +  }
 +}
-diff -urp coreutils-6.10-orig/src/mkdir.c coreutils-6.10/src/mkdir.c
---- coreutils-6.10-orig/src/mkdir.c	2008-01-05 23:58:25.000000000 +0100
-+++ coreutils-6.10/src/mkdir.c	2008-01-25 16:35:14.000000000 +0100
-@@ -41,6 +41,7 @@ char *program_name;
+diff -urp coreutils-7.0.orig/src/mkdir.c coreutils-7.0/src/mkdir.c
+--- coreutils-7.0.orig/src/mkdir.c	2008-08-24 22:58:15.000000000 +0200
++++ coreutils-7.0/src/mkdir.c	2009-01-28 17:18:52.771914007 +0100
+@@ -39,6 +39,7 @@
  static struct option const longopts[] =
  {
    {GETOPT_SELINUX_CONTEXT_OPTION_DECL},
@@ -701,10 +700,10 @@ diff -urp coreutils-6.10-orig/src/mkdir.c coreutils-6.10/src/mkdir.c
    {"mode", required_argument, NULL, 'm'},
    {"parents", no_argument, NULL, 'p'},
    {"verbose", no_argument, NULL, 'v'},
-diff -urp coreutils-6.10-orig/src/mknod.c coreutils-6.10/src/mknod.c
---- coreutils-6.10-orig/src/mknod.c	2008-01-05 23:58:25.000000000 +0100
-+++ coreutils-6.10/src/mknod.c	2008-01-25 17:01:11.000000000 +0100
-@@ -38,7 +38,7 @@ char *program_name;
+diff -urp coreutils-7.0.orig/src/mknod.c coreutils-7.0/src/mknod.c
+--- coreutils-7.0.orig/src/mknod.c	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/src/mknod.c	2009-01-28 17:18:52.772914014 +0100
+@@ -35,7 +35,7 @@
  
  static struct option const longopts[] =
  {
@@ -713,21 +712,21 @@ diff -urp coreutils-6.10-orig/src/mknod.c coreutils-6.10/src/mknod.c
    {"mode", required_argument, NULL, 'm'},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-diff -urp coreutils-6.10-orig/src/mv.c coreutils-6.10/src/mv.c
---- coreutils-6.10-orig/src/mv.c	2008-01-05 23:59:11.000000000 +0100
-+++ coreutils-6.10/src/mv.c	2008-01-25 17:11:50.000000000 +0100
-@@ -137,6 +137,7 @@ cp_option_init (struct cp_options *x)
+diff -urp coreutils-7.0.orig/src/mv.c coreutils-7.0/src/mv.c
+--- coreutils-7.0.orig/src/mv.c	2009-01-28 17:18:16.752671000 +0100
++++ coreutils-7.0/src/mv.c	2009-01-28 17:18:52.773914020 +0100
+@@ -138,6 +138,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_mode = true;
    x->preserve_timestamps = true;
    x->preserve_security_context = selinux_enabled;
 +  x->set_security_context = false;
    x->require_preserve = false;  /* FIXME: maybe make this an option */
    x->require_preserve_context = false;
-   x->recursive = true;
-diff -urNp coreutils-6.12-orig/src/runcon.c coreutils-6.12/src/runcon.c
---- coreutils-6.12-orig/src/runcon.c	2008-05-26 12:10:20.000000000 +0200
-+++ coreutils-6.12/src/runcon.c	2008-10-21 15:57:30.000000000 +0200
-@@ -88,7 +88,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
+   x->preserve_xattr = true;
+diff -urp coreutils-7.0.orig/src/runcon.c coreutils-7.0/src/runcon.c
+--- coreutils-7.0.orig/src/runcon.c	2008-08-24 22:30:10.000000000 +0200
++++ coreutils-7.0/src/runcon.c	2009-01-28 17:18:52.774914027 +0100
+@@ -86,7 +86,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
    or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n\
  "), program_name, program_name);
        fputs (_("\
@@ -736,10 +735,10 @@ diff -urNp coreutils-6.12-orig/src/runcon.c coreutils-6.12/src/runcon.c
  With neither CONTEXT nor COMMAND, print the current security context.\n\
  \n\
    CONTEXT            Complete security context\n\
-diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
---- coreutils-6.10-orig/src/stat.c	2008-01-05 23:59:11.000000000 +0100
-+++ coreutils-6.10/src/stat.c	2008-01-25 16:50:24.000000000 +0100
-@@ -831,7 +831,7 @@ print_it (char const *format, char const
+diff -urp coreutils-7.0.orig/src/stat.c coreutils-7.0/src/stat.c
+--- coreutils-7.0.orig/src/stat.c	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/src/stat.c	2009-01-28 17:18:52.775914034 +0100
+@@ -823,7 +823,7 @@ print_it (char const *format, char const
  
  /* Stat the file system and print what we find.  */
  static bool
@@ -748,7 +747,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  {
    STRUCT_STATVFS statfsbuf;
  
-@@ -843,15 +843,31 @@ do_statfs (char const *filename, bool te
+@@ -835,15 +835,31 @@ do_statfs (char const *filename, bool te
      }
  
    if (format == NULL)
@@ -787,7 +786,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  
    print_it (format, filename, print_statfs, &statfsbuf);
    return true;
-@@ -859,7 +875,7 @@ do_statfs (char const *filename, bool te
+@@ -851,7 +867,7 @@ do_statfs (char const *filename, bool te
  
  /* stat the file and print what we find */
  static bool
@@ -796,7 +795,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  {
    struct stat statbuf;
  
-@@ -872,9 +888,12 @@ do_stat (char const *filename, bool ters
+@@ -864,9 +880,12 @@ do_stat (char const *filename, bool ters
    if (format == NULL)
      {
        if (terse)
@@ -812,7 +811,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
        else
  	{
  	  /* Temporary hack to match original output until conditional
-@@ -891,12 +910,22 @@ do_stat (char const *filename, bool ters
+@@ -883,12 +902,22 @@ do_stat (char const *filename, bool ters
  	    }
  	  else
  	    {
@@ -841,7 +840,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  	    }
  	}
      }
-@@ -917,6 +946,7 @@ usage (int status)
+@@ -909,6 +938,7 @@ usage (int status)
  Display file or file system status.\n\
  \n\
    -L, --dereference     follow links\n\
@@ -849,7 +848,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
    -f, --file-system     display file system status instead of file status\n\
  "), stdout);
        fputs (_("\
-@@ -1001,6 +1031,7 @@ main (int argc, char *argv[])
+@@ -993,6 +1023,7 @@ main (int argc, char *argv[])
    int i;
    bool fs = false;
    bool terse = false;
@@ -857,7 +856,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
    char *format = NULL;
    bool ok = true;
  
-@@ -1040,13 +1071,13 @@ main (int argc, char *argv[])
+@@ -1032,13 +1063,13 @@ main (int argc, char *argv[])
  	  terse = true;
  	  break;
  
@@ -878,7 +877,7 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  	  break;
  
  	case_GETOPT_HELP_CHAR;
-@@ -1062,8 +1097,8 @@ main (int argc, char *argv[])
+@@ -1058,8 +1089,8 @@ main (int argc, char *argv[])
  
    for (i = optind; i < argc; i++)
      ok &= (fs
@@ -889,10 +888,10 @@ diff -urp coreutils-6.10-orig/src/stat.c coreutils-6.10/src/stat.c
  
    exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
  }
-diff -urp coreutils-6.10-orig/tests/misc/selinux coreutils-6.10/tests/misc/selinux
---- coreutils-6.10-orig/tests/misc/selinux	2008-01-11 11:34:22.000000000 +0100
-+++ coreutils-6.10/tests/misc/selinux	2008-01-25 18:17:59.000000000 +0100
-@@ -32,12 +32,10 @@ chcon $ctx f d p 2>/dev/null || {
+diff -urp coreutils-7.0.orig/tests/misc/selinux coreutils-7.0/tests/misc/selinux
+--- coreutils-7.0.orig/tests/misc/selinux	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/tests/misc/selinux	2009-01-28 17:18:52.776914041 +0100
+@@ -30,12 +30,10 @@ chcon $ctx f d p ||
  
  # inspect that context with both ls -Z and stat.
  for i in d f p; do
@@ -900,9 +899,9 @@ diff -urp coreutils-6.10-orig/tests/misc/selinux coreutils-6.10/tests/misc/selin
 +  c=`ls -dogZ $i|cut -d' ' -f5`; test x$c = x$ctx || fail=1
    c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
  done
-
+ 
 -# ensure that ls -l output includes the "+".
 -c=`ls -l f|cut -c11`; test "$c" = + || fail=1
-
+ 
  # Copy each to a new directory and ensure that context is preserved.
  cp -r --preserve=all d f p s1 || fail=1

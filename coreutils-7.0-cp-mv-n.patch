@@ -1,0 +1,322 @@
+diff -ruNp coreutils-7.0.orig/doc/coreutils.texi coreutils-7.0/doc/coreutils.texi
+--- coreutils-7.0.orig/doc/coreutils.texi	2009-01-28 15:28:14.724301000 +0100
++++ coreutils-7.0/doc/coreutils.texi	2009-01-28 16:42:36.319138655 +0100
+@@ -7295,6 +7295,9 @@ description of @option{--remove-destinat
+ This option is independent of the @option{--interactive} or
+ @option{-i} option: neither cancels the effect of the other.
+ 
++This option is redundant if the @option{--no-clobber} or @option{-n} option is
++used.
++
+ @item -H
+ @opindex -H
+ If a command line argument specifies a symbolic link, then copy the
+@@ -7307,7 +7310,8 @@ via recursive traversal.
+ @opindex -i
+ @opindex --interactive
+ When copying a file other than a directory, prompt whether to
+-overwrite an existing destination file.
++overwrite an existing destination file. The @option{-i} option overrides
++a previous @option{-n} option.
+ 
+ @item -l
+ @itemx --link
+@@ -7321,6 +7325,14 @@ Make hard links instead of copies of non
+ @opindex --dereference
+ Follow symbolic links when copying from them.
+ 
++@item -n
++@itemx --no-clobber
++@opindex -n
++@opindex --no-clobber
++Do not overwrite an existing file. The @option{-n} option overrides a previous
++@option{-i} option. This option is mutually exclusive with @option{-b} or
++@option{--backup} option.
++
+ @item -P
+ @itemx --no-dereference
+ @opindex -P
+@@ -8076,6 +8088,11 @@ The program accepts the following option
+ @opindex --force
+ @cindex prompts, omitting
+ Do not prompt the user before removing a destination file.
++@macro mvOptsIfn
++If you specify more than one of the @option{-i}, @option{-f}, @option{-n}
++options, only the final one takes effect.
++@end macro
++@mvOptsIfn
+ 
+ @item -i
+ @itemx --interactive
+@@ -8085,6 +8102,16 @@ Do not prompt the user before removing a
+ Prompt whether to overwrite each existing destination file, regardless
+ of its permissions.
+ If the response is not affirmative, the file is skipped.
++@mvOptsIfn
++
++@item -n
++@itemx --no-clobber
++@opindex -n
++@opindex --no-clobber
++@cindex prompts, omitting
++Do not overwrite an existing file.
++@mvOptsIfn
++This option is mutually exclusive with @option{-b} or @option{--backup} option.
+ 
+ @itemx @w{@kbd{--reply}=@var{how}}
+ @opindex --reply
+diff -ruNp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
+--- coreutils-7.0.orig/src/cp.c	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/src/cp.c	2009-01-28 16:43:08.501394935 +0100
+@@ -1,5 +1,5 @@
+ /* cp.c  -- file copying (main routines)
+-   Copyright (C) 89, 90, 91, 1995-2008 Free Software Foundation, Inc.
++   Copyright (C) 89, 90, 91, 1995-2009 Free Software Foundation, Inc.
+ 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+@@ -129,6 +129,7 @@ static struct option const long_opts[] =
+   {"force", no_argument, NULL, 'f'},
+   {"interactive", no_argument, NULL, 'i'},
+   {"link", no_argument, NULL, 'l'},
++  {"no-clobber", no_argument, NULL, 'n'},
+   {"no-dereference", no_argument, NULL, 'P'},
+   {"no-preserve", required_argument, NULL, NO_PRESERVE_ATTRIBUTES_OPTION},
+   {"no-target-directory", no_argument, NULL, 'T'},
+@@ -182,8 +183,10 @@ Mandatory arguments to long options are 
+ "), stdout);
+       fputs (_("\
+   -f, --force                  if an existing destination file cannot be\n\
+-                                 opened, remove it and try again\n\
+-  -i, --interactive            prompt before overwrite\n\
++                                 opened, remove it and try again (redundant if\n\
++                                 the -n option is used)\n\
++  -i, --interactive            prompt before overwrite (overrides a previous -n\n\
++                                  option)\n\
+   -H                           follow command-line symbolic links in SOURCE\n\
+ "), stdout);
+       fputs (_("\
+@@ -191,6 +194,8 @@ Mandatory arguments to long options are 
+   -L, --dereference            always follow symbolic links in SOURCE\n\
+ "), stdout);
+       fputs (_("\
++  -n, --no-clobber             do not overwrite an existing file (overrides\n\
++                                 a previous -i option)\n\
+   -P, --no-dereference         never follow symbolic links in SOURCE\n\
+ "), stdout);
+       fputs (_("\
+@@ -909,7 +914,7 @@ main (int argc, char **argv)
+      we'll actually use backup_suffix_string.  */
+   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+ 
+-  while ((c = getopt_long (argc, argv, "abdfHilLprst:uvxPRS:T",
++  while ((c = getopt_long (argc, argv, "abdfHilLnprst:uvxPRS:T",
+ 			   long_opts, NULL))
+ 	 != -1)
+     {
+@@ -965,6 +970,10 @@ main (int argc, char **argv)
+ 	  x.dereference = DEREF_ALWAYS;
+ 	  break;
+ 
++	case 'n':
++	  x.interactive = I_ALWAYS_NO;
++	  break;
++
+ 	case 'P':
+ 	  x.dereference = DEREF_NEVER;
+ 	  break;
+@@ -1072,6 +1081,13 @@ main (int argc, char **argv)
+       usage (EXIT_FAILURE);
+     }
+ 
++  if (make_backups && x.interactive == I_ALWAYS_NO)
++    {
++      error (0, 0,
++	     _("options --backup and --no-clobber are mutually exclusive"));
++      usage (EXIT_FAILURE);
++    }
++
+   if (backup_suffix_string)
+     simple_backup_suffix = xstrdup (backup_suffix_string);
+ 
+diff -ruNp coreutils-7.0.orig/src/mv.c coreutils-7.0/src/mv.c
+--- coreutils-7.0.orig/src/mv.c	2008-08-24 22:30:10.000000000 +0200
++++ coreutils-7.0/src/mv.c	2009-01-28 16:42:36.906143329 +0100
+@@ -1,5 +1,5 @@
+ /* mv -- move or rename files
+-   Copyright (C) 86, 89, 90, 91, 1995-2008 Free Software Foundation, Inc.
++   Copyright (C) 86, 89, 90, 91, 1995-2009 Free Software Foundation, Inc.
+ 
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+@@ -76,6 +76,7 @@ static struct option const long_options[
+   {"backup", optional_argument, NULL, 'b'},
+   {"force", no_argument, NULL, 'f'},
+   {"interactive", no_argument, NULL, 'i'},
++  {"no-clobber", no_argument, NULL, 'n'},
+   {"no-target-directory", no_argument, NULL, 'T'},
+   {"reply", required_argument, NULL, REPLY_OPTION}, /* Deprecated 2005-07-03,
+ 						       remove in 2008. */
+@@ -312,6 +313,8 @@ Mandatory arguments to long options are 
+   -b                           like --backup but does not accept an argument\n\
+   -f, --force                  do not prompt before overwriting\n\
+   -i, --interactive            prompt before overwrite\n\
++  -n, --no-clobber             do not overwrite an existing file\n\
++If you specify more than one of -i, -f, -n, only the final one takes effect.\n\
+ "), stdout);
+       fputs (_("\
+       --strip-trailing-slashes  remove any trailing slashes from each SOURCE\n\
+@@ -374,7 +377,7 @@ main (int argc, char **argv)
+      we'll actually use backup_suffix_string.  */
+   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+ 
+-  while ((c = getopt_long (argc, argv, "bfit:uvS:T", long_options, NULL))
++  while ((c = getopt_long (argc, argv, "bfint:uvS:T", long_options, NULL))
+ 	 != -1)
+     {
+       switch (c)
+@@ -396,6 +399,9 @@ main (int argc, char **argv)
+ 	  error (0, 0,
+ 		 _("the --reply option is deprecated; use -i or -f instead"));
+ 	  break;
++	case 'n':
++	  x.interactive = I_ALWAYS_NO;
++	  break;
+ 	case STRIP_TRAILING_SLASHES_OPTION:
+ 	  remove_trailing_slashes = true;
+ 	  break;
+@@ -468,6 +474,13 @@ main (int argc, char **argv)
+ 	       quote (file[n_files - 1]));
+     }
+ 
++  if (make_backups && x.interactive == I_ALWAYS_NO)
++    {
++      error (0, 0,
++	     _("options --backup and --no-clobber are mutually exclusive"));
++      usage (EXIT_FAILURE);
++    }
++
+   if (backup_suffix_string)
+     simple_backup_suffix = xstrdup (backup_suffix_string);
+ 
+diff -ruNp coreutils-7.0.orig/tests/cp/cp-i coreutils-7.0/tests/cp/cp-i
+--- coreutils-7.0.orig/tests/cp/cp-i	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/tests/cp/cp-i	2009-01-28 16:42:37.092144811 +0100
+@@ -31,4 +31,40 @@ fail=0
+ # coreutils 6.2 cp would neglect to prompt in this case.
+ echo n | cp -iR a b 2>/dev/null || fail=1
+ 
++# test miscellaneous combinations of -f -i -n parameters
++touch c d || framework_failure
++echo "\`c' -> \`d'" > out_copy
++> out_empty
++
++# ask for overwrite, answer no
++echo n | cp -vi  c d 2>/dev/null > out1 || fail=1
++compare out1 out_empty || fail=1
++
++# ask for overwrite, answer yes
++echo y | cp -vi  c d 2>/dev/null > out2 || fail=1
++compare out2 out_copy  || fail=1
++
++# -i wins over -n
++echo y | cp -vni c d 2>/dev/null > out3 || fail=1
++compare out3 out_copy  || fail=1
++
++# -n wins over -i
++echo y | cp -vin c d 2>/dev/null > out4 || fail=1
++compare out4 out_empty || fail=1
++
++# ask for overwrite, answer yes
++echo y | cp -vfi c d 2>/dev/null > out5 || fail=1
++compare out5 out_copy  || fail=1
++
++# do not ask, prevent from overwrite
++echo n | cp -vfn c d 2>/dev/null > out6 || fail=1
++compare out6 out_empty || fail=1
++
++# do not ask, prevent from overwrite
++echo n | cp -vnf c d 2>/dev/null > out7 || fail=1
++compare out7 out_empty || fail=1
++
++# options --backup and --no-clobber are mutually exclusive
++cp -bn c d 2>/dev/null && fail=1
++
+ Exit $fail
+diff -ruNp coreutils-7.0.orig/tests/Makefile.am coreutils-7.0/tests/Makefile.am
+--- coreutils-7.0.orig/tests/Makefile.am	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/tests/Makefile.am	2009-01-28 16:42:37.596148824 +0100
+@@ -374,6 +374,7 @@ TESTS =						\
+   mv/into-self-3				\
+   mv/into-self-4				\
+   mv/leak-fd					\
++  mv/mv-n					\
+   mv/mv-special-1				\
+   mv/no-target-dir				\
+   mv/part-fail					\
+diff -ruNp coreutils-7.0.orig/tests/mv/mv-n coreutils-7.0/tests/mv/mv-n
+--- coreutils-7.0.orig/tests/mv/mv-n	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/tests/mv/mv-n	2009-01-28 16:42:37.596148824 +0100
+@@ -0,0 +1,62 @@
++#!/bin/sh
++# Test whether mv -n works as documented (not overwrite target).
++
++# Copyright (C) 2006-2008 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if test "$VERBOSE" = yes; then
++  set -x
++  mv --version
++fi
++
++. $srcdir/test-lib.sh
++
++fail=0
++
++# test miscellaneous combinations of -f -i -n parameters
++touch a b || framework_failure
++echo "\`a' -> \`b'" > out_move
++> out_empty
++
++# ask for overwrite, answer no
++touch a b || framework_failure
++echo n | mv -vi a b 2>/dev/null > out1 || fail=1
++compare out1 out_empty || fail=1
++
++# ask for overwrite, answer yes
++touch a b || framework_failure
++echo y | mv -vi a b 2>/dev/null > out2 || fail=1
++compare out2 out_move || fail=1
++
++# -n wins (as the last option)
++touch a b || framework_failure
++echo y | mv -vin a b 2>/dev/null > out3 || fail=1
++compare out3 out_empty || fail=1
++
++# -n wins (as the last option)
++touch a b || framework_failure
++echo y | mv -vfn a b 2>/dev/null > out4 || fail=1
++compare out4 out_empty || fail=1
++
++# -n wins (as the last option)
++touch a b || framework_failure
++echo y | mv -vifn a b 2>/dev/null > out5 || fail=1
++compare out5 out_empty || fail=1
++
++# options --backup and --no-clobber are mutually exclusive
++touch a || framework_failure
++mv -bn a b 2>/dev/null && fail=1
++
++Exit $fail

@@ -1,0 +1,792 @@
+diff -ruNp coreutils-7.0.orig/doc/coreutils.texi coreutils-7.0/doc/coreutils.texi
+--- coreutils-7.0.orig/doc/coreutils.texi	2009-01-28 17:10:24.453415000 +0100
++++ coreutils-7.0/doc/coreutils.texi	2009-01-28 17:12:04.986109287 +0100
+@@ -7346,7 +7346,7 @@ symbolic links in the destination are al
+ @itemx @w{@kbd{--preserve}[=@var{attribute_list}]}
+ @opindex -p
+ @opindex --preserve
+-@cindex file information, preserving
++@cindex file information, preserving, extended attributes, xattr
+ Preserve the specified attributes of the original files.
+ If specified, the @var{attribute_list} must be a comma-separated list
+ of one or more of the following strings:
+@@ -7373,6 +7373,11 @@ Preserve in the destination files
+ any links between corresponding source files.
+ @c Give examples illustrating how hard links are preserved.
+ @c Also, show how soft links map to hard links with -L and -H.
++@itemx xattr
++Preserve extended attributes if @command{cp} is built with xattr support,
++and xattrs are supported and enabled on your file system. If SELinux context
++and/or ACLs are implemented using xattrs, they are preserved as well by this
++option.
+ @itemx all
+ Preserve all file attributes.
+ Equivalent to specifying all of the above.
+@@ -7912,6 +7917,9 @@ attributes of destination files.  It is 
+ copy programs into their destination directories.  It refuses to copy
+ files onto themselves.
+ 
++@cindex extended attributes, xattr
++@command{install} never preserves extended attributes (xattr).
++
+ The program accepts the following options.  Also see @ref{Common options}.
+ 
+ @table @samp
+@@ -8060,6 +8068,9 @@ directory succeeded, but the second didn
+ the destination partition and the second and third would be left on the
+ original partition.
+ 
++@cindex extended attributes, xattr
++@command{mv} always tries to copy extended attributes (xattr).
++
+ @cindex prompting, and @command{mv}
+ If a destination file exists but is normally unwritable, standard input
+ is a terminal, and the @option{-f} or @option{--force} option is not given,
+diff -ruNp coreutils-7.0.orig/m4/prereq.m4 coreutils-7.0/m4/prereq.m4
+--- coreutils-7.0.orig/m4/prereq.m4	2008-06-21 19:04:15.000000000 +0200
++++ coreutils-7.0/m4/prereq.m4	2009-01-28 17:12:04.987109294 +0100
+@@ -38,6 +38,7 @@ AC_DEFUN([gl_PREREQ],
+   # handles that; see ../bootstrap.conf.
+   AC_REQUIRE([gl_EUIDACCESS_STAT])
+   AC_REQUIRE([gl_FD_REOPEN])
++  AC_REQUIRE([gl_FUNC_XATTR])
+   AC_REQUIRE([gl_FUNC_XFTS])
+   AC_REQUIRE([gl_MEMXFRM])
+   AC_REQUIRE([gl_STRINTCMP])
+diff -ruNp coreutils-7.0.orig/m4/xattr.m4 coreutils-7.0/m4/xattr.m4
+--- coreutils-7.0.orig/m4/xattr.m4	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/m4/xattr.m4	2009-01-28 17:12:04.988109301 +0100
+@@ -0,0 +1,36 @@
++# xattr.m4 - check for Extended Attributes (Linux)
++
++# Copyright (C) 2003, 2008 Free Software Foundation, Inc.
++# This file is free software; the Free Software Foundation
++# gives unlimited permission to copy and/or distribute it,
++# with or without modifications, as long as this notice is preserved.
++
++# Originally written by Andreas Gruenbacher.
++# http://www.suse.de/~agruen/coreutils/5.91/coreutils-xattr.diff
++
++AC_DEFUN([gl_FUNC_XATTR],
++[
++  AC_ARG_ENABLE([xattr],
++	AC_HELP_STRING([--disable-xattr],
++		       [do not support extended attributes]),
++	[use_xattr=$enableval], [use_xattr=yes])
++
++  if test "$use_xattr" = "yes"; then
++    AC_CHECK_HEADERS([attr/error_context.h attr/libattr.h])
++    if test $ac_cv_header_attr_libattr_h = yes \
++       && test $ac_cv_header_attr_error_context_h = yes; then
++      use_xattr=1
++    else
++      use_xattr=0
++    fi
++    AC_DEFINE_UNQUOTED([USE_XATTR], [$use_xattr],
++		       [Define if you want extended attribute support.])
++    xattr_saved_LIBS=$LIBS
++    AC_SEARCH_LIBS([attr_copy_file], [attr],
++		   [test "$ac_cv_search_attr_copy_file" = "none required" ||
++		      LIB_XATTR=$ac_cv_search_attr_copy_file])
++    AC_CHECK_FUNCS([attr_copy_file])
++    LIBS=$xattr_saved_LIBS
++    AC_SUBST([LIB_XATTR])
++  fi
++])
+diff -ruNp coreutils-7.0.orig/src/copy.c coreutils-7.0/src/copy.c
+--- coreutils-7.0.orig/src/copy.c	2008-08-24 22:30:10.000000000 +0200
++++ coreutils-7.0/src/copy.c	2009-01-28 17:12:04.990109315 +0100
+@@ -55,6 +55,13 @@
+ #include "areadlink.h"
+ #include "yesno.h"
+ 
++#if USE_XATTR
++# include <attr/error_context.h>
++# include <attr/libattr.h>
++# include <stdarg.h>
++# include "verror.h"
++#endif
++
+ #ifndef HAVE_FCHOWN
+ # define HAVE_FCHOWN false
+ # define fchown(fd, uid, gid) (-1)
+@@ -124,6 +131,70 @@ is_ancestor (const struct stat *sb, cons
+   return false;
+ }
+ 
++#if USE_XATTR
++static void
++copy_attr_error (struct error_context *ctx, char const *fmt, ...)
++{
++  int err = errno;
++  va_list ap;
++
++  /* use verror module to print error message */
++  va_start (ap, fmt);
++  verror (0, err, fmt, ap);
++  va_end (ap);
++}
++
++static char const *
++copy_attr_quote (struct error_context *ctx, char const *str)
++{
++  return quote (str);
++}
++
++static void
++copy_attr_free (struct error_context *ctx, char const *str)
++{
++}
++
++static bool
++copy_attr_by_fd (char const *src_path, int src_fd,
++		 char const *dst_path, int dst_fd)
++{
++  struct error_context ctx =
++  {
++    .error = copy_attr_error,
++    .quote = copy_attr_quote,
++    .quote_free = copy_attr_free
++  };
++  return 0 == attr_copy_fd (src_path, src_fd, dst_path, dst_fd, 0, &ctx);
++}
++
++static bool
++copy_attr_by_name (char const *src_path, char const *dst_path)
++{
++  struct error_context ctx =
++  {
++    .error = copy_attr_error,
++    .quote = copy_attr_quote,
++    .quote_free = copy_attr_free
++  };
++  return 0 == attr_copy_file (src_path, dst_path, 0, &ctx);
++}
++#else /* USE_XATTR */
++
++static bool
++copy_attr_by_fd (char const *src_path, int src_fd,
++		 char const *dst_path, int dst_fd)
++{
++  return true;
++}
++
++static bool
++copy_attr_by_name (char const *src_path, char const *dst_path)
++{
++  return true;
++}
++#endif /* USE_XATTR */
++
+ /* Read the contents of the directory SRC_NAME_IN, and recursively
+    copy the contents to DST_NAME_IN.  NEW_DST is true if
+    DST_NAME_IN is a directory that was created previously in the
+@@ -682,6 +753,11 @@ copy_reg (char const *src_name, char con
+ 
+   set_author (dst_name, dest_desc, src_sb);
+ 
++  if (x->preserve_xattr && ! copy_attr_by_fd (src_name, source_desc,
++					      dst_name, dest_desc)
++      && x->require_preserve_xattr)
++    return false;
++
+   if (x->preserve_mode || x->move_mode)
+     {
+       if (copy_acl (src_name, source_desc, dst_name, dest_desc, src_mode) != 0
+@@ -1980,6 +2056,10 @@ copy_internal (char const *src_name, cha
+ 
+   set_author (dst_name, -1, &src_sb);
+ 
++  if (x->preserve_xattr && ! copy_attr_by_name (src_name, dst_name)
++      && x->require_preserve_xattr)
++    return false;
++
+   if (x->preserve_mode || x->move_mode)
+     {
+       if (copy_acl (src_name, -1, dst_name, -1, src_mode) != 0
+diff -ruNp coreutils-7.0.orig/src/copy.h coreutils-7.0/src/copy.h
+--- coreutils-7.0.orig/src/copy.h	2008-06-21 17:20:29.000000000 +0200
++++ coreutils-7.0/src/copy.h	2009-01-28 17:12:04.991109322 +0100
+@@ -174,6 +174,19 @@ struct cp_options
+      fail if it is unable to do so.  */
+   bool require_preserve_context;
+ 
++  /* If true, attempt to preserve extended attributes using libattr.
++     Ignored if coreutils are compiled without xattr support. */
++  bool preserve_xattr;
++
++  /* Useful only when preserve_xattr is true.
++     If true, a failed attempt to preserve file's extended attributes
++     propagates failure "out" to the caller.  If false, a failure to
++     preserve file's extended attributes does not change the invoking
++     application's exit status.  Give diagnostics for failed syscalls
++     regardless of this setting.  For example, with "cp --preserve=xattr"
++     this flag is "true", while with "cp --preserve=all", it is false. */
++  bool require_preserve_xattr;
++
+   /* If true, copy directories recursively and copy special files
+      as themselves rather than copying their contents. */
+   bool recursive;
+diff -ruNp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
+--- coreutils-7.0.orig/src/cp.c	2009-01-28 17:10:24.455415000 +0100
++++ coreutils-7.0/src/cp.c	2009-01-28 17:12:04.992109329 +0100
+@@ -202,7 +202,8 @@ Mandatory arguments to long options are 
+   -p                           same as --preserve=mode,ownership,timestamps\n\
+       --preserve[=ATTR_LIST]   preserve the specified attributes (default:\n\
+                                  mode,ownership,timestamps), if possible\n\
+-                                 additional attributes: context, links, all\n\
++                                 additional attributes: context, links, xattr,\n\
++                                 all\n\
+ "), stdout);
+       fputs (_("\
+       --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
+@@ -779,6 +780,8 @@ cp_option_init (struct cp_options *x)
+   x->preserve_timestamps = false;
+   x->preserve_security_context = false;
+   x->require_preserve_context = false;
++  x->preserve_xattr = false;
++  x->require_preserve_xattr = false;
+ 
+   x->require_preserve = false;
+   x->recursive = false;
+@@ -815,18 +818,20 @@ decode_preserve_arg (char const *arg, st
+       PRESERVE_OWNERSHIP,
+       PRESERVE_LINK,
+       PRESERVE_CONTEXT,
++      PRESERVE_XATTR,
+       PRESERVE_ALL
+     };
+   static enum File_attribute const preserve_vals[] =
+     {
+       PRESERVE_MODE, PRESERVE_TIMESTAMPS,
+-      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_CONTEXT, PRESERVE_ALL
++      PRESERVE_OWNERSHIP, PRESERVE_LINK, PRESERVE_CONTEXT, PRESERVE_XATTR,
++      PRESERVE_ALL
+     };
+   /* Valid arguments to the `--preserve' option. */
+   static char const* const preserve_args[] =
+     {
+       "mode", "timestamps",
+-      "ownership", "links", "context", "all", NULL
++      "ownership", "links", "context", "xattr", "all", NULL
+     };
+   ARGMATCH_VERIFY (preserve_args, preserve_vals);
+ 
+@@ -867,6 +872,11 @@ decode_preserve_arg (char const *arg, st
+ 	  x->require_preserve_context = on_off;
+ 	  break;
+ 
++	case PRESERVE_XATTR:
++	  x->preserve_xattr = on_off;
++	  x->require_preserve_xattr = on_off;
++	  break;
++
+ 	case PRESERVE_ALL:
+ 	  x->preserve_mode = on_off;
+ 	  x->preserve_timestamps = on_off;
+@@ -874,6 +884,7 @@ decode_preserve_arg (char const *arg, st
+ 	  x->preserve_links = on_off;
+ 	  if (selinux_enabled)
+ 	    x->preserve_security_context = on_off;
++	  x->preserve_xattr = on_off;
+ 	  break;
+ 
+ 	default:
+@@ -1121,6 +1132,12 @@ main (int argc, char **argv)
+ 		 "without an SELinux-enabled kernel"));
+     }
+ 
++#if !USE_XATTR
++  if (x.require_preserve_xattr)
++    error (EXIT_FAILURE, 0, _("cannot preserve extended attributes, cp is "
++			      "built without xattr support"));
++#endif
++
+   /* Allocate space for remembering copied and created files.  */
+ 
+   hash_init ();
+diff -ruNp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
+--- coreutils-7.0.orig/src/install.c	2008-09-27 19:28:41.000000000 +0200
++++ coreutils-7.0/src/install.c	2009-01-28 17:12:04.993109336 +0100
+@@ -200,6 +200,7 @@ cp_option_init (struct cp_options *x)
+   x->open_dangling_dest_symlink = false;
+   x->update = false;
+   x->preserve_security_context = false;
++  x->preserve_xattr = false;
+   x->verbose = false;
+   x->dest_info = NULL;
+   x->src_info = NULL;
+diff -ruNp coreutils-7.0.orig/src/Makefile.am coreutils-7.0/src/Makefile.am
+--- coreutils-7.0.orig/src/Makefile.am	2008-09-27 19:28:54.000000000 +0200
++++ coreutils-7.0/src/Makefile.am	2009-01-28 17:15:23.106476067 +0100
+@@ -149,9 +149,9 @@ su_LDADD = $(LDADD) $(LIB_CRYPT)
+ dir_LDADD += $(LIB_ACL)
+ ls_LDADD += $(LIB_ACL)
+ vdir_LDADD += $(LIB_ACL)
+-cp_LDADD += $(LIB_ACL)
+-mv_LDADD += $(LIB_ACL)
+-ginstall_LDADD += $(LIB_ACL)
++cp_LDADD += $(LIB_ACL) $(LIB_XATTR)
++mv_LDADD += $(LIB_ACL) $(LIB_XATTR)
++ginstall_LDADD += $(LIB_ACL) $(LIB_XATTR)
+ 
+ stat_LDADD = $(LDADD) $(LIB_SELINUX)
+ 
+@@ -226,7 +226,7 @@ uninstall-local:
+ 	  fi; \
+ 	fi
+ 
+-copy_sources = copy.c cp-hash.c
++copy_sources = copy.c cp-hash.c verror.c xvasprintf.c
+ 
+ # Use `ginstall' in the definition of PROGRAMS and in dependencies to avoid
+ # confusion with the `install' target.  The install rule transforms `ginstall'
+diff -ruNp coreutils-7.0.orig/src/mv.c coreutils-7.0/src/mv.c
+--- coreutils-7.0.orig/src/mv.c	2009-01-28 17:10:24.456415000 +0100
++++ coreutils-7.0/src/mv.c	2009-01-28 17:12:04.994109343 +0100
+@@ -140,6 +140,7 @@ cp_option_init (struct cp_options *x)
+   x->preserve_security_context = selinux_enabled;
+   x->require_preserve = false;  /* FIXME: maybe make this an option */
+   x->require_preserve_context = false;
++  x->preserve_xattr = true;
+   x->recursive = true;
+   x->sparse_mode = SPARSE_AUTO;  /* FIXME: maybe make this an option */
+   x->symbolic_link = false;
+diff -ruNp coreutils-7.0.orig/tests/Makefile.am coreutils-7.0/tests/Makefile.am
+--- coreutils-7.0.orig/tests/Makefile.am	2009-01-28 17:10:24.457415000 +0100
++++ coreutils-7.0/tests/Makefile.am	2009-01-28 17:12:04.994109343 +0100
+@@ -230,6 +230,7 @@ TESTS =						\
+   misc/tty-eof					\
+   misc/unexpand					\
+   misc/uniq					\
++  misc/xattr					\
+   chmod/c-option				\
+   chmod/equal-x					\
+   chmod/equals					\
+diff -ruNp coreutils-7.0.orig/tests/misc/xattr coreutils-7.0/tests/misc/xattr
+--- coreutils-7.0.orig/tests/misc/xattr	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/tests/misc/xattr	2009-01-28 17:12:04.995109350 +0100
+@@ -0,0 +1,111 @@
++#!/bin/sh
++# Ensure that cp --preserve=xattr and mv preserve extended attributes and
++# install does not preserve extended attributes.
++
++# Copyright (C) 2009 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if test "$VERBOSE" = yes; then
++  set -x
++  cp --version
++  mv --version
++  ginstall --version
++fi
++
++. $srcdir/test-lib.sh
++
++# Skip this test if cp was built without xattr support:
++touch src dest || framework_failure
++cp --preserve=xattr -n src dest 2>/dev/null \
++  || skip_test_ "coreutils built without xattr support"
++
++# this code was taken from test mv/backup-is-src
++cleanup_() { rm -rf "$other_partition_tmpdir"; }
++. "$abs_srcdir/other-fs-tmpdir"
++b_other="$other_partition_tmpdir/b"
++rm -f $b_other || framework_failure
++
++# testing xattr name-value pair
++xattr_name="user.foo"
++xattr_value="bar"
++xattr_pair="$xattr_name=\"$xattr_value\""
++
++# create new file and check its xattrs
++touch a || framework_failure
++getfattr -d a >out_a || skip_test_ "failed to get xattr of file"
++grep -F "$xattr_pair" out_a >/dev/null && framework_failure
++
++# try to set user xattr on file
++setfattr -n "$xattr_name" -v "$xattr_value" a >out_a \
++  || skip_test_ "failed to set xattr of file"
++getfattr -d a >out_a || skip_test_ "failed to get xattr of file"
++grep -F "$xattr_pair" out_a >/dev/null \
++  || skip_test_ "failed to set xattr of file"
++
++fail=0
++
++# cp should not preserve xattr by default
++cp a b || fail=1
++getfattr -d b >out_b || skip_test_ "failed to get xattr of file"
++grep -F "$xattr_pair" out_b >/dev/null && fail=1
++
++# test if --preserve=xattr option works
++cp --preserve=xattr a b || fail=1
++getfattr -d b >out_b || skip_test_ "failed to get xattr of file"
++grep -F "$xattr_pair" out_b >/dev/null || fail=1
++
++rm b || framework_failure
++
++# install should never preserve xattr
++ginstall a b || fail=1
++getfattr -d b >out_b || skip_test_ "failed to get xattr of file"
++grep -F "$xattr_pair" out_b >/dev/null && fail=1
++
++# mv should preserve xattr when renaming within a filesystem.
++# This is implicitly done by rename () and doesn't need explicit
++# xattr support in mv.
++mv a b || fail=1
++getfattr -d b >out_b || skip_test_ "failed to get xattr of file"
++grep -F "$xattr_pair" out_b >/dev/null || cat >&2 <<EOF
++=================================================================
++$0: WARNING!!!
++rename () does not preserve extended attributes
++=================================================================
++EOF
++
++# try to set user xattr on file on other partition
++test_mv=1
++touch $b_other || framework_failure
++setfattr -n "$xattr_name" -v "$xattr_value" $b_other >out_a 2>/dev/null \
++  || test_mv=0
++getfattr -d $b_other >out_b 2>/dev/null || test_mv=0
++grep -F "$xattr_pair" out_b >/dev/null || test_mv=0
++rm -f $b_other || framework_failure
++
++if test $test_mv -eq 1; then
++  # mv should preserve xattr when copying content from one partition to another
++  mv b $b_other || fail=1
++  getfattr -d $b_other >out_b 2>/dev/null || skip_test_ "failed to get xattr of file"
++  grep -F "$xattr_pair" out_b >/dev/null || fail=1
++else
++  cat >&2 <<EOF
++=================================================================
++$0: WARNING!!!
++failed to set xattr of file $b_other
++=================================================================
++EOF
++fi
++
++Exit $fail
+diff -ruNp coreutils-7.0.orig/src/verror.c coreutils-7.0/src/verror.c
+--- coreutils-7.0.orig/src/verror.c	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/src/verror.c	2009-01-28 17:14:58.399305619 +0100
+@@ -0,0 +1,77 @@
++/* va_list error handler for noninteractive utilities
++   Copyright (C) 2006-2007 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++/* Written by Eric Blake.  */
++
++#include <config.h>
++
++#include "verror.h"
++#include "xvasprintf.h"
++
++#include <errno.h>
++#include <stdarg.h>
++#include <stdlib.h>
++
++#if ENABLE_NLS
++# include "gettext.h"
++# define _(msgid) gettext (msgid)
++#endif
++
++#ifndef _
++# define _(String) String
++#endif
++
++/* Print a message with `vfprintf (stderr, FORMAT, ARGS)';
++   if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
++   If STATUS is nonzero, terminate the program with `exit (STATUS)'.
++   Use the globals error_print_progname and error_message_count similarly
++   to error().  */
++void
++verror (int status, int errnum, const char *format, va_list args)
++{
++  verror_at_line (status, errnum, NULL, 0, format, args);
++}
++
++/* Print a message with `vfprintf (stderr, FORMAT, ARGS)';
++   if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
++   If STATUS is nonzero, terminate the program with `exit (STATUS)'.
++   If FNAME is not NULL, prepend the message with `FNAME:LINENO:'.
++   Use the globals error_print_progname, error_message_count, and
++   error_one_per_line similarly to error_at_line().  */
++void
++verror_at_line (int status, int errnum, const char *file,
++                unsigned int line_number, const char *format, va_list args)
++{
++  char *message = xvasprintf (format, args);
++  if (message)
++    {
++      /* Until http://sourceware.org/bugzilla/show_bug.cgi?id=2997 is fixed,
++	 glibc violates GNU Coding Standards when the file argument to
++	 error_at_line is NULL.  */
++      if (file)
++        error_at_line (status, errnum, file, line_number, "%s", message);
++      else
++        error (status, errnum, "%s", message);
++    }
++  else
++    {
++      /* EOVERFLOW, EINVAL, and EILSEQ from xvasprintf are signs of
++         serious programmer errors.  */
++      error (0, errno, _("unable to display error message"));
++      abort ();
++    }
++  free (message);
++}
+diff -ruNp coreutils-7.0.orig/src/verror.h coreutils-7.0/src/verror.h
+--- coreutils-7.0.orig/src/verror.h	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/src/verror.h	2009-01-28 17:14:54.039275540 +0100
+@@ -0,0 +1,53 @@
++/* Declaration for va_list error-reporting function
++   Copyright (C) 2006-2007 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++#ifndef _VERROR_H
++#define _VERROR_H 1
++
++#include "error.h"
++#include <stdarg.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/* Print a message with `vfprintf (stderr, FORMAT, ARGS)';
++   if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
++   If STATUS is nonzero, terminate the program with `exit (STATUS)'.
++   Use the globals error_print_progname and error_message_count similarly
++   to error().  */
++
++extern void verror (int __status, int __errnum, const char *__format,
++                    va_list __args)
++     __attribute__ ((__format__ (__printf__, 3, 0)));
++
++/* Print a message with `vfprintf (stderr, FORMAT, ARGS)';
++   if ERRNUM is nonzero, follow it with ": " and strerror (ERRNUM).
++   If STATUS is nonzero, terminate the program with `exit (STATUS)'.
++   If FNAME is not NULL, prepend the message with `FNAME:LINENO:'.
++   Use the globals error_print_progname, error_message_count, and
++   error_one_per_line similarly to error_at_line().  */
++
++extern void verror_at_line (int __status, int __errnum, const char *__fname,
++                            unsigned int __lineno, const char *__format,
++                            va_list __args)
++     __attribute__ ((__format__ (__printf__, 5, 0)));
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* verror.h */
+diff -ruNp coreutils-7.0.orig/src/xvasprintf.c coreutils-7.0/src/xvasprintf.c
+--- coreutils-7.0.orig/src/xvasprintf.c	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/src/xvasprintf.c	2009-01-28 17:15:06.809363638 +0100
+@@ -0,0 +1,110 @@
++/* vasprintf and asprintf with out-of-memory checking.
++   Copyright (C) 1999, 2002-2004, 2006-2008 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++#include <config.h>
++
++/* Specification.  */
++#include "xvasprintf.h"
++
++#include <errno.h>
++#include <limits.h>
++#include <string.h>
++#include <stdio.h>
++
++#include "xalloc.h"
++
++/* Checked size_t computations.  */
++#include "xsize.h"
++
++static inline char *
++xstrcat (size_t argcount, va_list args)
++{
++  char *result;
++  va_list ap;
++  size_t totalsize;
++  size_t i;
++  char *p;
++
++  /* Determine the total size.  */
++  totalsize = 0;
++  va_copy (ap, args);
++  for (i = argcount; i > 0; i--)
++    {
++      const char *next = va_arg (ap, const char *);
++      totalsize = xsum (totalsize, strlen (next));
++    }
++  va_end (ap);
++
++  /* Test for overflow in the summing pass above or in (totalsize + 1) below.
++     Also, don't return a string longer than INT_MAX, for consistency with
++     vasprintf().  */
++  if (totalsize == SIZE_MAX || totalsize > INT_MAX)
++    {
++      errno = EOVERFLOW;
++      return NULL;
++    }
++
++  /* Allocate and fill the result string.  */
++  result = XNMALLOC (totalsize + 1, char);
++  p = result;
++  for (i = argcount; i > 0; i--)
++    {
++      const char *next = va_arg (args, const char *);
++      size_t len = strlen (next);
++      memcpy (p, next, len);
++      p += len;
++    }
++  *p = '\0';
++
++  return result;
++}
++
++char *
++xvasprintf (const char *format, va_list args)
++{
++  char *result;
++
++  /* Recognize the special case format = "%s...%s".  It is a frequently used
++     idiom for string concatenation and needs to be fast.  We don't want to
++     have a separate function xstrcat() for this purpose.  */
++  {
++    size_t argcount = 0;
++    const char *f;
++
++    for (f = format;;)
++      {
++	if (*f == '\0')
++	  /* Recognized the special case of string concatenation.  */
++	  return xstrcat (argcount, args);
++	if (*f != '%')
++	  break;
++	f++;
++	if (*f != 's')
++	  break;
++	f++;
++	argcount++;
++      }
++  }
++
++  if (vasprintf (&result, format, args) < 0)
++    {
++      if (errno == ENOMEM)
++	xalloc_die ();
++      return NULL;
++    }
++
++  return result;
++}
+diff -ruNp coreutils-7.0.orig/src/xvasprintf.h coreutils-7.0/src/xvasprintf.h
+--- coreutils-7.0.orig/src/xvasprintf.h	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-7.0/src/xvasprintf.h	2009-01-28 17:15:06.809363638 +0100
+@@ -0,0 +1,56 @@
++/* vasprintf and asprintf with out-of-memory checking.
++   Copyright (C) 2002-2004, 2006-2008 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++#ifndef _XVASPRINTF_H
++#define _XVASPRINTF_H
++
++/* Get va_list.  */
++#include <stdarg.h>
++
++#ifndef __attribute__
++/* This feature is available in gcc versions 2.5 and later.  */
++# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
++#  define __attribute__(Spec) /* empty */
++# endif
++/* The __-protected variants of `format' and `printf' attributes
++   are accepted by gcc versions 2.6.4 (effectively 2.7) and later.  */
++# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
++#  define __format__ format
++#  define __printf__ printf
++# endif
++#endif
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++/* Write formatted output to a string dynamically allocated with malloc(),
++   and return it.  Upon [ENOMEM] memory allocation error, call xalloc_die.
++   On some other error
++     - [EOVERFLOW] resulting string length is > INT_MAX,
++     - [EINVAL] invalid format string,
++     - [EILSEQ] error during conversion between wide and multibyte characters,
++   return NULL.  */
++extern char *xasprintf (const char *format, ...)
++       __attribute__ ((__format__ (__printf__, 1, 2)));
++extern char *xvasprintf (const char *format, va_list args)
++       __attribute__ ((__format__ (__printf__, 1, 0)));
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* _XVASPRINTF_H */
