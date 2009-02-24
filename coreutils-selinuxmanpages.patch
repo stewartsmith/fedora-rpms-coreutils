@@ -1,39 +1,6 @@
-diff -urNp coreutils-6.10-orig/doc/coreutils.info coreutils-6.10/doc/coreutils.info
---- coreutils-6.10-orig/doc/coreutils.info	2008-04-07 17:52:11.000000000 +0200
-+++ coreutils-6.10/doc/coreutils.info	2008-04-07 18:03:27.000000000 +0200
-@@ -5642,7 +5642,7 @@ options::.
-      Preserve as much as possible of the structure and attributes of the
-      original files in the copy (but do not attempt to preserve internal
-      directory structure; i.e., `ls -U' may list the entries in a copied
--     directory in a different order).  Equivalent to `-dpR'.
-+     directory in a different order).  Equivalent to `-cdpR'.
- 
- `-b'
- `--backup[=METHOD]'
-@@ -5660,6 +5660,11 @@ options::.
-             cp --backup --force -- "$i" "$i"
-           done
- 
-+`-c'
-+     Preserve SELinux security context of the original files if possible.
-+     Note: Some file systems don't support storing of SELinux security 
-+           context.
-+
- `--copy-contents'
-      If copying recursively, copy the contents of any special files
-      (e.g., FIFOs and device files) as if they were regular files.
 diff -urNp coreutils-6.10-orig/doc/coreutils.texi coreutils-6.10/doc/coreutils.texi
 --- coreutils-6.10-orig/doc/coreutils.texi	2008-04-07 17:52:11.000000000 +0200
 +++ coreutils-6.10/doc/coreutils.texi	2008-04-07 18:01:43.000000000 +0200
-@@ -6957,7 +6957,7 @@ Preserve as much as possible of the stru
- original files in the copy (but do not attempt to preserve internal
- directory structure; i.e., @samp{ls -U} may list the entries in a copied
- directory in a different order).
--Equivalent to @option{-dpR}.
-+Equivalent to @option{-cdpR}.
- 
- @item -b
- @itemx @w{@kbd{--backup}[=@var{method}]}
 @@ -6981,6 +6981,11 @@ for i; do
  done
  @end example

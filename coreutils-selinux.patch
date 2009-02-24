@@ -49,71 +49,6 @@ diff -urp coreutils-7.0.orig/src/chcon.c coreutils-7.0/src/chcon.c
 diff -urp coreutils-7.0.orig/src/copy.c coreutils-7.0/src/copy.c
 --- coreutils-7.0.orig/src/copy.c	2009-01-28 17:18:16.748671000 +0100
 +++ coreutils-7.0/src/copy.c	2009-01-28 17:18:52.762913947 +0100
-@@ -449,9 +449,10 @@ copy_reg (char const *src_name, char con
- 	  security_context_t con = NULL;
- 	  if (getfscreatecon (&con) < 0)
- 	    {
--	      error (0, errno, _("failed to get file system create context"));
-+        //do not show error when we not require security context (-a option)
- 	      if (x->require_preserve_context)
- 		{
-+      error (0, errno, _("failed to get file system create context"));
- 		  return_val = false;
- 		  goto close_src_and_dst_desc;
- 		}
-@@ -461,11 +462,12 @@ copy_reg (char const *src_name, char con
- 	    {
- 	      if (fsetfilecon (dest_desc, con) < 0)
- 		{
--		  error (0, errno,
--			 _("failed to set the security context of %s to %s"),
--			 quote_n (0, dst_name), quote_n (1, con));
-+      //do not show error when we not require security context (-a option)
- 		  if (x->require_preserve_context)
- 		    {
-+          error (0, errno,
-+		    	 _("failed to set the security context of %s to %s"),
-+    			 quote_n (0, dst_name), quote_n (1, con));
- 		      return_val = false;
- 		      freecon (con);
- 		      goto close_src_and_dst_desc;
-@@ -1714,11 +1716,12 @@ copy_internal (char const *src_name, cha
- 	{
- 	  if (setfscreatecon (con) < 0)
- 	    {
--	      error (0, errno,
--		     _("failed to set default file creation context to %s"),
--		     quote (con));
-+        //do not show error when we not require security context (-a option)
- 	      if (x->require_preserve_context)
- 		{
-+      error (0, errno,
-+		     _("failed to set default file creation context to %s"),
-+		     quote (con));
- 		  freecon (con);
- 		  return false;
- 		}
-@@ -1728,12 +1731,14 @@ copy_internal (char const *src_name, cha
-       else
- 	{
- 	  if (errno != ENOTSUP && errno != ENODATA)
--	    {
--	      error (0, errno,
--		     _("failed to get security context of %s"),
--		     quote (src_name));
--	      if (x->require_preserve_context)
--		return false;
-+	    { 
-+        //do not show error when we not require security context (-a option)
-+	      if (x->require_preserve_context) {
-+           error (0, errno,
-+    		   _("failed to get security context of %s"),
-+		       quote (src_name));
-+           return false;
-+        }
- 	    }
- 	}
-     }
 @@ -1819,6 +1824,8 @@ copy_internal (char const *src_name, cha
  	{
  	  /* Here, we are crossing a file system boundary and cp's -x option
@@ -147,15 +82,6 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -175,7 +176,7 @@ Copy SOURCE to DEST, or multiple SOURCE(
- Mandatory arguments to long options are mandatory for short options too.\n\
- "), stdout);
-       fputs (_("\
--  -a, --archive                same as -dpR\n\
-+  -a, --archive                same as -cdpR\n\
-       --backup[=CONTROL]       make a backup of each existing destination file\n\
-   -b                           like --backup but does not accept an argument\n\
-       --copy-contents          copy contents of special files when recursive\n\
 @@ -206,6 +207,9 @@ Mandatory arguments to long options are 
                                   all\n\
  "), stdout);
@@ -191,24 +117,6 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
  			   long_opts, NULL))
  	 != -1)
      {
-@@ -936,13 +942,15 @@ main (int argc, char **argv)
- 				     sparse_type_string, sparse_type);
- 	  break;
- 
--	case 'a':		/* Like -dpR. */
-+	case 'a':		/* Like -dpRc. */
- 	  x.dereference = DEREF_NEVER;
- 	  x.preserve_links = true;
- 	  x.preserve_ownership = true;
- 	  x.preserve_mode = true;
- 	  x.preserve_timestamps = true;
--	  x.require_preserve = true;
-+    x.require_preserve = true;
-+    if (selinux_enabled)
-+	     x.preserve_security_context = true;
- 	  x.recursive = true;
- 	  break;
- 
 @@ -956,6 +964,16 @@ main (int argc, char **argv)
  	  copy_contents = true;
  	  break;
@@ -288,15 +196,15 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
    x->require_preserve = false;
    x->require_preserve_context = false;
 +  x->set_security_context = false;
+   x->require_preserve_xattr = false;
    x->recursive = false;
    x->sparse_mode = SPARSE_AUTO;
-   x->symbolic_link = false;
 @@ -361,7 +362,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
--  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pt:TvS:Z:", long_options,
-+  while ((optc = getopt_long (argc, argv, "bcsDdg:m:o:pPt:TvS:Z:", long_options,
+-  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pt:TvS:Z:", long_options,
++  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pPt:TvS:Z:", long_options,
  			      NULL)) != -1)
      {
        switch (optc)
@@ -351,18 +259,6 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
    };
  
  /* Display letters and indicators for each filetype.
-@@ -182,8 +183,9 @@ struct fileinfo
-        exists, otherwise false.  */
-     bool linkok;
- 
--    /* For long listings, true if the file has an access control list,
--       or an SELinux security context.  */
-+    /* For long listings, true if the file has an access control list.
-+       Unlike with upstream not true for SELinux scontext(#430779) as
-+       this removes possibility to detect ACL via ls */
-     bool have_acl;
-   };
- 
 @@ -246,6 +248,7 @@ static void queue_directory (char const 
  static void sort_files (void);
  static void parse_ls_color (void);
@@ -513,26 +409,6 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  	{
  	  bool have_acl = false;
  	  int attr_len = (do_deref
-@@ -2708,9 +2735,7 @@ gobble_file (char const *name, enum file
- 	      f->scontext = xstrdup ("unlabeled");
- 	    }
- 
--	  if (err == 0)
--	    have_acl = ! STREQ ("unlabeled", f->scontext);
--	  else
-+	  if (err != 0)
- 	    {
- 	      f->scontext = UNKNOWN_SECURITY_CONTEXT;
- 
-@@ -2722,7 +2747,7 @@ gobble_file (char const *name, enum file
- 		err = 0;
- 	    }
- 
--	  if (err == 0 && ! have_acl && format == long_format)
-+	  if (err == 0 && format == long_format)
- 	    {
- 	      int n = file_has_acl (absolute_name, &f->stat);
- 	      err = (n < 0);
 @@ -3297,6 +3322,13 @@ print_current_files (void)
  	  print_long_format (sorted_file[i]);
  	  DIRED_PUTCHAR ('\n');
@@ -590,9 +466,9 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
 -  if (print_scontext)
 -    printf ("%*s ", format == with_commas ? 0 : scontext_width, f->scontext);
 -
-   print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f), f->linkok,
- 			   f->stat_ok, f->filetype, NULL);
- 
+   size_t width = print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f),
+ 					  f->linkok, f->stat_ok, f->filetype,
+ 					  NULL, f->stat.st_nlink, start_col);
 @@ -4077,9 +4109,6 @@ length_of_file_name_and_frills (const st
  					  output_block_size))
  		: block_size_width);
@@ -621,74 +497,6 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        fputs (_("\n\
-@@ -4541,3 +4577,67 @@ Exit status:\n\
-     }
-   exit (status);
- }
-+
-+static void
-+print_scontext_format (const struct fileinfo *f)
-+{
-+  char modebuf[12];
-+
-+  /* 7 fields that may require LONGEST_HUMAN_READABLE bytes,
-+     1 10-byte mode string,
-+     9 spaces, one following each of these fields, and
-+     1 trailing NUL byte.  */
-+
-+  char init_bigbuf[7 * LONGEST_HUMAN_READABLE + 10  + 9 + 1];
-+  char *buf = init_bigbuf;
-+  size_t bufsize = sizeof (init_bigbuf);
-+  size_t s;
-+  char *p;
-+  const char *fmt;
-+  char *user_name;
-+  char *group_name;
-+  int rv;
-+  char *scontext;
-+
-+  p = buf;
-+
-+  if ( print_scontext ) { /* zero means terse listing */
-+    filemodestring (&f->stat, modebuf);
-+    modebuf[10] = (f->have_acl ? '+' : ' ');
-+    modebuf[11] = '\0';
-+
-+    /* print mode */
-+
-+    (void) sprintf (p, "%s ", modebuf);
-+    p += strlen (p);
-+
-+    /* print standard user and group */
-+
-+    DIRED_FPUTS (buf, stdout, p - buf);
-+    format_user (f->stat.st_uid, owner_width, f->stat_ok);
-+    format_group (f->stat.st_gid, group_width, f->stat_ok);
-+    p = buf;
-+  }
-+
-+  (void) sprintf (p, "%-32s ", f->scontext ?: "");
-+  p += strlen (p);
-+ 
-+  DIRED_INDENT ();
-+  DIRED_FPUTS (buf, stdout, p - buf);
-+  print_name_with_quoting (f->name, f->stat.st_mode, f->linkok,
-+			   f->stat_ok, f->filetype, &dired_obstack);
-+ 
-+  if (f->filetype == symbolic_link) {
-+      if (f->linkname) {
-+	  DIRED_FPUTS_LITERAL (" -> ", stdout);
-+	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
-+				   f->stat_ok, f->filetype, NULL);
-+	  if (indicator_style != none)
-+	    print_type_indicator (f->stat_ok, f->linkmode, f->filetype);
-+      }
-+  }
-+  else {
-+    if (indicator_style != none)
-+      print_type_indicator (f->stat_ok, f->stat.st_mode, f->filetype);
-+  }
-+}
 diff -urp coreutils-7.0.orig/src/mkdir.c coreutils-7.0/src/mkdir.c
 --- coreutils-7.0.orig/src/mkdir.c	2008-08-24 22:58:15.000000000 +0200
 +++ coreutils-7.0/src/mkdir.c	2009-01-28 17:18:52.771914007 +0100
@@ -720,9 +528,9 @@ diff -urp coreutils-7.0.orig/src/mv.c coreutils-7.0/src/mv.c
    x->preserve_timestamps = true;
    x->preserve_security_context = selinux_enabled;
 +  x->set_security_context = false;
+   x->reduce_diagnostics = false;
    x->require_preserve = false;  /* FIXME: maybe make this an option */
    x->require_preserve_context = false;
-   x->preserve_xattr = true;
 diff -urp coreutils-7.0.orig/src/runcon.c coreutils-7.0/src/runcon.c
 --- coreutils-7.0.orig/src/runcon.c	2008-08-24 22:30:10.000000000 +0200
 +++ coreutils-7.0/src/runcon.c	2009-01-28 17:18:52.774914027 +0100
@@ -891,7 +699,7 @@ diff -urp coreutils-7.0.orig/src/stat.c coreutils-7.0/src/stat.c
 diff -urp coreutils-7.0.orig/tests/misc/selinux coreutils-7.0/tests/misc/selinux
 --- coreutils-7.0.orig/tests/misc/selinux	2008-09-27 19:28:54.000000000 +0200
 +++ coreutils-7.0/tests/misc/selinux	2009-01-28 17:18:52.776914041 +0100
-@@ -30,12 +30,10 @@ chcon $ctx f d p ||
+@@ -30,7 +30,7 @@ chcon $ctx f d p ||
  
  # inspect that context with both ls -Z and stat.
  for i in d f p; do
@@ -900,8 +708,76 @@ diff -urp coreutils-7.0.orig/tests/misc/selinux coreutils-7.0/tests/misc/selinux
    c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
  done
  
--# ensure that ls -l output includes the "+".
--c=`ls -l f|cut -c11`; test "$c" = + || fail=1
+diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
+--- coreutils-7.1-orig/src/ls.c	2009-02-23 17:11:01.000000000 +0100
++++ coreutils-7.1/src/ls.c	2009-02-23 17:14:27.000000000 +0100
+@@ -3467,6 +3467,69 @@ format_group_width (gid_t g)
+ }
  
- # Copy each to a new directory and ensure that context is preserved.
- cp -r --preserve=all d f p s1 || fail=1
+ 
++/* Print info about f in scontext format */
++static void
++print_scontext_format (const struct fileinfo *f)
++{
++  char modebuf[12];
++
++  /* 7 fields that may require LONGEST_HUMAN_READABLE bytes,
++     1 10-byte mode string,
++     9 spaces, one following each of these fields, and
++     1 trailing NUL byte.  */
++
++  char init_bigbuf[7 * LONGEST_HUMAN_READABLE + 10  + 9 + 1];
++  char *buf = init_bigbuf;
++  char *p;
++
++  p = buf;
++
++  if ( print_scontext ) { /* zero means terse listing */
++    filemodestring (&f->stat, modebuf);
++    if (! any_has_acl)
++      modebuf[10] = '\0';
++    else if (f->acl_type == ACL_T_SELINUX_ONLY)
++      modebuf[10] = '.';
++    else if (f->acl_type == ACL_T_YES)
++      modebuf[10] = '+';
++    modebuf[11] = '\0';
++
++    /* print mode */
++
++    (void) sprintf (p, "%s ", modebuf);
++    p += strlen (p);
++
++    /* print standard user and group */
++
++    DIRED_FPUTS (buf, stdout, p - buf);
++    format_user (f->stat.st_uid, owner_width, f->stat_ok);
++    format_group (f->stat.st_gid, group_width, f->stat_ok);
++    p = buf;
++  }
++
++  (void) sprintf (p, "%-32s ", f->scontext ?: "");
++  p += strlen (p);
++
++  DIRED_INDENT ();
++  DIRED_FPUTS (buf, stdout, p - buf);
++  size_t w = print_name_with_quoting (f->name, FILE_OR_LINK_MODE(f), f->linkok,
++			   f->stat_ok, f->filetype, &dired_obstack, f->stat.st_nlink, p - buf);
++
++  if (f->filetype == symbolic_link) {
++      if (f->linkname) {
++	  DIRED_FPUTS_LITERAL (" -> ", stdout);
++	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
++				   f->stat_ok, f->filetype, NULL, f->stat.st_nlink, (p-buf) + w + 4 );
++	  if (indicator_style != none)
++	    print_type_indicator (f->stat_ok, f->linkmode, f->filetype);
++      }
++  }
++  else {
++    if (indicator_style != none)
++      print_type_indicator (f->stat_ok, f->stat.st_mode, f->filetype);
++  }
++}
++
+ /* Print information about F in long format.  */
+ 
+ static void

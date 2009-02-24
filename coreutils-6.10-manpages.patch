@@ -11,15 +11,3 @@ diff -urNp coreutils-6.12-orig/src/md5sum.c coreutils-6.12/src/md5sum.c
        fputs (_("\
  \n\
  The following three options are useful only when verifying checksums:\n\
-diff -urNp coreutils-6.12-orig/src/sort.c coreutils-6.12/src/sort.c
---- coreutils-6.12-orig/src/sort.c	2008-10-21 16:04:50.000000000 +0200
-+++ coreutils-6.12/src/sort.c	2008-10-22 10:52:30.000000000 +0200
-@@ -412,7 +413,7 @@ With no FILE, or when FILE is -, read st
- \n\
- *** WARNING ***\n\
- The locale specified by the environment affects sort order.\n\
--Set LC_ALL=C to get the traditional sort order that uses\n\
-+Set LC_ALL=C (by \"export LC_LL=C\") to get the traditional sort order that uses\n\
- native byte values.\n\
- "), stdout );
-       emit_bug_reporting_address ();

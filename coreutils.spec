@@ -1,12 +1,13 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 7.0
-Release: 8%{?dist}
+Version: 7.1
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.lzma
+#Using .tar.gz tarball until xz utils will be in Fedora
+Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.gz
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.xterm
 Source103:  coreutils-DIR_COLORS.256color
@@ -18,17 +19,10 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-446294-lsexitstatuses.patch
-Patch2: coreutils-7.0-dftotal.patch
-Patch3: coreutils-7.0-expr-removebignumoptions.patch
-Patch4: coreutils-7.0-cp-mv-n.patch
-Patch5: coreutils-7.0-xattr.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
-#Patch102: coreutils-6.10-longoptions.patch
-Patch103: coreutils-6.11-sparc-shafix.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -54,15 +48,12 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
-Patch952: coreutils-463883-chcon-changes.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
 BuildRequires: gettext bison
 BuildRequires: texinfo >= 4.3
-BuildRequires: lzma
 BuildRequires: autoconf >= 2.58
-#dist-lzma required
 BuildRequires: automake >= 1.10.1
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires: libcap-devel >= 2.0.6
@@ -107,17 +98,10 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .lsexit
-%patch2 -p1 -b .dftotal
-%patch3 -p1 -b .bignum
-%patch4 -p1 -b .cpmvn
-%patch5 -p1 -b .xattr
 
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
-#%patch102 -p1 -b .longopt
-%patch103 -p1 -b .sparc
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -134,19 +118,16 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch915 -p1 -b .splitl
-#%patch916 -p1 -b .getfacl-exit-code
+%patch916 -p1 -b .getfacl-exit-code
 
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
-%patch952 -p1 -b .changeonly
 
 chmod a+x tests/misc/sort-mb-tests
-chmod a+x tests/misc/id-context
-chmod a+x tests/mv/mv-n
-chmod a+x tests/misc/xattr
 
 sed -i 's/1.10a/1.10.1/' configure.ac
+sed -i 's/dist-xz/dist-lzma/' configure.ac
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -328,6 +309,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Feb 24 2009 Ondrej Vasik <ovasik@redhat.com> - 7.1-1
+- New upstream release 7.1 (temporarily using tar.gz tarball
+  as there are no xz utils in Fedora), removed applied
+  patches, amended patches and LS_COLORS files
+
 * Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 7.0-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 

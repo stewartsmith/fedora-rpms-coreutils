@@ -331,7 +331,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
      error (EXIT_FAILURE, errno, "-");
 --- coreutils-6.8+/src/join.c.i18n	2007-01-14 15:41:28.000000000 +0000
 +++ coreutils-6.8+/src/join.c	2007-03-01 15:08:24.000000000 +0000
-@@ -23,17 +23,31 @@
+@@ -23,16 +23,30 @@
  #include <sys/types.h>
  #include <getopt.h>
  
@@ -347,7 +347,6 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +
  #include "system.h"
  #include "error.h"
- #include "hard-locale.h"
  #include "linebuffer.h"
 -#include "memcasecmp.h"
  #include "quote.h"
@@ -2841,11 +2840,11 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
     line of 1st page printed). */
 @@ -696,6 +756,7 @@
     -a|COLUMN|-m is a `space' and with the -J option a `tab'. */
- static char *col_sep_string = "";
+ static char *col_sep_string = (char *) "";
  static int col_sep_length = 0;
 +static int col_sep_width = 0;
- static char *column_separator = " ";
- static char *line_separator = "\t";
+ static char *column_separator = (char *) " ";
+ static char *line_separator = (char *) "\t";
  
 @@ -852,6 +913,13 @@
    col_sep_length = (int) strlen (optarg_S);
@@ -2927,7 +2926,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 @@ -1031,7 +1122,7 @@
  	  old_s = false;
  	  /* Reset an additional input of -s, -S dominates -s */
- 	  col_sep_string = "";
+ 	  col_sep_string = bad_cast ("");
 -	  col_sep_length = 0;
 +	  col_sep_length = col_sep_width = 0;
  	  use_col_separator = true;

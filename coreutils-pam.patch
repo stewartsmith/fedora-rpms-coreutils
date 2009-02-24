@@ -49,11 +49,11 @@
  #define DEFAULT_USER "root"
  
 +#ifndef USE_PAM
- char *crypt ();
+ char *crypt (char const *key, char const *salt);
 +#endif
- char *getusershell ();
- void endusershell ();
- void setusershell ();
+ char *getusershell (void);
+ void endusershell (void);
+ void setusershell (void);
  
  extern char **environ;
  

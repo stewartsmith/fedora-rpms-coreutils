@@ -107,15 +107,15 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
  # include <paths.h>
 @@ -149,6 +155,10 @@
  #ifndef USE_PAM
- char *crypt ();
+ char *crypt (char const *key, char const *salt);
  #endif
 +#ifndef CHECKPASSWD
 +#define CHECKPASSWD 1
 +#endif
 +
- char *getusershell ();
- void endusershell ();
- void setusershell ();
+ char *getusershell (void);
+ void endusershell (void);
+ void setusershell (void);
 @@ -156,7 +166,11 @@ void setusershell ();
  extern char **environ;
  
