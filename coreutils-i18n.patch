@@ -2735,7 +2735,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +
  #include "system.h"
  #include "error.h"
- #include "hard-locale.h"
+ #include "mbswidth.h"
 @@ -324,6 +350,18 @@
  #include "strftime.h"
  #include "xstrtol.h"

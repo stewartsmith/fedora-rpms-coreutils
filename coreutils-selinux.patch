@@ -1,7 +1,7 @@
-diff -urp coreutils-7.0.orig/configure.ac coreutils-7.0/configure.ac
---- coreutils-7.0.orig/configure.ac	2009-01-28 17:18:16.790672000 +0100
-+++ coreutils-7.0/configure.ac	2009-01-28 17:18:52.757913913 +0100
-@@ -51,6 +51,13 @@ AC_ARG_ENABLE(pam, dnl
+diff -urNp coreutils-7.1-orig/configure.ac coreutils-7.1/configure.ac
+--- coreutils-7.1-orig/configure.ac	2009-02-24 13:47:15.000000000 +0100
++++ coreutils-7.1/configure.ac	2009-02-24 13:47:15.000000000 +0100
+@@ -84,6 +84,13 @@ AC_ARG_ENABLE(pam, dnl
  LIB_PAM="-ldl -lpam -lpam_misc"
  AC_SUBST(LIB_PAM)])
  
@@ -15,18 +15,18 @@ diff -urp coreutils-7.0.orig/configure.ac coreutils-7.0/configure.ac
  AC_FUNC_FORK
  
  optional_bin_progs=
-diff -urp coreutils-7.0.orig/man/chcon.x coreutils-7.0/man/chcon.x
---- coreutils-7.0.orig/man/chcon.x	2008-03-07 17:05:53.000000000 +0100
-+++ coreutils-7.0/man/chcon.x	2009-01-28 17:18:52.759913926 +0100
+diff -urNp coreutils-7.1-orig/man/chcon.x coreutils-7.1/man/chcon.x
+--- coreutils-7.1-orig/man/chcon.x	2008-09-18 09:06:57.000000000 +0200
++++ coreutils-7.1/man/chcon.x	2009-02-24 13:47:15.000000000 +0100
 @@ -1,4 +1,4 @@
  [NAME]
 -chcon \- change file security context
 +chcon \- change file SELinux security context
  [DESCRIPTION]
  .\" Add any additional description here
-diff -urp coreutils-7.0.orig/man/runcon.x coreutils-7.0/man/runcon.x
---- coreutils-7.0.orig/man/runcon.x	2008-03-07 17:05:53.000000000 +0100
-+++ coreutils-7.0/man/runcon.x	2009-01-28 17:18:52.760913933 +0100
+diff -urNp coreutils-7.1-orig/man/runcon.x coreutils-7.1/man/runcon.x
+--- coreutils-7.1-orig/man/runcon.x	2008-09-18 09:06:57.000000000 +0200
++++ coreutils-7.1/man/runcon.x	2009-02-24 13:47:15.000000000 +0100
 @@ -1,5 +1,5 @@
  [NAME]
 -runcon \- run command with specified security context
@@ -34,22 +34,10 @@ diff -urp coreutils-7.0.orig/man/runcon.x coreutils-7.0/man/runcon.x
  [DESCRIPTION]
  Run COMMAND with completely-specified CONTEXT, or with current or
  transitioned security context modified by one or more of LEVEL,
-diff -urp coreutils-7.0.orig/src/chcon.c coreutils-7.0/src/chcon.c
---- coreutils-7.0.orig/src/chcon.c	2008-08-24 22:30:10.000000000 +0200
-+++ coreutils-7.0/src/chcon.c	2009-01-28 17:18:52.761913940 +0100
-@@ -366,7 +366,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
- "),
- 	program_name, program_name, program_name);
-       fputs (_("\
--Change the security context of each FILE to CONTEXT.\n\
-+Change the SELinux security context of each FILE to CONTEXT.\n\
- With --reference, change the security context of each FILE to that of RFILE.\n\
- \n\
-   -c, --changes          like verbose but report only when a change is made\n\
-diff -urp coreutils-7.0.orig/src/copy.c coreutils-7.0/src/copy.c
---- coreutils-7.0.orig/src/copy.c	2009-01-28 17:18:16.748671000 +0100
-+++ coreutils-7.0/src/copy.c	2009-01-28 17:18:52.762913947 +0100
-@@ -1819,6 +1824,8 @@ copy_internal (char const *src_name, cha
+diff -urNp coreutils-7.1-orig/src/copy.c coreutils-7.1/src/copy.c
+--- coreutils-7.1-orig/src/copy.c	2009-02-18 15:32:52.000000000 +0100
++++ coreutils-7.1/src/copy.c	2009-02-24 13:47:15.000000000 +0100
+@@ -1830,6 +1830,8 @@ copy_internal (char const *src_name, cha
  	{
  	  /* Here, we are crossing a file system boundary and cp's -x option
  	     is in effect: so don't copy the contents of this directory. */
@@ -58,10 +46,10 @@ diff -urp coreutils-7.0.orig/src/copy.c coreutils-7.0/src/copy.c
  	}
        else
  	{
-diff -urp coreutils-7.0.orig/src/copy.h coreutils-7.0/src/copy.h
---- coreutils-7.0.orig/src/copy.h	2009-01-28 17:18:16.748671000 +0100
-+++ coreutils-7.0/src/copy.h	2009-01-28 17:18:52.763913953 +0100
-@@ -141,6 +141,9 @@ struct cp_options
+diff -urNp coreutils-7.1-orig/src/copy.h coreutils-7.1/src/copy.h
+--- coreutils-7.1-orig/src/copy.h	2009-02-18 15:32:52.000000000 +0100
++++ coreutils-7.1/src/copy.h	2009-02-24 13:47:15.000000000 +0100
+@@ -140,6 +140,9 @@ struct cp_options
    bool preserve_mode;
    bool preserve_timestamps;
  
@@ -71,10 +59,10 @@ diff -urp coreutils-7.0.orig/src/copy.h coreutils-7.0/src/copy.h
    /* Enabled for mv, and for cp by the --preserve=links option.
       If true, attempt to preserve in the destination files any
       logical hard links between the source files.  If used with cp's
-diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
---- coreutils-7.0.orig/src/cp.c	2009-01-28 17:18:16.750671000 +0100
-+++ coreutils-7.0/src/cp.c	2009-01-28 17:20:29.109561384 +0100
-@@ -148,6 +148,7 @@ static struct option const long_opts[] =
+diff -urNp coreutils-7.1-orig/src/cp.c coreutils-7.1/src/cp.c
+--- coreutils-7.1-orig/src/cp.c	2009-02-18 15:32:52.000000000 +0100
++++ coreutils-7.1/src/cp.c	2009-02-24 13:47:15.000000000 +0100
+@@ -133,6 +133,7 @@ static struct option const long_opts[] =
    {"target-directory", required_argument, NULL, 't'},
    {"update", no_argument, NULL, 'u'},
    {"verbose", no_argument, NULL, 'v'},
@@ -82,7 +70,7 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -206,6 +207,9 @@ Mandatory arguments to long options are 
+@@ -191,6 +192,9 @@ Mandatory arguments to long options are 
                                   all\n\
  "), stdout);
        fputs (_("\
@@ -92,7 +80,7 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
        --parents                use full source file name under DIRECTORY\n\
  "), stdout);
-@@ -231,6 +235,7 @@ Mandatory arguments to long options are 
+@@ -216,6 +220,7 @@ Mandatory arguments to long options are 
                                   destination file is missing\n\
    -v, --verbose                explain what is being done\n\
    -x, --one-file-system        stay on this file system\n\
@@ -100,15 +88,15 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
  "), stdout);
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
-@@ -780,6 +785,7 @@ cp_option_init (struct cp_options *x)
+@@ -765,6 +770,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_timestamps = false;
    x->preserve_security_context = false;
    x->require_preserve_context = false;
 +  x->set_security_context = false;
    x->preserve_xattr = false;
+   x->reduce_diagnostics = false;
    x->require_preserve_xattr = false;
- 
-@@ -925,7 +931,7 @@ main (int argc, char **argv)
+@@ -911,7 +917,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
@@ -117,7 +105,7 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
  			   long_opts, NULL))
  	 != -1)
      {
-@@ -956,6 +964,16 @@ main (int argc, char **argv)
+@@ -945,6 +951,16 @@ main (int argc, char **argv)
  	  copy_contents = true;
  	  break;
  
@@ -134,7 +122,7 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
  	case 'd':
  	  x.preserve_links = true;
  	  x.dereference = DEREF_NEVER;
-@@ -1072,6 +1090,27 @@ main (int argc, char **argv)
+@@ -1054,6 +1070,27 @@ main (int argc, char **argv)
  	  x.one_file_system = true;
  	  break;
  
@@ -162,10 +150,22 @@ diff -urp coreutils-7.0.orig/src/cp.c coreutils-7.0/src/cp.c
  	case 'S':
  	  make_backups = true;
  	  backup_suffix_string = optarg;
-diff -urp coreutils-7.0.orig/src/id.c coreutils-7.0/src/id.c
---- coreutils-7.0.orig/src/id.c	2008-08-24 22:58:15.000000000 +0200
-+++ coreutils-7.0/src/id.c	2009-01-28 17:18:52.766913973 +0100
-@@ -106,7 +106,7 @@ int
+diff -urNp coreutils-7.1-orig/src/chcon.c coreutils-7.1/src/chcon.c
+--- coreutils-7.1-orig/src/chcon.c	2008-10-12 16:12:56.000000000 +0200
++++ coreutils-7.1/src/chcon.c	2009-02-24 13:47:15.000000000 +0100
+@@ -346,7 +346,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
+ "),
+ 	program_name, program_name, program_name);
+       fputs (_("\
+-Change the security context of each FILE to CONTEXT.\n\
++Change the SELinux security context of each FILE to CONTEXT.\n\
+ With --reference, change the security context of each FILE to that of RFILE.\n\
+ \n\
+   -h, --no-dereference   affect symbolic links instead of any referenced file\n\
+diff -urNp coreutils-7.1-orig/src/id.c coreutils-7.1/src/id.c
+--- coreutils-7.1-orig/src/id.c	2009-02-16 15:57:44.000000000 +0100
++++ coreutils-7.1/src/id.c	2009-02-24 13:47:15.000000000 +0100
+@@ -107,7 +107,7 @@ int
  main (int argc, char **argv)
  {
    int optc;
@@ -174,10 +174,10 @@ diff -urp coreutils-7.0.orig/src/id.c coreutils-7.0/src/id.c
  
    /* If true, output the list of all group IDs. -G */
    bool just_group_list = false;
-diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
---- coreutils-7.0.orig/src/install.c	2009-01-28 17:18:16.751671000 +0100
-+++ coreutils-7.0/src/install.c	2009-01-28 17:18:52.767913980 +0100
-@@ -152,11 +152,11 @@ static struct option const long_options[
+diff -urNp coreutils-7.1-orig/src/install.c coreutils-7.1/src/install.c
+--- coreutils-7.1-orig/src/install.c	2009-02-18 15:32:52.000000000 +0100
++++ coreutils-7.1/src/install.c	2009-02-24 13:47:15.000000000 +0100
+@@ -157,11 +157,11 @@ static struct option const long_options[
    {"no-target-directory", no_argument, NULL, 'T'},
    {"owner", required_argument, NULL, 'o'},
    {"preserve-timestamps", no_argument, NULL, 'p'},
@@ -191,15 +191,15 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
    {"strip", no_argument, NULL, 's'},
    {"strip-program", required_argument, NULL, STRIP_PROGRAM_OPTION},
    {"suffix", required_argument, NULL, 'S'},
-@@ -185,6 +185,7 @@ cp_option_init (struct cp_options *x)
-   x->preserve_timestamps = false;
+@@ -292,6 +292,7 @@ cp_option_init (struct cp_options *x)
+   x->reduce_diagnostics=false;
    x->require_preserve = false;
    x->require_preserve_context = false;
 +  x->set_security_context = false;
    x->require_preserve_xattr = false;
    x->recursive = false;
    x->sparse_mode = SPARSE_AUTO;
-@@ -361,7 +362,7 @@ main (int argc, char **argv)
+@@ -469,7 +470,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
@@ -208,7 +208,7 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
  			      NULL)) != -1)
      {
        switch (optc)
-@@ -428,6 +429,7 @@ main (int argc, char **argv)
+@@ -539,6 +540,7 @@ main (int argc, char **argv)
  	  no_target_directory = true;
  	  break;
  
@@ -216,7 +216,7 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
  	case PRESERVE_CONTEXT_OPTION:
  	  if ( ! selinux_enabled)
  	    {
-@@ -435,6 +437,10 @@ main (int argc, char **argv)
+@@ -546,6 +548,10 @@ main (int argc, char **argv)
  			     "this kernel is not SELinux-enabled"));
  	      break;
  	    }
@@ -227,7 +227,7 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
  	  x.preserve_security_context = true;
  	  use_default_selinux_context = false;
  	  break;
-@@ -446,6 +452,7 @@ main (int argc, char **argv)
+@@ -557,6 +563,7 @@ main (int argc, char **argv)
  	      break;
  	    }
  	  scontext = optarg;
@@ -235,7 +235,7 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
  	  use_default_selinux_context = false;
  	  break;
  	case_GETOPT_HELP_CHAR;
-@@ -850,8 +857,8 @@ Mandatory arguments to long options are 
+@@ -990,8 +997,8 @@ Mandatory arguments to long options are 
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
        fputs (_("\
@@ -246,10 +246,10 @@ diff -urp coreutils-7.0.orig/src/install.c coreutils-7.0/src/install.c
  "), stdout);
  
        fputs (HELP_OPTION_DESCRIPTION, stdout);
-diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
---- coreutils-7.0.orig/src/ls.c	2009-01-28 17:18:16.705671000 +0100
-+++ coreutils-7.0/src/ls.c	2009-01-28 17:18:52.770914000 +0100
-@@ -139,7 +139,8 @@ enum filetype
+diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
+--- coreutils-7.1-orig/src/ls.c	2009-02-20 19:34:02.000000000 +0100
++++ coreutils-7.1/src/ls.c	2009-02-24 13:47:15.000000000 +0100
+@@ -136,7 +136,8 @@ enum filetype
      symbolic_link,
      sock,
      whiteout,
@@ -259,7 +259,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
    };
  
  /* Display letters and indicators for each filetype.
-@@ -246,6 +248,7 @@ static void queue_directory (char const 
+@@ -253,6 +254,7 @@ static void queue_directory (char const 
  static void sort_files (void);
  static void parse_ls_color (void);
  void usage (int status);
@@ -267,7 +267,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  
  /* Initial size of hash table.
     Most hierarchies are likely to be shallower than this.  */
-@@ -315,7 +318,7 @@ static struct pending *pending_dirs;
+@@ -322,7 +324,7 @@ static struct pending *pending_dirs;
  
  static struct timespec current_time;
  
@@ -276,7 +276,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  static char UNKNOWN_SECURITY_CONTEXT[] = "?";
  
  /* Whether any of the files has an ACL.  This affects the width of the
-@@ -355,7 +358,9 @@ enum format
+@@ -362,7 +364,9 @@ enum format
      one_per_line,		/* -1 */
      many_per_line,		/* -C */
      horizontal,			/* -x */
@@ -287,7 +287,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
    };
  
  static enum format format;
-@@ -744,6 +749,9 @@ enum
+@@ -754,6 +758,9 @@ enum
    SHOW_CONTROL_CHARS_OPTION,
    SI_OPTION,
    SORT_OPTION,
@@ -297,7 +297,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
    TIME_OPTION,
    TIME_STYLE_OPTION
  };
-@@ -789,7 +797,9 @@ static struct option const long_options[
+@@ -799,7 +806,9 @@ static struct option const long_options[
    {"time-style", required_argument, NULL, TIME_STYLE_OPTION},
    {"color", optional_argument, NULL, COLOR_OPTION},
    {"block-size", required_argument, NULL, BLOCK_SIZE_OPTION},
@@ -308,7 +308,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
    {"author", no_argument, NULL, AUTHOR_OPTION},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-@@ -799,12 +809,12 @@ static struct option const long_options[
+@@ -809,12 +818,12 @@ static struct option const long_options[
  static char const *const format_args[] =
  {
    "verbose", "long", "commas", "horizontal", "across",
@@ -323,7 +323,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  };
  ARGMATCH_VERIFY (format_args, format_types);
  
-@@ -1251,7 +1261,7 @@ main (int argc, char **argv)
+@@ -1261,7 +1270,7 @@ main (int argc, char **argv)
  
    format_needs_stat = sort_type == sort_time || sort_type == sort_size
      || format == long_format
@@ -332,7 +332,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
      || print_block_size;
    format_needs_type = (! format_needs_stat
  		       && (recursive
-@@ -1282,7 +1292,7 @@ main (int argc, char **argv)
+@@ -1292,7 +1301,7 @@ main (int argc, char **argv)
      }
    else
      do
@@ -341,7 +341,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
      while (i < argc);
  
    if (cwd_n_used)
-@@ -1445,7 +1455,7 @@ decode_switches (int argc, char **argv)
+@@ -1455,7 +1464,7 @@ decode_switches (int argc, char **argv)
    ignore_mode = IGNORE_DEFAULT;
    ignore_patterns = NULL;
    hide_patterns = NULL;
@@ -350,7 +350,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  
    /* FIXME: put this in a function.  */
    {
-@@ -1827,13 +1837,27 @@ decode_switches (int argc, char **argv)
+@@ -1837,13 +1846,27 @@ decode_switches (int argc, char **argv)
  	  break;
  
  	case 'Z':
@@ -379,7 +379,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  	default:
  	  usage (LS_FAILURE);
  	}
-@@ -2547,8 +2571,10 @@ clear_files (void)
+@@ -2557,8 +2580,10 @@ clear_files (void)
        struct fileinfo *f = sorted_file[i];
        free (f->name);
        free (f->linkname);
@@ -392,7 +392,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
      }
  
    cwd_n_used = 0;
-@@ -2590,6 +2616,7 @@ gobble_file (char const *name, enum file
+@@ -2600,6 +2625,7 @@ gobble_file (char const *name, enum file
    memset (f, '\0', sizeof *f);
    f->stat.st_ino = inode;
    f->filetype = type;
@@ -400,16 +400,16 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
  
    if (command_line_arg
        || format_needs_stat
-@@ -2689,7 +2716,7 @@ gobble_file (char const *name, enum file
+@@ -2699,7 +2725,7 @@ gobble_file (char const *name, enum file
  
        f->stat_ok = true;
  
 -      if (format == long_format || print_scontext)
 +      if (format == long_format || format == security_format || print_scontext)
  	{
+ 	  bool have_selinux = false;
  	  bool have_acl = false;
- 	  int attr_len = (do_deref
-@@ -3297,6 +3322,13 @@ print_current_files (void)
+@@ -3312,6 +3338,13 @@ print_current_files (void)
  	  print_long_format (sorted_file[i]);
  	  DIRED_PUTCHAR ('\n');
  	}
@@ -423,295 +423,7 @@ diff -urp coreutils-7.0.orig/src/ls.c coreutils-7.0/src/ls.c
        break;
      }
  }
-@@ -3482,7 +3514,7 @@ print_long_format (const struct fileinfo
- 	 The latter is wrong when inode_number_width is zero.  */
-       p += strlen (p);
-     }
--
-+  
-   if (print_block_size)
-     {
-       char hbuf[LONGEST_HUMAN_READABLE + 1];
-@@ -3511,9 +3543,15 @@ print_long_format (const struct fileinfo
-      The latter is wrong when nlink_width is zero.  */
-   p += strlen (p);
- 
-+  if (print_scontext)
-+    {
-+      sprintf (p, "%-32s ", f->scontext ? f->scontext : "");
-+      p += strlen (p);
-+    }
-+
-   DIRED_INDENT ();
- 
--  if (print_owner | print_group | print_author | print_scontext)
-+  if (print_owner | print_group | print_author)
-     {
-       DIRED_FPUTS (buf, stdout, p - buf);
- 
-@@ -3526,9 +3564,6 @@ print_long_format (const struct fileinfo
-       if (print_author)
- 	format_user (f->stat.st_author, author_width, f->stat_ok);
- 
--      if (print_scontext)
--	format_user_or_group (f->scontext, 0, scontext_width);
--
-       p = buf;
-     }
- 
-@@ -3867,9 +3902,6 @@ print_file_name_and_frills (const struct
- 	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
- 			    ST_NBLOCKSIZE, output_block_size));
- 
--  if (print_scontext)
--    printf ("%*s ", format == with_commas ? 0 : scontext_width, f->scontext);
--
-   size_t width = print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f),
- 					  f->linkok, f->stat_ok, f->filetype,
- 					  NULL, f->stat.st_nlink, start_col);
-@@ -4077,9 +4109,6 @@ length_of_file_name_and_frills (const st
- 					  output_block_size))
- 		: block_size_width);
- 
--  if (print_scontext)
--    len += 1 + (format == with_commas ? strlen (f->scontext) : scontext_width);
--
-   quote_name (NULL, f->name, filename_quoting_options, &name_width);
-   len += name_width;
- 
-@@ -4510,9 +4539,16 @@ Mandatory arguments to long options are 
-   -w, --width=COLS           assume screen width instead of current value\n\
-   -x                         list entries by lines instead of by columns\n\
-   -X                         sort alphabetically by entry extension\n\
--  -Z, --context              print any SELinux security context of each file\n\
-   -1                         list one file per line\n\
- "), stdout);
-+      fputs(_("\nSELinux options:\n\n\
-+  --lcontext                 Display security context.   Enable -l. Lines\n\
-+                             will probably be too wide for most displays.\n\
-+  -Z, --context              Display security context so it fits on most\n\
-+                             displays.  Displays only mode, user, group,\n\
-+                             security context and file name.\n\
-+  --scontext                 Display only security context and file name.\n\
-+"), stdout);
-       fputs (HELP_OPTION_DESCRIPTION, stdout);
-       fputs (VERSION_OPTION_DESCRIPTION, stdout);
-       fputs (_("\n\
-diff -urp coreutils-7.0.orig/src/mkdir.c coreutils-7.0/src/mkdir.c
---- coreutils-7.0.orig/src/mkdir.c	2008-08-24 22:58:15.000000000 +0200
-+++ coreutils-7.0/src/mkdir.c	2009-01-28 17:18:52.771914007 +0100
-@@ -39,6 +39,7 @@
- static struct option const longopts[] =
- {
-   {GETOPT_SELINUX_CONTEXT_OPTION_DECL},
-+  {"context", required_argument, NULL, 'Z'},
-   {"mode", required_argument, NULL, 'm'},
-   {"parents", no_argument, NULL, 'p'},
-   {"verbose", no_argument, NULL, 'v'},
-diff -urp coreutils-7.0.orig/src/mknod.c coreutils-7.0/src/mknod.c
---- coreutils-7.0.orig/src/mknod.c	2008-09-27 19:28:54.000000000 +0200
-+++ coreutils-7.0/src/mknod.c	2009-01-28 17:18:52.772914014 +0100
-@@ -35,7 +35,7 @@
- 
- static struct option const longopts[] =
- {
--  {GETOPT_SELINUX_CONTEXT_OPTION_DECL},
-+  {GETOPT_SELINUX_CONTEXT_OPTION_DECL}, 
-   {"mode", required_argument, NULL, 'm'},
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-diff -urp coreutils-7.0.orig/src/mv.c coreutils-7.0/src/mv.c
---- coreutils-7.0.orig/src/mv.c	2009-01-28 17:18:16.752671000 +0100
-+++ coreutils-7.0/src/mv.c	2009-01-28 17:18:52.773914020 +0100
-@@ -138,6 +138,7 @@ cp_option_init (struct cp_options *x)
-   x->preserve_mode = true;
-   x->preserve_timestamps = true;
-   x->preserve_security_context = selinux_enabled;
-+  x->set_security_context = false;
-   x->reduce_diagnostics = false;
-   x->require_preserve = false;  /* FIXME: maybe make this an option */
-   x->require_preserve_context = false;
-diff -urp coreutils-7.0.orig/src/runcon.c coreutils-7.0/src/runcon.c
---- coreutils-7.0.orig/src/runcon.c	2008-08-24 22:30:10.000000000 +0200
-+++ coreutils-7.0/src/runcon.c	2009-01-28 17:18:52.774914027 +0100
-@@ -86,7 +86,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
-   or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n\
- "), program_name, program_name);
-       fputs (_("\
--Run a program in a different security context.\n\
-+Run a program in a different SELinux security context.\n\
- With neither CONTEXT nor COMMAND, print the current security context.\n\
- \n\
-   CONTEXT            Complete security context\n\
-diff -urp coreutils-7.0.orig/src/stat.c coreutils-7.0/src/stat.c
---- coreutils-7.0.orig/src/stat.c	2008-09-27 19:28:54.000000000 +0200
-+++ coreutils-7.0/src/stat.c	2009-01-28 17:18:52.775914034 +0100
-@@ -823,7 +823,7 @@ print_it (char const *format, char const
- 
- /* Stat the file system and print what we find.  */
- static bool
--do_statfs (char const *filename, bool terse, char const *format)
-+do_statfs (char const *filename, bool terse, bool secure, char const *format)
- {
-   STRUCT_STATVFS statfsbuf;
- 
-@@ -835,15 +835,31 @@ do_statfs (char const *filename, bool te
-     }
- 
-   if (format == NULL)
-+  {
-+    if (terse)
-     {
--      format = (terse
--		? "%n %i %l %t %s %S %b %f %a %c %d\n"
--		: "  File: \"%n\"\n"
--		"    ID: %-8i Namelen: %-7l Type: %T\n"
--		"Block size: %-10s Fundamental block size: %S\n"
--		"Blocks: Total: %-10b Free: %-10f Available: %a\n"
--		"Inodes: Total: %-10c Free: %d\n");
-+      if (secure)
-+        format = "%n %i %l %t %s %S %b %f %a %c %d %C\n";
-+   	  else
-+	      format = "%n %i %l %t %s %S %b %f %a %c %d\n";
-     }
-+    else
-+  	{
-+	    if (secure)
-+	      format = "  File: \"%n\"\n"
-+	        "    ID: %-8i Namelen: %-7l Type: %T\n"
-+  	      "Block size: %-10s Fundamental block size: %S\n"
-+	        "Blocks: Total: %-10b Free: %-10f Available: %a\n"
-+	        "Inodes: Total: %-10c Free: %d\n"
-+	        "   S_Context: %C\n";
-+  	  else
-+	      format = "  File: \"%n\"\n"
-+	        "    ID: %-8i Namelen: %-7l Type: %T\n"
-+	        "Block size: %-10s Fundamental block size: %S\n"
-+	        "Blocks: Total: %-10b Free: %-10f Available: %a\n"
-+  	      "Inodes: Total: %-10c Free: %d\n";
-+     }
-+  }
- 
-   print_it (format, filename, print_statfs, &statfsbuf);
-   return true;
-@@ -851,7 +867,7 @@ do_statfs (char const *filename, bool te
- 
- /* stat the file and print what we find */
- static bool
--do_stat (char const *filename, bool terse, char const *format)
-+do_stat (char const *filename, bool terse, bool secure, char const *format)
- {
-   struct stat statbuf;
- 
-@@ -864,9 +880,12 @@ do_stat (char const *filename, bool ters
-   if (format == NULL)
-     {
-       if (terse)
--	{
--	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
--	}
-+      {
-+        if (secure)
-+  	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
-+  	   else
-+	       format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
-+      }
-       else
- 	{
- 	  /* Temporary hack to match original output until conditional
-@@ -883,12 +902,22 @@ do_stat (char const *filename, bool ters
- 	    }
- 	  else
- 	    {
--	      format =
--		"  File: %N\n"
--		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
--		"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
--		"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
--		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
-+        if (secure)
-+           format =
-+  		  "  File: %N\n"
-+	  	  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+  		  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
-+	  	  " Device type: %t,%T\n"
-+ 		    "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+  		  "   S_Context: %C\n"
-+	  	  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
-+        else 
-+	        format =
-+    		"  File: %N\n"
-+	    	"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+  	  	"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
-+  	  	"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+    		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
- 	    }
- 	}
-     }
-@@ -909,6 +938,7 @@ usage (int status)
- Display file or file system status.\n\
- \n\
-   -L, --dereference     follow links\n\
-+  -Z, --context         print the SELinux security context \n\
-   -f, --file-system     display file system status instead of file status\n\
- "), stdout);
-       fputs (_("\
-@@ -993,6 +1023,7 @@ main (int argc, char *argv[])
-   int i;
-   bool fs = false;
-   bool terse = false;
-+  bool secure = false;
-   char *format = NULL;
-   bool ok = true;
- 
-@@ -1032,13 +1063,13 @@ main (int argc, char *argv[])
- 	  terse = true;
- 	  break;
- 
--	case 'Z':  /* FIXME: remove in 2010 */
--	  /* Ignore, for compatibility with distributions
--	     that implemented this before upstream.
--	     But warn of impending removal.  */
--	  error (0, 0,
--		 _("the --context (-Z) option is obsolete and will be removed\n"
--		   "in a future release"));
-+	case 'Z':
-+    if((is_selinux_enabled()>0))
-+	    secure = 1;
-+	  else {
-+	    error (0, 0, _("Kernel is not SELinux enabled"));
-+	    usage (EXIT_FAILURE);
-+	  }
- 	  break;
- 
- 	case_GETOPT_HELP_CHAR;
-@@ -1058,8 +1089,8 @@ main (int argc, char *argv[])
- 
-   for (i = optind; i < argc; i++)
-     ok &= (fs
--	   ? do_statfs (argv[i], terse, format)
--	   : do_stat (argv[i], terse, format));
-+	   ? do_statfs (argv[i], terse, secure, format)
-+	   : do_stat (argv[i], terse, secure, format));
- 
-   exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
- }
-diff -urp coreutils-7.0.orig/tests/misc/selinux coreutils-7.0/tests/misc/selinux
---- coreutils-7.0.orig/tests/misc/selinux	2008-09-27 19:28:54.000000000 +0200
-+++ coreutils-7.0/tests/misc/selinux	2009-01-28 17:18:52.776914041 +0100
-@@ -30,7 +30,7 @@ chcon $ctx f d p ||
- 
- # inspect that context with both ls -Z and stat.
- for i in d f p; do
--  c=`ls -dogZ $i|cut -d' ' -f3`; test x$c = x$ctx || fail=1
-+  c=`ls -dogZ $i|cut -d' ' -f5`; test x$c = x$ctx || fail=1
-   c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
- done
- 
-diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
---- coreutils-7.1-orig/src/ls.c	2009-02-23 17:11:01.000000000 +0100
-+++ coreutils-7.1/src/ls.c	2009-02-23 17:14:27.000000000 +0100
-@@ -3467,6 +3467,69 @@ format_group_width (gid_t g)
+@@ -3434,6 +3467,69 @@ format_group_width (gid_t g)
  }
  
  
@@ -781,3 +493,288 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  /* Print information about F in long format.  */
  
  static void
+@@ -3499,7 +3595,7 @@ print_long_format (const struct fileinfo
+ 	 The latter is wrong when inode_number_width is zero.  */
+       p += strlen (p);
+     }
+-
++  
+   if (print_block_size)
+     {
+       char hbuf[LONGEST_HUMAN_READABLE + 1];
+@@ -3528,9 +3624,15 @@ print_long_format (const struct fileinfo
+      The latter is wrong when nlink_width is zero.  */
+   p += strlen (p);
+ 
++  if (print_scontext)
++    {
++      sprintf (p, "%-32s ", f->scontext ? f->scontext : "");
++      p += strlen (p);
++    }
++
+   DIRED_INDENT ();
+ 
+-  if (print_owner | print_group | print_author | print_scontext)
++  if (print_owner | print_group | print_author)
+     {
+       DIRED_FPUTS (buf, stdout, p - buf);
+ 
+@@ -3543,9 +3645,6 @@ print_long_format (const struct fileinfo
+       if (print_author)
+ 	format_user (f->stat.st_author, author_width, f->stat_ok);
+ 
+-      if (print_scontext)
+-	format_user_or_group (f->scontext, 0, scontext_width);
+-
+       p = buf;
+     }
+ 
+@@ -3888,9 +3987,6 @@ print_file_name_and_frills (const struct
+ 	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
+ 			    ST_NBLOCKSIZE, output_block_size));
+ 
+-  if (print_scontext)
+-    printf ("%*s ", format == with_commas ? 0 : scontext_width, f->scontext);
+-
+   size_t width = print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f),
+ 					  f->linkok, f->stat_ok, f->filetype,
+ 					  NULL, f->stat.st_nlink, start_col);
+@@ -4105,9 +4201,6 @@ length_of_file_name_and_frills (const st
+ 					  output_block_size))
+ 		: block_size_width);
+ 
+-  if (print_scontext)
+-    len += 1 + (format == with_commas ? strlen (f->scontext) : scontext_width);
+-
+   quote_name (NULL, f->name, filename_quoting_options, &name_width);
+   len += name_width;
+ 
+@@ -4538,9 +4631,16 @@ Mandatory arguments to long options are 
+   -w, --width=COLS           assume screen width instead of current value\n\
+   -x                         list entries by lines instead of by columns\n\
+   -X                         sort alphabetically by entry extension\n\
+-  -Z, --context              print any SELinux security context of each file\n\
+   -1                         list one file per line\n\
+ "), stdout);
++      fputs(_("\nSELinux options:\n\n\
++  --lcontext                 Display security context.   Enable -l. Lines\n\
++                             will probably be too wide for most displays.\n\
++  -Z, --context              Display security context so it fits on most\n\
++                             displays.  Displays only mode, user, group,\n\
++                             security context and file name.\n\
++  --scontext                 Display only security context and file name.\n\
++"), stdout);
+       fputs (HELP_OPTION_DESCRIPTION, stdout);
+       fputs (VERSION_OPTION_DESCRIPTION, stdout);
+       fputs (_("\n\
+diff -urNp coreutils-7.1-orig/src/mkdir.c coreutils-7.1/src/mkdir.c
+--- coreutils-7.1-orig/src/mkdir.c	2008-10-19 21:47:57.000000000 +0200
++++ coreutils-7.1/src/mkdir.c	2009-02-24 13:47:15.000000000 +0100
+@@ -38,6 +38,7 @@
+ static struct option const longopts[] =
+ {
+   {GETOPT_SELINUX_CONTEXT_OPTION_DECL},
++  {"context", required_argument, NULL, 'Z'},
+   {"mode", required_argument, NULL, 'm'},
+   {"parents", no_argument, NULL, 'p'},
+   {"verbose", no_argument, NULL, 'v'},
+diff -urNp coreutils-7.1-orig/src/mknod.c coreutils-7.1/src/mknod.c
+--- coreutils-7.1-orig/src/mknod.c	2008-09-22 16:01:21.000000000 +0200
++++ coreutils-7.1/src/mknod.c	2009-02-24 13:47:15.000000000 +0100
+@@ -35,7 +35,7 @@
+ 
+ static struct option const longopts[] =
+ {
+-  {GETOPT_SELINUX_CONTEXT_OPTION_DECL},
++  {GETOPT_SELINUX_CONTEXT_OPTION_DECL}, 
+   {"mode", required_argument, NULL, 'm'},
+   {GETOPT_HELP_OPTION_DECL},
+   {GETOPT_VERSION_OPTION_DECL},
+diff -urNp coreutils-7.1-orig/src/mv.c coreutils-7.1/src/mv.c
+--- coreutils-7.1-orig/src/mv.c	2009-02-18 15:32:52.000000000 +0100
++++ coreutils-7.1/src/mv.c	2009-02-24 13:47:15.000000000 +0100
+@@ -122,6 +122,7 @@ cp_option_init (struct cp_options *x)
+   x->preserve_mode = true;
+   x->preserve_timestamps = true;
+   x->preserve_security_context = selinux_enabled;
++  x->set_security_context = false;
+   x->reduce_diagnostics = false;
+   x->require_preserve = false;  /* FIXME: maybe make this an option */
+   x->require_preserve_context = false;
+diff -urNp coreutils-7.1-orig/src/runcon.c coreutils-7.1/src/runcon.c
+--- coreutils-7.1-orig/src/runcon.c	2008-09-18 09:06:57.000000000 +0200
++++ coreutils-7.1/src/runcon.c	2009-02-24 13:47:15.000000000 +0100
+@@ -86,7 +86,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
+   or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n\
+ "), program_name, program_name);
+       fputs (_("\
+-Run a program in a different security context.\n\
++Run a program in a different SELinux security context.\n\
+ With neither CONTEXT nor COMMAND, print the current security context.\n\
+ \n\
+   CONTEXT            Complete security context\n\
+diff -urNp coreutils-7.1-orig/src/stat.c coreutils-7.1/src/stat.c
+--- coreutils-7.1-orig/src/stat.c	2009-01-27 22:11:25.000000000 +0100
++++ coreutils-7.1/src/stat.c	2009-02-24 13:47:15.000000000 +0100
+@@ -825,7 +825,7 @@ print_it (char const *format, char const
+ 
+ /* Stat the file system and print what we find.  */
+ static bool
+-do_statfs (char const *filename, bool terse, char const *format)
++do_statfs (char const *filename, bool terse, bool secure, char const *format)
+ {
+   STRUCT_STATVFS statfsbuf;
+ 
+@@ -837,15 +837,31 @@ do_statfs (char const *filename, bool te
+     }
+ 
+   if (format == NULL)
++  {
++    if (terse)
+     {
+-      format = (terse
+-		? "%n %i %l %t %s %S %b %f %a %c %d\n"
+-		: "  File: \"%n\"\n"
+-		"    ID: %-8i Namelen: %-7l Type: %T\n"
+-		"Block size: %-10s Fundamental block size: %S\n"
+-		"Blocks: Total: %-10b Free: %-10f Available: %a\n"
+-		"Inodes: Total: %-10c Free: %d\n");
++      if (secure)
++        format = "%n %i %l %t %s %S %b %f %a %c %d %C\n";
++   	  else
++	      format = "%n %i %l %t %s %S %b %f %a %c %d\n";
+     }
++    else
++  	{
++	    if (secure)
++	      format = "  File: \"%n\"\n"
++	        "    ID: %-8i Namelen: %-7l Type: %T\n"
++  	      "Block size: %-10s Fundamental block size: %S\n"
++	        "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++	        "Inodes: Total: %-10c Free: %d\n"
++	        "   S_Context: %C\n";
++  	  else
++	      format = "  File: \"%n\"\n"
++	        "    ID: %-8i Namelen: %-7l Type: %T\n"
++	        "Block size: %-10s Fundamental block size: %S\n"
++	        "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++  	      "Inodes: Total: %-10c Free: %d\n";
++     }
++  }
+ 
+   print_it (format, filename, print_statfs, &statfsbuf);
+   return true;
+@@ -853,7 +869,7 @@ do_statfs (char const *filename, bool te
+ 
+ /* stat the file and print what we find */
+ static bool
+-do_stat (char const *filename, bool terse, char const *format)
++do_stat (char const *filename, bool terse, bool secure, char const *format)
+ {
+   struct stat statbuf;
+ 
+@@ -866,9 +882,12 @@ do_stat (char const *filename, bool ters
+   if (format == NULL)
+     {
+       if (terse)
+-	{
+-	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
+-	}
++      {
++        if (secure)
++  	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
++  	   else
++	       format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
++      }
+       else
+ 	{
+ 	  /* Temporary hack to match original output until conditional
+@@ -885,12 +904,22 @@ do_stat (char const *filename, bool ters
+ 	    }
+ 	  else
+ 	    {
+-	      format =
+-		"  File: %N\n"
+-		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
+-		"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
+-		"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
+-		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
++        if (secure)
++           format =
++  		  "  File: %N\n"
++	  	  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++  		  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
++	  	  " Device type: %t,%T\n"
++ 		    "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++  		  "   S_Context: %C\n"
++	  	  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
++        else 
++	        format =
++    		"  File: %N\n"
++	    	"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++  	  	"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
++  	  	"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++    		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
+ 	    }
+ 	}
+     }
+@@ -911,6 +940,7 @@ usage (int status)
+ Display file or file system status.\n\
+ \n\
+   -L, --dereference     follow links\n\
++  -Z, --context         print the SELinux security context \n\
+   -f, --file-system     display file system status instead of file status\n\
+ "), stdout);
+       fputs (_("\
+@@ -995,6 +1025,7 @@ main (int argc, char *argv[])
+   int i;
+   bool fs = false;
+   bool terse = false;
++  bool secure = false;
+   char *format = NULL;
+   bool ok = true;
+ 
+@@ -1034,13 +1065,13 @@ main (int argc, char *argv[])
+ 	  terse = true;
+ 	  break;
+ 
+-	case 'Z':  /* FIXME: remove in 2010 */
+-	  /* Ignore, for compatibility with distributions
+-	     that implemented this before upstream.
+-	     But warn of impending removal.  */
+-	  error (0, 0,
+-		 _("the --context (-Z) option is obsolete and will be removed\n"
+-		   "in a future release"));
++	case 'Z':
++    if((is_selinux_enabled()>0))
++	    secure = 1;
++	  else {
++	    error (0, 0, _("Kernel is not SELinux enabled"));
++	    usage (EXIT_FAILURE);
++	  }
+ 	  break;
+ 
+ 	case_GETOPT_HELP_CHAR;
+@@ -1060,8 +1091,8 @@ main (int argc, char *argv[])
+ 
+   for (i = optind; i < argc; i++)
+     ok &= (fs
+-	   ? do_statfs (argv[i], terse, format)
+-	   : do_stat (argv[i], terse, format));
++	   ? do_statfs (argv[i], terse, secure, format)
++	   : do_stat (argv[i], terse, secure, format));
+ 
+   exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
+ }
+diff -urNp coreutils-7.1-orig/tests/misc/selinux coreutils-7.1/tests/misc/selinux
+--- coreutils-7.1-orig/tests/misc/selinux	2008-10-25 14:20:26.000000000 +0200
++++ coreutils-7.1/tests/misc/selinux	2009-02-24 13:47:15.000000000 +0100
+@@ -30,7 +30,7 @@ chcon $ctx f d p ||
+ 
+ # inspect that context with both ls -Z and stat.
+ for i in d f p; do
+-  c=`ls -dogZ $i|cut -d' ' -f3`; test x$c = x$ctx || fail=1
++  c=`ls -dogZ $i|cut -d' ' -f5`; test x$c = x$ctx || fail=1
+   c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
+ done
+ 
