@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -309,6 +309,11 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Feb 25 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-2
+- workaround libcap issue with broken headers (#483548)
+- fix gnulib testsuite failure (4x77 (skip) is not
+  77(skip) ;) )
+
 * Tue Feb 24 2009 Ondrej Vasik <ovasik@redhat.com> - 7.1-1
 - New upstream release 7.1 (temporarily using tar.gz tarball
   as there are no xz utils in Fedora), removed applied
