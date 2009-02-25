@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-7.1-sort-endoffields.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -98,6 +99,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .endfield
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -309,6 +311,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Feb 25 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-3
+- fix couple of bugs (including #485715) in sort with
+  determining end of fields(upstream)
+
 * Wed Feb 25 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-2
 - workaround libcap issue with broken headers (#483548)
 - fix gnulib testsuite failure (4x77 (skip) is not
