@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.1
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -311,6 +311,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Feb 26 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-4
+- fix showing ACL's for ls -Z (#487374), fix automatic
+  column width for it as well
+
 * Wed Feb 25 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-3
 - fix couple of bugs (including #485715) in sort with
   determining end of fields(upstream)

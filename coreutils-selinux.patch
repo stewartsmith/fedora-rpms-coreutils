@@ -323,7 +323,26 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  };
  ARGMATCH_VERIFY (format_args, format_types);
  
-@@ -1261,7 +1270,7 @@ main (int argc, char **argv)
+@@ -1194,7 +1203,8 @@ main (int argc, char **argv)
+       /* Avoid following symbolic links when possible.  */
+       if (is_colored (C_ORPHAN)
+ 	  || (is_colored (C_EXEC) && color_symlink_as_referent)
+-	  || (is_colored (C_MISSING) && format == long_format))
++	  || (is_colored (C_MISSING) && (format == long_format
++	      || format == security_format)))
+ 	check_symlink_color = true;
+ 
+       /* If the standard output is a controlling terminal, watch out
+@@ -1241,7 +1251,7 @@ main (int argc, char **argv)
+   if (dereference == DEREF_UNDEFINED)
+     dereference = ((immediate_dirs
+ 		    || indicator_style == classify
+-		    || format == long_format)
++		    || format == long_format || format == security_format)
+ 		   ? DEREF_NEVER
+ 		   : DEREF_COMMAND_LINE_SYMLINK_TO_DIR);
+ 
+@@ -1261,7 +1271,7 @@ main (int argc, char **argv)
  
    format_needs_stat = sort_type == sort_time || sort_type == sort_size
      || format == long_format
@@ -332,7 +351,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
      || print_block_size;
    format_needs_type = (! format_needs_stat
  		       && (recursive
-@@ -1292,7 +1301,7 @@ main (int argc, char **argv)
+@@ -1292,7 +1302,7 @@ main (int argc, char **argv)
      }
    else
      do
@@ -341,7 +360,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
      while (i < argc);
  
    if (cwd_n_used)
-@@ -1455,7 +1464,7 @@ decode_switches (int argc, char **argv)
+@@ -1455,7 +1465,7 @@ decode_switches (int argc, char **argv)
    ignore_mode = IGNORE_DEFAULT;
    ignore_patterns = NULL;
    hide_patterns = NULL;
@@ -350,7 +369,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  
    /* FIXME: put this in a function.  */
    {
-@@ -1837,13 +1846,27 @@ decode_switches (int argc, char **argv)
+@@ -1837,13 +1847,27 @@ decode_switches (int argc, char **argv)
  	  break;
  
  	case 'Z':
@@ -379,7 +398,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  	default:
  	  usage (LS_FAILURE);
  	}
-@@ -2557,8 +2580,10 @@ clear_files (void)
+@@ -2557,8 +2581,10 @@ clear_files (void)
        struct fileinfo *f = sorted_file[i];
        free (f->name);
        free (f->linkname);
@@ -392,7 +411,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
      }
  
    cwd_n_used = 0;
-@@ -2600,6 +2625,7 @@ gobble_file (char const *name, enum file
+@@ -2600,6 +2626,7 @@ gobble_file (char const *name, enum file
    memset (f, '\0', sizeof *f);
    f->stat.st_ino = inode;
    f->filetype = type;
@@ -400,7 +419,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  
    if (command_line_arg
        || format_needs_stat
-@@ -2699,7 +2725,7 @@ gobble_file (char const *name, enum file
+@@ -2699,7 +2726,7 @@ gobble_file (char const *name, enum file
  
        f->stat_ok = true;
  
@@ -409,7 +428,43 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  	{
  	  bool have_selinux = false;
  	  bool have_acl = false;
-@@ -3312,6 +3338,13 @@ print_current_files (void)
+@@ -2732,7 +2760,7 @@ gobble_file (char const *name, enum file
+ 		err = 0;
+ 	    }
+ 
+-	  if (err == 0 && format == long_format)
++	  if (err == 0 && (format == long_format || format == security_format))
+ 	    {
+ 	      int n = file_has_acl (absolute_name, &f->stat);
+ 	      err = (n < 0);
+@@ -2751,7 +2779,8 @@ gobble_file (char const *name, enum file
+ 	}
+ 
+       if (S_ISLNK (f->stat.st_mode)
+-	  && (format == long_format || check_symlink_color))
++	  && (format == long_format || format == security_format
++	      || check_symlink_color))
+ 	{
+ 	  char *linkname;
+ 	  struct stat linkstats;
+@@ -2771,6 +2800,7 @@ gobble_file (char const *name, enum file
+ 		 command line are automatically traced if not being
+ 		 listed as files.  */
+ 	      if (!command_line_arg || format == long_format
++		  || format == security_format
+ 		  || !S_ISDIR (linkstats.st_mode))
+ 		{
+ 		  /* Get the linked-to file's mode for the filetype indicator
+@@ -2810,7 +2840,7 @@ gobble_file (char const *name, enum file
+ 	    block_size_width = len;
+ 	}
+ 
+-      if (format == long_format)
++      if (format == long_format || format == security_format)
+ 	{
+ 	  if (print_owner)
+ 	    {
+@@ -3312,6 +3341,13 @@ print_current_files (void)
  	  print_long_format (sorted_file[i]);
  	  DIRED_PUTCHAR ('\n');
  	}
@@ -423,7 +478,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
        break;
      }
  }
-@@ -3434,6 +3467,69 @@ format_group_width (gid_t g)
+@@ -3434,6 +3470,69 @@ format_group_width (gid_t g)
  }
  
  
@@ -493,16 +548,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  /* Print information about F in long format.  */
  
  static void
-@@ -3499,7 +3595,7 @@ print_long_format (const struct fileinfo
- 	 The latter is wrong when inode_number_width is zero.  */
-       p += strlen (p);
-     }
--
-+  
-   if (print_block_size)
-     {
-       char hbuf[LONGEST_HUMAN_READABLE + 1];
-@@ -3528,9 +3624,15 @@ print_long_format (const struct fileinfo
+@@ -3528,9 +3627,15 @@ print_long_format (const struct fileinfo
       The latter is wrong when nlink_width is zero.  */
    p += strlen (p);
  
@@ -519,7 +565,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
      {
        DIRED_FPUTS (buf, stdout, p - buf);
  
-@@ -3543,9 +3645,6 @@ print_long_format (const struct fileinfo
+@@ -3543,9 +3648,6 @@ print_long_format (const struct fileinfo
        if (print_author)
  	format_user (f->stat.st_author, author_width, f->stat_ok);
  
@@ -529,7 +575,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
        p = buf;
      }
  
-@@ -3888,9 +3987,6 @@ print_file_name_and_frills (const struct
+@@ -3888,9 +3990,6 @@ print_file_name_and_frills (const struct
  	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
  			    ST_NBLOCKSIZE, output_block_size));
  
@@ -539,7 +585,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
    size_t width = print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f),
  					  f->linkok, f->stat_ok, f->filetype,
  					  NULL, f->stat.st_nlink, start_col);
-@@ -4105,9 +4201,6 @@ length_of_file_name_and_frills (const st
+@@ -4105,9 +4204,6 @@ length_of_file_name_and_frills (const st
  					  output_block_size))
  		: block_size_width);
  
@@ -549,7 +595,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
    quote_name (NULL, f->name, filename_quoting_options, &name_width);
    len += name_width;
  
-@@ -4538,9 +4631,16 @@ Mandatory arguments to long options are 
+@@ -4538,9 +4634,16 @@ Mandatory arguments to long options are 
    -w, --width=COLS           assume screen width instead of current value\n\
    -x                         list entries by lines instead of by columns\n\
    -X                         sort alphabetically by entry extension\n\
