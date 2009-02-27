@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.1
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,7 @@ Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-7.1-sort-endoffields.patch
+Patch2: coreutils-7.1-cp-recursiveinfloop.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -100,6 +101,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .endfield
+%patch2 -p1 -b .recinfloop
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -311,6 +313,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Feb 27 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-5
+- fix infinite loop in recursive cp (upstream, introduced
+  by 7.1)
+
 * Thu Feb 26 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-4
 - fix showing ACL's for ls -Z (#487374), fix automatic
   column width for it as well
