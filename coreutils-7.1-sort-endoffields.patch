@@ -65,7 +65,7 @@ diff -urNp coreutils-7.1-orig/tests/misc/sort coreutils-7.1/tests/misc/sort
 --- coreutils-7.1-orig/tests/misc/sort	2009-01-27 22:11:25.000000000 +0100
 +++ coreutils-7.1/tests/misc/sort	2009-02-25 16:21:48.000000000 +0100
 @@ -24,6 +24,10 @@ my $prog = 'sort';
-  # Turn off localization of executable's output.
+ # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
  
 +my $mb_locale = $ENV{LOCALE_FR_UTF8};
