@@ -1938,7 +1938,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
        if (newlim)
  	lim = newlim;
      }
-@@ -1384,6 +1570,107 @@
+@@ -1384,6 +1570,113 @@
    return ptr;
  }
  
@@ -1951,6 +1951,9 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +  int i;
 +  size_t mblength;
 +  mbstate_t state;
++
++  if (echar == 0)
++    eword++; /* skip all of end field. */
 +
 +  memset (&state, '\0', sizeof(mbstate_t));
 +
@@ -2020,24 +2023,27 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +    }
 +# endif
 +
-+  /* If we're skipping leading blanks, don't start counting characters
-+   *      until after skipping past any leading blanks.  */
-+  if (key->skipsblanks)
-+    while (ptr < lim && ismbblank (ptr, lim - ptr, &mblength))
-+      ptr += mblength;
++  if (echar != 0)
++  {
++    /* If we're skipping leading blanks, don't start counting characters
++     *      until after skipping past any leading blanks.  */
++    if (key->skipsblanks)
++      while (ptr < lim && ismbblank (ptr, lim - ptr, &mblength))
++        ptr += mblength;
 +
-+  memset (&state, '\0', sizeof(mbstate_t));
++    memset (&state, '\0', sizeof(mbstate_t));
 +
-+  /* Advance PTR by ECHAR (if possible), but no further than LIM.  */
-+  for (i = 0; i < echar; i++)
-+    {
-+      GET_BYTELEN_OF_CHAR (lim, ptr, mblength, state);
++    /* Advance PTR by ECHAR (if possible), but no further than LIM.  */
++    for (i = 0; i < echar; i++)
++     {
++        GET_BYTELEN_OF_CHAR (lim, ptr, mblength, state);
 +
-+      if (ptr + mblength > lim)
-+	break;
-+      else
-+	ptr += mblength;
-+    }
++        if (ptr + mblength > lim)
++  	break;
++        else
++	  ptr += mblength;
++      }
++  }
 +
 +  return ptr;
 +}

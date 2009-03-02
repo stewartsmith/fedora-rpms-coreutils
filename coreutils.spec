@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -313,6 +313,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Mar 02 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-6
+- fix sort bugs (including #485715) for multibyte locales
+  as well
 * Fri Feb 27 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-5
 - fix infinite loop in recursive cp (upstream, introduced
   by 7.1)
