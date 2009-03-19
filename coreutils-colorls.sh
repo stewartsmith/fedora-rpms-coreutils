@@ -2,7 +2,7 @@
 
 #when USER_LS_COLORS defined do not override user LS_COLORS, but use them.
 if [ -z "$USER_LS_COLORS" ]; then
-  
+
   alias ll='ls -l' 2>/dev/null
   alias l.='ls -d .*' 2>/dev/null
 
