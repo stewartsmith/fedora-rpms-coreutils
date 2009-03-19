@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.1
-Release: 6%{?dist}
+Release: 7{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -9,7 +9,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 #Using .tar.gz tarball until xz utils will be in Fedora
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.gz
 Source101:  coreutils-DIR_COLORS
-Source102:  coreutils-DIR_COLORS.xterm
+Source102:  coreutils-DIR_COLORS.lightbgcolor
 Source103:  coreutils-DIR_COLORS.256color
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
@@ -50,6 +50,7 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
+Patch952: coreutils-cp-a-xattrs.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -127,6 +128,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+%patch952 -p1 -b .xattrs
 
 chmod a+x tests/misc/sort-mb-tests
 
@@ -202,7 +204,7 @@ for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
-install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.xterm
+install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.lightbgcolor
 install -p -c -m644 %SOURCE103 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.256color
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
@@ -313,9 +315,18 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Mar 19 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-7
+- do not ship /etc/DIR_COLORS.xterm - as many terminals
+  use TERM xterm and black background as default - making
+  ls color output unreadable
+- shipping /etc/DIR_COLORS.lightbgcolor instead of it for
+  light(white/gray) backgrounds
+- try to preserve xattrs in cp -a when possible
+
 * Mon Mar 02 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-6
 - fix sort bugs (including #485715) for multibyte locales
   as well
+
 * Fri Feb 27 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-5
 - fix infinite loop in recursive cp (upstream, introduced
   by 7.1)
