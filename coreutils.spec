@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 7.1
-Release: 7%{?dist}
+Version: 7.2
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,8 +19,6 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-7.1-sort-endoffields.patch
-Patch2: coreutils-7.1-cp-recursiveinfloop.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -50,7 +48,6 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
-Patch952: coreutils-7.1-cp-a-xattrs.patch
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -101,8 +98,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .endfield
-%patch2 -p1 -b .recinfloop
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -128,7 +123,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
-%patch952 -p1 -b .xattrs
 
 chmod a+x tests/misc/sort-mb-tests
 
@@ -315,6 +309,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Tue Mar 31 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-1
+- New upstream bugfix release 7.2
+- removed applied patches
+
 * Thu Mar 19 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-7
 - do not ship /etc/DIR_COLORS.xterm - as many terminals
   use TERM xterm and black background as default - making
