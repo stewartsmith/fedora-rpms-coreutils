@@ -407,7 +407,7 @@
 --- coreutils-7.1/configure.ac.pam
 +++ coreutils-7.1/configure.ac
 @@ -44,6 +44,13 @@
-     [enable compile-time and run-time bounds-checking, and some warnings])
+   AC_DEFINE([GNULIB_PORTCHECK], [1], [enable some gnulib portability checks])
  fi
  
 +dnl Give the chance to enable PAM

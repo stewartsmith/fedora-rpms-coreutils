@@ -312,6 +312,7 @@ fi
 * Tue Mar 31 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-1
 - New upstream bugfix release 7.2
 - removed applied patches
+- temporarily disable strverscmp failing gnulib test
 
 * Thu Mar 19 2009 Ondrej Vasik <ovasik@redhat.com> 7.1-7
 - do not ship /etc/DIR_COLORS.xterm - as many terminals
