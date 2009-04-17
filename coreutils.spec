@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -48,6 +48,9 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
+
+Patch960: coreutils-silentmv.patch
+
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -123,6 +126,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+
+%patch960 -p1 -b .silentmv
 
 chmod a+x tests/misc/sort-mb-tests
 
@@ -309,6 +314,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Apr 17 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-2
+- make mv xattr support failures silent (as is done for
+  cp -a) - #496142
+
 * Tue Mar 31 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-1
 - New upstream bugfix release 7.2
 - removed applied patches

@@ -1,0 +1,12 @@
+diff -urNp coreutils-7.2-orig/src/mv.c coreutils-7.2/src/mv.c
+--- coreutils-7.2-orig/src/mv.c	2009-04-17 11:48:39.000000000 +0200
++++ coreutils-7.2/src/mv.c	2009-04-17 11:49:17.000000000 +0200
+@@ -117,7 +117,7 @@ cp_option_init (struct cp_options *x)
+   x->preserve_timestamps = true;
+   x->preserve_security_context = selinux_enabled;
+   x->set_security_context = false;
+-  x->reduce_diagnostics = false;
++  x->reduce_diagnostics = true;
+   x->require_preserve = false;  /* FIXME: maybe make this an option */
+   x->require_preserve_context = false;
+   x->preserve_xattr = true;
