@@ -433,7 +433,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +
 +  memset (&state, 0, sizeof (mbstate_t));
 +
-+  if (ptr == lim)
++  if (ptr >= lim)
 +    return;
 +
 +  if (tab != NULL)
@@ -464,7 +464,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +		}
 +	    }
 +
-+	  if (sep == lim)
++	  if (sep >= lim)
 +	    break;
 +
 +	  extract_field (line, ptr, sep - ptr);
@@ -505,7 +505,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +	  mblength = (mblength < 1) ? 1 : mblength;
 +
 +	  sep = ptr + mblength;
-+	  while (sep != lim)
++	  while (sep < lim)
 +	    {
 +	      state_bak = state;
 +	      mblength = mbrtowc (&wc, sep, lim - sep + 1, &state);
@@ -524,7 +524,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +	    }
 +
 +	  extract_field (line, ptr, sep - ptr);
-+	  if (sep == lim)
++	  if (sep >= lim)
 +	    return;
 +
 +	  state_bak = state;
@@ -538,7 +538,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +	  mblength = (mblength < 1) ? 1 : mblength;
 +
 +	  ptr = sep + mblength;
-+	  while (ptr != lim)
++	  while (ptr < lim)
 +	    {
 +	      state_bak = state;
 +	      mblength = mbrtowc (&wc, ptr, lim - ptr + 1, &state);
@@ -556,7 +556,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +	      ptr += mblength;
 +	    }
 +	}
-+      while (ptr != lim);
++      while (ptr < lim);
 +    }
 +
 +  extract_field (line, ptr, lim - ptr);

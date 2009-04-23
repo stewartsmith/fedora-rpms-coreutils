@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -314,6 +314,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Apr 23 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-3
+- fix segfaults in join (i18n patch) when using multibyte
+  locales(#497368)
+
 * Fri Apr 17 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-2
 - make mv xattr support failures silent (as is done for
   cp -a) - #496142
