@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 7.2
-Release: 3%{?dist}
+Version: 7.4
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -48,9 +48,6 @@ Patch916: coreutils-getfacl-exit-code.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
-
-Patch960: coreutils-silentmv.patch
-
 
 BuildRequires: libselinux-devel >= 1.25.6-1
 BuildRequires: libacl-devel
@@ -127,12 +124,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-%patch960 -p1 -b .silentmv
-
 chmod a+x tests/misc/sort-mb-tests
-
-sed -i 's/1.10a/1.10.1/' configure.ac
-sed -i 's/dist-xz/dist-lzma/' configure.ac
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -314,6 +306,9 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon May 25 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-1
+- new upstream release 7.4, removed applied patches
+
 * Thu Apr 23 2009 Ondrej Vasik <ovasik@redhat.com> 7.2-3
 - fix segfaults in join (i18n patch) when using multibyte
   locales(#497368)

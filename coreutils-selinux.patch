@@ -177,20 +177,6 @@ diff -urNp coreutils-7.1-orig/src/id.c coreutils-7.1/src/id.c
 diff -urNp coreutils-7.1-orig/src/install.c coreutils-7.1/src/install.c
 --- coreutils-7.1-orig/src/install.c	2009-02-18 15:32:52.000000000 +0100
 +++ coreutils-7.1/src/install.c	2009-02-24 13:47:15.000000000 +0100
-@@ -157,11 +157,11 @@ static struct option const long_options[
-   {"no-target-directory", no_argument, NULL, 'T'},
-   {"owner", required_argument, NULL, 'o'},
-   {"preserve-timestamps", no_argument, NULL, 'p'},
--  {"preserve-context", no_argument, NULL, PRESERVE_CONTEXT_OPTION},
-+  {"preserve-context", no_argument, NULL, 'P'},
-   /* Continue silent support for --preserve_context until Jan 2008. FIXME-obs
-      After that, FIXME-obs: warn in, say, late 2008, and disable altogether
-      a year or two later.  */
--  {"preserve_context", no_argument, NULL, PRESERVE_CONTEXT_OPTION},
-+  {"preserve_context", no_argument, NULL, 'P'},
-   {"strip", no_argument, NULL, 's'},
-   {"strip-program", required_argument, NULL, STRIP_PROGRAM_OPTION},
-   {"suffix", required_argument, NULL, 'S'},
 @@ -292,6 +292,7 @@ cp_option_init (struct cp_options *x)
    x->reduce_diagnostics=false;
    x->require_preserve = false;
@@ -209,9 +195,9 @@ diff -urNp coreutils-7.1-orig/src/install.c coreutils-7.1/src/install.c
      {
        switch (optc)
 @@ -539,6 +540,7 @@ main (int argc, char **argv)
- 	  no_target_directory = true;
- 	  break;
- 
+ 	  error (0, 0, _("WARNING: --preserve_context is deprecated; "
+ 			 "use --preserve-context instead"));
+ 	  /* fall through */
 +  case 'P':
  	case PRESERVE_CONTEXT_OPTION:
  	  if ( ! selinux_enabled)
