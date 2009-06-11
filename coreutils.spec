@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -23,6 +23,7 @@ Source203:  coreutils-runuser-l.pamd
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
+Patch102: coreutils-7.4-sttytcsadrain.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -102,6 +103,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
+%patch102 -p1 -b .tcsadrain
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -306,6 +308,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Jun 16 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-2
+- temporarily workaround probable kernel issue with
+  TCSADRAIN(#504798)
+
 * Mon May 25 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-1
 - new upstream release 7.4, removed applied patches
 
