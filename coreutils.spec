@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -308,6 +308,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Mon Jul 06 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-3
+- do not ignore sort's version sort for multibyte locales
+  (#509688)
+
 * Thu Jun 16 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-2
 - temporarily workaround probable kernel issue with
   TCSADRAIN(#504798)
