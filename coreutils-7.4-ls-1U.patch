@@ -1,0 +1,92 @@
+diff -ruNp coreutils-7.4.orig/src/ls.c coreutils-7.4/src/ls.c
+--- coreutils-7.4.orig/src/ls.c	2009-08-05 10:14:46.397545653 +0200
++++ coreutils-7.4/src/ls.c	2009-08-05 10:20:47.564858256 +0200
+@@ -2480,6 +2480,19 @@ print_dir (char const *name, char const 
+       DEV_INO_PUSH (dir_stat.st_dev, dir_stat.st_ino);
+     }
+ 
++  if (recursive | print_dir_name)
++    {
++      if (!first)
++	DIRED_PUTCHAR ('\n');
++      first = false;
++      DIRED_INDENT ();
++      PUSH_CURRENT_DIRED_POS (&subdired_obstack);
++      dired_pos += quote_name (stdout, realname ? realname : name,
++			       dirname_quoting_options, NULL);
++      PUSH_CURRENT_DIRED_POS (&subdired_obstack);
++      DIRED_FPUTS_LITERAL (":\n", stdout);
++    }
++
+   /* Read the directory entries, and insert the subfiles into the `cwd_file'
+      table.  */
+ 
+@@ -2519,7 +2532,8 @@ print_dir (char const *name, char const 
+ 		 ls uses constant memory while processing the entries of
+ 		 this directory.  Useful when there are many (millions)
+ 		 of entries in a directory.  */
+-	      if (format == one_per_line && sort_type == sort_none)
++	      if (format == one_per_line && sort_type == sort_none
++		      && !print_block_size && !recursive)
+ 		{
+ 		  /* We must call sort_files in spite of
+ 		     "sort_type == sort_none" for its initialization
+@@ -2555,19 +2569,6 @@ print_dir (char const *name, char const 
+   if (recursive)
+     extract_dirs_from_files (name, command_line_arg);
+ 
+-  if (recursive | print_dir_name)
+-    {
+-      if (!first)
+-	DIRED_PUTCHAR ('\n');
+-      first = false;
+-      DIRED_INDENT ();
+-      PUSH_CURRENT_DIRED_POS (&subdired_obstack);
+-      dired_pos += quote_name (stdout, realname ? realname : name,
+-			       dirname_quoting_options, NULL);
+-      PUSH_CURRENT_DIRED_POS (&subdired_obstack);
+-      DIRED_FPUTS_LITERAL (":\n", stdout);
+-    }
+-
+   if (format == long_format || print_block_size)
+     {
+       const char *p;
+diff -ruNp coreutils-7.4.orig/tests/misc/ls-misc coreutils-7.4/tests/misc/ls-misc
+--- coreutils-7.4.orig/tests/misc/ls-misc	2009-04-24 14:50:28.000000000 +0200
++++ coreutils-7.4/tests/misc/ls-misc	2009-08-05 10:20:47.564858256 +0200
+@@ -18,6 +18,7 @@
+ use strict;
+ 
+ (my $program_name = $0) =~ s|.*/||;
++my $prog = 'ls';
+ 
+ # Turn off localization of executable's output.
+ @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
+@@ -224,6 +225,18 @@ my @Tests =
+       {PRE => sub { mk_file @v_files }},
+       {POST => sub { unlink @v_files }},
+       ],
++
++     # Test for the ls -1U bug fixed in coreutils-7.5.
++     # It is triggered only with -1U and with two or more arguments,
++     # at least one of which is a nonempty directory.
++     ['multi-arg-U1', '-U1 d no-such',
++      {OUT => "d:\nf\n"},
++      {ERR_SUBST=>'s/ch:.*/ch:/'},
++      {ERR => "$prog: cannot access no-such:\n"},
++      $mkdir_reg,
++      $rmdir_reg,
++      {EXIT => 2},
++     ],
+     );
+ 
+ # Start with an unset LS_COLORS environment variable.
+@@ -232,8 +245,6 @@ delete $ENV{LS_COLORS};
+ my $save_temps = $ENV{SAVE_TEMPS};
+ my $verbose = $ENV{VERBOSE};
+ 
+-my $prog = 'ls';
+-
+ setuid_setup;
+ my $fail = run_tests ($program_name, $prog, \@Tests, $save_temps, $verbose);
+ $fail

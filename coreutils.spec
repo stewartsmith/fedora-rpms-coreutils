@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,8 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-7.4-ls-1U.patch
+Patch2: coreutils-7.4-install-SELinux.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -99,6 +101,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .ls-1U
+%patch2 -p1 -b .install-SELinux
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -308,6 +312,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Wed Aug 05 2009 Kamil Dudka <kdudka@redhat.com> - 7.4-5
+- ls -1U with two or more arguments (or with -R or -s) works properly again
+- install runs faster again with SELinux enabled (#479502)
+
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 7.4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
