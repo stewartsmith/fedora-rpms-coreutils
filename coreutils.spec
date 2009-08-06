@@ -61,7 +61,7 @@ BuildRequires: automake >= 1.10.1
 BuildRequires: libcap-devel >= 2.0.6
 BuildRequires: libattr-devel
 BuildRequires: attr
-BuildRequires: xz-utils
+BuildRequires: xz
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
@@ -320,7 +320,7 @@ fi
 %changelog
 * Thu Aug 06 2009 Ondrej Vasik <ovasik@redhat.com> - 7.4-6
 - do process install-info only with info files present(#515970)
-- BuildRequire for xz-utils, use xz tarball
+- BuildRequires for xz, use xz tarball
 
 * Wed Aug 05 2009 Kamil Dudka <kdudka@redhat.com> - 7.4-5
 - ls -1U with two or more arguments (or with -R or -s) works properly again
