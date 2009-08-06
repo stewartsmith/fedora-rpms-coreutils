@@ -1,13 +1,12 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-#Using .tar.gz tarball until xz utils will be in Fedora
-Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.gz
+Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.lightbgcolor
 Source103:  coreutils-DIR_COLORS.256color
@@ -62,6 +61,7 @@ BuildRequires: automake >= 1.10.1
 BuildRequires: libcap-devel >= 2.0.6
 BuildRequires: libattr-devel
 BuildRequires: attr
+BuildRequires: xz-utils
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
@@ -247,19 +247,25 @@ rm -rf $RPM_BUILD_ROOT
 # coreutils.info. else their postun'll be run too late
 # and install-info will fail badly because of duplicates
 for file in sh-utils textutils fileutils; do
+  if [ -f %{_infodir}/$file.info ]; then
     /sbin/install-info --delete %{_infodir}/$file.info --dir=%{_infodir}/dir &> /dev/null || :
+  fi
 done
 
 %preun
 if [ $1 = 0 ]; then
+  if [ -f %{_infodir}/%{name}.info ]; then
     /sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
+  fi
 fi
 
 %post
 /bin/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
   %{_infodir}/dir.rpmmodify || exit 0
     /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-/sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
+if [ -f %{_infodir}/%{name}.info ]; then
+  /sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
+fi
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
@@ -312,6 +318,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Thu Aug 06 2009 Ondrej Vasik <ovasik@redhat.com> - 7.4-6
+- do process install-info only with info files present(#515970)
+- BuildRequire for xz-utils, use xz tarball
+
 * Wed Aug 05 2009 Kamil Dudka <kdudka@redhat.com> - 7.4-5
 - ls -1U with two or more arguments (or with -R or -s) works properly again
 - install runs faster again with SELinux enabled (#479502)
