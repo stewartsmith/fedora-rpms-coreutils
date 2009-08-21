@@ -58,7 +58,7 @@ RESET 0
 DIR 00;34	# directory
 LINK 00;36	# symbolic link (If you set this to 'target' instead of a
 		# numerical value, the color is as for the file pointed to.)
-HARDLINK 44;37 # regular file with more than one link
+MULTIHARDLINK 00 # regular file with more than one link
 FIFO 40;33	# pipe
 SOCK 00;35	# socket
 DOOR 00;35	# door
@@ -94,12 +94,16 @@ EXEC 00;32
 .taz 00;31
 .lzh 00;31
 .lzma 00;31
+.tlz 00;31
+.txz 00;31
 .zip 00;31
 .z   00;31
 .Z   00;31
 .dz  00;31
 .gz  00;31
+.xz  00;31
 .bz2 00;31
+.tbz 00;31
 .tbz2 00;31
 .bz  00;31
 .tz  00;31
@@ -112,7 +116,6 @@ EXEC 00;32
 .cpio 00;31
 .7z  00;31
 .rz  00;31
-.xz  00;31
 # image formats (magenta)
 .jpg 00;35
 .jpeg 00;35
@@ -127,6 +130,8 @@ EXEC 00;32
 .tif 00;35
 .tiff 00;35
 .png 00;35
+.svg 00;35
+.svgz 00;35
 .mng 00;35
 .pcx 00;35
 .mov 00;35
@@ -154,13 +159,13 @@ EXEC 00;32
 .xcf 00;35
 .xwd 00;35
 .yuv 00;35
-.svg 00;35
-.svgz 00;35
+
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .axv 00;35
 .anx 00;35
 .ogv 00;35
 .ogx 00;35
+
 # audio formats (cyan)
 .aac 00;36
 .au 00;36
@@ -173,6 +178,7 @@ EXEC 00;32
 .ogg 00;36
 .ra 00;36
 .wav 00;36
+
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .axa 00;36
 .oga 00;36

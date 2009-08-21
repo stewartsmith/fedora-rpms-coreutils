@@ -1,0 +1,26 @@
+diff -urNp coreutils-7.5-orig/tests/cp/preserve-slink-time coreutils-7.5/tests/cp/preserve-slink-time
+--- coreutils-7.5-orig/tests/cp/preserve-slink-time	2009-08-15 17:25:32.000000000 +0200
++++ coreutils-7.5/tests/cp/preserve-slink-time	2009-08-21 12:45:41.000000000 +0200
+@@ -28,6 +28,10 @@ grep '^#define HAVE_UTIMENSAT' "$CONFIG_
+ 
+ ln -s no-such dangle || framework_failure
+ 
++cp -Pp dangle d3 2>error
++grep 'Function not implemented' error > /dev/null &&
++  skip_test_ 'utimensat function not implemented'
++
+ # If the current file system lacks sub-second resolution, sleep for 2s to
+ # ensure that the times on the copy are different from those of the original.
+ case $(stat --format=%y dangle) in
+diff -urNp coreutils-7.5-orig/tests/mv/part-symlink coreutils-7.5/tests/mv/part-symlink
+--- coreutils-7.5-orig/tests/mv/part-symlink	2009-08-15 17:25:32.000000000 +0200
++++ coreutils-7.5/tests/mv/part-symlink	2009-08-21 12:52:13.000000000 +0200
+@@ -201,6 +201,8 @@ cat <<\EOF > $expected
+ 
+ EOF
+ 
++grep 'Function not implemented' $actual > /dev/null &&
++  skip_test_ 'utimensat function not implemented'
+ # Redirect to stderr, since stdout is already taken.
+ compare $expected $actual 1>&2 || fail=1
+ 

@@ -23,6 +23,7 @@ Source203:  coreutils-runuser-l.pamd
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
 Patch102: coreutils-7.4-sttytcsadrain.patch
+Patch103: coreutils-7.5-kojiutimensatskip.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -59,7 +60,6 @@ BuildRequires: automake >= 1.10.1
 BuildRequires: libcap-devel >= 2.0.6
 BuildRequires: libattr-devel
 BuildRequires: attr
-BuildRequires: xz
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
@@ -73,6 +73,7 @@ Requires(post): grep
 %{?!nopam:Requires: pam >= 0.66-12}
 Requires(post): libcap >= 2.0.6
 Requires:       ncurses
+Requires: %{name}-libs = %{version}-%{release}
 
 # Require a C library that doesn't put LC_TIME files in our way.
 Conflicts: glibc < 2.2
@@ -95,6 +96,14 @@ Conflicts: tetex < 1.0.7-66
 These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
+%package libs
+Summary: Libraries for %{name}
+Group: System Environment/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description libs
+Libraries for coreutils package.
+
 %prep
 %setup -q
 
@@ -104,6 +113,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
 %patch102 -p1 -b .tcsadrain
+%patch103 -p1 -b .kojiutimensat
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -313,10 +323,19 @@ fi
 %_sbindir/chroot
 /sbin/runuser
 
+%files libs
+%defattr(-, root, root, -)
+%{_libdir}/coreutils
+
 %changelog
 * Fri Aug 21 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-1
 - New upstream release 7.5, remove already applied patches,
-  defuzz few others  
+  defuzz few others, xz in default set(by dependencies),
+  so no explicit br required
+- skip two new tests on system with insufficient utimensat
+  support(e.g. koji)
+- libstdbuf.so in separate coreutils-libs subpackage
+- update /etc/DIRCOLORS*
 
 * Thu Aug 06 2009 Ondrej Vasik <ovasik@redhat.com> - 7.4-6
 - do process install-info only with info files present(#515970)

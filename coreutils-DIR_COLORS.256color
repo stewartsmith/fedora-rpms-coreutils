@@ -55,7 +55,7 @@ RESET 0 # reset to "normal" color
 DIR 01;38;5;27	# directory
 LINK 01;38;5;51	# symbolic link (If you set this to 'target' instead of a
 		# numerical value, the color is as for the file pointed to.)
-HARDLINK 44;38;5;15; # regular file with more than one link
+MULTIHARDLINK 44;38;5;15; # regular file with more than one link
 FIFO 40;38;5;11	# pipe
 SOCK 01;38;5;13	# socket
 DOOR 01;38;5;5	# door
@@ -91,12 +91,16 @@ EXEC 01;38;5;34
 .taz 01;38;5;9
 .lzh 01;38;5;9
 .lzma 01;38;5;9
+.tlz 01;38;5;9
+.txz 01;38;5;9
 .zip 01;38;5;9
 .z   01;38;5;9
 .Z   01;38;5;9
 .dz  01;38;5;9
 .gz  01;38;5;9
+.xz  01;38;5;9
 .bz2 01;38;5;9
+.tbz 01;38;5;9
 .tbz2 01;38;5;9
 .bz  01;38;5;9
 .tz  01;38;5;9
@@ -109,7 +113,7 @@ EXEC 01;38;5;34
 .cpio 01;38;5;9
 .7z  01;38;5;9
 .rz  01;38;5;9
-.xz  01;38;5;9
+
 # image formats (magenta)
 .jpg 01;38;5;13
 .jpeg 01;38;5;13
@@ -124,6 +128,8 @@ EXEC 01;38;5;34
 .tif 01;38;5;13
 .tiff 01;38;5;13
 .png 01;38;5;13
+.svg 01;38;5;13
+.svgz 01;38;5;13
 .mng 01;38;5;13
 .pcx 01;38;5;13
 .mov 01;38;5;13
@@ -151,13 +157,13 @@ EXEC 01;38;5;34
 .xcf 01;38;5;13
 .xwd 01;38;5;13
 .yuv 01;38;5;13
-.svg 01;38;5;13
-.svgz 01;38;5;13
+
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .axv 01;38;5;13
 .anx 01;38;5;13
 .ogv 01;38;5;13
 .ogx 01;38;5;13
+
 # audio formats (cyan)
 .aac 01;38;5;45
 .au 01;38;5;45
@@ -170,6 +176,7 @@ EXEC 01;38;5;34
 .ogg 01;38;5;45
 .ra 01;38;5;45
 .wav 01;38;5;45
+
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .axa 01;38;5;45
 .oga 01;38;5;45
