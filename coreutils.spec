@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 7.4
-Release: 6%{?dist}
+Version: 7.5
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,8 +18,6 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-7.4-ls-1U.patch
-Patch2: coreutils-7.4-install-SELinux.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -101,8 +99,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .ls-1U
-%patch2 -p1 -b .install-SELinux
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -318,6 +314,10 @@ fi
 /sbin/runuser
 
 %changelog
+* Fri Aug 21 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-1
+- New upstream release 7.5, remove already applied patches,
+  defuzz few others  
+
 * Thu Aug 06 2009 Ondrej Vasik <ovasik@redhat.com> - 7.4-6
 - do process install-info only with info files present(#515970)
 - BuildRequires for xz, use xz tarball

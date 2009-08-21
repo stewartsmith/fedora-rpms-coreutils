@@ -2089,7 +2089,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
    while (blanks[to_uchar (*a)])
      a++;
 @@ -1510,6 +1813,25 @@
-   return strnumcmp (a, b, decimal_point, thousands_sep);
+ 	  : strnumcmp (a, b, decimal_point, thousands_sep));
  }
  
 +#if HAVE_MBRTOWC
@@ -2202,7 +2202,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 -keycompare (const struct line *a, const struct line *b)
 +keycompare_uni (const struct line *a, const struct line *b)
  {
-   struct keyfield const *key = keylist;
+   struct keyfield *key = keylist;
  
 @@ -1875,6 +2265,181 @@
    return key->reverse ? -diff : diff;

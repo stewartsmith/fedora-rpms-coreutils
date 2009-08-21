@@ -7,10 +7,10 @@ diff -urNp coreutils-7.2-orig/gnulib-tests/gnulib.mk coreutils-7.2/gnulib-tests/
  
 -TESTS += test-memchr
 -check_PROGRAMS += test-memchr
--EXTRA_DIST += test-memchr.c
+-EXTRA_DIST += test-memchr.c zerosize-ptr.h
 +#TESTS += test-memchr
 +#check_PROGRAMS += test-memchr
-+#EXTRA_DIST += test-memchr.c
++#EXTRA_DIST += test-memchr.c zerosize-ptr.h
  
  ## end   gnulib module memchr-tests
  

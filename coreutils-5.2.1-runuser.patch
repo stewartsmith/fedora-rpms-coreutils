@@ -44,13 +44,13 @@ diff -urNp coreutils-7.0.orig/README coreutils-7.0/README
    link ln logname ls md5sum mkdir mkfifo mknod mktemp mv nice nl nohup
    od paste pathchk pinky pr printenv printf ptx pwd readlink rm rmdir
 -  runcon seq sha1sum sha224sum sha256sum sha384sum sha512sum shred shuf
--  sleep sort split stat stty su sum sync tac tail tee test timeout touch tr
--  true truncate tsort tty uname unexpand uniq unlink uptime users vdir wc who
--  whoami yes
+-  sleep sort split stat stdbuf stty su sum sync tac tail tee test timeout
+-  touch tr true truncate tsort tty uname unexpand uniq unlink uptime users
+-  vdir wc who whoami yes
 +  runcon runuser seq sha1sum sha224sum sha256sum sha384sum sha512sum shred
-+  shuf sleep sort split stat stty su sum sync tac tail tee test timeout touch
-+  tr true truncate tsort tty uname unexpand uniq unlink uptime users vdir wc
-+  who whoami yes
++  shuf sleep sort split stat stdbuf stty su sum sync tac tail tee test
++  timeout touch tr true truncate tsort tty uname unexpand uniq unlink uptime
++  users vdir wc who whoami yes
  
  See the file NEWS for a list of major changes in the current release.
  
@@ -355,13 +355,13 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
 +#endif
 +	     );
  }
-diff -urNp coreutils-7.0.orig/tests/misc/help-version coreutils-7.0/tests/misc/help-version
---- coreutils-7.0.orig/tests/misc/help-version	2008-09-27 19:28:54.000000000 +0200
-+++ coreutils-7.0/tests/misc/help-version	2009-01-28 18:11:00.321247443 +0100
-@@ -148,6 +148,7 @@ printf_args=foo
- seq_args=10
+diff -urNp coreutils-7.5.orig/tests/misc/help-version coreutils-7.5/tests/misc/help-version
+--- coreutils-7.5.orig/tests/misc/help-version
++++ coreutils-7.5/tests/misc/help-version
+@@ -150,6 +150,7 @@ printf_args=foo
  sleep_args=0
  su_args=--version
+ stdbuf_args="-oL true"
 +runuser_args=--version
  timeout_args=--version
  
