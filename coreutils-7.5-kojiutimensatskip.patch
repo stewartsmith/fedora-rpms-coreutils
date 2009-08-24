@@ -9,7 +9,7 @@ diff -urNp coreutils-7.5-orig/src/copy.c coreutils-7.5/src/copy.c
 +  int err = utimensat (AT_FDCWD, file, timespec, AT_SYMLINK_NOFOLLOW);
 +  /* When configuring on a system with new headers and libraries, and
 +     running on one with a kernel that is old enough to lack the syscall,
-+     utimensat fails with ENOTSUP.  Ignore that.  */
++     utimensat fails with ENOSYS.  Ignore that.  */
 +  if (err && errno == ENOSYS)
 +    err = 0;
 +  return err;
