@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,12 +18,12 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-7.5-kojiutimensatskip.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
 Patch102: coreutils-7.4-sttytcsadrain.patch
-Patch103: coreutils-7.5-kojiutimensatskip.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -108,12 +108,12 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .kojiutimensat
 
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
 %patch102 -p1 -b .tcsadrain
-%patch103 -p1 -b .kojiutimensat
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -328,6 +328,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Aug 24 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-2
+- Better fix than workaround the koji insufficient utimensat
+  support issue to prevent failures in other packages
+
 * Fri Aug 21 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-1
 - New upstream release 7.5, remove already applied patches,
   defuzz few others, xz in default set(by dependencies),
