@@ -32,14 +32,12 @@ This bug was introduced by the 2006-02-26 commit, 33eb3efe:
 * tests/ls/stat-vs-dirent: Don't suppress failure of this test,
 now that ls -i is fixed.  Though note that it doesn't test well,
 since it compares only the always-stat'd command-line arguments.
-* NEWS (Bug fixes): Mention it.
 ---
- NEWS                              |    5 +++
  src/ls.c                          |   23 +++++++++++-
  tests/Makefile.am                 |    1 +
  tests/ls/readdir-mountpoint-inode |   72 +++++++++++++++++++++++++++++++++++++
  tests/ls/stat-vs-dirent           |    7 +---
- 5 files changed, 101 insertions(+), 7 deletions(-)
+ 4 files changed, 96 insertions(+), 7 deletions(-)
  create mode 100755 tests/ls/readdir-mountpoint-inode
 
 diff --git a/NEWS b/NEWS
@@ -194,8 +192,8 @@ index c1d7ff5..064ec12 100755
 --- a/tests/ls/stat-vs-dirent
 +++ b/tests/ls/stat-vs-dirent
 @@ -49,12 +49,7 @@ while :; do
-         The flaw isn't serious for coreutils, but it might break other tools,
-         so you should report it to your operating system vendor." 1>&2
+ 	The flaw isn't serious for coreutils, but it might break other tools,
+ 	so you should report it to your operating system vendor." 1>&2
 
 -      # This test fails too often, and we don't want to be distracted
 -      # with reports, since the code that could be affected by the losing
