@@ -1,0 +1,211 @@
+From 3af748aa25193e8a5a8fe520cd967cfbc4d71cb8 Mon Sep 17 00:00:00 2001
+From: Jim Meyering <meyering@redhat.com>
+Date: Wed, 2 Jul 2008 18:01:43 +0200
+Subject: [PATCH] ls -i: print consistent inode numbers also for mount points
+
+On most unix- and linux-based kernels, ls -i DIR_CONTAINING_MOUNT_POINT
+would print the wrong inode number for any entry that is a mount point.
+It would do that by relying on readdir's dirent.d_ino values, while
+most readdir implementations return the inode number of the underlying,
+inaccessible directory.  Thus, it is not consistent with what you'd
+get when applying stat to the same entry.  This bug led to surprising
+results like "ls -i" and "ls -i --color" printing different numbers (ls
+must usually "stat" a file to colorize its name).  This change makes it
+so that on offending systems, ls must stat non-command-line-arguments
+for which otherwise it would be able to use "for free" dirent.d_ino
+values.  Regardless of this change, ls is already required to stat every
+command-line argument.  Note: versions of GNU ls prior to coreutils-6.0
+did not perform the invalid optimization, and hence always printed
+correct inode numbers.  Thus, for the sake of correctness, ls -i is
+forgoing the readdir optimization, for any kernel (including linux!)
+with POSIX-nonconforming readdir.  Note that currently, only Cygwin has
+been agile enough to conform.
+
+* src/ls.c (RELIABLE_D_INO): Define.
+(print_dir): Use it.
+For plenty of discussion, see this long thread:
+http://thread.gmane.org/gmane.comp.gnu.coreutils.bugs/14020
+This bug was introduced by the 2006-02-26 commit, 33eb3efe:
+"In ls, avoid calling stat for --inode (-i), when possible."
+* tests/ls/readdir-mountpoint-inode: New test.
+* tests/Makefile.am (TESTS): Add it.
+* tests/ls/stat-vs-dirent: Don't suppress failure of this test,
+now that ls -i is fixed.  Though note that it doesn't test well,
+since it compares only the always-stat'd command-line arguments.
+* NEWS (Bug fixes): Mention it.
+---
+ NEWS                              |    5 +++
+ src/ls.c                          |   23 +++++++++++-
+ tests/Makefile.am                 |    1 +
+ tests/ls/readdir-mountpoint-inode |   72 +++++++++++++++++++++++++++++++++++++
+ tests/ls/stat-vs-dirent           |    7 +---
+ 5 files changed, 101 insertions(+), 7 deletions(-)
+ create mode 100755 tests/ls/readdir-mountpoint-inode
+
+diff --git a/NEWS b/NEWS
+index 39666fa..50c40be 100644
+--- a/NEWS
++++ b/NEWS
+@@ -16,6 +16,11 @@ GNU coreutils NEWS                                    -*- outline -*-
+   printing a summary to stderr.
+   [bug introduced in coreutils-6.11]
+
++  ls -i now prints consistent inode numbers also for mount points.
++  This makes ls -i DIR less efficient on systems with dysfunctional readdir,
++  because ls must stat every file in order to obtain a guaranteed-valid
++  inode number.  [bug introduced in coreutils-6.0]
++
+ ** New features
+
+   cp --reflink accepts a new "auto" parameter which falls back to
+diff --git a/src/ls.c b/src/ls.c
+index 6316dfa..553090d 100644
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -126,6 +126,26 @@
+    Subtracting doesn't always work, due to overflow.  */
+ #define longdiff(a, b) ((a) < (b) ? -1 : (a) > (b))
+
++/* Unix-based readdir implementations have historically returned a dirent.d_ino
++   value that is sometimes not equal to the stat-obtained st_ino value for
++   that same entry.  This error occurs for a readdir entry that refers
++   to a mount point.  readdir's error is to return the inode number of
++   the underlying directory -- one that typically cannot be stat'ed, as
++   long as a file system is mounted on that directory.  RELIABLE_D_INO
++   encapsulates whether we can use the more efficient approach of relying
++   on readdir-supplied d_ino values, or whether we must incur the cost of
++   calling stat or lstat to obtain each guaranteed-valid inode number.  */
++
++#ifndef READDIR_LIES_ABOUT_MOUNTPOINT_D_INO
++# define READDIR_LIES_ABOUT_MOUNTPOINT_D_INO 1
++#endif
++
++#if READDIR_LIES_ABOUT_MOUNTPOINT_D_INO
++# define RELIABLE_D_INO(dp) NOT_AN_INODE_NUMBER
++#else
++# define RELIABLE_D_INO(dp) D_INO (dp)
++#endif
++
+ #if ! HAVE_STRUCT_STAT_ST_AUTHOR
+ # define st_author st_uid
+ #endif
+@@ -2501,7 +2521,8 @@ print_dir (char const *name, char const *realname, bool command_line_arg)
+ # endif
+ 		}
+ #endif
+-	      total_blocks += gobble_file (next->d_name, type, D_INO (next),
++              total_blocks += gobble_file (next->d_name, type,
++                                           RELIABLE_D_INO (next),
+					   false, name);
+
+	      /* In this narrow case, print out each name right away, so
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 3177056..0151cb0 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -358,6 +358,7 @@ TESTS =                                             \
+   ls/no-arg					\
+   ls/no-cap					\
+   ls/proc-selinux-segfault			\
++  ls/readdir-mountpoint-inode                  \
+   ls/recursive					\
+   ls/rt-1					\
+   ls/stat-dtype					\
+diff --git a/tests/ls/readdir-mountpoint-inode b/tests/ls/readdir-mountpoint-inode
+new file mode 100755
+index 0000000..763cab1
+--- /dev/null
++++ b/tests/ls/readdir-mountpoint-inode
+@@ -0,0 +1,72 @@
++#!/bin/sh
++# ensure that ls -i works also for mount points
++
++# Copyright (C) 2009 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if test "$VERBOSE" = yes; then
++  set -x
++  ls --version
++fi
++
++. $srcdir/test-lib.sh
++
++fail=0
++
++mount_points=$(df --local -P 2>&1 | sed -n 's,.*[0-9]% \(/.\),\1,p')
++test -z "$mount_points" && skip_test_ "this test requires a non-root mount point"
++
++# Given e.g., /dev/shm, produce the list of GNU ls options that
++# let us list just that entry using readdir data from its parent:
++# ls -i -I '[^s]*' -I 's[^h]*' -I 'sh[^m]*' -I 'shm?*' -I '.?*' \
++# -I '?' -I '??' /dev
++
++ls_ignore_options()
++{
++  name=$1
++  opts="-I '.?*' -I '$name?*'"
++  while :; do
++    glob=$(echo "$name"|sed 's/\(.*\)\(.\)$/\1[^\2]*/')
++    opts="$opts -I '$glob'"
++    name=$(echo "$name"|sed 's/.$//')
++    test -z "$name" && break
++    glob=$(echo "$name"|sed 's/./?/g')
++    opts="$opts -I '$glob'"
++  done
++  echo "$opts"
++}
++
++inode_via_readdir()
++{
++  mount_point=$1
++  base=$(basename $mount_point)
++  case $base in
++    .*) skip_test_ 'mount point component starts with "."' ;;
++    *[*?]*) skip_test_ 'mount point component contains "?" or "*"' ;;
++  esac
++  opts=$(ls_ignore_options "$base")
++  parent_dir=$(dirname $mount_point)
++  eval "ls -i $opts $parent_dir" | sed 's/ .*//'
++}
++
++# FIXME: use a timeout, in case stat'ing mount points takes too long.
++
++for dir in $mount_points; do
++  readdir_inode=$(inode_via_readdir $dir)
++  stat_inode=$(env stat --format=%i $dir)
++  test "$readdir_inode" = "$stat_inode" || fail=1
++done
++
++Exit $fail
+diff --git a/tests/ls/stat-vs-dirent b/tests/ls/stat-vs-dirent
+index c1d7ff5..064ec12 100755
+--- a/tests/ls/stat-vs-dirent
++++ b/tests/ls/stat-vs-dirent
+@@ -49,12 +49,7 @@ while :; do
+         The flaw isn't serious for coreutils, but it might break other tools,
+         so you should report it to your operating system vendor." 1>&2
+
+-      # This test fails too often, and we don't want to be distracted
+-      # with reports, since the code that could be affected by the losing
+-      # behavior (pwd and getcwd) works around any mismatch.
+-      # So do continue to issue the warning, but don't count it as a
+-      # real failure.
+-      # fail=1
++      fail=1
+       break
+     fi
+   fi
+--
+1.6.4.2.363.g2d6e
