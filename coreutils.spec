@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -25,6 +25,7 @@ Patch2: coreutils-7.5-ls-inode.patch
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
 Patch102: coreutils-7.4-sttytcsadrain.patch
+Patch103: coreutils-7.5-df-localdevice.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -116,6 +117,7 @@ Libraries for coreutils package.
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
 %patch102 -p1 -b .tcsadrain
+%patch103 -p1 -b .localdevice
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -331,6 +333,11 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Sep 03 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-4
+- fixed regression where df -l <device> as regular user
+  cause "Permission denied" (#520630, introduced by fix for
+  rhbz #497830)
+
 * Fri Aug 28 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-3
 - ls -i: print consistent inode numbers also for mount points
   (#453709)
