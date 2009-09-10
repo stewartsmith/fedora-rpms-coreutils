@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -333,6 +333,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Sep 10 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-6
+- fix double free error in fold for singlebyte locales
+  (caused by multibyte patch)
+
 * Tue Sep 08 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-5
 - fix sort -h for multibyte locales (reported via
   http://bugs.archlinux.org/task/16022)

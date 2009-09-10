@@ -1348,7 +1348,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
  	      /* Look for the last blank. */
  	      while (logical_end)
  		{
-@@ -218,11 +255,225 @@
+@@ -218,11 +255,222 @@
        line_out[offset_out++] = c;
      }
  
@@ -1358,7 +1358,6 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +  if (offset_out)
 +    fwrite (line_out, sizeof (char), (size_t) offset_out, stdout);
 +
-+  free(line_out);
 +}
 +
 +#if HAVE_MBRTOWC
@@ -1367,16 +1366,16 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +{
 +  char buf[MB_LEN_MAX + BUFSIZ];  /* For spooling a read byte sequence. */
 +  size_t buflen = 0;	/* The length of the byte sequence in buf. */
-+  char *bufpos;         /* Next read position of BUF. */
++  char *bufpos = NULL;         /* Next read position of BUF. */
 +  wint_t wc;		/* A gotten wide character. */
 +  size_t mblength;	/* The byte size of a multibyte character which shows
 +			   as same character as WC. */
 +  mbstate_t state, state_bak;	/* State of the stream. */
 +  int convfail;		/* 1, when conversion is failed. Otherwise 0. */
 +
-+  char *line_out = NULL;
++  static char *line_out = NULL;
 +  size_t offset_out = 0;	/* Index in `line_out' for next char. */
-+  size_t allocated_out = 0;
++  static size_t allocated_out = 0;
 +
 +  int increment;
 +  size_t column = 0;
@@ -1384,7 +1383,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +  size_t last_blank_pos;
 +  size_t last_blank_column;
 +  int is_blank_seen;
-+  int last_blank_increment;
++  int last_blank_increment = 0;
 +  int is_bs_following_last_blank;
 +  size_t bs_following_last_blank_num;
 +  int is_cr_after_last_blank;
@@ -1503,8 +1502,7 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
 +
 +      if (allocated_out < offset_out + mblength)
 +	{
-+	  allocated_out += 1024;
-+	  line_out = xrealloc (line_out, allocated_out);
++	  line_out = X2REALLOC (line_out, &allocated_out);
 +	}
 +
 +      memcpy (line_out + offset_out, bufpos, mblength);
@@ -1536,7 +1534,6 @@ diff -urNp coreutils-6.11-orig/src/join.c coreutils-6.11/src/join.c
    if (offset_out)
      fwrite (line_out, sizeof (char), (size_t) offset_out, stdout);
  
-+  free(line_out);
 +}
 +#endif
 +
