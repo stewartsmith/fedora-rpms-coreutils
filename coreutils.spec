@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 7.5
-Release: 6%{?dist}
+Version: 7.6
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,14 +18,11 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1: coreutils-7.5-kojiutimensatskip.patch
-Patch2: coreutils-7.5-ls-inode.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
 Patch101: coreutils-6.10-manpages.patch
 Patch102: coreutils-7.4-sttytcsadrain.patch
-Patch103: coreutils-7.5-df-localdevice.patch
 
 # sh-utils
 Patch703: sh-utils-2.0.11-dateman.patch
@@ -110,14 +107,11 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .kojiutimensat
-%patch2 -p1 -b .inode
 
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
 %patch102 -p1 -b .tcsadrain
-%patch103 -p1 -b .localdevice
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -333,6 +327,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Sat Sep 12 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-1
+- new upstream bugfix release 7.6, removed applied patches,
+  defuzzed the rest
+
 * Thu Sep 10 2009 Ondrej Vasik <ovasik@redhat.com> - 7.5-6
 - fix double free error in fold for singlebyte locales
   (caused by multibyte patch)

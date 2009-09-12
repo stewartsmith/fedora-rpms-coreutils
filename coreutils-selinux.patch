@@ -38,14 +38,14 @@ diff -urNp coreutils-7.1-orig/src/copy.c coreutils-7.1/src/copy.c
 --- coreutils-7.1-orig/src/copy.c	2009-02-18 15:32:52.000000000 +0100
 +++ coreutils-7.1/src/copy.c	2009-02-24 13:47:15.000000000 +0100
 @@ -1830,6 +1830,8 @@ copy_internal (char const *src_name, cha
- 	{
- 	  /* Here, we are crossing a file system boundary and cp's -x option
- 	     is in effect: so don't copy the contents of this directory. */
+         {
+           /* Here, we are crossing a file system boundary and cp's -x option
+              is in effect: so don't copy the contents of this directory. */
 +        if (x->preserve_security_context)
-+      	    restore_default_fscreatecon_or_die ();
- 	}
++           restore_default_fscreatecon_or_die ();
+         }
        else
- 	{
+         {
 diff -urNp coreutils-7.1-orig/src/copy.h coreutils-7.1/src/copy.h
 --- coreutils-7.1-orig/src/copy.h	2009-02-18 15:32:52.000000000 +0100
 +++ coreutils-7.1/src/copy.h	2009-02-24 13:47:15.000000000 +0100
@@ -102,60 +102,60 @@ diff -urNp coreutils-7.1-orig/src/cp.c coreutils-7.1/src/cp.c
  
 -  while ((c = getopt_long (argc, argv, "abdfHilLnprst:uvxPRS:T",
 +  while ((c = getopt_long (argc, argv, "abcdfHilLnprst:uvxPRS:TZ:",
- 			   long_opts, NULL))
- 	 != -1)
+                            long_opts, NULL))
+          != -1)
      {
 @@ -945,6 +951,16 @@ main (int argc, char **argv)
- 	  copy_contents = true;
- 	  break;
+           copy_contents = true;
+           break;
  
-+  case 'c':
-+	  if ( x.set_security_context ) { 
-+	      (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
-+	    exit( 1 );
-+	  }
-+	  else if (selinux_enabled) {
-+	    x.preserve_security_context = true;
-+      x.require_preserve_context = true;
-+    }
-+	  break;
- 	case 'd':
- 	  x.preserve_links = true;
- 	  x.dereference = DEREF_NEVER;
++        case 'c':
++          if ( x.set_security_context ) { 
++              (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
++             exit( 1 );
++           }
++           else if (selinux_enabled) {
++              x.preserve_security_context = true;
++              x.require_preserve_context = true;
++           }
++          break;
+         case 'd':
+           x.preserve_links = true;
+           x.dereference = DEREF_NEVER;
 @@ -1054,6 +1070,27 @@ main (int argc, char **argv)
- 	  x.one_file_system = true;
- 	  break;
+           x.one_file_system = true;
+           break;
  
 +
-+  case 'Z':
-+	  /* politely decline if we're not on a selinux-enabled kernel. */
-+	  if( !selinux_enabled ) {
-+	    fprintf( stderr, "Warning:  ignoring --context (-Z). "
-+		             "It requires a SELinux enabled kernel.\n" );
-+	    break;
-+	  }
-+	  if ( x.preserve_security_context ) {
-+	    (void) fprintf(stderr, "%s: cannot force target context to '%s' and preserve it\n", argv[0], optarg);
-+	    exit( 1 );
-+	  }
-+	  x.set_security_context = true;
-+	  /* if there's a security_context given set new path 
-+	     components to that context, too */
-+	  if ( setfscreatecon(optarg) < 0 ) {
-+	    (void) fprintf(stderr, _("cannot set default security context %s\n"), optarg);
-+	    exit( 1 );
-+	  }
-+	  break;
++        case 'Z':
++          /* politely decline if we're not on a selinux-enabled kernel. */
++          if( !selinux_enabled ) {
++             fprintf( stderr, "Warning:  ignoring --context (-Z). "
++                              "It requires a SELinux enabled kernel.\n" );
++             break;
++         }
++         if ( x.preserve_security_context ) {
++            (void) fprintf(stderr, "%s: cannot force target context to '%s' and preserve it\n", argv[0], optarg);
++            exit( 1 );
++         }
++         x.set_security_context = true;
++         /* if there's a security_context given set new path 
++            components to that context, too */
++         if ( setfscreatecon(optarg) < 0 ) {
++            (void) fprintf(stderr, _("cannot set default security context %s\n"), optarg);
++            exit( 1 );
++         }
++         break;
 +
- 	case 'S':
- 	  make_backups = true;
- 	  backup_suffix_string = optarg;
+         case 'S':
+           make_backups = true;
+           backup_suffix_string = optarg;
 diff -urNp coreutils-7.1-orig/src/chcon.c coreutils-7.1/src/chcon.c
 --- coreutils-7.1-orig/src/chcon.c	2008-10-12 16:12:56.000000000 +0200
 +++ coreutils-7.1/src/chcon.c	2009-02-24 13:47:15.000000000 +0100
 @@ -346,7 +346,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
  "),
- 	program_name, program_name, program_name);
+         program_name, program_name, program_name);
        fputs (_("\
 -Change the security context of each FILE to CONTEXT.\n\
 +Change the SELinux security context of each FILE to CONTEXT.\n\
@@ -191,36 +191,36 @@ diff -urNp coreutils-7.1-orig/src/install.c coreutils-7.1/src/install.c
  
 -  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pt:TvS:Z:", long_options,
 +  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pPt:TvS:Z:", long_options,
- 			      NULL)) != -1)
+                               NULL)) != -1)
      {
        switch (optc)
 @@ -539,6 +540,7 @@ main (int argc, char **argv)
- 	  error (0, 0, _("WARNING: --preserve_context is deprecated; "
- 			 "use --preserve-context instead"));
- 	  /* fall through */
-+  case 'P':
- 	case PRESERVE_CONTEXT_OPTION:
- 	  if ( ! selinux_enabled)
- 	    {
+           error (0, 0, _("WARNING: --preserve_context is deprecated; "
+                          "use --preserve-context instead"));
+           /* fall through */
++        case 'P':
+         case PRESERVE_CONTEXT_OPTION:
+           if ( ! selinux_enabled)
+             {
 @@ -546,6 +548,10 @@ main (int argc, char **argv)
- 			     "this kernel is not SELinux-enabled"));
- 	      break;
- 	    }
-+    if ( x.set_security_context ) {
-+		  (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
-+ 	    exit( 1 );
-+ 	  }
- 	  x.preserve_security_context = true;
- 	  use_default_selinux_context = false;
- 	  break;
+                              "this kernel is not SELinux-enabled"));
+               break;
+             }
++          if ( x.set_security_context ) {
++             (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
++             exit( 1 );
++          }
+           x.preserve_security_context = true;
+           use_default_selinux_context = false;
+           break;
 @@ -557,6 +563,7 @@ main (int argc, char **argv)
- 	      break;
- 	    }
- 	  scontext = optarg;
-+	  x.set_security_context = true;
- 	  use_default_selinux_context = false;
- 	  break;
- 	case_GETOPT_HELP_CHAR;
+               break;
+             }
+           scontext = optarg;
++          x.set_security_context = true;
+           use_default_selinux_context = false;
+           break;
+         case_GETOPT_HELP_CHAR;
 @@ -990,8 +997,8 @@ Mandatory arguments to long options are 
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
@@ -312,21 +312,21 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
 @@ -1194,7 +1203,8 @@ main (int argc, char **argv)
        /* Avoid following symbolic links when possible.  */
        if (is_colored (C_ORPHAN)
- 	  || (is_colored (C_EXEC) && color_symlink_as_referent)
--	  || (is_colored (C_MISSING) && format == long_format))
-+	  || (is_colored (C_MISSING) && (format == long_format
-+	      || format == security_format)))
- 	check_symlink_color = true;
+           || (is_colored (C_EXEC) && color_symlink_as_referent)
+-          || (is_colored (C_MISSING) && format == long_format))
++          || (is_colored (C_MISSING) && (format == long_format
++              || format == security_format)))
+         check_symlink_color = true;
  
        /* If the standard output is a controlling terminal, watch out
 @@ -1241,7 +1251,7 @@ main (int argc, char **argv)
    if (dereference == DEREF_UNDEFINED)
      dereference = ((immediate_dirs
- 		    || indicator_style == classify
--		    || format == long_format)
-+		    || format == long_format || format == security_format)
- 		   ? DEREF_NEVER
- 		   : DEREF_COMMAND_LINE_SYMLINK_TO_DIR);
+                     || indicator_style == classify
+-                    || format == long_format)
++                    || format == long_format || format == security_format)
+                    ? DEREF_NEVER
+                    : DEREF_COMMAND_LINE_SYMLINK_TO_DIR);
  
 @@ -1261,7 +1271,7 @@ main (int argc, char **argv)
  
@@ -336,7 +336,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
 +    || format == security_format || print_scontext
      || print_block_size;
    format_needs_type = (! format_needs_stat
- 		       && (recursive
+                        && (recursive
 @@ -1292,7 +1302,7 @@ main (int argc, char **argv)
      }
    else
@@ -356,42 +356,42 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
    /* FIXME: put this in a function.  */
    {
 @@ -1837,13 +1847,27 @@ decode_switches (int argc, char **argv)
- 	  break;
+           break;
  
- 	case 'Z':
--	  print_scontext = true;
-+	  print_scontext = 1;
+         case 'Z':
+-          print_scontext = true;
++          print_scontext = 1;
 +    format = security_format;
- 	  break;
+           break;
  
- 	case_GETOPT_HELP_CHAR;
+         case_GETOPT_HELP_CHAR;
  
- 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
+         case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
  
 +  case CONTEXT_OPTION: /* default security context format */
-+		print_scontext = 1;
-+		format = security_format;
-+		break;
-+	case LCONTEXT_OPTION: /* long format plus security context */
-+		print_scontext = 1;
-+		format = long_format;
-+		break;
-+	case SCONTEXT_OPTION: /* short form of new security format */
-+		print_scontext = 0;
-+		format = security_format;
-+		break;
++                print_scontext = 1;
++                format = security_format;
++                break;
++        case LCONTEXT_OPTION: /* long format plus security context */
++                print_scontext = 1;
++                format = long_format;
++                break;
++        case SCONTEXT_OPTION: /* short form of new security format */
++                print_scontext = 0;
++                format = security_format;
++                break;
 +
- 	default:
- 	  usage (LS_FAILURE);
- 	}
+         default:
+           usage (LS_FAILURE);
+         }
 @@ -2557,8 +2581,10 @@ clear_files (void)
        struct fileinfo *f = sorted_file[i];
        free (f->name);
        free (f->linkname);
 -      if (f->scontext != UNKNOWN_SECURITY_CONTEXT)
--	freecon (f->scontext);
+-        freecon (f->scontext);
 +      if (f->scontext != UNKNOWN_SECURITY_CONTEXT) {
-+       	freecon (f->scontext);
++               freecon (f->scontext);
 +        f->scontext = NULL;
 +      }
      }
@@ -411,49 +411,49 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  
 -      if (format == long_format || print_scontext)
 +      if (format == long_format || format == security_format || print_scontext)
- 	{
- 	  bool have_selinux = false;
- 	  bool have_acl = false;
+         {
+           bool have_selinux = false;
+           bool have_acl = false;
 @@ -2732,7 +2760,7 @@ gobble_file (char const *name, enum file
- 		err = 0;
- 	    }
+                 err = 0;
+             }
  
--	  if (err == 0 && format == long_format)
-+	  if (err == 0 && (format == long_format || format == security_format))
- 	    {
- 	      int n = file_has_acl (absolute_name, &f->stat);
- 	      err = (n < 0);
+-          if (err == 0 && format == long_format)
++          if (err == 0 && (format == long_format || format == security_format))
+             {
+               int n = file_has_acl (absolute_name, &f->stat);
+               err = (n < 0);
 @@ -2751,7 +2779,8 @@ gobble_file (char const *name, enum file
- 	}
+         }
  
        if (S_ISLNK (f->stat.st_mode)
--	  && (format == long_format || check_symlink_color))
-+	  && (format == long_format || format == security_format
-+	      || check_symlink_color))
- 	{
- 	  char *linkname;
- 	  struct stat linkstats;
+-          && (format == long_format || check_symlink_color))
++          && (format == long_format || format == security_format
++              || check_symlink_color))
+         {
+           char *linkname;
+           struct stat linkstats;
 @@ -2771,6 +2800,7 @@ gobble_file (char const *name, enum file
- 		 command line are automatically traced if not being
- 		 listed as files.  */
- 	      if (!command_line_arg || format == long_format
-+		  || format == security_format
- 		  || !S_ISDIR (linkstats.st_mode))
- 		{
- 		  /* Get the linked-to file's mode for the filetype indicator
+                  command line are automatically traced if not being
+                  listed as files.  */
+               if (!command_line_arg || format == long_format
++                  || format == security_format
+                   || !S_ISDIR (linkstats.st_mode))
+                 {
+                   /* Get the linked-to file's mode for the filetype indicator
 @@ -2810,7 +2840,7 @@ gobble_file (char const *name, enum file
- 	    block_size_width = len;
- 	}
+             block_size_width = len;
+         }
  
 -      if (format == long_format)
 +      if (format == long_format || format == security_format)
- 	{
- 	  if (print_owner)
- 	    {
+         {
+           if (print_owner)
+             {
 @@ -3312,6 +3341,13 @@ print_current_files (void)
- 	  print_long_format (sorted_file[i]);
- 	  DIRED_PUTCHAR ('\n');
- 	}
+           print_long_format (sorted_file[i]);
+           DIRED_PUTCHAR ('\n');
+         }
 +     break;
 +    case security_format:
 +      for (i = 0; i < cwd_n_used; i++)
@@ -514,15 +514,15 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
 +  DIRED_INDENT ();
 +  DIRED_FPUTS (buf, stdout, p - buf);
 +  size_t w = print_name_with_quoting (f->name, FILE_OR_LINK_MODE(f), f->linkok,
-+			   f->stat_ok, f->filetype, &dired_obstack, f->stat.st_nlink, p - buf);
++                           f->stat_ok, f->filetype, &dired_obstack, f->stat.st_nlink, p - buf);
 +
 +  if (f->filetype == symbolic_link) {
 +      if (f->linkname) {
-+	  DIRED_FPUTS_LITERAL (" -> ", stdout);
-+	  print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
-+				   f->stat_ok, f->filetype, NULL, f->stat.st_nlink, (p-buf) + w + 4 );
-+	  if (indicator_style != none)
-+	    print_type_indicator (f->stat_ok, f->linkmode, f->filetype);
++          DIRED_FPUTS_LITERAL (" -> ", stdout);
++          print_name_with_quoting (f->linkname, f->linkmode, f->linkok - 1,
++                                   f->stat_ok, f->filetype, NULL, f->stat.st_nlink, (p-buf) + w + 4 );
++          if (indicator_style != none)
++            print_type_indicator (f->stat_ok, f->linkmode, f->filetype);
 +      }
 +  }
 +  else {
@@ -553,27 +553,27 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
  
 @@ -3543,9 +3648,6 @@ print_long_format (const struct fileinfo
        if (print_author)
- 	format_user (f->stat.st_author, author_width, f->stat_ok);
+         format_user (f->stat.st_author, author_width, f->stat_ok);
  
 -      if (print_scontext)
--	format_user_or_group (f->scontext, 0, scontext_width);
+-        format_user_or_group (f->scontext, 0, scontext_width);
 -
        p = buf;
      }
  
 @@ -3888,9 +3990,6 @@ print_file_name_and_frills (const struct
- 	    human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
- 			    ST_NBLOCKSIZE, output_block_size));
+             human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
+                             ST_NBLOCKSIZE, output_block_size));
  
 -  if (print_scontext)
 -    printf ("%*s ", format == with_commas ? 0 : scontext_width, f->scontext);
 -
    size_t width = print_name_with_quoting (f->name, FILE_OR_LINK_MODE (f),
- 					  f->linkok, f->stat_ok, f->filetype,
- 					  NULL, f->stat.st_nlink, start_col);
+                                           f->linkok, f->stat_ok, f->filetype,
+                                           NULL, f->stat.st_nlink, start_col);
 @@ -4105,9 +4204,6 @@ length_of_file_name_and_frills (const st
- 					  output_block_size))
- 		: block_size_width);
+                                           output_block_size))
+                 : block_size_width);
  
 -  if (print_scontext)
 -    len += 1 + (format == with_commas ? strlen (f->scontext) : scontext_width);
@@ -598,7 +598,7 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
 +"), stdout);
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
-       fputs (_("\n\
+       emit_size_note ();
 diff -urNp coreutils-7.1-orig/src/mkdir.c coreutils-7.1/src/mkdir.c
 --- coreutils-7.1-orig/src/mkdir.c	2008-10-19 21:47:57.000000000 +0200
 +++ coreutils-7.1/src/mkdir.c	2009-02-24 13:47:15.000000000 +0100
@@ -665,32 +665,32 @@ diff -urNp coreutils-7.1-orig/src/stat.c coreutils-7.1/src/stat.c
 +    if (terse)
      {
 -      format = (terse
--		? "%n %i %l %t %s %S %b %f %a %c %d\n"
--		: "  File: \"%n\"\n"
--		"    ID: %-8i Namelen: %-7l Type: %T\n"
--		"Block size: %-10s Fundamental block size: %S\n"
--		"Blocks: Total: %-10b Free: %-10f Available: %a\n"
--		"Inodes: Total: %-10c Free: %d\n");
+-                ? "%n %i %l %t %s %S %b %f %a %c %d\n"
+-                : "  File: \"%n\"\n"
+-                "    ID: %-8i Namelen: %-7l Type: %T\n"
+-                "Block size: %-10s Fundamental block size: %S\n"
+-                "Blocks: Total: %-10b Free: %-10f Available: %a\n"
+-                "Inodes: Total: %-10c Free: %d\n");
 +      if (secure)
 +        format = "%n %i %l %t %s %S %b %f %a %c %d %C\n";
-+   	  else
-+	      format = "%n %i %l %t %s %S %b %f %a %c %d\n";
++             else
++              format = "%n %i %l %t %s %S %b %f %a %c %d\n";
      }
 +    else
-+  	{
-+	    if (secure)
-+	      format = "  File: \"%n\"\n"
-+	        "    ID: %-8i Namelen: %-7l Type: %T\n"
-+  	      "Block size: %-10s Fundamental block size: %S\n"
-+	        "Blocks: Total: %-10b Free: %-10f Available: %a\n"
-+	        "Inodes: Total: %-10c Free: %d\n"
-+	        "   S_Context: %C\n";
-+  	  else
-+	      format = "  File: \"%n\"\n"
-+	        "    ID: %-8i Namelen: %-7l Type: %T\n"
-+	        "Block size: %-10s Fundamental block size: %S\n"
-+	        "Blocks: Total: %-10b Free: %-10f Available: %a\n"
-+  	      "Inodes: Total: %-10c Free: %d\n";
++          {
++            if (secure)
++              format = "  File: \"%n\"\n"
++                "    ID: %-8i Namelen: %-7l Type: %T\n"
++                "Block size: %-10s Fundamental block size: %S\n"
++                "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++                "Inodes: Total: %-10c Free: %d\n"
++                "   S_Context: %C\n";
++            else
++              format = "  File: \"%n\"\n"
++                "    ID: %-8i Namelen: %-7l Type: %T\n"
++                "Block size: %-10s Fundamental block size: %S\n"
++                "Blocks: Total: %-10b Free: %-10f Available: %a\n"
++                "Inodes: Total: %-10c Free: %d\n";
 +     }
 +  }
  
@@ -709,46 +709,46 @@ diff -urNp coreutils-7.1-orig/src/stat.c coreutils-7.1/src/stat.c
    if (format == NULL)
      {
        if (terse)
--	{
--	  format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
--	}
+-        {
+-          format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
+-        }
 +      {
 +        if (secure)
-+  	     format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
-+  	   else
-+	       format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
++               format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o %C\n";
++             else
++               format = "%n %s %b %f %u %g %D %i %h %t %T %X %Y %Z %o\n";
 +      }
        else
- 	{
- 	  /* Temporary hack to match original output until conditional
+         {
+           /* Temporary hack to match original output until conditional
 @@ -885,12 +904,22 @@ do_stat (char const *filename, bool ters
- 	    }
- 	  else
- 	    {
--	      format =
--		"  File: %N\n"
--		"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
--		"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
--		"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
--		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
+             }
+           else
+             {
+-              format =
+-                "  File: %N\n"
+-                "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
+-                "Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
+-                "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
+-                "Access: %x\n" "Modify: %y\n" "Change: %z\n";
 +        if (secure)
 +           format =
-+  		  "  File: %N\n"
-+	  	  "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+  		  "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
-+	  	  " Device type: %t,%T\n"
-+ 		    "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+  		  "   S_Context: %C\n"
-+	  	  "Access: %x\n" "Modify: %y\n" "Change: %z\n";
++                    "  File: %N\n"
++                    "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++                    "Device: %Dh/%dd\tInode: %-10i  Links: %-5h"
++                    " Device type: %t,%T\n"
++                     "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++                    "   S_Context: %C\n"
++                    "Access: %x\n" "Modify: %y\n" "Change: %z\n";
 +        else 
-+	        format =
-+    		"  File: %N\n"
-+	    	"  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
-+  	  	"Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
-+  	  	"Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
-+    		"Access: %x\n" "Modify: %y\n" "Change: %z\n";
- 	    }
- 	}
++                format =
++                    "  File: %N\n"
++                    "  Size: %-10s\tBlocks: %-10b IO Block: %-6o %F\n"
++                    "Device: %Dh/%dd\tInode: %-10i  Links: %h\n"
++                    "Access: (%04a/%10.10A)  Uid: (%5u/%8U)   Gid: (%5g/%8G)\n"
++                    "Access: %x\n" "Modify: %y\n" "Change: %z\n";
+             }
+         }
      }
 @@ -911,6 +940,7 @@ usage (int status)
  Display file or file system status.\n\
@@ -767,34 +767,34 @@ diff -urNp coreutils-7.1-orig/src/stat.c coreutils-7.1/src/stat.c
    bool ok = true;
  
 @@ -1034,13 +1065,13 @@ main (int argc, char *argv[])
- 	  terse = true;
- 	  break;
+           terse = true;
+           break;
  
--	case 'Z':  /* FIXME: remove in 2010 */
--	  /* Ignore, for compatibility with distributions
--	     that implemented this before upstream.
--	     But warn of impending removal.  */
--	  error (0, 0,
--		 _("the --context (-Z) option is obsolete and will be removed\n"
--		   "in a future release"));
-+	case 'Z':
+-        case 'Z':  /* FIXME: remove in 2010 */
+-          /* Ignore, for compatibility with distributions
+-             that implemented this before upstream.
+-             But warn of impending removal.  */
+-          error (0, 0,
+-                 _("the --context (-Z) option is obsolete and will be removed\n"
+-                   "in a future release"));
++        case 'Z':
 +    if((is_selinux_enabled()>0))
-+	    secure = 1;
-+	  else {
-+	    error (0, 0, _("Kernel is not SELinux enabled"));
-+	    usage (EXIT_FAILURE);
-+	  }
- 	  break;
++            secure = 1;
++          else {
++            error (0, 0, _("Kernel is not SELinux enabled"));
++            usage (EXIT_FAILURE);
++          }
+           break;
  
- 	case_GETOPT_HELP_CHAR;
+         case_GETOPT_HELP_CHAR;
 @@ -1060,8 +1091,8 @@ main (int argc, char *argv[])
  
    for (i = optind; i < argc; i++)
      ok &= (fs
--	   ? do_statfs (argv[i], terse, format)
--	   : do_stat (argv[i], terse, format));
-+	   ? do_statfs (argv[i], terse, secure, format)
-+	   : do_stat (argv[i], terse, secure, format));
+-           ? do_statfs (argv[i], terse, format)
+-           : do_stat (argv[i], terse, format));
++           ? do_statfs (argv[i], terse, secure, format)
++           : do_stat (argv[i], terse, secure, format));
  
    exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
  }

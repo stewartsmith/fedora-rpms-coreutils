@@ -121,11 +121,11 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
  
  static void run_shell (char const *, char const *, char **, size_t,
 -	const struct passwd *)
-+	const struct passwd *
++        const struct passwd *
 +#ifdef RUNUSER
-+		       , gid_t *groups, int num_groups
++                       , gid_t *groups, int num_groups
 +#endif
-+	)
++        )
  #ifdef USE_PAM
  	;
  #else
@@ -180,9 +180,9 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
 -change_identity (const struct passwd *pw)
 +change_identity (const struct passwd *pw
 +#ifdef RUNUSER
-+		 , gid_t *groups, int num_groups
++                 , gid_t *groups, int num_groups
 +#endif
-+	)
++        )
  {
  #ifdef HAVE_INITGROUPS
 +  int rc = 0;
@@ -202,12 +202,12 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
  
  static void
  run_shell (char const *shell, char const *command, char **additional_args,
--	   size_t n_additional_args, const struct passwd *pw)
-+	   size_t n_additional_args, const struct passwd *pw
+-           size_t n_additional_args, const struct passwd *pw)
++           size_t n_additional_args, const struct passwd *pw
 +#ifdef RUNUSER
-+	   , gid_t *groups, int num_groups
++           , gid_t *groups, int num_groups
 +#endif
-+	)
++        )
  {
    size_t n_args = 1 + fast_startup + 2 * !!command + n_additional_args + 1;
    char const **args = xnmalloc (n_args, sizeof *args);
@@ -218,9 +218,9 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
 -  change_identity (pw);
 +  change_identity (pw
 +#ifdef RUNUSER
-+		   , groups, num_groups
++                   , groups, num_groups
 +#endif
-+	  );
++          );
    pam_end(pamh, 0);
    if (!same_session)
      setsid ();
@@ -279,43 +279,43 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
 -  while ((optc = getopt_long (argc, argv, "c:flmps:", longopts, NULL)) != -1)
 +  while ((optc = getopt_long (argc, argv, "c:flmps:"
 +#ifdef RUNUSER
-+			      "g:G:"
++                              "g:G:"
 +#endif
-+			      , longopts, NULL)) != -1)
++                              , longopts, NULL)) != -1)
      {
        switch (optc)
- 	{
+         {
 @@ -697,6 +773,28 @@ main (int argc, char **argv)
- 	  shell = optarg;
- 	  break;
+           shell = optarg;
+           break;
  
 +#ifdef RUNUSER
-+	case 'g':
-+	  gr = getgrnam(optarg);
-+	  if (!gr)
-+	    error (EXIT_FAILURE, 0, _("group %s does not exist"), optarg);
-+	  use_gid = 1;
-+	  groups[0] = gr->gr_gid;
-+	  break;
++        case 'g':
++          gr = getgrnam(optarg);
++          if (!gr)
++            error (EXIT_FAILURE, 0, _("group %s does not exist"), optarg);
++          use_gid = 1;
++          groups[0] = gr->gr_gid;
++          break;
 +
-+	case 'G':
-+	  num_supp_groups++;
-+	  if (num_supp_groups >= NGROUPS_MAX)
-+	    error (EXIT_FAILURE, 0,
-+		   _("Can't specify more than %d supplemental groups"),
-+		   NGROUPS_MAX - 1);
-+	  gr = getgrnam(optarg);
-+	  if (!gr)
-+	    error (EXIT_FAILURE, 0, _("group %s does not exist"), optarg);
-+	  groups[num_supp_groups] = gr->gr_gid;
-+	  break;
++        case 'G':
++          num_supp_groups++;
++          if (num_supp_groups >= NGROUPS_MAX)
++            error (EXIT_FAILURE, 0,
++                   _("Can't specify more than %d supplemental groups"),
++                   NGROUPS_MAX - 1);
++          gr = getgrnam(optarg);
++          if (!gr)
++            error (EXIT_FAILURE, 0, _("group %s does not exist"), optarg);
++          groups[num_supp_groups] = gr->gr_gid;
++          break;
 +#endif
 +
- 	case_GETOPT_HELP_CHAR;
+         case_GETOPT_HELP_CHAR;
  
- 	case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
+         case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
 @@ -735,7 +833,20 @@ main (int argc, char **argv)
- 			  : DEFAULT_SHELL);
+                           : DEFAULT_SHELL);
    endpwent ();
  
 -  if (!correct_password (pw))
@@ -343,17 +343,17 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
 -  change_identity (pw);
 +  change_identity (pw
 +#ifdef RUNUSER
-+		   , groups, num_supp_groups
++                   , groups, num_supp_groups
 +#endif
-+		   );
++                   );
  #endif
  
 -  run_shell (shell, command, argv + optind, MAX (0, argc - optind), pw);
 +  run_shell (shell, command, argv + optind, MAX (0, argc - optind), pw
 +#ifdef RUNUSER
-+	     , groups, num_supp_groups
++             , groups, num_supp_groups
 +#endif
-+	     );
++             );
  }
 diff -urNp coreutils-7.5.orig/tests/misc/help-version coreutils-7.5/tests/misc/help-version
 --- coreutils-7.5.orig/tests/misc/help-version

@@ -33,24 +33,24 @@
 -        || sigprocmask(SIG_UNBLOCK, &ourset, NULL)) {
 +    if (!same_session)
 +      {
-+	if (sigaddset(&ourset, SIGINT) || sigaddset(&ourset, SIGQUIT))
-+	  {
-+	    fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
-+	    caught = 1;
-+	  }
++        if (sigaddset(&ourset, SIGINT) || sigaddset(&ourset, SIGQUIT))
++          {
++            fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
++            caught = 1;
++          }
 +      }
 +    if (!caught && (sigaddset(&ourset, SIGTERM)
-+		    || sigaddset(&ourset, SIGALRM)
-+		    || sigaction(SIGTERM, &action, NULL)
-+		    || sigprocmask(SIG_UNBLOCK, &ourset, NULL))) {
++                    || sigaddset(&ourset, SIGALRM)
++                    || sigaction(SIGTERM, &action, NULL)
++                    || sigprocmask(SIG_UNBLOCK, &ourset, NULL))) {
        fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
        caught = 1;
      }
 +    if (!caught && !same_session && (sigaction(SIGINT, &action, NULL)
-+				     || sigaction(SIGQUIT, &action, NULL)))
++                                     || sigaction(SIGQUIT, &action, NULL)))
 +      {
-+	fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
-+	caught = 1;
++        fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
++        caught = 1;
 +      }
    }
    if (!caught) {
@@ -73,17 +73,17 @@
    struct passwd *pw;
    struct passwd pw_copy;
 @@ -656,6 +679,11 @@
- 	  command = optarg;
- 	  break;
+           command = optarg;
+           break;
  
-+	case 'C':
-+	  command = optarg;
-+	  request_same_session = 1;
-+	  break;
++        case 'C':
++          command = optarg;
++          request_same_session = 1;
++          break;
 +
- 	case 'f':
- 	  fast_startup = true;
- 	  break;
+         case 'f':
+           fast_startup = true;
+           break;
 @@ -725,6 +753,9 @@
      }
  #endif

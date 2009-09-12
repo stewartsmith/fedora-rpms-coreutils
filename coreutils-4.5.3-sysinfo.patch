@@ -17,9 +17,9 @@
 +      char *element = unknown;
  #if HAVE_SYSINFO && defined SI_ARCHITECTURE
        {
- 	static char processor[257];
- 	if (0 <= sysinfo (SI_ARCHITECTURE, processor, sizeof processor))
- 	  element = processor;
+         static char processor[257];
+         if (0 <= sysinfo (SI_ARCHITECTURE, processor, sizeof processor))
+           element = processor;
        }
 +#else
 +      {
@@ -54,10 +54,10 @@
 +      char *element = unknown;
  #if HAVE_SYSINFO && defined SI_PLATFORM
        {
- 	static char hardware_platform[257];
+         static char hardware_platform[257];
 @@ -356,6 +378,14 @@
- 			  hardware_platform, sizeof hardware_platform))
- 	  element = hardware_platform;
+                           hardware_platform, sizeof hardware_platform))
+           element = hardware_platform;
        }
 +#else
 +      {
