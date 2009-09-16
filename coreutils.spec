@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-cpxattrreadonly.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -107,6 +108,7 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .roxattr
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -135,13 +137,11 @@ Libraries for coreutils package.
 %patch951 -p1 -b .selinuxman
 
 chmod a+x tests/misc/sort-mb-tests
-chmod a+x tests/ls/readdir-mountpoint-inode
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
  sed -i \
- -e 's/-dpR/-cdpR/' \
- -e 's/commmand/command/'
+ -e 's/-dpR/-cdpR/'
 
 %build
 %ifarch s390 s390x
@@ -327,6 +327,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Sep 16 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-2
+- fix copying of extended attributes for read only source
+  files
+
 * Sat Sep 12 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-1
 - new upstream bugfix release 7.6, removed applied patches,
   defuzzed the rest
