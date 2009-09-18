@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -327,6 +327,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Sep 18 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-3
+- fixed typo in DIR_COLORS.256color causing no color for
+  multihardlink
+
 * Wed Sep 16 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-2
 - fix copying of extended attributes for read only source
   files
