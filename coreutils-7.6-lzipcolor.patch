@@ -1,0 +1,11 @@
+diff -urNp coreutils-7.6-orig/src/dircolors.hin coreutils-7.6/src/dircolors.hin
+--- coreutils-7.6-orig/src/dircolors.hin	2009-09-01 13:01:16.000000000 +0200
++++ coreutils-7.6/src/dircolors.hin	2009-09-21 08:00:38.000000000 +0200
+@@ -131,6 +131,7 @@ EXEC 01;32
+ .cpio 01;31
+ .7z  01;31
+ .rz  01;31
++.lz  01;31
+ 
+ # image formats
+ .jpg 01;35

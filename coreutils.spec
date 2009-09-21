@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,7 @@ Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-cpxattrreadonly.patch
+Patch2: coreutils-lzipcolor.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -109,6 +110,7 @@ Libraries for coreutils package.
 
 # From upstream
 %patch1 -p1 -b .roxattr
+%patch2 -p1 -b .lzip
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -327,6 +329,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Sep 21 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-4
+- add dircolors color for GNU lzip (#516897)
+
 * Fri Sep 18 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-3
 - fixed typo in DIR_COLORS.256color causing no color for
   multihardlink
