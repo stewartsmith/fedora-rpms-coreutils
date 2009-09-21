@@ -19,7 +19,7 @@ Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 Patch1: coreutils-cpxattrreadonly.patch
-Patch2: coreutils-lzipcolor.patch
+Patch2: coreutils-7.6-lzipcolor.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
