@@ -32,9 +32,9 @@ diff -urNp coreutils-7.0.orig/man/runuser.x coreutils-7.0/man/runuser.x
 +.TP
 +More detailed Texinfo documentation could be found by command
 +.TP
-+\t\fBinfo su invocation\fR\t
++\t\fBinfo coreutils \(aqsu invocation\(aq\fR\t
 +.TP
-+since the command \fBrunuser\fR is trimmed down version of command \fBrunuser\fR.
++since the command \fBrunuser\fR is trimmed down version of command \fBsu\fR.
 +.br
 diff -urNp coreutils-7.0.orig/README coreutils-7.0/README
 --- coreutils-7.0.orig/README	2008-08-24 22:30:10.000000000 +0200
@@ -224,16 +224,18 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
    pam_end(pamh, 0);
    if (!same_session)
      setsid ();
-@@ -620,6 +665,26 @@ usage (int status)
+@@ -620,6 +665,28 @@ usage (int status)
    else
      {
        printf (_("Usage: %s [OPTION]... [-] [USER [ARG]...]\n"), program_name);
 +#ifdef RUNUSER
-+      fputs (_("\
-+Change the effective user id and group id to that of USER.  No PAM hooks\n\
-+are run, and there will be no password prompt.  This command is useful\n\
++      printf (_("\
++Change the effective user id and group id to that of USER.  Only session PAM\n\
++hooks are run, and there is no password prompt.  This command is useful only\n\
 +when run as the root user.  If run as a non-root user without privilege\n\
-+to set user ID, the command will fail.\n\
++to set user ID, the command will fail as the binary is not setuid.\n\
++As %s doesn't run auth and account PAM hooks, it runs with lower overhead\n\
++than su.\n\
 +\n\
 +  -, -l, --login               make the shell a login shell, uses runuser-l\n\
 +                               PAM file instead of default one\n\
@@ -246,7 +248,7 @@ diff -urNp coreutils-7.0.orig/src/su.c coreutils-7.0/src/su.c
 +  -m, --preserve-environment   do not reset environment variables\n\
 +  -p                           same as -m\n\
 +  -s, --shell=SHELL            run SHELL if /etc/shells allows it\n\
-+"), stdout);
++"), program_name);
 +#else
        fputs (_("\
  Change the effective user id and group id to that of USER.\n\
@@ -366,3 +368,16 @@ diff -urNp coreutils-7.5.orig/tests/misc/help-version coreutils-7.5/tests/misc/h
  timeout_args=--version
  
  # I'd rather not run sync, since it spins up disks that I've
+diff -urNp coreutils-7.6-orig/man/help2man coreutils-7.6/man/help2man
+--- coreutils-7.6-orig/man/help2man	2009-09-01 13:01:16.000000000 +0200
++++ coreutils-7.6/man/help2man	2009-09-22 15:15:01.000000000 +0200
+@@ -550,6 +550,9 @@ while (length)
+     $include{$sect} .= $content;
+ }
+ 
++# There is no info documentation for runuser (shared with su).
++$opt_no_info = 1 if $program eq 'runuser';
++
+ # Refer to the real documentation.
+ unless ($opt_no_info)
+ {
