@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.6
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,7 @@ Source203:  coreutils-runuser-l.pamd
 # From upstream
 Patch1: coreutils-cpxattrreadonly.patch
 Patch2: coreutils-7.6-lzipcolor.patch
+Patch3: coreutils-ls-inode.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -111,6 +112,7 @@ Libraries for coreutils package.
 # From upstream
 %patch1 -p1 -b .roxattr
 %patch2 -p1 -b .lzip
+%patch3 -p1 -b .inode
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -254,15 +256,15 @@ rm -rf $RPM_BUILD_ROOT
 # coreutils.info. else their postun'll be run too late
 # and install-info will fail badly because of duplicates
 for file in sh-utils textutils fileutils; do
-  if [ -f %{_infodir}/$file.info ]; then
-    /sbin/install-info --delete %{_infodir}/$file.info --dir=%{_infodir}/dir &> /dev/null || :
+  if [ -f %{_infodir}/$file.info.gz ]; then
+    /sbin/install-info --delete %{_infodir}/$file.info.gz --dir=%{_infodir}/dir &> /dev/null || :
   fi
 done
 
 %preun
 if [ $1 = 0 ]; then
-  if [ -f %{_infodir}/%{name}.info ]; then
-    /sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
+  if [ -f %{_infodir}/%{name}.info.gz ]; then
+    /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
   fi
 fi
 
@@ -270,8 +272,8 @@ fi
 /bin/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
   %{_infodir}/dir.rpmmodify || exit 0
     /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
-if [ -f %{_infodir}/%{name}.info ]; then
-  /sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
+if [ -f %{_infodir}/%{name}.info.gz ]; then
+  /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 fi
 
 %files -f %{name}.lang
@@ -329,6 +331,13 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Oct 02 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-6
+- ls -LR exits with status 2, not 0, when it encounters
+  a cycle(#525402)
+- ls: print "?", not "0" as inode of dereferenced dangling
+  symlink(#525400)
+- call the install-info on .gz info files
+
 * Tue Sep 22 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-5
 - improve and correct runuser documentation (#524805)
 
