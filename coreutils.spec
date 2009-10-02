@@ -112,7 +112,6 @@ Libraries for coreutils package.
 # From upstream
 %patch1 -p1 -b .roxattr
 %patch2 -p1 -b .lzip
-%patch3 -p1 -b .inode
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -139,6 +138,9 @@ Libraries for coreutils package.
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+
+#apply upstream patch later to prevent defuzzing
+%patch3 -p1 -b .inode
 
 chmod a+x tests/misc/sort-mb-tests
 
