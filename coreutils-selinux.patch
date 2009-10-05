@@ -162,6 +162,17 @@ diff -urNp coreutils-7.1-orig/src/chcon.c coreutils-7.1/src/chcon.c
  With --reference, change the security context of each FILE to that of RFILE.\n\
  \n\
    -h, --no-dereference   affect symbolic links instead of any referenced file\n\
+@@ -519,6 +519,10 @@ main (int argc, char **argv)
+       usage (EXIT_FAILURE);
+     }
+ 
++  if (is_selinux_enabled () != 1)
++    error (EXIT_FAILURE, 0,
++           _("%s may be used only on a SELinux kernel"), program_name);
++
+   if (reference_file)
+     {
+       if (getfilecon (reference_file, &ref_context) < 0)
 diff -urNp coreutils-7.1-orig/src/id.c coreutils-7.1/src/id.c
 --- coreutils-7.1-orig/src/id.c	2009-02-16 15:57:44.000000000 +0100
 +++ coreutils-7.1/src/id.c	2009-02-24 13:47:15.000000000 +0100

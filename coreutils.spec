@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 7.6
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -333,6 +333,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Oct 05 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-7
+- chcon no longer aborts on a selinux disabled system
+  (#527142)
+
 * Fri Oct 02 2009 Ondrej Vasik <ovasik@redhat.com> - 7.6-6
 - ls -LR exits with status 2, not 0, when it encounters
   a cycle(#525402)
