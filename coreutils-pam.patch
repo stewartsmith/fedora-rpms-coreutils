@@ -44,16 +44,13 @@
  #include "system.h"
  #include "getpass.h"
  
-@@ -128,15 +147,22 @@
+@@ -128,12 +147,19 @@
  /* The user to become if none is specified.  */
  #define DEFAULT_USER "root"
  
 +#ifndef USE_PAM
  char *crypt (char const *key, char const *salt);
 +#endif
- char *getusershell (void);
- void endusershell (void);
- void setusershell (void);
  
  extern char **environ;
  

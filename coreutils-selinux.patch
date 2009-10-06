@@ -557,8 +557,8 @@ diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
 +
    DIRED_INDENT ();
  
--  if (print_owner | print_group | print_author | print_scontext)
-+  if (print_owner | print_group | print_author)
+-  if (print_owner || print_group || print_author || print_scontext)
++  if (print_owner || print_group || print_author)
      {
        DIRED_FPUTS (buf, stdout, p - buf);
  

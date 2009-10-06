@@ -346,7 +346,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
      error (EXIT_FAILURE, errno, "-");
 --- coreutils-6.8+/src/join.c.i18n	2007-01-14 15:41:28.000000000 +0000
 +++ coreutils-6.8+/src/join.c	2007-03-01 15:08:24.000000000 +0000
-@@ -23,16 +23,30 @@
+@@ -23,17 +23,31 @@
  #include <sys/types.h>
  #include <getopt.h>
  
@@ -362,6 +362,7 @@ diff -urN coreutils-6.12-orig/tests/Makefile.am coreutils-6.12/tests/Makefile.am
 +
  #include "system.h"
  #include "error.h"
+ #include "hard-locale.h"
  #include "linebuffer.h"
 -#include "memcasecmp.h"
  #include "quote.h"
