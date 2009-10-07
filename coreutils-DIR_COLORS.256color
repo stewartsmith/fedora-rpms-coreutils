@@ -158,6 +158,8 @@ EXEC 01;38;5;34
 .xcf 01;38;5;13
 .xwd 01;38;5;13
 .yuv 01;38;5;13
+.cgm 01;38;5;13
+.emf 01;38;5;13
 
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .axv 01;38;5;13

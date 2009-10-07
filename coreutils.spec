@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -325,6 +325,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Oct 07 2009 Ondrej Vasik <ovasik@redhat.com> - 8.0-2
+- update /etc/DIR_COLORS* files
+
 * Wed Oct 07 2009 Ondrej Vasik <ovasik@redhat.com> - 8.0-1
 - New upstream release 8.0 (beta), defuzz patches,
   remove applied patches

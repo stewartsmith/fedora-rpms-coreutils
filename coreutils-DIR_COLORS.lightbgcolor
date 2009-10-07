@@ -160,6 +160,8 @@ EXEC 00;32
 .xcf 00;35
 .xwd 00;35
 .yuv 00;35
+.cgm 00;35
+.emf 00;35
 
 # http://wiki.xiph.org/index.php/MIME_Types_and_File_Extensions
 .axv 00;35
