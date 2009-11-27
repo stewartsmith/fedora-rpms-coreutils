@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.0
-Release: 2%{?dist}
+Version: 8.1
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,8 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1:   coreutils-8.1-unsearchablepath.patch
+Patch2:   coreutils-8.1-kojiutimens-symlinks.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -59,6 +61,7 @@ BuildRequires: automake >= 1.10.1
 BuildRequires: libcap-devel >= 2.0.6
 BuildRequires: libattr-devel
 BuildRequires: attr
+BuildRequires: strace
 
 Requires(post): libselinux >= 1.25.6-1
 Requires:       libattr
@@ -107,6 +110,8 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .path
+%patch2 -p1 -b .koji
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -154,7 +159,7 @@ touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
 autoconf --force
 automake --copy --add-missing
-%configure --enable-largefile --with-afs %{?!nopam:--enable-pam} \
+%configure --enable-largefile %{?!nopam:--enable-pam} \
            --enable-selinux \
            --enable-install-program=su,hostname,arch \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
@@ -325,6 +330,12 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Nov 27 2009 Ondrej Vasik <ovasik@redhat.com> - 8.1-1
+- new upstream release 8.1
+- fix build under koji (no test failures with underlying
+  RHEL-5 XEN kernel due to unsearchable path and lack of
+  futimens functionality)
+
 * Wed Oct 07 2009 Ondrej Vasik <ovasik@redhat.com> - 8.0-2
 - update /etc/DIR_COLORS* files
 

@@ -10,11 +10,11 @@ diff -urp coreutils-6.10-orig/lib/getugroups.c coreutils-6.10/lib/getugroups.c
 +
  #include "getugroups.h"
  
- #include <limits.h>
-@@ -114,3 +117,4 @@ getugroups (int maxcount, GETGROUPS_T *g
- 
-   return count;
+ #include <errno.h>
+@@ -123,3 +126,4 @@ getugroups (int maxcount, GETGROUPS_T *g
  }
+ 
+ #endif /* HAVE_GRP_H */
 +#endif	/* have getgrouplist */
 diff -urp coreutils-6.10-orig/m4/jm-macros.m4 coreutils-6.10/m4/jm-macros.m4
 --- coreutils-6.10-orig/m4/jm-macros.m4	2007-11-25 14:23:31.000000000 +0100

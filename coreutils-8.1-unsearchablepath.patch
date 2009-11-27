@@ -1,0 +1,43 @@
+diff -urNp coreutils-8.1-orig/tests/test-lib.sh coreutils-8.1/tests/test-lib.sh
+--- coreutils-8.1-orig/tests/test-lib.sh	2009-11-24 09:35:12.000000000 +0100
++++ coreutils-8.1/tests/test-lib.sh	2009-11-24 09:37:17.000000000 +0100
+@@ -23,6 +23,31 @@ if test $? != 11; then
+   Exit 77
+ fi
+ 
++# Having an unsearchable directory in PATH causes execve to fail with EACCES
++# when applied to an unresolvable program name, contrary to the desired ENOENT.
++# Avoid the problem by rewriting PATH to exclude unsearchable directories.
++sanitize_path_()
++{
++ local saved_IFS=$IFS
++ IFS=:
++ set - $PATH
++ IFS=$saved_IFS
++
++ local d d1
++ local colon=
++ local new_path=
++ for d in "$@"; do
++ test -z "$d" && d1=. || d1=$d
++ if ls -d "$d1/." > /dev/null 2>&1; then
++ new_path="$new_path$colon$d"
++ colon=':'
++ fi
++ done
++
++ PATH=$new_path
++ export PATH
++}
++
+ skip_test_()
+ {
+   echo "$0: skipping test: $@" | head -1 1>&9
+@@ -396,5 +421,7 @@ else
+   compare() { cmp "$@"; }
+ fi
+ 
++sanitize_path_
++
+ # Initialize; all bourne shell scripts end with "Exit $fail".
+ fail=0

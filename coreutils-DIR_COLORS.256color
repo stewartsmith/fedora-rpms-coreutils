@@ -1,6 +1,6 @@
 # Configuration file for the 256color ls utility
 # This file goes in the /etc directory, and must be world readable.
-# Synchronized with coreutils 7.1 dircolors
+# Synchronized with coreutils 8.1 dircolors
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
 # In the case that you are not satisfied with supplied colors, please

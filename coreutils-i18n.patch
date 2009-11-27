@@ -3557,7 +3557,7 @@ diff -urNp coreutils-8.0-orig/src/uniq.c coreutils-8.0/src/uniq.c
  #include "argmatch.h"
  #include "linebuffer.h"
 @@ -31,7 +41,19 @@
- #include "quote.h"
+ #include "stdio--.h"
  #include "xmemcoll.h"
  #include "xstrtol.h"
 -#include "memcasecmp.h"
