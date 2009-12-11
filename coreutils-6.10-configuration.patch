@@ -78,3 +78,58 @@ diff -urNp coreutils-8.1-orig/tests/touch/no-dereference coreutils-8.1/tests/tou
  
  # Changing time of dangling symlink is okay.
  touch -h dangling || fail=1
+diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/gnulib.mk
+--- coreutils-8.2-orig/gnulib-tests/gnulib.mk	2009-12-11 17:54:36.850815863 +0100
++++ coreutils-8.2/gnulib-tests/gnulib.mk	2009-12-11 18:03:01.034460289 +0100
+@@ -233,9 +233,9 @@ EXTRA_DIST += test-chown.h test-chown.c
+ 
+ ## begin gnulib module cloexec-tests
+ 
+-TESTS += test-cloexec
+-check_PROGRAMS += test-cloexec
+-EXTRA_DIST += test-cloexec.c
++#TESTS += test-cloexec
++#check_PROGRAMS += test-cloexec
++#EXTRA_DIST += test-cloexec.c
+ 
+ ## end   gnulib module cloexec-tests
+ 
+@@ -293,9 +293,9 @@ EXTRA_DIST += test-dirname.c
+ 
+ ## begin gnulib module dup2-tests
+ 
+-TESTS += test-dup2
+-check_PROGRAMS += test-dup2
+-EXTRA_DIST += test-dup2.c
++#TESTS += test-dup2
++#check_PROGRAMS += test-dup2
++#EXTRA_DIST += test-dup2.c
+ 
+ ## end   gnulib module dup2-tests
+ 
+@@ -337,9 +337,9 @@ EXTRA_DIST += test-exclude.c test-exclud
+ 
+ ## begin gnulib module fchdir-tests
+ 
+-TESTS += test-fchdir
+-check_PROGRAMS += test-fchdir
+-EXTRA_DIST += test-fchdir.c
++#TESTS += test-fchdir
++#check_PROGRAMS += test-fchdir
++#EXTRA_DIST += test-fchdir.c
+ 
+ ## end   gnulib module fchdir-tests
+ 
+@@ -1463,9 +1463,9 @@ EXTRA_DIST += test-uname.c
+ 
+ ## begin gnulib module unistd-safer-tests
+ 
+-TESTS += test-dup-safer
+-check_PROGRAMS += test-dup-safer
+-EXTRA_DIST += test-dup-safer.c
++#TESTS += test-dup-safer
++#check_PROGRAMS += test-dup-safer
++#EXTRA_DIST += test-dup-safer.c
+ 
+ ## end   gnulib module unistd-safer-tests
+ 

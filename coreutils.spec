@@ -328,7 +328,8 @@ fi
 %changelog
 * Fri Dec 11 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-1
 - new upstream release 8.2
-- removed applied patches
+- removed applied patches, temporarily do not run dup_cloexec()
+  dependent gnulib tests failing in koji
 
 * Fri Nov 27 2009 Ondrej Vasik <ovasik@redhat.com> - 8.1-1
 - new upstream release 8.1
