@@ -1,6 +1,6 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.1
+Version: 8.2
 Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
@@ -18,8 +18,6 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-Patch1:   coreutils-8.1-unsearchablepath.patch
-Patch2:   coreutils-8.1-kojiutimens-symlinks.patch
 
 # Our patches
 Patch100: coreutils-6.10-configuration.patch
@@ -110,8 +108,6 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .path
-%patch2 -p1 -b .koji
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -330,6 +326,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Dec 11 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-1
+- new upstream release 8.2
+- removed applied patches
+
 * Fri Nov 27 2009 Ondrej Vasik <ovasik@redhat.com> - 8.1-1
 - new upstream release 8.1
 - fix build under koji (no test failures with underlying
