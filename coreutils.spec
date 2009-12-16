@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -32,7 +32,6 @@ Patch704: sh-utils-1.16-paths.patch
 # it here indefinitely.
 Patch706: coreutils-pam.patch
 Patch713: coreutils-4.5.3-langinfo.patch
-Patch715: coreutils-4.5.3-sysinfo.patch
 
 # (sb) lin18nux/lsb compliance
 Patch800: coreutils-i18n.patch
@@ -49,34 +48,28 @@ Patch916: coreutils-getfacl-exit-code.patch
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 
-BuildRequires: libselinux-devel >= 1.25.6-1
+BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
 BuildRequires: gettext bison
-BuildRequires: texinfo >= 4.3
-BuildRequires: autoconf >= 2.58
-BuildRequires: automake >= 1.10.1
+BuildRequires: texinfo
+BuildRequires: autoconf
+BuildRequires: automake
 %{?!nopam:BuildRequires: pam-devel}
-BuildRequires: libcap-devel >= 2.0.6
+BuildRequires: libcap-devel
 BuildRequires: libattr-devel
 BuildRequires: attr
 BuildRequires: strace
 
-Requires(post): libselinux >= 1.25.6-1
+Requires(post): libselinux
 Requires:       libattr
-#util-linux-ng requirement is here only to prevent /bin/arch conflict
-#(could be removed after F-11/F-12 split, no idea how to solve it better)
-Requires:				util-linux-ng >= 2.14
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Requires(post): grep
-%{?!nopam:Requires: pam >= 0.66-12}
-Requires(post): libcap >= 2.0.6
+%{?!nopam:Requires: pam }
+Requires(post): libcap
 Requires:       ncurses
 Requires: %{name}-libs = %{version}-%{release}
-
-# Require a C library that doesn't put LC_TIME files in our way.
-Conflicts: glibc < 2.2
 
 Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
@@ -89,8 +82,6 @@ Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
 Obsoletes: textutils <= 2.0.21
-# readlink(1) moved here from tetex.
-Conflicts: tetex < 1.0.7-66
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -119,7 +110,6 @@ Libraries for coreutils package.
 %patch704 -p1 -b .paths
 %patch706 -p1 -b .pam
 %patch713 -p1 -b .langinfo
-%patch715 -p1 -b .sysinfo
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
@@ -326,6 +316,12 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Dec 16 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-3
+- use grep instead of deprecated egrep in colorls.sh script
+  (#548174)
+- remove unnecessary versioned requires
+- remove non-upstream hack for uname -p
+
 * Wed Dec 16 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-2
 - fix DIR_COLORS.256color file
 
