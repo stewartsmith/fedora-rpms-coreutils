@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -326,6 +326,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Dec 16 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-2
+- fix DIR_COLORS.256color file
+
 * Fri Dec 11 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-1
 - new upstream release 8.2
 - removed applied patches, temporarily do not run dup_cloexec()
