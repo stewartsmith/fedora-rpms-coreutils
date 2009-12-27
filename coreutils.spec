@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -331,6 +331,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Sun Dec 27 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-5
+- fix misc/selinux root-only test(#550494)
+
 * Sat Dec 19 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-4
 - bring back uname -p/-i functionality except of the
   athlon hack(#548834)

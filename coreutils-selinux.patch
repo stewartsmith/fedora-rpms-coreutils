@@ -802,7 +802,7 @@ diff -urNp coreutils-8.1-orig/tests/misc/selinux coreutils-8.1/tests/misc/selinu
  # inspect that context with both ls -Z and stat.
  for i in d f p; do
 -  c=`ls -dogZ $i|cut -d' ' -f3`; test x$c = x$ctx || fail=1
-+  c=`ls -dogZ $i|cut -d' ' -f5`; test x$c = x$ctx || fail=1
++  c=`ls -dogZ $i|cut -d' ' -f4`; test x$c = x$ctx || fail=1
    c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
  done
  
