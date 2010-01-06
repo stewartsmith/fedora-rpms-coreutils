@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.2
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -71,6 +71,7 @@ BuildRequires: automake
 %{?!nopam:BuildRequires: pam-devel}
 BuildRequires: libcap-devel
 BuildRequires: libattr-devel
+BuildRequires: gpm-devel
 BuildRequires: attr
 BuildRequires: strace
 
@@ -83,6 +84,7 @@ Requires(post): grep
 %{?!nopam:Requires: pam }
 Requires(post): libcap
 Requires:       ncurses
+Requires:       gpm
 Requires: %{name}-libs = %{version}-%{release}
 
 Provides: fileutils = %{version}-%{release}
@@ -331,6 +333,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Jan 06 2010 Ondrej Vasik <ovasik@redhat.com> - 8.2-6
+- require gpm-devel/gpm for large numbers support(#552846)
+
 * Sun Dec 27 2009 Ondrej Vasik <ovasik@redhat.com> - 8.2-5
 - fix misc/selinux root-only test(#550494)
 
