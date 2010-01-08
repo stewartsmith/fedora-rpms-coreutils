@@ -58,10 +58,10 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
 -TESTS += test-cloexec
 -check_PROGRAMS += test-cloexec
--EXTRA_DIST += test-cloexec.c
+-EXTRA_DIST += test-cloexec.c macros.h
 +#TESTS += test-cloexec
 +#check_PROGRAMS += test-cloexec
-+#EXTRA_DIST += test-cloexec.c
++#EXTRA_DIST += test-cloexec.c macros.h
  
  ## end   gnulib module cloexec-tests
  
@@ -71,10 +71,10 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
 -TESTS += test-dup2
 -check_PROGRAMS += test-dup2
--EXTRA_DIST += test-dup2.c
+-EXTRA_DIST += test-dup2.c signature.h macros.h
 +#TESTS += test-dup2
 +#check_PROGRAMS += test-dup2
-+#EXTRA_DIST += test-dup2.c
++#EXTRA_DIST += test-dup2.c signature.h macros.h
  
  ## end   gnulib module dup2-tests
  
@@ -84,10 +84,10 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
 -TESTS += test-fchdir
 -check_PROGRAMS += test-fchdir
--EXTRA_DIST += test-fchdir.c
+-EXTRA_DIST += test-fchdir.c signature.h macros.h
 +#TESTS += test-fchdir
 +#check_PROGRAMS += test-fchdir
-+#EXTRA_DIST += test-fchdir.c
++#EXTRA_DIST += test-fchdir.c signature.h macros.h
  
  ## end   gnulib module fchdir-tests
  
@@ -97,10 +97,10 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
 -TESTS += test-dup-safer
 -check_PROGRAMS += test-dup-safer
--EXTRA_DIST += test-dup-safer.c
+-EXTRA_DIST += test-dup-safer.c macros.h
 +#TESTS += test-dup-safer
 +#check_PROGRAMS += test-dup-safer
-+#EXTRA_DIST += test-dup-safer.c
++#EXTRA_DIST += test-dup-safer.c macros.h
  
  ## end   gnulib module unistd-safer-tests
  
