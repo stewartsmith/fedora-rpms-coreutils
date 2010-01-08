@@ -104,3 +104,14 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
  ## end   gnulib module unistd-safer-tests
  
+diff -urNp coreutils-8.3-orig/tests/Makefile.am coreutils-8.3/tests/Makefile.am
+--- coreutils-8.3-orig/tests/Makefile.am	2010-01-08 13:06:44.000000000 +0100
++++ coreutils-8.3/tests/Makefile.am	2010-01-08 13:25:14.000000000 +0100
+@@ -79,7 +79,6 @@ TESTS =						\
+   rm/ext3-perf					\
+   rm/cycle					\
+   cp/link-heap					\
+-  tail-2/inotify-hash-abuse			\
+   tail-2/inotify-hash-abuse2			\
+   tail-2/F-vs-rename				\
+   tail-2/inotify-rotate				\
