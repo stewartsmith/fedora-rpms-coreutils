@@ -1,6 +1,6 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.3
+Version: 8.4
 Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
@@ -333,6 +333,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Jan 14 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-1
+- new upstream release 8.4
+
 * Fri Jan 08 2010 Ondrej Vasik <ovasik@redhat.com> - 8.3-1
 - new upstream release 8.3
 

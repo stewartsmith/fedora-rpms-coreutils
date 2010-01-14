@@ -1,58 +1,7 @@
-diff -urNp coreutils-6.11-orig/tests/test-lib.sh coreutils-6.11/tests/test-lib.sh
---- coreutils-6.11-orig/tests/test-lib.sh	2008-04-19 23:34:23.000000000 +0200
-+++ coreutils-6.11/tests/test-lib.sh	2008-04-24 14:18:59.000000000 +0200
-@@ -97,8 +97,8 @@ skip_if_()
- 
- require_selinux_()
- {
--  case `ls -Zd .` in
--    '? .'|'unlabeled .')
-+  case `ls --scontext -d . | cut -f1 -d" "` in
-+    '?'|'unlabeled')
-       skip_test_ "this system (or maybe just" \
-         "the current file system) lacks SELinux support"
-     ;;
-diff -urNp coreutils-7.1-orig/src/ls.c coreutils-7.1/src/ls.c
---- coreutils-7.1-orig/src/ls.c	2009-02-25 13:23:59.000000000 +0100
-+++ coreutils-7.1/src/ls.c	2009-02-25 13:25:20.000000000 +0100
-@@ -38,10 +38,6 @@
- #include <config.h>
- #include <sys/types.h>
- 
--#ifdef HAVE_CAP
--# include <sys/capability.h>
--#endif
--
- #if HAVE_TERMIOS_H
- # include <termios.h>
- #endif
-@@ -84,6 +80,10 @@
- #include "system.h"
- #include <fnmatch.h>
- 
-+#ifdef HAVE_CAP
-+# include <sys/capability.h>
-+#endif
-+
- #include "acl.h"
- #include "argmatch.h"
- #include "dev-ino.h"
-diff -urNp coreutils-8.1-orig/tests/touch/no-dereference coreutils-8.1/tests/touch/no-dereference
---- coreutils-8.1-orig/tests/touch/no-dereference	2009-10-30 12:51:07.000000000 +0100
-+++ coreutils-8.1/tests/touch/no-dereference	2009-11-27 13:31:10.000000000 +0100
-@@ -46,6 +46,8 @@ test -f nowhere && fail=1
- grep '^#define HAVE_UTIMENSAT' "$CONFIG_HEADER" > /dev/null ||
- grep '^#define HAVE_LUTIMES' "$CONFIG_HEADER" > /dev/null ||
-   skip_test_ 'this system lacks the utimensat function'
-+grep '^#define HAVE_WORKINGKOJI' "$CONFIG_HEADER" > /dev/null ||
-+  skip_test_ 'rest of the test disabled due to koji lack of utimensat function'
- 
- # Changing time of dangling symlink is okay.
- touch -h dangling || fail=1
-diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/gnulib.mk
---- coreutils-8.2-orig/gnulib-tests/gnulib.mk	2009-12-11 17:54:36.850815863 +0100
-+++ coreutils-8.2/gnulib-tests/gnulib.mk	2009-12-11 18:03:01.034460289 +0100
-@@ -233,9 +233,9 @@ EXTRA_DIST += test-chown.h test-chown.c
+diff -urNp coreutils-8.4-orig/gnulib-tests/gnulib.mk coreutils-8.4/gnulib-tests/gnulib.mk
+--- coreutils-8.4-orig/gnulib-tests/gnulib.mk	2010-01-13 22:01:30.000000000 +0100
++++ coreutils-8.4/gnulib-tests/gnulib.mk	2010-01-14 10:28:17.000000000 +0100
+@@ -256,9 +256,9 @@ EXTRA_DIST += nap.h test-chown.h test-ch
  
  ## begin gnulib module cloexec-tests
  
@@ -65,7 +14,7 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
  ## end   gnulib module cloexec-tests
  
-@@ -293,9 +293,9 @@ EXTRA_DIST += test-dirname.c
+@@ -332,9 +332,9 @@ EXTRA_DIST += test-dirname.c
  
  ## begin gnulib module dup2-tests
  
@@ -78,7 +27,7 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
  ## end   gnulib module dup2-tests
  
-@@ -337,9 +337,9 @@ EXTRA_DIST += test-exclude.c test-exclud
+@@ -376,9 +376,9 @@ EXTRA_DIST += test-exclude.c test-exclud
  
  ## begin gnulib module fchdir-tests
  
@@ -91,7 +40,7 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
  ## end   gnulib module fchdir-tests
  
-@@ -1463,9 +1463,9 @@ EXTRA_DIST += test-uname.c
+@@ -1532,9 +1532,9 @@ EXTRA_DIST += test-uname.c signature.h m
  
  ## begin gnulib module unistd-safer-tests
  
@@ -104,9 +53,9 @@ diff -urNp coreutils-8.2-orig/gnulib-tests/gnulib.mk coreutils-8.2/gnulib-tests/
  
  ## end   gnulib module unistd-safer-tests
  
-diff -urNp coreutils-8.3-orig/tests/Makefile.am coreutils-8.3/tests/Makefile.am
---- coreutils-8.3-orig/tests/Makefile.am	2010-01-08 13:06:44.000000000 +0100
-+++ coreutils-8.3/tests/Makefile.am	2010-01-08 13:25:14.000000000 +0100
+diff -urNp coreutils-8.4-orig/tests/Makefile.am coreutils-8.4/tests/Makefile.am
+--- coreutils-8.4-orig/tests/Makefile.am	2010-01-03 18:06:20.000000000 +0100
++++ coreutils-8.4/tests/Makefile.am	2010-01-14 10:28:17.000000000 +0100
 @@ -79,7 +79,6 @@ TESTS =						\
    rm/ext3-perf					\
    rm/cycle					\
@@ -115,3 +64,29 @@ diff -urNp coreutils-8.3-orig/tests/Makefile.am coreutils-8.3/tests/Makefile.am
    tail-2/inotify-hash-abuse2			\
    tail-2/F-vs-rename				\
    tail-2/inotify-rotate				\
+diff -urNp coreutils-8.4-orig/tests/test-lib.sh coreutils-8.4/tests/test-lib.sh
+--- coreutils-8.4-orig/tests/test-lib.sh	2010-01-03 18:06:20.000000000 +0100
++++ coreutils-8.4/tests/test-lib.sh	2010-01-14 10:28:17.000000000 +0100
+@@ -218,8 +218,8 @@ skip_if_()
+ 
+ require_selinux_()
+ {
+-  case `ls -Zd .` in
+-    '? .'|'unlabeled .')
++  case `ls --scontext -d . | cut -f1 -d" "` in
++    '?'|'unlabeled')
+       skip_test_ "this system (or maybe just" \
+         "the current file system) lacks SELinux support"
+     ;;
+diff -urNp coreutils-8.4-orig/tests/touch/no-dereference coreutils-8.4/tests/touch/no-dereference
+--- coreutils-8.4-orig/tests/touch/no-dereference	2010-01-12 15:36:17.000000000 +0100
++++ coreutils-8.4/tests/touch/no-dereference	2010-01-14 10:28:17.000000000 +0100
+@@ -46,6 +46,8 @@ test -f nowhere && fail=1
+ grep '^#define HAVE_UTIMENSAT' "$CONFIG_HEADER" > /dev/null ||
+ grep '^#define HAVE_LUTIMES' "$CONFIG_HEADER" > /dev/null ||
+   skip_test_ 'this system lacks the utimensat function'
++grep '^#define HAVE_WORKINGKOJI' "$CONFIG_HEADER" > /dev/null ||
++  skip_test_ 'rest of the test disabled due to koji lack of utimensat function'
+ 
+ # Changing time of dangling symlink is okay.
+ # Skip the test if this fails, but the error text corresponds to
