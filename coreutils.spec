@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,8 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+#"who" doesn't determine user's message status correctly - #454261
+Patch1: coreutils-8.4-who-msgstatus.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -115,6 +117,7 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .whomsg
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -165,6 +168,7 @@ automake --copy --add-missing
 %configure --enable-largefile %{?!nopam:--enable-pam} \
            --enable-selinux \
            --enable-install-program=su,hostname,arch \
+           --with-tty-group \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 
 # Regenerate manpages
@@ -333,6 +337,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Tue Jan 26 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-2
+- who doesn't determine user's message status correctly
+  (#454261)
+
 * Thu Jan 14 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-1
 - new upstream release 8.4
 
