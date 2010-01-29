@@ -105,3 +105,25 @@ diff -urNp coreutils-8.4-orig/tests/touch/no-dereference coreutils-8.4/tests/tou
  
  # Changing time of dangling symlink is okay.
  # Skip the test if this fails, but the error text corresponds to
+diff -urNp coreutils-8.4-orig/tests/cp/cp-a-selinux coreutils-8.4/tests/cp/cp-a-selinux
+--- coreutils-8.4-orig/tests/cp/cp-a-selinux	2010-01-03 18:06:20.000000000 +0100
++++ coreutils-8.4/tests/cp/cp-a-selinux	2010-01-29 09:39:43.000000000 +0100
+@@ -48,12 +48,15 @@ ls -Z f | grep $ctx || fail=1
+ 
+ # Create a file system, then mount it with the context=... option.
+ dd if=/dev/zero of=blob bs=8192 count=200 > /dev/null 2>&1 \
+-                                             || framework_failure
+-mkdir mnt                                    || framework_failure
++                                             || skip=1
++mkdir mnt                                    || skip=1
+ mkfs -t ext2 -F blob ||
+   skip_test_ "failed to create an ext2 file system"
+ 
+-mount -oloop,context=$ctx blob mnt           || framework_failure
++mount -oloop,context=$ctx blob mnt           || skip=1
++test $skip = 1 \
++    && skip_test_ "insufficient mount/ext2 support"
++
+ cd mnt                                       || framework_failure
+ 
+ echo > f                                     || framework_failure
