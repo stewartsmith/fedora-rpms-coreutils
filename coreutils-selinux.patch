@@ -794,6 +794,20 @@ diff -urNp coreutils-8.1-orig/src/stat.c coreutils-8.1/src/stat.c
  
    exit (ok ? EXIT_SUCCESS : EXIT_FAILURE);
  }
+diff -urNp coreutils-8.4-orig/tests/test-lib.sh coreutils-8.4/tests/test-lib.sh
+--- coreutils-8.4-orig/tests/test-lib.sh	2010-01-03 18:06:20.000000000 +0100
++++ coreutils-8.4/tests/test-lib.sh	2010-01-14 10:28:17.000000000 +0100
+@@ -218,8 +218,8 @@ skip_if_()
+ 
+ require_selinux_()
+ {
+-  case `ls -Zd .` in
+-    '? .'|'unlabeled .')
++  case `ls -Zd . | cut -f4 -d" "` in
++    '?'|'unlabeled')
+       skip_test_ "this system (or maybe just" \
+         "the current file system) lacks SELinux support"
+     ;;
 diff -urNp coreutils-8.1-orig/tests/misc/selinux coreutils-8.1/tests/misc/selinux
 --- coreutils-8.1-orig/tests/misc/selinux	2009-10-30 12:51:07.000000000 +0100
 +++ coreutils-8.1/tests/misc/selinux	2009-11-20 13:11:40.000000000 +0100

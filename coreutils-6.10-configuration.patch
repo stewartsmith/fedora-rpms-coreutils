@@ -79,20 +79,6 @@ diff -urNp coreutils-8.4-orig/tests/Makefile.am coreutils-8.4/tests/Makefile.am
    tail-2/inotify-hash-abuse2			\
    tail-2/F-vs-rename				\
    tail-2/inotify-rotate				\
-diff -urNp coreutils-8.4-orig/tests/test-lib.sh coreutils-8.4/tests/test-lib.sh
---- coreutils-8.4-orig/tests/test-lib.sh	2010-01-03 18:06:20.000000000 +0100
-+++ coreutils-8.4/tests/test-lib.sh	2010-01-14 10:28:17.000000000 +0100
-@@ -218,8 +218,8 @@ skip_if_()
- 
- require_selinux_()
- {
--  case `ls -Zd .` in
--    '? .'|'unlabeled .')
-+  case `ls --scontext -d . | cut -f1 -d" "` in
-+    '?'|'unlabeled')
-       skip_test_ "this system (or maybe just" \
-         "the current file system) lacks SELinux support"
-     ;;
 diff -urNp coreutils-8.4-orig/tests/touch/no-dereference coreutils-8.4/tests/touch/no-dereference
 --- coreutils-8.4-orig/tests/touch/no-dereference	2010-01-12 15:36:17.000000000 +0100
 +++ coreutils-8.4/tests/touch/no-dereference	2010-01-14 10:28:17.000000000 +0100

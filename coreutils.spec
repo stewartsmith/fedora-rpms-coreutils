@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -337,6 +337,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+- Fri Feb 05 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-4
+- do not depend on selinux patch application in
+  _require_selinux tests(#556350)
+
 * Fri Jan 29 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-3
 - do not fail tests if there are no loopdevices left
   (#558898)
