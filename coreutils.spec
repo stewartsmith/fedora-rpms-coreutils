@@ -337,7 +337,7 @@ fi
 %{_libdir}/coreutils
 
 %changelog
-- Fri Feb 05 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-4
+* Fri Feb 05 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-4
 - do not depend on selinux patch application in
   _require_selinux tests(#556350)
 
