@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -337,6 +337,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Feb 12 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-5
+- fix exit status of terminated child processes in su with
+  pam(#559098)
+
 * Fri Feb 05 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-4
 - do not depend on selinux patch application in
   _require_selinux tests(#556350)
