@@ -18,7 +18,7 @@ if [ -z "$USER_LS_COLORS" ]; then
   done
 
   [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.256color" ] && \
-      [ "x`tput colors 2>/dev/null`" = "x256" ] && \
+      [ "x`tty -s && tput colors 2>/dev/null`" = "x256" ] && \
       COLORS="/etc/DIR_COLORS.256color"
 
   if [ -z "$COLORS" ]; then

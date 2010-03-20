@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -337,6 +337,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Sat Mar 20 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-6
+- run tput colors in colorls profile.d scripts only
+  in the interactive mode(#450424)
+
 * Fri Feb 12 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-5
 - fix exit status of terminated child processes in su with
   pam(#559098)
