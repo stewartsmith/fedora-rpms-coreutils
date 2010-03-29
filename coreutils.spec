@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -30,6 +30,8 @@ Patch101: coreutils-6.10-manpages.patch
 Patch102: coreutils-7.4-sttytcsadrain.patch
 #do display processor type for uname -p/-i based on uname(2) syscall
 Patch103: coreutils-8.2-uname-processortype.patch
+#df --direct
+Patch104: coreutils-df-direct.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -124,6 +126,7 @@ Libraries for coreutils package.
 %patch101 -p1 -b .manpages
 %patch102 -p1 -b .tcsadrain
 %patch103 -p1 -b .sysinfo
+%patch104 -p1 -b .dfdirect
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -145,7 +148,7 @@ Libraries for coreutils package.
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-chmod a+x tests/misc/sort-mb-tests
+chmod a+x tests/misc/sort-mb-tests tests/df/direct
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -337,6 +340,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Mar 29 2010 Kamil Dudka <kdudka@redhat.com> - 8.4-7
+- a new option df --direct
+
 * Sat Mar 20 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-6
 - run tput colors in colorls profile.d scripts only
   in the interactive mode(#450424)
