@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.4
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -207,15 +207,15 @@ bzip2 -9f ChangeLog
 # let be compatible with old fileutils, sh-utils and textutils packages :
 mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
 %{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
-for f in arch basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd rm rmdir sleep sort stty sync touch true uname unlink
+for f in arch basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd readlink rm rmdir sleep sort stty sync touch true uname unlink
 do
     mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f
 done
 
 # chroot was in /usr/sbin :
 mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
-# {cat,sort,cut} were previously moved from bin to /usr/bin and linked into
-for i in env cut; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
+# {env,cut,readlink} were previously moved from /usr/bin to /bin and linked into
+for i in env cut readlink; do ln -sf ../../bin/$i $RPM_BUILD_ROOT/usr/bin; done
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
@@ -317,6 +317,7 @@ fi
 /bin/mv
 /bin/nice
 /bin/pwd
+/bin/readlink
 /bin/rm
 /bin/rmdir
 /bin/sleep
@@ -340,6 +341,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Apr 15 2010 Ondrej Vasik <ovasik@redhat.com> - 8.4-8
+- move readlink from /usr/bin to bin, keep symlink in
+  /usr/bin(#580682)
+
 * Mon Mar 29 2010 Kamil Dudka <kdudka@redhat.com> - 8.4-7
 - a new option df --direct
 
