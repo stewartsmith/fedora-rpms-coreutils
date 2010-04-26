@@ -380,11 +380,11 @@ diff -urNp coreutils-8.1-orig/tests/misc/help-version coreutils-8.1/tests/misc/h
  expected_failure_status_tty=3
  expected_failure_status_sort=2
 @@ -153,6 +154,7 @@ seq_args=10
- sleep_args=0
- su_args=--version
- stdbuf_args="-oL true"
-+runuser_args=--version
- timeout_args=--version
+ sleep_setup () { args=0; }
+ su_setup () { args=--version; }
+ stdbuf_setup () { args="-oL true"; }
++runuser_setup () { args=--version; }
+ timeout_setup () { args=--version; }
  
  # I'd rather not run sync, since it spins up disks that I've
 diff -urNp coreutils-8.1-orig/tests/misc/invalid-opt coreutils-8.1/tests/misc/invalid-opt
