@@ -126,7 +126,7 @@ Libraries for coreutils package.
 %patch102 -p1 -b .tcsadrain
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
-#%patch105 -p1 -b .sparc
+%patch105 -p1 -b .sparc
 
 # sh-utils
 %patch703 -p1 -b .dateman
