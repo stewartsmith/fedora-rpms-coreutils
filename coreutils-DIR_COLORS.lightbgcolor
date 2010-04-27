@@ -1,5 +1,5 @@
 # Configuration file for the color ls utility - modified for gray backgrounds
-# Synchronized with coreutils 8.1 dircolors
+# Synchronized with coreutils 8.5 dircolors
 # This file goes in the /etc directory, and must be world readable.
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
@@ -34,7 +34,9 @@ TERM xterm-16color
 TERM xterm-88color
 TERM xterm-256color
 TERM rxvt
+TERM rxvt-256color
 TERM rxvt-unicode
+TERM rxvt-unicode256
 TERM xterm-color
 TERM color-xterm
 TERM vt100

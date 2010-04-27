@@ -1,6 +1,6 @@
 # Configuration file for the 256color ls utility
 # This file goes in the /etc directory, and must be world readable.
-# Synchronized with coreutils 8.1 dircolors
+# Synchronized with coreutils 8.5 dircolors
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
 # In the case that you are not satisfied with supplied colors, please
@@ -23,6 +23,7 @@ OPTIONS -F -T 0
 # Below, there should be one TERM entry for each termtype that is colorizable
 TERM putty-256color
 TERM rxvt-256color
+TERM rxvt-unicode256
 TERM screen-256color
 TERM xterm-256color
 TERM gnome-256color

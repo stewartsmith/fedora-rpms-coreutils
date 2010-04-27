@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -30,6 +30,8 @@ Patch102: coreutils-7.4-sttytcsadrain.patch
 Patch103: coreutils-8.2-uname-processortype.patch
 #df --direct
 Patch104: coreutils-df-direct.patch
+#Fix mkstemp on sparc64
+Patch105: coreutils-mkstemp.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -124,6 +126,7 @@ Libraries for coreutils package.
 %patch102 -p1 -b .tcsadrain
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
+%patch105 -p1 -b .sparc
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -338,6 +341,12 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Tue Apr 27 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-2
+- doublequote LS_COLORS in colorls.*sh scripts to speedup
+  shell start(#586029)
+- add patch for mkstemp on sparc64(Dennis Gilmore)
+- update /etc/DIR_COLORS* files
+
 * Mon Apr 26 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-1
 - new upstream release 8.5
 

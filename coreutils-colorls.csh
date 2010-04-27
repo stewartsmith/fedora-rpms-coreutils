@@ -2,7 +2,7 @@
 # color-ls initialization
 if ( $?USER_LS_COLORS ) then
   if ( "$USER_LS_COLORS" != "" ) then
-     #when USER_LS_COLORS defined do not override user 
+     #when USER_LS_COLORS defined do not override user
      #specified LS_COLORS and use them
      goto finish
   endif
@@ -12,14 +12,14 @@ alias ll 'ls -l'
 alias l. 'ls -d .*'
 set COLORS=/etc/DIR_COLORS
 if ($?TERM) then
-  if ( -e "/etc/DIR_COLORS.$TERM" ) then 
+  if ( -e "/etc/DIR_COLORS.$TERM" ) then
      set COLORS="/etc/DIR_COLORS.$TERM"
   endif
 endif
 if ( -e "/etc/DIR_COLORS.256color" ) then
   if ( "`tty -s && tput colors`" == "256" ) then
      set COLORS=/etc/DIR_COLORS.256color
-  endif 
+  endif
 endif
 if ( -f ~/.dircolors ) set COLORS=~/.dircolors
 if ( -f ~/.dir_colors ) set COLORS=~/.dir_colors
@@ -30,11 +30,11 @@ endif
 
 if ( ! -e "$COLORS" ) exit
 
-eval `dircolors -c $COLORS`
+eval "`dircolors -c $COLORS`"
 
 if ( "$LS_COLORS" == '' ) exit
 set color_none=`sed -n '/^COLOR.*none/Ip' < $COLORS`
-if ( "$color_none" != '' ) then 
+if ( "$color_none" != '' ) then
    unset color_none
    exit
 endif

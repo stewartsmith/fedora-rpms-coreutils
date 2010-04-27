@@ -30,7 +30,7 @@ if [ -z "$USER_LS_COLORS" ]; then
   # Existence of $COLORS already checked above.
   [ -n "$COLORS" ] || return
 
-  eval `dircolors --sh "$COLORS" 2>/dev/null`
+  eval "`dircolors --sh "$COLORS" 2>/dev/null`"
   [ -z "$LS_COLORS" ] && return
   grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
 fi
