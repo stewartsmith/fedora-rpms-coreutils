@@ -51,7 +51,7 @@ index 76474c2..0a9d221 100644
 -        : getgroups (max_n_groups - (gid != (gid_t) -1),
 -                                g + (gid != (gid_t) -1)));
 +  if (!username)
-+    ng = getgroups (max_n_groups, g);
++    ng = getgroups (max_n_groups - (gid != (gid_t)-1), g + (gid != (gid_t)-1));
 +  else
 +  {
 +#ifdef HAVE_GETGROUPLIST
