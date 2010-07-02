@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -156,12 +156,7 @@ find ./po/ -name "*.p*" | xargs \
  -e 's/-dpR/-cdpR/'
 
 %build
-%ifarch s390 s390x
-# Build at -O1 for the moment (bug #196369).
-export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fPIC -O1"
-%else
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
-%endif
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 #autoreconf -i -v
 touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
@@ -341,6 +336,11 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Jul  2 2010 Dan Horák <dan[at]danny.cz> - 8.5-3
+- rebuilt with the updated configuration patch
+- drop the old -O1 exception for s390(x)
+- updated the getgrouplist patch (Kamil Dudka)
+
 * Tue Apr 27 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-2
 - doublequote LS_COLORS in colorls.*sh scripts to speedup
   shell start(#586029)
