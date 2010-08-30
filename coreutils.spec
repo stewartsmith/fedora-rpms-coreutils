@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,8 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+#fix double free error in tac (reported in debian bug #594666)
+Patch1: coreutils-8.5-tac-doublefree.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -121,6 +123,7 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .doublefree
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -339,6 +342,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Aug 30 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-5
+- fix double free abort in tac (#628213)
+
 * Thu Jul 22 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-4
 - Add .ear, .war, .sar , for Java jar-like archives to
   dircolors (#616497)
