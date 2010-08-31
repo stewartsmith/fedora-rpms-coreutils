@@ -8,29 +8,13 @@ tac to realloc its primary buffer.  Then, just before exit, tac
 would mistakenly free the original (now free'd) buffer.
 This bug was introduced by commit be6c13e7, "maint: always free a
 buffer, to avoid even semblance of a leak".
-* NEWS (Bug fixes): Mention it.
 * tests/misc/tac (double-free): New test, to exercise this.
 Reported by Salvo Tomaselli in <http://bugs.debian.org/594666>.
 ---
- NEWS           |    3 +++
  src/tac.c      |    6 ++++--
  tests/misc/tac |    6 ++++++
- 3 files changed, 13 insertions(+), 2 deletions(-)
+ 2 files changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/NEWS b/NEWS
-index 85f55a2..f29d311 100644
---- a/NEWS
-+++ b/NEWS
-@@ -11,6 +11,9 @@ GNU coreutils NEWS                                    -*- outline -*-
-   du -H and -L now consistently count pointed-to files instead of
-   symbolic links, and correctly diagnose dangling symlinks.
-
-+  tac would perform a double-free when given an input line longer than 16KiB.
-+  [bug introduced in coreutils-8.3]
-+
- ** New features
-
-   cp now accepts the --attributes-only option to not copy file data,
 diff --git a/src/tac.c b/src/tac.c
 index cec9736..859e006 100644
 --- a/src/tac.c
