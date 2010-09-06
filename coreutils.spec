@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -64,6 +64,8 @@ Patch912: coreutils-overflow.patch
 Patch915: coreutils-split-pam.patch
 #prevent koji build failure with wrong getfacl exit code
 Patch916: coreutils-getfacl-exit-code.patch
+#compile su with pie flag
+Patch917: coreutils-8.4-su-pie.patch
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
@@ -149,6 +151,7 @@ Libraries for coreutils package.
 %patch912 -p1 -b .overflow
 %patch915 -p1 -b .splitl
 %patch916 -p1 -b .getfacl-exit-code
+%patch917 -p1 -b .pie
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -179,8 +182,7 @@ automake --copy --add-missing
 touch man/*.x
 
 make all %{?_smp_mflags} \
-         %{?!nopam:CPPFLAGS="-DUSE_PAM"} \
-         su_LDFLAGS="-pie %{?!nopam:-lpam -lpam_misc}"
+         %{?!nopam:CPPFLAGS="-DUSE_PAM"}
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
@@ -342,6 +344,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Sep 06 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-6
+- compile su with pie again (#630017)
+
 * Mon Aug 30 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-5
 - fix double free abort in tac (#628213)
 
