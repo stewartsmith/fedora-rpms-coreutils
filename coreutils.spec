@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -64,7 +64,7 @@ Patch912: coreutils-overflow.patch
 Patch915: coreutils-split-pam.patch
 #prevent koji build failure with wrong getfacl exit code
 Patch916: coreutils-getfacl-exit-code.patch
-#compile su with pie flag
+#compile su with pie flag and RELRO protection
 Patch917: coreutils-8.4-su-pie.patch
 
 #SELINUX Patch - implements Redhat changes
@@ -344,6 +344,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Sep 09 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-7
+- add RELRO protection to su as well (#630017)
+
 * Mon Sep 06 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-6
 - compile su with pie again (#630017)
 
