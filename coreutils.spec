@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -344,6 +344,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Sep 29 2010 jkeating - 8.5-9
+- Rebuilt for gcc bug 634757
+
 * Mon Sep 20 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-8
 - change assertion failure for invalid multibyte input
   in sort to less confusing error message(#591352)
