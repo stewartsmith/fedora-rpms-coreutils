@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.5
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,6 +20,8 @@ Source203:  coreutils-runuser-l.pamd
 # From upstream
 #fix double free error in tac (reported in debian bug #594666)
 Patch1: coreutils-8.5-tac-doublefree.patch
+#fix various case conversion issues in tr(#611274)
+Patch2: coreutils-8.5-trcaseconversion.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -126,6 +128,7 @@ Libraries for coreutils package.
 
 # From upstream
 %patch1 -p1 -b .doublefree
+%patch2 -p1 -b .caseconvert
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -158,6 +161,7 @@ Libraries for coreutils package.
 %patch951 -p1 -b .selinuxman
 
 chmod a+x tests/misc/sort-mb-tests tests/df/direct
+chmod a+x tests/misc/tr-case-class
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -344,6 +348,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Sep 30 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-10
+- various fixes for case conversion in tr(#611274)
+
 * Wed Sep 29 2010 jkeating - 8.5-9
 - Rebuilt for gcc bug 634757
 
