@@ -200,7 +200,7 @@ index a5b6810..479d3d3 100644
  
 @@ -1822,47 +1891,21 @@ main (int argc, char **argv)
            s2->state = BEGIN_STATE;
-           while (true)
+           for (;;)
              {
 -              /* When the previous pair identified case-converting classes,
 -                 advance S1 and S2 so that each points to the following
