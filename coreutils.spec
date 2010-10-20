@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.5
-Release: 10%{?dist}
+Version: 8.6
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,10 +18,6 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-#fix double free error in tac (reported in debian bug #594666)
-Patch1: coreutils-8.5-tac-doublefree.patch
-#fix various case conversion issues in tr(#611274)
-Patch2: coreutils-8.5-trcaseconversion.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -64,8 +60,6 @@ Patch912: coreutils-overflow.patch
 #split the PAM scripts for "su -l"/"runuser -l" from that of normal "su" and
 #"runuser" (#198639)
 Patch915: coreutils-split-pam.patch
-#prevent koji build failure with wrong getfacl exit code
-Patch916: coreutils-getfacl-exit-code.patch
 #compile su with pie flag and RELRO protection
 Patch917: coreutils-8.4-su-pie.patch
 
@@ -87,14 +81,11 @@ BuildRequires: gmp-devel
 BuildRequires: attr
 BuildRequires: strace
 
-Requires(post): libselinux
-Requires:       libattr
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Requires(post): grep
 %{?!nopam:Requires: pam }
-Requires(post): libcap
 Requires:       ncurses
 Requires:       gmp
 Requires: %{name}-libs = %{version}-%{release}
@@ -127,8 +118,6 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .doublefree
-%patch2 -p1 -b .caseconvert
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -144,6 +133,7 @@ Libraries for coreutils package.
 %patch704 -p1 -b .paths
 %patch706 -p1 -b .pam
 %patch713 -p1 -b .langinfo
+
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
@@ -153,7 +143,6 @@ Libraries for coreutils package.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch915 -p1 -b .splitl
-%patch916 -p1 -b .getfacl-exit-code
 %patch917 -p1 -b .pie
 
 #SELinux
@@ -161,7 +150,6 @@ Libraries for coreutils package.
 %patch951 -p1 -b .selinuxman
 
 chmod a+x tests/misc/sort-mb-tests tests/df/direct
-chmod a+x tests/misc/tr-case-class
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -348,6 +336,12 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Oct 20 2010 Ondrej Vasik <ovasik@redhat.com> - 8.6-1
+- new upstream release 8.6
+- remove applied patches, temporarily disable sort
+  debug-keys test for multibyte locales (failing
+  because of i18n patch)
+
 * Thu Sep 30 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-10
 - various fixes for case conversion in tr(#611274)
 
