@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -336,6 +336,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Tue Oct 26 2010 Kamil Dudka <kdudka@redhat.com> - 8.6-2
+- improve i18n support in sort (debug-keys test is now back)
+
 * Wed Oct 20 2010 Ondrej Vasik <ovasik@redhat.com> - 8.6-1
 - new upstream release 8.6
 - remove applied patches, temporarily disable sort
