@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.6
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -336,6 +336,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Nov 03 2010 Kamil Dudka <kdudka@redhat.com> - 8.6-3
+- prevent sort from assertion failure in case LC_CTYPE does not match LC_TIME
+  (#647938)
+
 * Tue Oct 26 2010 Kamil Dudka <kdudka@redhat.com> - 8.6-2
 - improve i18n support in sort (debug-keys test is now back)
 
