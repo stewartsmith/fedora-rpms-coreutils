@@ -3,8 +3,8 @@ diff -urNp coreutils-8.4-orig/src/Makefile.am coreutils-8.4/src/Makefile.am
 +++ coreutils-8.4/src/Makefile.am	2010-09-03 17:36:13.005765125 +0200
 @@ -367,6 +367,7 @@ factor_LDADD += $(LIB_GMP)
  
- # for crypt
- su_LDADD += $(LIB_CRYPT) @LIB_PAM@
+ # for crypt and pam
+ su_LDADD += $(LIB_CRYPT) $(PAM_LIBS)
 +su_LDFLAGS = -pie -Wl,-z,relro,-z,now
  
  # for various ACL functions

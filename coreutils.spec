@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.6
-Release: 3%{?dist}
+Version: 8.7
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -42,8 +42,8 @@ Patch703: sh-utils-2.0.11-dateman.patch
 Patch704: sh-utils-1.16-paths.patch
 # RMS will never accept the PAM patch because it removes his historical
 # rant about Twenex and the wheel group, so we'll continue to maintain
-# it here indefinitely.
-Patch706: coreutils-pam.patch
+# it here indefinitely. Patch is now the same in Fedora and SUSE.
+Patch706: coreutils-8.5-pam.patch
 Patch713: coreutils-4.5.3-langinfo.patch
 
 # (sb) lin18nux/lsb compliance - multibyte functionality patch
@@ -52,14 +52,11 @@ Patch800: coreutils-i18n.patch
 #Call setsid() in su under some circumstances (bug #173008).
 Patch900: coreutils-setsid.patch
 #make runuser binary based on su.c
-Patch907: coreutils-5.2.1-runuser.patch
+Patch907: coreutils-8.7-runuser.patch
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
 #Prevent buffer overflow in who(1) (bug #158405).
 Patch912: coreutils-overflow.patch
-#split the PAM scripts for "su -l"/"runuser -l" from that of normal "su" and
-#"runuser" (#198639)
-Patch915: coreutils-split-pam.patch
 #compile su with pie flag and RELRO protection
 Patch917: coreutils-8.4-su-pie.patch
 
@@ -142,7 +139,6 @@ Libraries for coreutils package.
 %patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
-%patch915 -p1 -b .splitl
 %patch917 -p1 -b .pie
 
 #SELinux
@@ -336,6 +332,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Nov 03 2010 Ondrej Vasik <ovasik@redhat.com> - 8.7-1
+- new upstream release coreutils-8.7
+- pam support in su consolidation with SUSE(#622700)
+
 * Wed Nov 03 2010 Kamil Dudka <kdudka@redhat.com> - 8.6-3
 - prevent sort from assertion failure in case LC_CTYPE does not match LC_TIME
   (#647938)

@@ -1,12 +1,17 @@
---- coreutils-6.7/src/su.c.setsid	2007-01-09 17:26:26.000000000 +0000
-+++ coreutils-6.7/src/su.c	2007-01-09 17:26:57.000000000 +0000
-@@ -176,9 +176,13 @@
+diff -urNp coreutils-8.6-orig/src/su.c coreutils-8.6/src/su.c
+--- coreutils-8.6-orig/src/su.c	2010-11-03 13:56:11.679069689 +0100
++++ coreutils-8.6/src/su.c	2010-11-03 13:56:45.304325661 +0100
+@@ -153,6 +153,9 @@ static bool simulate_login;
  /* If true, change some environment vars to indicate the user su'd to.  */
  static bool change_environment;
  
 +/* If true, then don't call setsid() with a command. */
 +int same_session = 0;
 +
+ #ifdef USE_PAM
+ static bool _pam_session_opened;
+ static bool _pam_cred_established;
+@@ -161,6 +164,7 @@ static bool _pam_cred_established;
  static struct option const longopts[] =
  {
    {"command", required_argument, NULL, 'c'},
@@ -14,48 +19,40 @@
    {"fast", no_argument, NULL, 'f'},
    {"login", no_argument, NULL, 'l'},
    {"preserve-environment", no_argument, NULL, 'p'},
-@@ -478,6 +482,8 @@
-   if (child == 0) {  /* child shell */
-   change_identity (pw);
-   pam_end(pamh, 0);
-+  if (!same_session)
-+    setsid ();
- #endif
- 
-   if (simulate_login)
-@@ -532,13 +538,27 @@
-     sigemptyset(&action.sa_mask);
-     action.sa_flags = 0;
-     sigemptyset(&ourset);
--    if (sigaddset(&ourset, SIGTERM)
--        || sigaddset(&ourset, SIGALRM)
--        || sigaction(SIGTERM, &action, NULL)
--        || sigprocmask(SIG_UNBLOCK, &ourset, NULL)) {
+@@ -335,14 +339,27 @@ create_watching_parent (void)
+       sigemptyset (&action.sa_mask);
+       action.sa_flags = 0;
+       sigemptyset (&ourset);
+-      if (sigaddset (&ourset, SIGTERM)
+-	  || sigaddset (&ourset, SIGALRM)
+-	  || sigaction (SIGTERM, &action, NULL)
+-	  || sigprocmask (SIG_UNBLOCK, &ourset, NULL))
+-	{
 +    if (!same_session)
 +      {
 +        if (sigaddset(&ourset, SIGINT) || sigaddset(&ourset, SIGQUIT))
 +          {
-+            fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
-+            caught = 1;
++            error (0, errno, _("cannot set signal handler"));
++            caught_signal = true;
 +          }
 +      }
-+    if (!caught && (sigaddset(&ourset, SIGTERM)
++    if (!caught_signal && (sigaddset(&ourset, SIGTERM)
 +                    || sigaddset(&ourset, SIGALRM)
 +                    || sigaction(SIGTERM, &action, NULL)
 +                    || sigprocmask(SIG_UNBLOCK, &ourset, NULL))) {
-       fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
-       caught = 1;
-     }
-+    if (!caught && !same_session && (sigaction(SIGINT, &action, NULL)
+ 	  error (0, errno, _("cannot set signal handler"));
+ 	  caught_signal = true;
+ 	}
++    if (!caught_signal && !same_session && (sigaction(SIGINT, &action, NULL)
 +                                     || sigaction(SIGQUIT, &action, NULL)))
 +      {
-+        fprintf(stderr, "%s: signal masking malfunction\n", PROGRAM_NAME);
-+        caught = 1;
++        error (0, errno, _("cannot set signal handler"));
++        caught_signal = true;
 +      }
-   }
-   if (!caught) {
-     do {
-@@ -609,6 +629,8 @@
+     }
+   if (!caught_signal)
+     {
+@@ -627,6 +644,8 @@ Change the effective user id and group i
  \n\
    -, -l, --login               make the shell a login shell\n\
    -c, --command=COMMAND        pass a single COMMAND to the shell with -c\n\
@@ -64,7 +61,7 @@
    -f, --fast                   pass -f to the shell (for csh or tcsh)\n\
    -m, --preserve-environment   do not reset environment variables\n\
    -p                           same as -m\n\
-@@ -631,6 +653,7 @@
+@@ -649,6 +668,7 @@ main (int argc, char **argv)
    int optc;
    const char *new_user = DEFAULT_USER;
    char *command = NULL;
@@ -72,7 +69,7 @@
    char *shell = NULL;
    struct passwd *pw;
    struct passwd pw_copy;
-@@ -656,6 +679,11 @@
+@@ -674,6 +694,11 @@ main (int argc, char **argv)
            command = optarg;
            break;
  
@@ -84,7 +81,7 @@
          case 'f':
            fast_startup = true;
            break;
-@@ -725,6 +753,9 @@
+@@ -743,6 +768,9 @@ main (int argc, char **argv)
      }
  #endif
  
@@ -94,3 +91,12 @@
    if (!shell && !change_environment)
      shell = getenv ("SHELL");
    if (shell && getuid () != 0 && restricted_shell (pw->pw_shell))
+@@ -764,6 +792,8 @@ main (int argc, char **argv)
+ #endif
+ 
+   change_identity (pw);
++  if (!same_session)
++    setsid ();
+ 
+   /* Set environment after pam_open_session, which may put KRB5CCNAME
+      into the pam_env, etc.  */
