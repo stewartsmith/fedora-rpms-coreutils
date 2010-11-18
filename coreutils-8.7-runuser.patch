@@ -138,7 +138,7 @@ diff -urNp coreutils-8.7-orig/src/su.c coreutils-8.7/src/su.c
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
    {NULL, 0, NULL, 0}
-@@ -444,8 +457,14 @@ correct_password (const struct passwd *p
+@@ -444,6 +457,11 @@ correct_password (const struct passwd *p
        retval = pam_set_item (pamh, PAM_RUSER, (const void *) lpw->pw_name);
        PAM_BAIL_P (return false);
      }
@@ -149,10 +149,15 @@ diff -urNp coreutils-8.7-orig/src/su.c coreutils-8.7/src/su.c
 +#else
    retval = pam_authenticate (pamh, 0);
    PAM_BAIL_P (return false);
-+#endif
    retval = pam_acct_mgmt (pamh, 0);
-   if (retval == PAM_NEW_AUTHTOK_REQD)
-     {
+@@ -454,6 +472,7 @@ correct_password (const struct passwd *p
+       PAM_BAIL_P (return false);
+     }
+   PAM_BAIL_P (return false);
++#endif
+   /* Must be authenticated if this point was reached.  */
+   return true;
+ #else /* !USE_PAM */
 @@ -533,11 +552,22 @@ modify_environment (const struct passwd 
  /* Become the user and group(s) specified by PW.  */
  
