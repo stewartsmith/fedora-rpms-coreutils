@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.7
-Release: 2%{?dist}
+Version: 8.8
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -332,6 +332,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Dec 23 2010 Ondrej Vasik <ovasik@redhat.com> - 8.8-1
+- fix parallel sorting issue (#655096)
+- new upstream release coreutils-8.8 (#665164)
+
 * Thu Nov 18 2010 Ondrej Vasik <ovasik@redhat.com> - 8.7-2
 - don't prompt for password with runuser(#654367)
 
