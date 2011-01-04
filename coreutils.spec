@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.8
-Release: 2%{?dist}
+Version: 8.9
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,8 +18,6 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
-#The suffix length was dependent on the number of bytes or lines per file(#666293)
-Patch1: coreutils-8.8-split-suffix.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -117,7 +115,6 @@ Libraries for coreutils package.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .splitsuffix
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -335,6 +332,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Tue Jan 04 2011 Ondrej Vasik <ovasik@redhat.com> - 8.9-1
+- new upstream release coreutils-8.9
+
 * Fri Dec 31 2010 Ondrej Vasik <ovasik@redhat.com> - 8.8-2
 - The suffix length was dependent on the number of bytes
   or lines per file (#666293)
