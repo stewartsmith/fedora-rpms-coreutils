@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -30,8 +30,6 @@ Patch102: coreutils-7.4-sttytcsadrain.patch
 Patch103: coreutils-8.2-uname-processortype.patch
 #df --direct
 Patch104: coreutils-df-direct.patch
-#Fix mkstemp on sparc64
-Patch105: coreutils-mkstemp.patch
 #add jar-like archives to colored ones
 Patch106: coreutils-8.5-dircolors.patch
 
@@ -122,7 +120,6 @@ Libraries for coreutils package.
 %patch102 -p1 -b .tcsadrain
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
-%patch105 -p1 -b .sparc
 %patch106 -p1 -b .java
 
 # sh-utils
@@ -332,6 +329,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Sat Jan 08 2011 Dennis Gilmore <dennis@ausil.us> - 8.9-2
+- drop no longer needed mkstemp patch for sparc 
+
 * Tue Jan 04 2011 Ondrej Vasik <ovasik@redhat.com> - 8.9-1
 - new upstream release coreutils-8.9
 
