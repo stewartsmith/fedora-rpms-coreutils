@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.9
-Release: 2%{?dist}
+Version: 8.10
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -329,6 +329,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Feb 03 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-1
+- new upstream release coreutils-8.10
+
 * Sat Jan 08 2011 Dennis Gilmore <dennis@ausil.us> - 8.9-2
 - drop no longer needed mkstemp patch for sparc 
 
