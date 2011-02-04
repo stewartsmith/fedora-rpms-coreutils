@@ -329,7 +329,7 @@ fi
 %{_libdir}/coreutils
 
 %changelog
-* Fri Feb 03 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-1
+* Fri Feb 04 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-1
 - new upstream release coreutils-8.10
 
 * Sat Jan 08 2011 Dennis Gilmore <dennis@ausil.us> - 8.9-2
