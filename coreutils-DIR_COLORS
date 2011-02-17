@@ -49,13 +49,16 @@ TERM rxvt-256color
 TERM rxvt-cygwin
 TERM rxvt-cygwin-native
 TERM rxvt-unicode
+TERM rxvt-unicode-256color
 TERM rxvt-unicode256
 TERM screen
 TERM screen-256color
 TERM screen-256color-bce
 TERM screen-bce
 TERM screen-w
+TERM screen.rxvt
 TERM screen.linux
+TERM terminator
 TERM vt100
 TERM xterm
 TERM xterm-16color

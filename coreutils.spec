@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.10
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -329,6 +329,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Feb 17 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-3
+- add several new TERMs to DIR_COLORS files(#678147)
+
 * Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 8.10-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
