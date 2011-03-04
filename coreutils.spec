@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.10
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -142,7 +142,7 @@ Libraries for coreutils package.
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-chmod a+x tests/misc/sort-mb-tests tests/df/direct
+chmod a+x tests/misc/sort-mb-tests tests/df/direct || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -158,7 +158,7 @@ aclocal -I m4
 autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile %{?!nopam:--enable-pam} \
-           --enable-selinux \
+           %{?!noselinux:--enable-selinux} \
            --enable-install-program=su,hostname,arch \
            --with-tty-group \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
@@ -214,9 +214,9 @@ install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.c
 
 # su
 install -m 4755 src/su $RPM_BUILD_ROOT/bin
-install -m 755 src/runuser $RPM_BUILD_ROOT/sbin
+%{?!norunuser:install -m 755 src/runuser $RPM_BUILD_ROOT/sbin}
 # do not ship runuser in /usr/bin/runuser
-rm -rf $RPM_BUILD_ROOT/usr/bin/runuser
+rm -rf $RPM_BUILD_ROOT/usr/bin/runuser || :
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
@@ -322,13 +322,17 @@ fi
 %_infodir/coreutils*
 %_mandir/man*/*
 %_sbindir/chroot
-/sbin/runuser
+%{?!norunuser:/sbin/runuser}
 
 %files libs
 %defattr(-, root, root, -)
 %{_libdir}/coreutils
 
 %changelog
+* Fri Mar  4 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-5
+- make coreutils build even without patches (with
+  nopam, norunuser and noselinux variables)
+
 * Thu Feb 17 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-4
 - colorize documents by DIR_COLORS files(brown like mc)
 
