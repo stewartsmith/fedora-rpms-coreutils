@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.10
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -329,6 +329,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Mar 14 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-6
+- fix possible uninitalized variables usage caused by i18n
+  patch(#683799)
+
 * Fri Mar  4 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-5
 - make coreutils build even without patches (with
   nopam, norunuser and noselinux variables)
