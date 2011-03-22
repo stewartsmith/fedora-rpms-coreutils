@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.10
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -32,6 +32,8 @@ Patch103: coreutils-8.2-uname-processortype.patch
 Patch104: coreutils-df-direct.patch
 #add jar-like archives to colored ones
 Patch106: coreutils-8.5-dircolors.patch
+#add note about mkdir --mode behaviour into info documentation(#610559)
+Patch107: coreutils-8.4-mkdir-modenote.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -121,6 +123,7 @@ Libraries for coreutils package.
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch106 -p1 -b .java
+%patch107 -p1 -b .mkdirmode
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -329,6 +332,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Tue Mar 22 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-7
+- add note about mkdir mode behaviour into info
+  documentation (#610559)
+
 * Mon Mar 14 2011 Ondrej Vasik <ovasik@redhat.com> - 8.10-6
 - fix possible uninitalized variables usage caused by i18n
   patch(#683799)
