@@ -52,7 +52,7 @@ diff -urNp coreutils-8.11-orig/src/df.c coreutils-8.11/src/df.c
 -      char const *header = _(headers[field][header_mode]);
 +     
 +      char const *header = (field == MNT_FIELD && direct_statfs)?
-+                             _("File\n") :
++                             _("File") :
 +                             _(headers[field][header_mode]);
 +
        if (!header)
@@ -157,14 +157,14 @@ diff -urNp coreutils-8.11-orig/tests/df/direct coreutils-8.11/tests/df/direct
 +compare header_file_out header_file_exp || fail=1
 +
 +# check df output (without --direct)
-+#$AWK '{ if (NR==2) print $6; }' df_out > file_out \
-+#  || framework_failure
-+#compare file_out file_exp && fail=1
++$AWK '{ if (NR==2) print $6; }' df_out > file_out \
++  || framework_failure
++compare file_out file_exp && fail=1
 +
 +# check df output (with --direct)
-+#$AWK '{ if (NR==2) print $6; }' df_direct_out > file_out \
-+#  || framework_failure
-+#compare file_out file_exp || fail=1
++$AWK '{ if (NR==2) print $6; }' df_direct_out > file_out \
++  || framework_failure
++compare file_out file_exp || fail=1
 +
 +Exit $fail
 diff -urNp coreutils-8.11-orig/tests/Makefile.am coreutils-8.11/tests/Makefile.am

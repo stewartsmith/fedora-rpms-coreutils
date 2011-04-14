@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -332,6 +332,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Apr 14 2011 Ondrej Vasik <ovasik@redhat.com> - 8.11-2
+- fix issue with df --direct(extra new line)
+
 * Thu Apr 14 2011 Ondrej Vasik <ovasik@redhat.com> - 8.11-1
 - new upstream release 8.11, defuzz patches
 
