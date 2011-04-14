@@ -1,6 +1,6 @@
-diff -urNp coreutils-8.9-orig/configure.ac coreutils-8.9/configure.ac
---- coreutils-8.9-orig/configure.ac	2011-01-04 17:43:03.876887473 +0100
-+++ coreutils-8.9/configure.ac	2011-01-04 17:43:36.194889010 +0100
+diff -urNp coreutils-8.11-orig/configure.ac coreutils-8.11/configure.ac
+--- coreutils-8.11-orig/configure.ac	2011-04-14 11:05:27.511308852 +0200
++++ coreutils-8.11/configure.ac	2011-04-14 11:06:05.481433832 +0200
 @@ -132,6 +132,13 @@ if test "$gl_gcc_warnings" = yes; then
    AC_SUBST([GNULIB_TEST_WARN_CFLAGS])
  fi
@@ -15,18 +15,18 @@ diff -urNp coreutils-8.9-orig/configure.ac coreutils-8.9/configure.ac
  AC_FUNC_FORK
  
  AC_ARG_ENABLE(pam, AS_HELP_STRING([--disable-pam],
-diff -urNp coreutils-8.9-orig/man/chcon.x coreutils-8.9/man/chcon.x
---- coreutils-8.9-orig/man/chcon.x	2009-09-01 13:01:16.000000000 +0200
-+++ coreutils-8.9/man/chcon.x	2011-01-04 17:43:36.195889150 +0100
+diff -urNp coreutils-8.11-orig/man/chcon.x coreutils-8.11/man/chcon.x
+--- coreutils-8.11-orig/man/chcon.x	2009-09-01 13:01:16.000000000 +0200
++++ coreutils-8.11/man/chcon.x	2011-04-14 11:06:05.482433878 +0200
 @@ -1,4 +1,4 @@
  [NAME]
 -chcon \- change file security context
 +chcon \- change file SELinux security context
  [DESCRIPTION]
  .\" Add any additional description here
-diff -urNp coreutils-8.9-orig/man/runcon.x coreutils-8.9/man/runcon.x
---- coreutils-8.9-orig/man/runcon.x	2009-09-01 13:01:16.000000000 +0200
-+++ coreutils-8.9/man/runcon.x	2011-01-04 17:43:36.195889150 +0100
+diff -urNp coreutils-8.11-orig/man/runcon.x coreutils-8.11/man/runcon.x
+--- coreutils-8.11-orig/man/runcon.x	2009-09-01 13:01:16.000000000 +0200
++++ coreutils-8.11/man/runcon.x	2011-04-14 11:06:05.483445779 +0200
 @@ -1,5 +1,5 @@
  [NAME]
 -runcon \- run command with specified security context
@@ -34,10 +34,22 @@ diff -urNp coreutils-8.9-orig/man/runcon.x coreutils-8.9/man/runcon.x
  [DESCRIPTION]
  Run COMMAND with completely-specified CONTEXT, or with current or
  transitioned security context modified by one or more of LEVEL,
-diff -urNp coreutils-8.9-orig/src/copy.c coreutils-8.9/src/copy.c
---- coreutils-8.9-orig/src/copy.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/copy.c	2011-01-04 17:43:36.199888591 +0100
-@@ -1931,6 +1931,8 @@ copy_internal (char const *src_name, cha
+diff -urNp coreutils-8.11-orig/src/chcon.c coreutils-8.11/src/chcon.c
+--- coreutils-8.11-orig/src/chcon.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/chcon.c	2011-04-14 11:06:05.489434075 +0200
+@@ -356,7 +356,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
+ "),
+         program_name, program_name, program_name);
+       fputs (_("\
+-Change the security context of each FILE to CONTEXT.\n\
++Change the SELinux security context of each FILE to CONTEXT.\n\
+ With --reference, change the security context of each FILE to that of RFILE.\n\
+ \n\
+   -h, --no-dereference   affect symbolic links instead of any referenced file\n\
+diff -urNp coreutils-8.11-orig/src/copy.c coreutils-8.11/src/copy.c
+--- coreutils-8.11-orig/src/copy.c	2011-04-12 12:07:43.000000000 +0200
++++ coreutils-8.11/src/copy.c	2011-04-14 11:06:05.485433752 +0200
+@@ -2179,6 +2179,8 @@ copy_internal (char const *src_name, cha
          {
            /* Here, we are crossing a file system boundary and cp's -x option
               is in effect: so don't copy the contents of this directory. */
@@ -46,9 +58,9 @@ diff -urNp coreutils-8.9-orig/src/copy.c coreutils-8.9/src/copy.c
          }
        else
          {
-diff -urNp coreutils-8.9-orig/src/copy.h coreutils-8.9/src/copy.h
---- coreutils-8.9-orig/src/copy.h	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/copy.h	2011-01-04 17:43:36.201889220 +0100
+diff -urNp coreutils-8.11-orig/src/copy.h coreutils-8.11/src/copy.h
+--- coreutils-8.11-orig/src/copy.h	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/copy.h	2011-04-14 11:06:05.487340225 +0200
 @@ -158,6 +158,9 @@ struct cp_options
    bool preserve_mode;
    bool preserve_timestamps;
@@ -59,9 +71,9 @@ diff -urNp coreutils-8.9-orig/src/copy.h coreutils-8.9/src/copy.h
    /* Enabled for mv, and for cp by the --preserve=links option.
       If true, attempt to preserve in the destination files any
       logical hard links between the source files.  If used with cp's
-diff -urNp coreutils-8.9-orig/src/cp.c coreutils-8.9/src/cp.c
---- coreutils-8.9-orig/src/cp.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/cp.c	2011-01-04 17:43:36.202898439 +0100
+diff -urNp coreutils-8.11-orig/src/cp.c coreutils-8.11/src/cp.c
+--- coreutils-8.11-orig/src/cp.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/cp.c	2011-04-14 11:06:05.488433894 +0200
 @@ -141,6 +141,7 @@ static struct option const long_opts[] =
    {"target-directory", required_argument, NULL, 't'},
    {"update", no_argument, NULL, 'u'},
@@ -150,21 +162,9 @@ diff -urNp coreutils-8.9-orig/src/cp.c coreutils-8.9/src/cp.c
          case 'S':
            make_backups = true;
            backup_suffix_string = optarg;
-diff -urNp coreutils-8.9-orig/src/chcon.c coreutils-8.9/src/chcon.c
---- coreutils-8.9-orig/src/chcon.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/chcon.c	2011-01-04 17:43:36.205888452 +0100
-@@ -356,7 +356,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
- "),
-         program_name, program_name, program_name);
-       fputs (_("\
--Change the security context of each FILE to CONTEXT.\n\
-+Change the SELinux security context of each FILE to CONTEXT.\n\
- With --reference, change the security context of each FILE to that of RFILE.\n\
- \n\
-   -h, --no-dereference   affect symbolic links instead of any referenced file\n\
-diff -urNp coreutils-8.9-orig/src/id.c coreutils-8.9/src/id.c
---- coreutils-8.9-orig/src/id.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/id.c	2011-01-04 17:43:36.206888661 +0100
+diff -urNp coreutils-8.11-orig/src/id.c coreutils-8.11/src/id.c
+--- coreutils-8.11-orig/src/id.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/id.c	2011-04-14 11:06:05.490435340 +0200
 @@ -107,7 +107,7 @@ int
  main (int argc, char **argv)
  {
@@ -174,10 +174,10 @@ diff -urNp coreutils-8.9-orig/src/id.c coreutils-8.9/src/id.c
  
    /* If true, output the list of all group IDs. -G */
    bool just_group_list = false;
-diff -urNp coreutils-8.9-orig/src/install.c coreutils-8.9/src/install.c
---- coreutils-8.9-orig/src/install.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/install.c	2011-01-04 17:47:30.255887962 +0100
-@@ -283,6 +283,7 @@ cp_option_init (struct cp_options *x)
+diff -urNp coreutils-8.11-orig/src/install.c coreutils-8.11/src/install.c
+--- coreutils-8.11-orig/src/install.c	2011-04-12 12:07:43.000000000 +0200
++++ coreutils-8.11/src/install.c	2011-04-14 11:07:58.333433706 +0200
+@@ -261,6 +261,7 @@ cp_option_init (struct cp_options *x)
    x->data_copy_required = true;
    x->require_preserve = false;
    x->require_preserve_context = false;
@@ -185,7 +185,16 @@ diff -urNp coreutils-8.9-orig/src/install.c coreutils-8.9/src/install.c
    x->require_preserve_xattr = false;
    x->recursive = false;
    x->sparse_mode = SPARSE_AUTO;
-@@ -460,7 +461,7 @@ main (int argc, char **argv)
+@@ -622,7 +623,7 @@ Mandatory arguments to long options are 
+   -v, --verbose       print the name of each directory as it is created\n\
+ "), stdout);
+       fputs (_("\
+-      --preserve-context  preserve SELinux security context\n\
++  -P, --preserve-context  preserve SELinux security context\n\
+   -Z, --context=CONTEXT  set SELinux security context of files and directories\
+ \n\
+ "), stdout);
+@@ -765,7 +766,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
@@ -194,15 +203,15 @@ diff -urNp coreutils-8.9-orig/src/install.c coreutils-8.9/src/install.c
                                NULL)) != -1)
      {
        switch (optc)
-@@ -534,6 +535,7 @@ main (int argc, char **argv)
-           error (0, 0, _("WARNING: --preserve_context is deprecated; "
-                          "use --preserve-context instead"));
-           /* fall through */
+@@ -835,6 +836,7 @@ main (int argc, char **argv)
+           no_target_directory = true;
+           break;
+ 
 +        case 'P':
          case PRESERVE_CONTEXT_OPTION:
            if ( ! selinux_enabled)
              {
-@@ -541,6 +543,10 @@ main (int argc, char **argv)
+@@ -842,6 +844,10 @@ main (int argc, char **argv)
                               "this kernel is not SELinux-enabled"));
                break;
              }
@@ -213,7 +222,7 @@ diff -urNp coreutils-8.9-orig/src/install.c coreutils-8.9/src/install.c
            x.preserve_security_context = true;
            use_default_selinux_context = false;
            break;
-@@ -552,6 +558,7 @@ main (int argc, char **argv)
+@@ -853,6 +859,7 @@ main (int argc, char **argv)
                break;
              }
            scontext = optarg;
@@ -221,18 +230,9 @@ diff -urNp coreutils-8.9-orig/src/install.c coreutils-8.9/src/install.c
            use_default_selinux_context = false;
            break;
          case_GETOPT_HELP_CHAR;
-@@ -985,7 +992,7 @@ Mandatory arguments to long options are 
-   -v, --verbose       print the name of each directory as it is created\n\
- "), stdout);
-       fputs (_("\
--      --preserve-context  preserve SELinux security context\n\
-+  -P, --preserve-context  preserve SELinux security context\n\
-   -Z, --context=CONTEXT  set SELinux security context of files and directories\
- \n\
- "), stdout);
-diff -urNp coreutils-8.9-orig/src/ls.c coreutils-8.9/src/ls.c
---- coreutils-8.9-orig/src/ls.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/ls.c	2011-01-04 17:43:36.211887474 +0100
+diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
+--- coreutils-8.11-orig/src/ls.c	2011-04-12 12:07:43.000000000 +0200
++++ coreutils-8.11/src/ls.c	2011-04-14 11:06:05.498436329 +0200
 @@ -159,7 +159,8 @@ enum filetype
      symbolic_link,
      sock,
@@ -595,9 +595,9 @@ diff -urNp coreutils-8.9-orig/src/ls.c coreutils-8.9/src/ls.c
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        emit_size_note ();
-diff -urNp coreutils-8.9-orig/src/mkdir.c coreutils-8.9/src/mkdir.c
---- coreutils-8.9-orig/src/mkdir.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/mkdir.c	2011-01-04 17:43:36.213899906 +0100
+diff -urNp coreutils-8.11-orig/src/mkdir.c coreutils-8.11/src/mkdir.c
+--- coreutils-8.11-orig/src/mkdir.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/mkdir.c	2011-04-14 11:06:05.499460276 +0200
 @@ -38,6 +38,7 @@
  static struct option const longopts[] =
  {
@@ -606,9 +606,9 @@ diff -urNp coreutils-8.9-orig/src/mkdir.c coreutils-8.9/src/mkdir.c
    {"mode", required_argument, NULL, 'm'},
    {"parents", no_argument, NULL, 'p'},
    {"verbose", no_argument, NULL, 'v'},
-diff -urNp coreutils-8.9-orig/src/mknod.c coreutils-8.9/src/mknod.c
---- coreutils-8.9-orig/src/mknod.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/mknod.c	2011-01-04 17:43:36.215887404 +0100
+diff -urNp coreutils-8.11-orig/src/mknod.c coreutils-8.11/src/mknod.c
+--- coreutils-8.11-orig/src/mknod.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/mknod.c	2011-04-14 11:06:05.500309648 +0200
 @@ -35,7 +35,7 @@
  
  static struct option const longopts[] =
@@ -618,9 +618,9 @@ diff -urNp coreutils-8.9-orig/src/mknod.c coreutils-8.9/src/mknod.c
    {"mode", required_argument, NULL, 'm'},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-diff -urNp coreutils-8.9-orig/src/mv.c coreutils-8.9/src/mv.c
---- coreutils-8.9-orig/src/mv.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/mv.c	2011-01-04 17:43:36.216896344 +0100
+diff -urNp coreutils-8.11-orig/src/mv.c coreutils-8.11/src/mv.c
+--- coreutils-8.11-orig/src/mv.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/mv.c	2011-04-14 11:06:05.501309664 +0200
 @@ -118,6 +118,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_mode = true;
    x->preserve_timestamps = true;
@@ -629,9 +629,9 @@ diff -urNp coreutils-8.9-orig/src/mv.c coreutils-8.9/src/mv.c
    x->reduce_diagnostics = false;
    x->data_copy_required = true;
    x->require_preserve = false;  /* FIXME: maybe make this an option */
-diff -urNp coreutils-8.9-orig/src/runcon.c coreutils-8.9/src/runcon.c
---- coreutils-8.9-orig/src/runcon.c	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/src/runcon.c	2011-01-04 17:43:36.216896344 +0100
+diff -urNp coreutils-8.11-orig/src/runcon.c coreutils-8.11/src/runcon.c
+--- coreutils-8.11-orig/src/runcon.c	2011-02-19 18:17:03.000000000 +0100
++++ coreutils-8.11/src/runcon.c	2011-04-14 11:06:05.502310854 +0200
 @@ -86,7 +86,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
    or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n\
  "), program_name, program_name);
@@ -641,13 +641,13 @@ diff -urNp coreutils-8.9-orig/src/runcon.c coreutils-8.9/src/runcon.c
  With neither CONTEXT nor COMMAND, print the current security context.\n\
  \n\
    CONTEXT            Complete security context\n\
-diff -urNp coreutils-8.9-orig/tests/init.cfg coreutils-8.9/tests/init.cfg
---- coreutils-8.9-orig/tests/init.cfg	2010-12-22 12:29:13.000000000 +0100
-+++ coreutils-8.9/tests/init.cfg	2011-01-04 17:43:36.218137788 +0100
-@@ -216,8 +216,8 @@ skip_if_()
+diff -urNp coreutils-8.11-orig/tests/init.cfg coreutils-8.11/tests/init.cfg
+--- coreutils-8.11-orig/tests/init.cfg	2011-04-12 12:07:43.000000000 +0200
++++ coreutils-8.11/tests/init.cfg	2011-04-14 11:06:05.503308646 +0200
+@@ -231,8 +231,8 @@ require_selinux_()
  
- require_selinux_()
- {
+   # Independent of whether SELinux is enabled system-wide,
+   # the current file system may lack SELinux support.
 -  case `ls -Zd .` in
 -    '? .'|'unlabeled .')
 +  case `ls -Zd . | cut -f4 -d" "` in
@@ -655,9 +655,9 @@ diff -urNp coreutils-8.9-orig/tests/init.cfg coreutils-8.9/tests/init.cfg
        skip_test_ "this system (or maybe just" \
          "the current file system) lacks SELinux support"
      ;;
-diff -urNp coreutils-8.9-orig/tests/misc/selinux coreutils-8.9/tests/misc/selinux
---- coreutils-8.9-orig/tests/misc/selinux	2011-01-01 22:19:23.000000000 +0100
-+++ coreutils-8.9/tests/misc/selinux	2011-01-04 17:43:36.219137718 +0100
+diff -urNp coreutils-8.11-orig/tests/misc/selinux coreutils-8.11/tests/misc/selinux
+--- coreutils-8.11-orig/tests/misc/selinux	2011-01-31 13:40:38.000000000 +0100
++++ coreutils-8.11/tests/misc/selinux	2011-04-14 11:06:05.504353757 +0200
 @@ -37,7 +37,7 @@ chcon $ctx f d p ||
  
  # inspect that context with both ls -Z and stat.
