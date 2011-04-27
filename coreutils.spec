@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.11
-Release: 2%{?dist}
+Version: 8.12
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -30,8 +30,6 @@ Patch102: coreutils-7.4-sttytcsadrain.patch
 Patch103: coreutils-8.2-uname-processortype.patch
 #df --direct
 Patch104: coreutils-df-direct.patch
-#add jar-like archives to colored ones
-Patch106: coreutils-8.5-dircolors.patch
 #add note about mkdir --mode behaviour into info documentation(#610559)
 Patch107: coreutils-8.4-mkdir-modenote.patch
 
@@ -122,7 +120,6 @@ Libraries for coreutils package.
 %patch102 -p1 -b .tcsadrain
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
-%patch106 -p1 -b .java
 %patch107 -p1 -b .mkdirmode
 
 # sh-utils
@@ -332,6 +329,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Wed Apr 27 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-1
+- new upstream release 8.12
+
 * Thu Apr 14 2011 Ondrej Vasik <ovasik@redhat.com> - 8.11-2
 - fix issue with df --direct(extra new line)
 
