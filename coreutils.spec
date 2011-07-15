@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -329,6 +329,10 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Jul 15 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-2
+- support ecryptfs mount of Private (postlogin into su.pamd)
+  (#722323)
+
 * Wed Apr 27 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-1
 - new upstream release 8.12
 
