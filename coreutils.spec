@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.12
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -32,6 +32,8 @@ Patch103: coreutils-8.2-uname-processortype.patch
 Patch104: coreutils-df-direct.patch
 #add note about mkdir --mode behaviour into info documentation(#610559)
 Patch107: coreutils-8.4-mkdir-modenote.patch
+#use acl_extended_file_nofollow if available (#692823)
+Patch108: coreutils-acl-extended-file-nofollow.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -121,6 +123,7 @@ Libraries for coreutils package.
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
+%patch108 -p1 -b .nofollow
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -329,6 +332,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Fri Jul 29 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-3
+- use acl_extended_file_nofollow() if available (#692823)
+
 * Fri Jul 15 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-2
 - support ecryptfs mount of Private (postlogin into su.pamd)
   (#722323)
