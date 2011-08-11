@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.12
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -64,6 +64,8 @@ Patch917: coreutils-8.4-su-pie.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
+#Deprecate cp -Z/--context non-upstream option
+Patch952: coreutils-cpZ-deprecate.patch
 
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
@@ -144,6 +146,7 @@ Libraries for coreutils package.
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+%patch952 -p1 -b .cpZ
 
 chmod a+x tests/misc/sort-mb-tests tests/df/direct || :
 
@@ -332,6 +335,11 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Aug 11 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-4
+- deprecate non-upstream cp -Z/--context (install should be
+  used instead of it), make it working if destination exists
+  (#715557)
+
 * Fri Jul 29 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-3
 - use acl_extended_file_nofollow() if available (#692823)
 
