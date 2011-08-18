@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.12
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -335,6 +335,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Thu Aug 18 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-5
+- variable "u" should be static in uname processor type patch
+
 * Thu Aug 11 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-4
 - deprecate non-upstream cp -Z/--context (install should be
   used instead of it), make it working if destination exists
