@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.12
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -335,6 +335,9 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Tue Aug 23 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-6
+- su: fix shell suspend in tcsh (#597928)
+
 * Thu Aug 18 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-5
 - variable "u" should be static in uname processor type patch
 
