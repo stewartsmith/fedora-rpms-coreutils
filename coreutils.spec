@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.12
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -335,6 +335,12 @@ fi
 %{_libdir}/coreutils
 
 %changelog
+* Mon Sep 05 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-7
+- incorporate some i18n patch fixes from OpenSUSE:
+  - fix cut output-delimiter option
+  - prevent infinite loop in sort when ignoring chars
+  - prevent using unitialized variable in cut
+
 * Tue Aug 23 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-6
 - su: fix shell suspend in tcsh (#597928)
 
