@@ -324,7 +324,14 @@ fi
 - new upstream release 8.13
 - temporarily disable recently added multibyte checks in
   misc/cut test
+- fix the SUSE fix for cut output-delimiter
 - drop coreutils-libs subpackage, no longer needed
+
+* Mon Sep 05 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-7
+- incorporate some i18n patch fixes from OpenSUSE:
+  - fix cut output-delimiter option
+  - prevent infinite loop in sort when ignoring chars
+  - prevent using unitialized variable in cut
 
 * Tue Aug 23 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-6
 - su: fix shell suspend in tcsh (#597928)
