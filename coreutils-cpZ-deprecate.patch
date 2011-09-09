@@ -10,7 +10,6 @@ diff -urNp coreutils-8.12-orig/src/copy.c coreutils-8.12/src/copy.c
          {
            bool all_errors = (!x->data_copy_required
                               || x->require_preserve_context);
-Binary files coreutils-8.12-orig/src/.copy.c.swp and coreutils-8.12/src/.copy.c.swp differ
 diff -urNp coreutils-8.12-orig/src/cp.c coreutils-8.12/src/cp.c
 --- coreutils-8.12-orig/src/cp.c	2011-08-11 16:05:15.435486976 +0200
 +++ coreutils-8.12/src/cp.c	2011-08-11 16:16:56.408644526 +0200

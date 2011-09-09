@@ -1,7 +1,7 @@
-diff -urNp coreutils-8.11-orig/configure.ac coreutils-8.11/configure.ac
---- coreutils-8.11-orig/configure.ac	2011-04-14 11:05:27.511308852 +0200
-+++ coreutils-8.11/configure.ac	2011-04-14 11:06:05.481433832 +0200
-@@ -132,6 +132,13 @@ if test "$gl_gcc_warnings" = yes; then
+diff -urNp coreutils-8.13-orig/configure.ac coreutils-8.13/configure.ac
+--- coreutils-8.13-orig/configure.ac	2011-09-09 10:29:52.584690353 +0200
++++ coreutils-8.13/configure.ac	2011-09-09 10:30:39.524564991 +0200
+@@ -141,6 +141,13 @@ if test "$gl_gcc_warnings" = yes; then
    AC_SUBST([GNULIB_TEST_WARN_CFLAGS])
  fi
  
@@ -15,18 +15,18 @@ diff -urNp coreutils-8.11-orig/configure.ac coreutils-8.11/configure.ac
  AC_FUNC_FORK
  
  AC_ARG_ENABLE(pam, AS_HELP_STRING([--disable-pam],
-diff -urNp coreutils-8.11-orig/man/chcon.x coreutils-8.11/man/chcon.x
---- coreutils-8.11-orig/man/chcon.x	2009-09-01 13:01:16.000000000 +0200
-+++ coreutils-8.11/man/chcon.x	2011-04-14 11:06:05.482433878 +0200
+diff -urNp coreutils-8.13-orig/man/chcon.x coreutils-8.13/man/chcon.x
+--- coreutils-8.13-orig/man/chcon.x	2009-09-01 13:01:16.000000000 +0200
++++ coreutils-8.13/man/chcon.x	2011-09-09 10:30:39.524564991 +0200
 @@ -1,4 +1,4 @@
  [NAME]
 -chcon \- change file security context
 +chcon \- change file SELinux security context
  [DESCRIPTION]
  .\" Add any additional description here
-diff -urNp coreutils-8.11-orig/man/runcon.x coreutils-8.11/man/runcon.x
---- coreutils-8.11-orig/man/runcon.x	2009-09-01 13:01:16.000000000 +0200
-+++ coreutils-8.11/man/runcon.x	2011-04-14 11:06:05.483445779 +0200
+diff -urNp coreutils-8.13-orig/man/runcon.x coreutils-8.13/man/runcon.x
+--- coreutils-8.13-orig/man/runcon.x	2009-09-01 13:01:16.000000000 +0200
++++ coreutils-8.13/man/runcon.x	2011-09-09 10:30:39.544686472 +0200
 @@ -1,5 +1,5 @@
  [NAME]
 -runcon \- run command with specified security context
@@ -34,9 +34,9 @@ diff -urNp coreutils-8.11-orig/man/runcon.x coreutils-8.11/man/runcon.x
  [DESCRIPTION]
  Run COMMAND with completely-specified CONTEXT, or with current or
  transitioned security context modified by one or more of LEVEL,
-diff -urNp coreutils-8.11-orig/src/chcon.c coreutils-8.11/src/chcon.c
---- coreutils-8.11-orig/src/chcon.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/chcon.c	2011-04-14 11:06:05.489434075 +0200
+diff -urNp coreutils-8.13-orig/src/chcon.c coreutils-8.13/src/chcon.c
+--- coreutils-8.13-orig/src/chcon.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/chcon.c	2011-09-09 10:30:39.562561252 +0200
 @@ -356,7 +356,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
  "),
          program_name, program_name, program_name);
@@ -46,10 +46,10 @@ diff -urNp coreutils-8.11-orig/src/chcon.c coreutils-8.11/src/chcon.c
  With --reference, change the security context of each FILE to that of RFILE.\n\
  \n\
    -h, --no-dereference   affect symbolic links instead of any referenced file\n\
-diff -urNp coreutils-8.11-orig/src/copy.c coreutils-8.11/src/copy.c
---- coreutils-8.11-orig/src/copy.c	2011-04-12 12:07:43.000000000 +0200
-+++ coreutils-8.11/src/copy.c	2011-04-14 11:06:05.485433752 +0200
-@@ -2179,6 +2179,8 @@ copy_internal (char const *src_name, cha
+diff -urNp coreutils-8.13-orig/src/copy.c coreutils-8.13/src/copy.c
+--- coreutils-8.13-orig/src/copy.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/copy.c	2011-09-09 10:30:39.564562214 +0200
+@@ -2244,6 +2244,8 @@ copy_internal (char const *src_name, cha
          {
            /* Here, we are crossing a file system boundary and cp's -x option
               is in effect: so don't copy the contents of this directory. */
@@ -58,9 +58,9 @@ diff -urNp coreutils-8.11-orig/src/copy.c coreutils-8.11/src/copy.c
          }
        else
          {
-diff -urNp coreutils-8.11-orig/src/copy.h coreutils-8.11/src/copy.h
---- coreutils-8.11-orig/src/copy.h	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/copy.h	2011-04-14 11:06:05.487340225 +0200
+diff -urNp coreutils-8.13-orig/src/copy.h coreutils-8.13/src/copy.h
+--- coreutils-8.13-orig/src/copy.h	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/copy.h	2011-09-09 10:30:39.565563712 +0200
 @@ -158,6 +158,9 @@ struct cp_options
    bool preserve_mode;
    bool preserve_timestamps;
@@ -71,9 +71,9 @@ diff -urNp coreutils-8.11-orig/src/copy.h coreutils-8.11/src/copy.h
    /* Enabled for mv, and for cp by the --preserve=links option.
       If true, attempt to preserve in the destination files any
       logical hard links between the source files.  If used with cp's
-diff -urNp coreutils-8.11-orig/src/cp.c coreutils-8.11/src/cp.c
---- coreutils-8.11-orig/src/cp.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/cp.c	2011-04-14 11:06:05.488433894 +0200
+diff -urNp coreutils-8.13-orig/src/cp.c coreutils-8.13/src/cp.c
+--- coreutils-8.13-orig/src/cp.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/cp.c	2011-09-09 10:30:39.566562062 +0200
 @@ -141,6 +141,7 @@ static struct option const long_opts[] =
    {"target-directory", required_argument, NULL, 't'},
    {"update", no_argument, NULL, 'u'},
@@ -162,9 +162,9 @@ diff -urNp coreutils-8.11-orig/src/cp.c coreutils-8.11/src/cp.c
          case 'S':
            make_backups = true;
            backup_suffix_string = optarg;
-diff -urNp coreutils-8.11-orig/src/id.c coreutils-8.11/src/id.c
---- coreutils-8.11-orig/src/id.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/id.c	2011-04-14 11:06:05.490435340 +0200
+diff -urNp coreutils-8.13-orig/src/id.c coreutils-8.13/src/id.c
+--- coreutils-8.13-orig/src/id.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/id.c	2011-09-09 10:30:39.567562153 +0200
 @@ -107,7 +107,7 @@ int
  main (int argc, char **argv)
  {
@@ -174,9 +174,9 @@ diff -urNp coreutils-8.11-orig/src/id.c coreutils-8.11/src/id.c
  
    /* If true, output the list of all group IDs. -G */
    bool just_group_list = false;
-diff -urNp coreutils-8.11-orig/src/install.c coreutils-8.11/src/install.c
---- coreutils-8.11-orig/src/install.c	2011-04-12 12:07:43.000000000 +0200
-+++ coreutils-8.11/src/install.c	2011-04-14 11:07:58.333433706 +0200
+diff -urNp coreutils-8.13-orig/src/install.c coreutils-8.13/src/install.c
+--- coreutils-8.13-orig/src/install.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/install.c	2011-09-09 10:30:39.569562422 +0200
 @@ -261,6 +261,7 @@ cp_option_init (struct cp_options *x)
    x->data_copy_required = true;
    x->require_preserve = false;
@@ -230,10 +230,10 @@ diff -urNp coreutils-8.11-orig/src/install.c coreutils-8.11/src/install.c
            use_default_selinux_context = false;
            break;
          case_GETOPT_HELP_CHAR;
-diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
---- coreutils-8.11-orig/src/ls.c	2011-04-12 12:07:43.000000000 +0200
-+++ coreutils-8.11/src/ls.c	2011-04-14 11:06:05.498436329 +0200
-@@ -159,7 +159,8 @@ enum filetype
+diff -urNp coreutils-8.13-orig/src/ls.c coreutils-8.13/src/ls.c
+--- coreutils-8.13-orig/src/ls.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/ls.c	2011-09-09 10:30:39.575562845 +0200
+@@ -166,7 +166,8 @@ enum filetype
      symbolic_link,
      sock,
      whiteout,
@@ -243,7 +243,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
    };
  
  /* Display letters and indicators for each filetype.
-@@ -276,6 +277,7 @@ static void queue_directory (char const 
+@@ -283,6 +284,7 @@ static void queue_directory (char const 
  static void sort_files (void);
  static void parse_ls_color (void);
  void usage (int status);
@@ -251,7 +251,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
  
  /* Initial size of hash table.
     Most hierarchies are likely to be shallower than this.  */
-@@ -345,7 +347,7 @@ static struct pending *pending_dirs;
+@@ -352,7 +354,7 @@ static struct pending *pending_dirs;
  
  static struct timespec current_time;
  
@@ -260,7 +260,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
  static char UNKNOWN_SECURITY_CONTEXT[] = "?";
  
  /* Whether any of the files has an ACL.  This affects the width of the
-@@ -385,7 +387,9 @@ enum format
+@@ -392,7 +394,9 @@ enum format
      one_per_line,		/* -1 */
      many_per_line,		/* -C */
      horizontal,			/* -x */
@@ -271,7 +271,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
    };
  
  static enum format format;
-@@ -787,6 +791,9 @@ enum
+@@ -794,6 +798,9 @@ enum
    SHOW_CONTROL_CHARS_OPTION,
    SI_OPTION,
    SORT_OPTION,
@@ -281,7 +281,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
    TIME_OPTION,
    TIME_STYLE_OPTION
  };
-@@ -832,7 +839,9 @@ static struct option const long_options[
+@@ -839,7 +846,9 @@ static struct option const long_options[
    {"time-style", required_argument, NULL, TIME_STYLE_OPTION},
    {"color", optional_argument, NULL, COLOR_OPTION},
    {"block-size", required_argument, NULL, BLOCK_SIZE_OPTION},
@@ -292,7 +292,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
    {"author", no_argument, NULL, AUTHOR_OPTION},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-@@ -842,12 +851,12 @@ static struct option const long_options[
+@@ -849,12 +858,12 @@ static struct option const long_options[
  static char const *const format_args[] =
  {
    "verbose", "long", "commas", "horizontal", "across",
@@ -307,7 +307,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
  };
  ARGMATCH_VERIFY (format_args, format_types);
  
-@@ -1289,7 +1298,8 @@ main (int argc, char **argv)
+@@ -1296,7 +1305,8 @@ main (int argc, char **argv)
        /* Avoid following symbolic links when possible.  */
        if (is_colored (C_ORPHAN)
            || (is_colored (C_EXEC) && color_symlink_as_referent)
@@ -317,7 +317,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
          check_symlink_color = true;
  
        /* If the standard output is a controlling terminal, watch out
-@@ -1336,7 +1346,7 @@ main (int argc, char **argv)
+@@ -1343,7 +1353,7 @@ main (int argc, char **argv)
    if (dereference == DEREF_UNDEFINED)
      dereference = ((immediate_dirs
                      || indicator_style == classify
@@ -326,7 +326,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
                     ? DEREF_NEVER
                     : DEREF_COMMAND_LINE_SYMLINK_TO_DIR);
  
-@@ -1356,7 +1366,7 @@ main (int argc, char **argv)
+@@ -1363,7 +1373,7 @@ main (int argc, char **argv)
  
    format_needs_stat = sort_type == sort_time || sort_type == sort_size
      || format == long_format
@@ -335,7 +335,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
      || print_block_size;
    format_needs_type = (! format_needs_stat
                         && (recursive
-@@ -1387,7 +1397,7 @@ main (int argc, char **argv)
+@@ -1394,7 +1404,7 @@ main (int argc, char **argv)
      }
    else
      do
@@ -344,7 +344,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
      while (i < argc);
  
    if (cwd_n_used)
-@@ -1558,7 +1568,7 @@ decode_switches (int argc, char **argv)
+@@ -1565,7 +1575,7 @@ decode_switches (int argc, char **argv)
    ignore_mode = IGNORE_DEFAULT;
    ignore_patterns = NULL;
    hide_patterns = NULL;
@@ -353,7 +353,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
  
    /* FIXME: put this in a function.  */
    {
-@@ -1940,13 +1950,27 @@ decode_switches (int argc, char **argv)
+@@ -1947,13 +1957,27 @@ decode_switches (int argc, char **argv)
            break;
  
          case 'Z':
@@ -382,7 +382,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
          default:
            usage (LS_FAILURE);
          }
-@@ -2691,8 +2715,10 @@ clear_files (void)
+@@ -2714,8 +2738,10 @@ clear_files (void)
        struct fileinfo *f = sorted_file[i];
        free (f->name);
        free (f->linkname);
@@ -395,7 +395,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
      }
  
    cwd_n_used = 0;
-@@ -2734,6 +2760,7 @@ gobble_file (char const *name, enum file
+@@ -2757,6 +2783,7 @@ gobble_file (char const *name, enum file
    memset (f, '\0', sizeof *f);
    f->stat.st_ino = inode;
    f->filetype = type;
@@ -403,7 +403,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
  
    if (command_line_arg
        || format_needs_stat
-@@ -2843,7 +2870,7 @@ gobble_file (char const *name, enum file
+@@ -2869,7 +2896,7 @@ gobble_file (char const *name, enum file
            && print_with_color && is_colored (C_CAP))
          f->has_capability = has_capability (absolute_name);
  
@@ -412,7 +412,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
          {
            bool have_selinux = false;
            bool have_acl = false;
-@@ -2866,7 +2893,7 @@ gobble_file (char const *name, enum file
+@@ -2892,7 +2919,7 @@ gobble_file (char const *name, enum file
                  err = 0;
              }
  
@@ -421,7 +421,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
              {
                int n = file_has_acl (absolute_name, &f->stat);
                err = (n < 0);
-@@ -2885,7 +2912,8 @@ gobble_file (char const *name, enum file
+@@ -2911,7 +2938,8 @@ gobble_file (char const *name, enum file
          }
  
        if (S_ISLNK (f->stat.st_mode)
@@ -431,7 +431,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
          {
            char *linkname;
            struct stat linkstats;
-@@ -2905,6 +2933,7 @@ gobble_file (char const *name, enum file
+@@ -2931,6 +2959,7 @@ gobble_file (char const *name, enum file
                   command line are automatically traced if not being
                   listed as files.  */
                if (!command_line_arg || format == long_format
@@ -439,7 +439,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
                    || !S_ISDIR (linkstats.st_mode))
                  {
                    /* Get the linked-to file's mode for the filetype indicator
-@@ -2944,7 +2973,7 @@ gobble_file (char const *name, enum file
+@@ -2970,7 +2999,7 @@ gobble_file (char const *name, enum file
              block_size_width = len;
          }
  
@@ -448,7 +448,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
          {
            if (print_owner)
              {
-@@ -3445,6 +3474,13 @@ print_current_files (void)
+@@ -3471,6 +3500,13 @@ print_current_files (void)
            print_long_format (sorted_file[i]);
            DIRED_PUTCHAR ('\n');
          }
@@ -462,7 +462,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
        break;
      }
  }
-@@ -3607,6 +3643,67 @@ format_inode (char *buf, size_t buflen, 
+@@ -3633,6 +3669,67 @@ format_inode (char *buf, size_t buflen, 
            : (char *) "?");
  }
  
@@ -530,7 +530,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
  /* Print information about F in long format.  */
  static void
  print_long_format (const struct fileinfo *f)
-@@ -3698,9 +3795,15 @@ print_long_format (const struct fileinfo
+@@ -3724,9 +3821,15 @@ print_long_format (const struct fileinfo
       The latter is wrong when nlink_width is zero.  */
    p += strlen (p);
  
@@ -547,7 +547,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
      {
        DIRED_FPUTS (buf, stdout, p - buf);
  
-@@ -3713,9 +3816,6 @@ print_long_format (const struct fileinfo
+@@ -3739,9 +3842,6 @@ print_long_format (const struct fileinfo
        if (print_author)
          format_user (f->stat.st_author, author_width, f->stat_ok);
  
@@ -557,7 +557,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
        p = buf;
      }
  
-@@ -4060,9 +4160,6 @@ print_file_name_and_frills (const struct
+@@ -4086,9 +4186,6 @@ print_file_name_and_frills (const struct
              : human_readable (ST_NBLOCKS (f->stat), buf, human_output_opts,
                                ST_NBLOCKSIZE, output_block_size));
  
@@ -567,7 +567,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
    size_t width = print_name_with_quoting (f, false, NULL, start_col);
  
    if (indicator_style != none)
-@@ -4266,9 +4363,6 @@ length_of_file_name_and_frills (const st
+@@ -4292,9 +4389,6 @@ length_of_file_name_and_frills (const st
                                              output_block_size))
                  : block_size_width);
  
@@ -577,7 +577,7 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
    quote_name (NULL, f->name, filename_quoting_options, &name_width);
    len += name_width;
  
-@@ -4707,9 +4801,16 @@ Mandatory arguments to long options are 
+@@ -4733,9 +4827,16 @@ Mandatory arguments to long options are 
    -w, --width=COLS           assume screen width instead of current value\n\
    -x                         list entries by lines instead of by columns\n\
    -X                         sort alphabetically by entry extension\n\
@@ -595,9 +595,9 @@ diff -urNp coreutils-8.11-orig/src/ls.c coreutils-8.11/src/ls.c
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
        emit_size_note ();
-diff -urNp coreutils-8.11-orig/src/mkdir.c coreutils-8.11/src/mkdir.c
---- coreutils-8.11-orig/src/mkdir.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/mkdir.c	2011-04-14 11:06:05.499460276 +0200
+diff -urNp coreutils-8.13-orig/src/mkdir.c coreutils-8.13/src/mkdir.c
+--- coreutils-8.13-orig/src/mkdir.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/mkdir.c	2011-09-09 10:30:39.576564256 +0200
 @@ -38,6 +38,7 @@
  static struct option const longopts[] =
  {
@@ -606,9 +606,9 @@ diff -urNp coreutils-8.11-orig/src/mkdir.c coreutils-8.11/src/mkdir.c
    {"mode", required_argument, NULL, 'm'},
    {"parents", no_argument, NULL, 'p'},
    {"verbose", no_argument, NULL, 'v'},
-diff -urNp coreutils-8.11-orig/src/mknod.c coreutils-8.11/src/mknod.c
---- coreutils-8.11-orig/src/mknod.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/mknod.c	2011-04-14 11:06:05.500309648 +0200
+diff -urNp coreutils-8.13-orig/src/mknod.c coreutils-8.13/src/mknod.c
+--- coreutils-8.13-orig/src/mknod.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/mknod.c	2011-09-09 10:30:39.577563177 +0200
 @@ -35,7 +35,7 @@
  
  static struct option const longopts[] =
@@ -618,9 +618,9 @@ diff -urNp coreutils-8.11-orig/src/mknod.c coreutils-8.11/src/mknod.c
    {"mode", required_argument, NULL, 'm'},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-diff -urNp coreutils-8.11-orig/src/mv.c coreutils-8.11/src/mv.c
---- coreutils-8.11-orig/src/mv.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/mv.c	2011-04-14 11:06:05.501309664 +0200
+diff -urNp coreutils-8.13-orig/src/mv.c coreutils-8.13/src/mv.c
+--- coreutils-8.13-orig/src/mv.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/mv.c	2011-09-09 10:30:39.578562234 +0200
 @@ -118,6 +118,7 @@ cp_option_init (struct cp_options *x)
    x->preserve_mode = true;
    x->preserve_timestamps = true;
@@ -629,9 +629,9 @@ diff -urNp coreutils-8.11-orig/src/mv.c coreutils-8.11/src/mv.c
    x->reduce_diagnostics = false;
    x->data_copy_required = true;
    x->require_preserve = false;  /* FIXME: maybe make this an option */
-diff -urNp coreutils-8.11-orig/src/runcon.c coreutils-8.11/src/runcon.c
---- coreutils-8.11-orig/src/runcon.c	2011-02-19 18:17:03.000000000 +0100
-+++ coreutils-8.11/src/runcon.c	2011-04-14 11:06:05.502310854 +0200
+diff -urNp coreutils-8.13-orig/src/runcon.c coreutils-8.13/src/runcon.c
+--- coreutils-8.13-orig/src/runcon.c	2011-07-28 12:38:27.000000000 +0200
++++ coreutils-8.13/src/runcon.c	2011-09-09 10:30:39.579564283 +0200
 @@ -86,7 +86,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
    or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n\
  "), program_name, program_name);
@@ -641,10 +641,10 @@ diff -urNp coreutils-8.11-orig/src/runcon.c coreutils-8.11/src/runcon.c
  With neither CONTEXT nor COMMAND, print the current security context.\n\
  \n\
    CONTEXT            Complete security context\n\
-diff -urNp coreutils-8.11-orig/tests/init.cfg coreutils-8.11/tests/init.cfg
---- coreutils-8.11-orig/tests/init.cfg	2011-04-12 12:07:43.000000000 +0200
-+++ coreutils-8.11/tests/init.cfg	2011-04-14 11:06:05.503308646 +0200
-@@ -231,8 +231,8 @@ require_selinux_()
+diff -urNp coreutils-8.13-orig/tests/init.cfg coreutils-8.13/tests/init.cfg
+--- coreutils-8.13-orig/tests/init.cfg	2011-09-07 18:00:55.000000000 +0200
++++ coreutils-8.13/tests/init.cfg	2011-09-09 10:32:17.031688699 +0200
+@@ -253,8 +253,8 @@ require_selinux_()
  
    # Independent of whether SELinux is enabled system-wide,
    # the current file system may lack SELinux support.
@@ -652,12 +652,12 @@ diff -urNp coreutils-8.11-orig/tests/init.cfg coreutils-8.11/tests/init.cfg
 -    '? .'|'unlabeled .')
 +  case `ls -Zd . | cut -f4 -d" "` in
 +    '?'|'unlabeled')
-       skip_test_ "this system (or maybe just" \
+       skip_ "this system (or maybe just" \
          "the current file system) lacks SELinux support"
      ;;
-diff -urNp coreutils-8.11-orig/tests/misc/selinux coreutils-8.11/tests/misc/selinux
---- coreutils-8.11-orig/tests/misc/selinux	2011-01-31 13:40:38.000000000 +0100
-+++ coreutils-8.11/tests/misc/selinux	2011-04-14 11:06:05.504353757 +0200
+diff -urNp coreutils-8.13-orig/tests/misc/selinux coreutils-8.13/tests/misc/selinux
+--- coreutils-8.13-orig/tests/misc/selinux	2011-08-08 09:42:16.000000000 +0200
++++ coreutils-8.13/tests/misc/selinux	2011-09-09 10:30:39.586563144 +0200
 @@ -37,7 +37,7 @@ chcon $ctx f d p ||
  
  # inspect that context with both ls -Z and stat.

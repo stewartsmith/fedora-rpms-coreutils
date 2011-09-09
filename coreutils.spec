@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.12
-Release: 6%{?dist}
+Version: 8.13
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -32,8 +32,6 @@ Patch103: coreutils-8.2-uname-processortype.patch
 Patch104: coreutils-df-direct.patch
 #add note about mkdir --mode behaviour into info documentation(#610559)
 Patch107: coreutils-8.4-mkdir-modenote.patch
-#use acl_extended_file_nofollow if available (#692823)
-Patch108: coreutils-acl-extended-file-nofollow.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -87,7 +85,6 @@ Requires(post): grep
 %{?!nopam:Requires: pam }
 Requires:       ncurses
 Requires:       gmp
-Requires: %{name}-libs = %{version}-%{release}
 
 Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
@@ -105,14 +102,6 @@ Obsoletes: textutils <= 2.0.21
 These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
 
-%package libs
-Summary: Libraries for %{name}
-Group: System Environment/Libraries
-Requires: %{name} = %{version}-%{release}
-
-%description libs
-Libraries for coreutils package.
-
 %prep
 %setup -q
 
@@ -125,7 +114,6 @@ Libraries for coreutils package.
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
-%patch108 -p1 -b .nofollow
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -199,11 +187,11 @@ fi
 bzip2 -9f ChangeLog
 
 # let be compatible with old fileutils, sh-utils and textutils packages :
-mkdir -p $RPM_BUILD_ROOT{/bin,%_bindir,%_sbindir,/sbin}
-%{?!nopam:mkdir -p $RPM_BUILD_ROOT%_sysconfdir/pam.d}
+mkdir -p $RPM_BUILD_ROOT{/bin,%{_bindir},%{_sbindir},/sbin}
+%{?!nopam:mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/pam.d}
 for f in arch basename cat chgrp chmod chown cp cut date dd df echo env false link ln ls mkdir mknod mktemp mv nice pwd readlink rm rmdir sleep sort stty sync touch true uname unlink
 do
-    mv $RPM_BUILD_ROOT{%_bindir,/bin}/$f
+    mv $RPM_BUILD_ROOT{%{_bindir},/bin}/$f
 done
 
 # chroot was in /usr/sbin :
@@ -226,13 +214,13 @@ rm -rf $RPM_BUILD_ROOT/usr/bin/runuser || :
 
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
-    rm $RPM_BUILD_ROOT{%_bindir/$i,%_mandir/man1/$i.1}
+    rm $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
 done
 
-%{?!nopam:install -p -m 644 %SOURCE200 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su}
-%{?!nopam:install -p -m 644 %SOURCE202 $RPM_BUILD_ROOT%_sysconfdir/pam.d/su-l}
-%{?!nopam:install -p -m 644 %SOURCE201 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser}
-%{?!nopam:install -p -m 644 %SOURCE203 $RPM_BUILD_ROOT%_sysconfdir/pam.d/runuser-l}
+%{?!nopam:install -p -m 644 %SOURCE200 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/su}
+%{?!nopam:install -p -m 644 %SOURCE202 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/su-l}
+%{?!nopam:install -p -m 644 %SOURCE201 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/runuser}
+%{?!nopam:install -p -m 644 %SOURCE203 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/runuser-l}
 
 # Compress ChangeLogs from before the fileutils/textutils/etc merge
 bzip2 -f9 old/*/C*
@@ -324,17 +312,20 @@ fi
 /bin/true
 /bin/uname
 /bin/unlink
-%_bindir/*
-%_infodir/coreutils*
-%_mandir/man*/*
-%_sbindir/chroot
+%{_bindir}/*
+%{_infodir}/coreutils*
+%{_libexecdir}/coreutils*
+%{_mandir}/man*/*
+%{_sbindir}/chroot
 %{?!norunuser:/sbin/runuser}
 
-%files libs
-%defattr(-, root, root, -)
-%{_libdir}/coreutils
-
 %changelog
+* Fri Sep 09 2011 Ondrej Vasik <ovasik@redhat.com> - 8.13-1
+- new upstream release 8.13
+- temporarily disable recently added multibyte checks in
+  misc/cut test
+- drop coreutils-libs subpackage, no longer needed
+
 * Tue Aug 23 2011 Ondrej Vasik <ovasik@redhat.com> - 8.12-6
 - su: fix shell suspend in tcsh (#597928)
 
