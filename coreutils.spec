@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.13
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -97,6 +97,8 @@ Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
 Obsoletes: textutils <= 2.0.21
+#coreutils-libs dropped in f17
+Obsoletes: coreutils-libs < 8.13
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -320,6 +322,9 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
+* Mon Sep 12 2011 Ondrej Vasik <ovasik@redhat.com> - 8.13-2
+- Obsolete coreutils-libs (#737287)
+
 * Fri Sep 09 2011 Ondrej Vasik <ovasik@redhat.com> - 8.13-1
 - new upstream release 8.13
 - temporarily disable recently added multibyte checks in
