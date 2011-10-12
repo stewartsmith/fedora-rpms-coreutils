@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.13
-Release: 2%{?dist}.2
+Version: 8.14
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -322,6 +322,9 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
+* Wed Oct 12 2011 Ondrej Vasik <ovasik@redhat.com> - 8.14-1
+- new upstream release 8.14
+
 * Mon Sep 26 2011 Peter Schiffer <pschiffe@redhat.com> - 8.13-2.2
 - rebuild with new gmp
 
