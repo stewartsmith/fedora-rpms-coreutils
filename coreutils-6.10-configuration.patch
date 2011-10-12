@@ -58,18 +58,18 @@ diff -urNp coreutils-8.13-orig/gnulib-tests/gnulib.mk coreutils-8.13/gnulib-test
  ## end   gnulib module linkat-tests
  
 @@ -1284,9 +1284,9 @@ EXTRA_DIST += test-memrchr.c zerosize-ptr.h signature.h macros.h
-
-## begin gnulib module memrchr-tests
-
+ 
+ ## begin gnulib module memrchr-tests
+ 
 -TESTS += test-memrchr
 -check_PROGRAMS += test-memrchr
 -EXTRA_DIST += test-memrchr.c zerosize-ptr.h signature.h macros.h
 +#TESTS += test-memrchr
 +#check_PROGRAMS += test-memrchr
 +#EXTRA_DIST += test-memrchr.c zerosize-ptr.h signature.h macros.h
-
-## end   gnulib module memrchr-tests
-
+ 
+ ## end   gnulib module memrchr-tests
+ 
 @@ -1891,9 +1891,9 @@ EXTRA_DIST += test-uname.c signature.h m
  
  ## begin gnulib module unistd-safer-tests
