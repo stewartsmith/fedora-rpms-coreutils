@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.14
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -82,7 +82,7 @@ Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Requires(post): grep
-%{?!nopam:Requires: pam }
+%{?!nopam:Requires: pam >= 1.1.3-7}
 Requires:       ncurses
 Requires:       gmp
 
@@ -322,6 +322,9 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
+* Mon Oct 24 2011 Ondrej Vasik <ovasik@redhat.com> - 8.14-3
+- require at least pam 1.1.3-7 (#748215)
+
 * Thu Oct 20 2011 Ondrej Vasik <ovasik@redhat.com> - 8.14-2
 - rebuild for gmp
 
