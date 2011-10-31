@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.14
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -322,6 +322,9 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
+* Mon Oct 31 2011 Rex Dieter <rdieter@fedoraproject.org> 8.14-4
+- rebuild (gmp), last time, I promise
+
 * Mon Oct 24 2011 Ondrej Vasik <ovasik@redhat.com> - 8.14-3
 - require at least pam 1.1.3-7 (#748215)
 
