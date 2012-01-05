@@ -1,4 +1,3 @@
-#! /bin/csh -f
 # color-ls initialization
 if ( $?USER_LS_COLORS ) then
   if ( "$USER_LS_COLORS" != "" ) then

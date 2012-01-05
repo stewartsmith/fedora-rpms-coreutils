@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.14
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -322,6 +322,9 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
+* Thu Jan 05 2012 Ondrej Vasik <ovasik@redhat.com> - 8.14-6
+- do not use shebang in sourced colorls.csh
+
 * Thu Jan 05 2012 Ondrej Vasik <ovasik@redhat.com> - 8.14-5
 - fix pr -c and pr -v segfault with multibyte locales
 
