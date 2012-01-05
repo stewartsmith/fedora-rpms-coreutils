@@ -322,7 +322,7 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
-* Thu Jan 05 2011 Ondrej Vasik <ovasik@redhat.com> - 8.14-5
+* Thu Jan 05 2012 Ondrej Vasik <ovasik@redhat.com> - 8.14-5
 - fix pr -c and pr -v segfault with multibyte locales
 
 * Mon Oct 31 2011 Rex Dieter <rdieter@fedoraproject.org> 8.14-4
