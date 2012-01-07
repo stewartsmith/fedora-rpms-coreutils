@@ -322,7 +322,7 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
-* Sat Jan 08 2012 Ondrej Vasik <ovasik@redhat.com> - 8.15-1
+* Sat Jan 07 2012 Ondrej Vasik <ovasik@redhat.com> - 8.15-1
 - new upstream release 8.15
 
 * Thu Jan 05 2012 Ondrej Vasik <ovasik@redhat.com> - 8.14-6
