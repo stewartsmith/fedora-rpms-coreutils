@@ -10,7 +10,7 @@ diff -urNp coreutils-8.13-orig/lib/linebuffer.h coreutils-8.13/lib/linebuffer.h
 +#  include <wchar.h>
 +# endif
 +
- /* A `struct linebuffer' holds a line of text. */
+ /* A 'struct linebuffer' holds a line of text. */
  
  struct linebuffer
 @@ -28,6 +33,9 @@ struct linebuffer
@@ -1784,8 +1784,8 @@ diff -urNp coreutils-8.13-orig/src/pr.c coreutils-8.13/src/pr.c
  static void getoptarg (char *arg, char switch_char, char *character,
 +                       int *character_length, int *character_width,
                         int *number);
- void usage (int status);
  static void print_files (int number_of_files, char **av);
+ static void init_parameters (int number_of_files);
 @@ -439,7 +491,6 @@ static void store_char (char c);
  static void pad_down (int lines);
  static void read_rest_of_line (COLUMN *p);

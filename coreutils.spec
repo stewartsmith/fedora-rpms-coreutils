@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.14
-Release: 6%{?dist}
+Version: 8.15
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -322,6 +322,9 @@ fi
 %{?!norunuser:/sbin/runuser}
 
 %changelog
+* Sat Jan 08 2012 Ondrej Vasik <ovasik@redhat.com> - 8.15-1
+- new upstream release 8.15
+
 * Thu Jan 05 2012 Ondrej Vasik <ovasik@redhat.com> - 8.14-6
 - do not use shebang in sourced colorls.csh
 

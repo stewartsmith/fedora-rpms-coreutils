@@ -45,7 +45,7 @@ diff -urNp coreutils-8.13-orig/src/chcon.c coreutils-8.13/src/chcon.c
 +Change the SELinux security context of each FILE to CONTEXT.\n\
  With --reference, change the security context of each FILE to that of RFILE.\n\
  \n\
-   -h, --no-dereference   affect symbolic links instead of any referenced file\n\
+ "), stdout);
 diff -urNp coreutils-8.13-orig/src/copy.c coreutils-8.13/src/copy.c
 --- coreutils-8.13-orig/src/copy.c	2011-07-28 12:38:27.000000000 +0200
 +++ coreutils-8.13/src/copy.c	2011-09-09 10:30:39.564562214 +0200
@@ -243,10 +243,10 @@ diff -urNp coreutils-8.13-orig/src/ls.c coreutils-8.13/src/ls.c
    };
  
  /* Display letters and indicators for each filetype.
-@@ -283,6 +284,7 @@ static void queue_directory (char const 
+@@ -282,6 +283,7 @@
+                              bool command_line_arg);
  static void sort_files (void);
  static void parse_ls_color (void);
- void usage (int status);
 +static void print_scontext_format (const struct fileinfo *f);
  
  /* Initial size of hash table.
@@ -382,19 +382,6 @@ diff -urNp coreutils-8.13-orig/src/ls.c coreutils-8.13/src/ls.c
          default:
            usage (LS_FAILURE);
          }
-@@ -2714,8 +2738,10 @@ clear_files (void)
-       struct fileinfo *f = sorted_file[i];
-       free (f->name);
-       free (f->linkname);
--      if (f->scontext != UNKNOWN_SECURITY_CONTEXT)
--        freecon (f->scontext);
-+      if (f->scontext != UNKNOWN_SECURITY_CONTEXT) {
-+               freecon (f->scontext);
-+        f->scontext = NULL;
-+      }
-     }
- 
-   cwd_n_used = 0;
 @@ -2757,6 +2783,7 @@ gobble_file (char const *name, enum file
    memset (f, '\0', sizeof *f);
    f->stat.st_ino = inode;
