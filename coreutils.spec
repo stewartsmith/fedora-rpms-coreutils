@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.15
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -65,7 +65,7 @@ Patch951: coreutils-selinuxmanpages.patch
 #Deprecate cp -Z/--context non-upstream option
 Patch952: coreutils-cpZ-deprecate.patch
 
-#Conflicts: filesystem < 3
+Conflicts: filesystem < 3
 Provides: /bin/basename
 Provides: /bin/cat
 Provides: /bin/chgrp
@@ -418,6 +418,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Wed Jan 25 2012 Harald Hoyer <harald@redhat.com> 8.15-5
+- add filesystem guard
+
 * Wed Jan 25 2012 Harald Hoyer <harald@redhat.com> 8.15-4
 - add missing provides for the /usr-move
 
