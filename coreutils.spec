@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.15
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -64,6 +64,41 @@ Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 #Deprecate cp -Z/--context non-upstream option
 Patch952: coreutils-cpZ-deprecate.patch
+
+#Conflicts: filesystem < 3
+Provides: /bin/basename
+Provides: /bin/cat
+Provides: /bin/chgrp
+Provides: /bin/chmod
+Provides: /bin/chown
+Provides: /bin/cp
+Provides: /bin/cut
+Provides: /bin/date
+Provides: /bin/dd
+Provides: /bin/df
+Provides: /bin/echo
+Provides: /bin/env
+Provides: /bin/false
+Provides: /bin/ln
+Provides: /bin/ls
+Provides: /bin/mkdir
+Provides: /bin/mknod
+Provides: /bin/mktemp
+Provides: /bin/mv
+Provides: /bin/nice
+Provides: /bin/pwd
+Provides: /bin/readlink
+Provides: /bin/rm
+Provides: /bin/rmdir
+Provides: /bin/sleep
+Provides: /bin/sort
+Provides: /bin/stty
+Provides: /bin/su
+Provides: /bin/sync
+Provides: /bin/touch
+Provides: /bin/true
+Provides: /bin/uname
+Provides: /sbin/runuser
 
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
@@ -383,6 +418,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Wed Jan 25 2012 Harald Hoyer <harald@redhat.com> 8.15-4
+- add missing provides for the /usr-move
+
 * Wed Jan 25 2012 Harald Hoyer <harald@redhat.com> 8.15-3
 - install everything in /usr
   https://fedoraproject.org/wiki/Features/UsrMove
