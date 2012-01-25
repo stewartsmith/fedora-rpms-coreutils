@@ -345,6 +345,7 @@ fi
 %{_bindir}/printenv
 %{_bindir}/printf
 %{_bindir}/ptx
+%{_bindir}/realpath
 %{_bindir}/runcon
 %{_bindir}/seq
 %{_bindir}/sha1sum
