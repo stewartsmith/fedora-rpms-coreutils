@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.15
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -204,9 +204,7 @@ make all %{?_smp_mflags} \
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
 %check
-# FIXME: check failed!!
-# make check
-:
+make check
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -418,6 +416,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Fri Feb 10 2012 Harald Hoyer <harald@redhat.com> 8.15-6
+- turn on testsuite again
+
 * Wed Jan 25 2012 Harald Hoyer <harald@redhat.com> 8.15-5
 - add filesystem guard
 
