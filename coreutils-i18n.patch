@@ -1,6 +1,6 @@
-diff -urNp coreutils-8.13-orig/lib/linebuffer.h coreutils-8.13/lib/linebuffer.h
---- coreutils-8.13-orig/lib/linebuffer.h	2011-04-24 19:21:45.000000000 +0200
-+++ coreutils-8.13/lib/linebuffer.h	2011-09-09 10:23:14.163704760 +0200
+diff -urNp coreutils-8.15-orig/lib/linebuffer.h coreutils-8.15/lib/linebuffer.h
+--- coreutils-8.15-orig/lib/linebuffer.h	2012-01-06 10:14:31.000000000 +0100
++++ coreutils-8.15/lib/linebuffer.h	2012-03-07 21:25:39.499333158 +0100
 @@ -21,6 +21,11 @@
  
  # include <stdio.h>
@@ -23,9 +23,9 @@ diff -urNp coreutils-8.13-orig/lib/linebuffer.h coreutils-8.13/lib/linebuffer.h
  };
  
  /* Initialize linebuffer LINEBUFFER for use. */
-diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
---- coreutils-8.13-orig/src/cut.c	2011-07-28 12:38:27.000000000 +0200
-+++ coreutils-8.13/src/cut.c	2011-09-09 10:23:14.165701039 +0200
+diff -urNp coreutils-8.15-orig/src/cut.c coreutils-8.15/src/cut.c
+--- coreutils-8.15-orig/src/cut.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/cut.c	2012-03-07 21:25:39.501333069 +0100
 @@ -28,6 +28,11 @@
  #include <assert.h>
  #include <getopt.h>
@@ -304,7 +304,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
  /* Read from stream STREAM, printing to standard output any selected fields.  */
  
  static void
-@@ -704,13 +843,195 @@ cut_fields (FILE *stream)
+@@ -704,13 +857,195 @@ cut_fields (FILE *stream)
      }
  }
  
@@ -503,7 +503,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
  }
  
  /* Process file FILE to standard output.
-@@ -762,6 +1080,8 @@ main (int argc, char **argv)
+@@ -762,6 +1097,8 @@ main (int argc, char **argv)
    bool ok;
    bool delim_specified = false;
    char *spec_list_string IF_LINT ( = NULL);
@@ -512,7 +512,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
  
    initialize_main (&argc, &argv);
    set_program_name (argv[0]);
-@@ -784,7 +1104,6 @@ main (int argc, char **argv)
+@@ -784,7 +1121,6 @@ main (int argc, char **argv)
        switch (optc)
          {
          case 'b':
@@ -520,7 +520,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
            /* Build the byte list. */
            if (operating_mode != undefined_mode)
              FATAL_ERROR (_("only one type of list may be specified"));
-@@ -792,6 +1111,14 @@ main (int argc, char **argv)
+@@ -792,6 +1128,14 @@ main (int argc, char **argv)
            spec_list_string = optarg;
            break;
  
@@ -535,7 +535,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
          case 'f':
            /* Build the field list. */
            if (operating_mode != undefined_mode)
-@@ -803,10 +1130,35 @@ main (int argc, char **argv)
+@@ -803,10 +1147,35 @@ main (int argc, char **argv)
          case 'd':
            /* New delimiter. */
            /* Interpret -d '' to mean `use the NUL byte as the delimiter.'  */
@@ -575,7 +575,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
            break;
  
          case OUTPUT_DELIMITER_OPTION:
-@@ -819,6 +1171,7 @@ main (int argc, char **argv)
+@@ -819,6 +1188,7 @@ main (int argc, char **argv)
            break;
  
          case 'n':
@@ -583,7 +583,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
            break;
  
          case 's':
-@@ -841,7 +1194,7 @@ main (int argc, char **argv)
+@@ -841,7 +1211,7 @@ main (int argc, char **argv)
    if (operating_mode == undefined_mode)
      FATAL_ERROR (_("you must specify a list of bytes, characters, or fields"));
  
@@ -592,7 +592,7 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
      FATAL_ERROR (_("an input delimiter may be specified only\
   when operating on fields"));
  
-@@ -868,15 +1221,34 @@ main (int argc, char **argv)
+@@ -868,15 +1238,34 @@ main (int argc, char **argv)
      }
  
    if (!delim_specified)
@@ -633,9 +633,9 @@ diff -urNp coreutils-8.13-orig/src/cut.c coreutils-8.13/src/cut.c
      }
  
    if (optind == argc)
-diff -urNp coreutils-8.13-orig/src/expand.c coreutils-8.13/src/expand.c
---- coreutils-8.13-orig/src/expand.c	2011-07-28 12:38:27.000000000 +0200
-+++ coreutils-8.13/src/expand.c	2011-09-09 10:23:14.167583399 +0200
+diff -urNp coreutils-8.15-orig/src/expand.c coreutils-8.15/src/expand.c
+--- coreutils-8.15-orig/src/expand.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/expand.c	2012-03-07 21:25:39.502358144 +0100
 @@ -38,12 +38,29 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -823,9 +823,9 @@ diff -urNp coreutils-8.13-orig/src/expand.c coreutils-8.13/src/expand.c
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
-diff -urNp coreutils-8.13-orig/src/fold.c coreutils-8.13/src/fold.c
---- coreutils-8.13-orig/src/fold.c	2011-07-28 12:38:27.000000000 +0200
-+++ coreutils-8.13/src/fold.c	2011-09-09 10:23:14.169583741 +0200
+diff -urNp coreutils-8.15-orig/src/fold.c coreutils-8.15/src/fold.c
+--- coreutils-8.15-orig/src/fold.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/fold.c	2012-03-07 21:25:39.504360585 +0100
 @@ -22,12 +22,34 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -1223,9 +1223,9 @@ diff -urNp coreutils-8.13-orig/src/fold.c coreutils-8.13/src/fold.c
            break;
  
          case 's':		/* Break at word boundaries. */
-diff -urNp coreutils-8.13-orig/src/join.c coreutils-8.13/src/join.c
---- coreutils-8.13-orig/src/join.c	2011-08-08 10:16:09.000000000 +0200
-+++ coreutils-8.13/src/join.c	2011-09-09 10:23:14.172687087 +0200
+diff -urNp coreutils-8.15-orig/src/join.c coreutils-8.15/src/join.c
+--- coreutils-8.15-orig/src/join.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/join.c	2012-03-07 21:25:39.506358365 +0100
 @@ -22,18 +22,32 @@
  #include <sys/types.h>
  #include <getopt.h>
@@ -1670,8 +1670,8 @@ diff -urNp coreutils-8.13-orig/src/join.c coreutils-8.13/src/join.c
 +#endif
 +              newtablen = 1;
              if (! newtab)
-+            {
 -              newtab = '\n'; /* '' => process the whole line.  */
++            {
 +              newtab = "\n"; /* '' => process the whole line.  */
 +            }
              else if (optarg[1])
@@ -1701,9 +1701,9 @@ diff -urNp coreutils-8.13-orig/src/join.c coreutils-8.13/src/join.c
            break;
  
          case NOCHECK_ORDER_OPTION:
-diff -urNp coreutils-8.13-orig/src/pr.c coreutils-8.13/src/pr.c
---- coreutils-8.13-orig/src/pr.c	2011-08-30 23:01:40.000000000 +0200
-+++ coreutils-8.13/src/pr.c	2011-09-09 10:23:14.177658905 +0200
+diff -urNp coreutils-8.15-orig/src/pr.c coreutils-8.15/src/pr.c
+--- coreutils-8.15-orig/src/pr.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/pr.c	2012-03-07 21:25:39.509333048 +0100
 @@ -312,6 +312,32 @@
  
  #include <getopt.h>
@@ -2151,7 +2151,7 @@ diff -urNp coreutils-8.13-orig/src/pr.c coreutils-8.13/src/pr.c
            /* sep_string ends with some spaces */
            if (spaces_not_printed > 0)
              print_white_space ();
-@@ -2305,7 +2443,7 @@ print_clump (COLUMN *p, int n, char *clump)
+@@ -2305,7 +2443,7 @@ print_clump (COLUMN *p, int n, char *clu
     required number of tabs and spaces. */
  
  static void
@@ -2447,9 +2447,9 @@ diff -urNp coreutils-8.13-orig/src/pr.c coreutils-8.13/src/pr.c
  /* We've just printed some files and need to clean up things before
     looking for more options and printing the next batch of files.
  
-diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
---- coreutils-8.13-orig/src/sort.c	2011-07-29 10:12:25.000000000 +0200
-+++ coreutils-8.13/src/sort.c	2011-09-09 10:23:14.183686800 +0200
+diff -urNp coreutils-8.15-orig/src/sort.c coreutils-8.15/src/sort.c
+--- coreutils-8.15-orig/src/sort.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/sort.c	2012-03-07 21:28:21.856210178 +0100
 @@ -22,11 +22,20 @@
  
  #include <config.h>
@@ -2994,7 +2994,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
  /* Work around a problem whereby the long double value returned by glibc's
     strtold ("NaN", ...) contains uninitialized bits: clear all bytes of
     A and B before calling strtold.  FIXME: remove this function once
-@@ -1942,7 +2305,7 @@ general_numcompare (char const *sa, char
+@@ -1960,7 +2323,7 @@ general_numcompare (char const *sa, char
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -3003,7 +3003,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
  {
    size_t lo = 0;
    size_t hi = MONTHS_PER_YEAR;
-@@ -2217,15 +2580,14 @@ debug_key (struct line const *line, stru
+@@ -2235,15 +2598,14 @@ debug_key (struct line const *line, stru
            char saved = *lim;
            *lim = '\0';
  
@@ -3021,7 +3021,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
            else if (key->general_numeric)
              ignore_value (strtold (beg, &tighter_lim));
            else if (key->numeric || key->human_numeric)
-@@ -2369,7 +2731,7 @@ key_warnings (struct keyfield const *gke
+@@ -2387,7 +2749,7 @@ key_warnings (struct keyfield const *gke
        bool maybe_space_aligned = !hard_LC_COLLATE && default_key_compare (key)
                                   && !(key->schar || key->echar);
        bool line_offset = key->eword == 0 && key->echar != 0; /* -k1.x,1.y  */
@@ -3030,7 +3030,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
            && ((!key->skipsblanks && !(implicit_skip || maybe_space_aligned))
                || (!key->skipsblanks && key->schar)
                || (!key->skipeblanks && key->echar)))
-@@ -2427,11 +2789,83 @@ key_warnings (struct keyfield const *gke
+@@ -2445,11 +2807,83 @@ key_warnings (struct keyfield const *gke
      error (0, 0, _("option `-r' only applies to last-resort comparison"));
  }
  
@@ -3096,11 +3096,11 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
 +    }
 +  while (hi - lo > 1);
 +
-+  if (ea)
-+     *ea = (char *) month;
-+
 +  result = (!strncmp (month, monthtab[lo].name, strlen (monthtab[lo].name))
 +      ? monthtab[lo].val : 0);
++
++  if (ea && result)
++     *ea = s + strlen (monthtab[lo].name);
 +
 +  return result;
 +}
@@ -3115,7 +3115,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
  {
    struct keyfield *key = keylist;
  
-@@ -2516,7 +2950,7 @@ keycompare (struct line const *a, struct
+@@ -2534,7 +2968,7 @@ keycompare (struct line const *a, struct
            else if (key->human_numeric)
              diff = human_numcompare (ta, tb);
            else if (key->month)
@@ -3124,7 +3124,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
            else if (key->random)
              diff = compare_random (ta, tlena, tb, tlenb);
            else if (key->version)
-@@ -2632,6 +3066,180 @@ keycompare (struct line const *a, struct
+@@ -2650,6 +3084,180 @@ keycompare (struct line const *a, struct
    return key->reverse ? -diff : diff;
  }
  
@@ -3305,7 +3305,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -4095,7 +4702,7 @@ main (int argc, char **argv)
+@@ -4110,7 +4718,7 @@ main (int argc, char **argv)
    initialize_exit_failure (SORT_FAILURE);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
@@ -3314,7 +3314,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -4116,6 +4723,29 @@ main (int argc, char **argv)
+@@ -4131,6 +4739,29 @@ main (int argc, char **argv)
        thousands_sep = -1;
    }
  
@@ -3344,7 +3344,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
    have_read_stdin = false;
    inittables ();
  
-@@ -4386,13 +5016,34 @@ main (int argc, char **argv)
+@@ -4401,13 +5032,34 @@ main (int argc, char **argv)
  
          case 't':
            {
@@ -3383,7 +3383,7 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
                  else
                    {
                      /* Provoke with `sort -txx'.  Complain about
-@@ -4403,9 +5054,12 @@ main (int argc, char **argv)
+@@ -4418,9 +5070,12 @@ main (int argc, char **argv)
                             quote (optarg));
                    }
                }
@@ -3398,9 +3398,9 @@ diff -urNp coreutils-8.13-orig/src/sort.c coreutils-8.13/src/sort.c
            }
            break;
  
-diff -urNp coreutils-8.13-orig/src/unexpand.c coreutils-8.13/src/unexpand.c
---- coreutils-8.13-orig/src/unexpand.c	2011-07-28 12:38:27.000000000 +0200
-+++ coreutils-8.13/src/unexpand.c	2011-09-09 10:23:14.185647633 +0200
+diff -urNp coreutils-8.15-orig/src/unexpand.c coreutils-8.15/src/unexpand.c
+--- coreutils-8.15-orig/src/unexpand.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/unexpand.c	2012-03-07 21:25:39.517457874 +0100
 @@ -39,12 +39,29 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -3654,9 +3654,9 @@ diff -urNp coreutils-8.13-orig/src/unexpand.c coreutils-8.13/src/unexpand.c
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
-diff -urNp coreutils-8.13-orig/src/uniq.c coreutils-8.13/src/uniq.c
---- coreutils-8.13-orig/src/uniq.c	2011-07-28 12:38:27.000000000 +0200
-+++ coreutils-8.13/src/uniq.c	2011-09-09 10:24:19.631560964 +0200
+diff -urNp coreutils-8.15-orig/src/uniq.c coreutils-8.15/src/uniq.c
+--- coreutils-8.15-orig/src/uniq.c	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/src/uniq.c	2012-03-07 21:25:39.519460555 +0100
 @@ -21,6 +21,16 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -4022,10 +4022,10 @@ diff -urNp coreutils-8.13-orig/src/uniq.c coreutils-8.13/src/uniq.c
    skip_chars = 0;
    skip_fields = 0;
    check_chars = SIZE_MAX;
-diff -urNp coreutils-8.13-orig/tests/Makefile.am coreutils-8.13/tests/Makefile.am
---- coreutils-8.13-orig/tests/Makefile.am	2011-09-09 10:22:43.352561668 +0200
-+++ coreutils-8.13/tests/Makefile.am	2011-09-09 10:23:14.189688942 +0200
-@@ -238,6 +238,7 @@ TESTS =						\
+diff -urNp coreutils-8.15-orig/tests/Makefile.am coreutils-8.15/tests/Makefile.am
+--- coreutils-8.15-orig/tests/Makefile.am	2012-03-07 21:25:03.149233957 +0100
++++ coreutils-8.15/tests/Makefile.am	2012-03-07 21:25:39.520458288 +0100
+@@ -240,6 +240,7 @@ TESTS =						\
    misc/sort-debug-keys				\
    misc/sort-debug-warn				\
    misc/sort-files0-from				\
@@ -4033,7 +4033,7 @@ diff -urNp coreutils-8.13-orig/tests/Makefile.am coreutils-8.13/tests/Makefile.a
    misc/sort-float				\
    misc/sort-merge				\
    misc/sort-merge-fdlimit			\
-@@ -518,6 +519,10 @@ TESTS =						\
+@@ -526,6 +527,10 @@ TESTS =						\
    $(root_tests)
  
  pr_data =					\
@@ -4044,10 +4044,10 @@ diff -urNp coreutils-8.13-orig/tests/Makefile.am coreutils-8.13/tests/Makefile.a
    pr/0F						\
    pr/0FF					\
    pr/0FFnt					\
-diff -urNp coreutils-8.13-orig/tests/misc/cut coreutils-8.13/tests/misc/cut
---- coreutils-8.13-orig/tests/misc/cut	2011-09-02 14:08:40.000000000 +0200
-+++ coreutils-8.13/tests/misc/cut	2011-09-09 10:23:14.190686793 +0200
-@@ -23,14 +23,15 @@ my $mb_locale = $ENV{LOCALE_FR_UTF8};
+diff -urNp coreutils-8.15-orig/tests/misc/cut coreutils-8.15/tests/misc/cut
+--- coreutils-8.15-orig/tests/misc/cut	2012-01-01 10:04:06.000000000 +0100
++++ coreutils-8.15/tests/misc/cut	2012-03-07 21:25:39.521460928 +0100
+@@ -23,14 +23,15 @@ use strict;
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
  
@@ -4067,7 +4067,7 @@ diff -urNp coreutils-8.13-orig/tests/misc/cut coreutils-8.13/tests/misc/cut
  my $no_endpoint = "$prog: invalid range with no endpoint: -\n$try";
  
  my @Tests =
-@@ -147,7 +147,7 @@ my @Tests =
+@@ -147,7 +148,7 @@ my @Tests =
  
    # None of the following invalid ranges provoked an error up to coreutils-6.9.
    ['inval1', qw(-f 2-0), {IN=>''}, {OUT=>''}, {EXIT=>1},
@@ -4076,41 +4076,41 @@ diff -urNp coreutils-8.13-orig/tests/misc/cut coreutils-8.13/tests/misc/cut
    ['inval2', qw(-f -), {IN=>''}, {OUT=>''}, {EXIT=>1}, {ERR=>$no_endpoint}],
    ['inval3', '-f', '4,-', {IN=>''}, {OUT=>''}, {EXIT=>1}, {ERR=>$no_endpoint}],
    ['inval4', '-f', '1-2,-', {IN=>''}, {OUT=>''}, {EXIT=>1},
-diff -urNp coreutils-8.13-orig/tests/misc/mb1.I coreutils-8.13/tests/misc/mb1.I
---- coreutils-8.13-orig/tests/misc/mb1.I	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.13/tests/misc/mb1.I	2011-09-09 10:23:14.191687037 +0200
+diff -urNp coreutils-8.15-orig/tests/misc/mb1.I coreutils-8.15/tests/misc/mb1.I
+--- coreutils-8.15-orig/tests/misc/mb1.I	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-8.15/tests/misc/mb1.I	2012-03-07 21:25:39.521460928 +0100
 @@ -0,0 +1,4 @@
 +Apple＠10
 +Banana＠5
 +Citrus＠20
 +Cherry＠30
-diff -urNp coreutils-8.13-orig/tests/misc/mb1.X coreutils-8.13/tests/misc/mb1.X
---- coreutils-8.13-orig/tests/misc/mb1.X	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.13/tests/misc/mb1.X	2011-09-09 10:23:14.192581910 +0200
+diff -urNp coreutils-8.15-orig/tests/misc/mb1.X coreutils-8.15/tests/misc/mb1.X
+--- coreutils-8.15-orig/tests/misc/mb1.X	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-8.15/tests/misc/mb1.X	2012-03-07 21:25:39.522458368 +0100
 @@ -0,0 +1,4 @@
 +Banana＠5
 +Apple＠10
 +Citrus＠20
 +Cherry＠30
-diff -urNp coreutils-8.13-orig/tests/misc/mb2.I coreutils-8.13/tests/misc/mb2.I
---- coreutils-8.13-orig/tests/misc/mb2.I	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.13/tests/misc/mb2.I	2011-09-09 10:23:14.192581910 +0200
+diff -urNp coreutils-8.15-orig/tests/misc/mb2.I coreutils-8.15/tests/misc/mb2.I
+--- coreutils-8.15-orig/tests/misc/mb2.I	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-8.15/tests/misc/mb2.I	2012-03-07 21:25:39.523458000 +0100
 @@ -0,0 +1,4 @@
 +Apple＠ＡＡ10＠＠20
 +Banana＠ＡＡ5＠＠30
 +Citrus＠ＡＡ20＠＠5
 +Cherry＠ＡＡ30＠＠10
-diff -urNp coreutils-8.13-orig/tests/misc/mb2.X coreutils-8.13/tests/misc/mb2.X
---- coreutils-8.13-orig/tests/misc/mb2.X	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.13/tests/misc/mb2.X	2011-09-09 10:23:14.193687456 +0200
+diff -urNp coreutils-8.15-orig/tests/misc/mb2.X coreutils-8.15/tests/misc/mb2.X
+--- coreutils-8.15-orig/tests/misc/mb2.X	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-8.15/tests/misc/mb2.X	2012-03-07 21:25:39.523458000 +0100
 @@ -0,0 +1,4 @@
 +Citrus＠ＡＡ20＠＠5
 +Cherry＠ＡＡ30＠＠10
 +Apple＠ＡＡ10＠＠20
 +Banana＠ＡＡ5＠＠30
-diff -urNp coreutils-8.13-orig/tests/misc/sort-mb-tests coreutils-8.13/tests/misc/sort-mb-tests
---- coreutils-8.13-orig/tests/misc/sort-mb-tests	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.13/tests/misc/sort-mb-tests	2011-09-09 10:23:14.194687565 +0200
+diff -urNp coreutils-8.15-orig/tests/misc/sort-mb-tests coreutils-8.15/tests/misc/sort-mb-tests
+--- coreutils-8.15-orig/tests/misc/sort-mb-tests	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-8.15/tests/misc/sort-mb-tests	2012-03-07 21:25:39.524460637 +0100
 @@ -0,0 +1,58 @@
 +#! /bin/sh
 +case $# in

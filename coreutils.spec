@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.15
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -416,6 +416,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Wed Mar 07 2012 Ondrej Vasik <ovasik@redhat.com> 8.15-7
+- fix sort segfault with multibyte locales (by P.Brady)
+
 * Fri Feb 10 2012 Harald Hoyer <harald@redhat.com> 8.15-6
 - turn on testsuite again
 
