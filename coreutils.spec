@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.15
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,8 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+# fix regression in du -x with nondir argument
+Patch1: coreutils-8.15-du-x-nondir.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -143,6 +145,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .xnondir
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -416,6 +419,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Thu Mar 08 2012 Ondrej Vasik <ovasik@redhat.com> 8.15-8
+- fix regression in du -x with nondir argument (by J.Meyering)
+
 * Wed Mar 07 2012 Ondrej Vasik <ovasik@redhat.com> 8.15-7
 - fix sort segfault with multibyte locales (by P.Brady)
 
