@@ -392,7 +392,7 @@ diff -urNp coreutils-8.13-orig/src/ls.c coreutils-8.13/src/ls.c
        || format_needs_stat
 @@ -2869,7 +2896,7 @@ gobble_file (char const *name, enum file
            && print_with_color && is_colored (C_CAP))
-         f->has_capability = has_capability (absolute_name);
+         f->has_capability = has_capability_cache (absolute_name, f);
  
 -      if (format == long_format || print_scontext)
 +      if (format == long_format || format == security_format || print_scontext)
@@ -406,7 +406,7 @@ diff -urNp coreutils-8.13-orig/src/ls.c coreutils-8.13/src/ls.c
 -          if (err == 0 && format == long_format)
 +          if (err == 0 && (format == long_format || format == security_format))
              {
-               int n = file_has_acl (absolute_name, &f->stat);
+               int n = file_has_acl_cache (absolute_name, f);
                err = (n < 0);
 @@ -2911,7 +2938,8 @@ gobble_file (char const *name, enum file
          }
