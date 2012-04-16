@@ -16,7 +16,7 @@ if ($?TERM) then
   endif
 endif
 if ( -e "/etc/DIR_COLORS.256color" ) then
-  if ( "`tty -s && tput colors`" == "256" ) then
+  if ( "`tty -s` && tput colors" == "256" ) then
      set COLORS=/etc/DIR_COLORS.256color
   endif
 endif

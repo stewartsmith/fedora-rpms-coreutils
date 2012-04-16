@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.16
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -416,6 +416,10 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Mon Apr 16 2012 Ondrej Vasik <ovasik@redhat.com> 8.16-2
+- fix the tcsh colorls.csh behaviour in non-interactive
+  mode (#804604)
+
 * Mon Mar 26 2012 Ondrej Vasik <ovasik@redhat.com> 8.16-1
 - new upstream release 8.16
 - defuzz patches, remove already applied patches
