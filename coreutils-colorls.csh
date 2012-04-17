@@ -14,10 +14,10 @@ if ($?TERM) then
   if ( -e "/etc/DIR_COLORS.$TERM" ) then
      set COLORS="/etc/DIR_COLORS.$TERM"
   endif
-endif
-if ( -e "/etc/DIR_COLORS.256color" ) then
-  if ( "`tty -s` && tput colors" == "256" ) then
-     set COLORS=/etc/DIR_COLORS.256color
+  if ( -e "/etc/DIR_COLORS.256color" ) then
+    if ( "`tput colors`" == "256" ) then
+       set COLORS=/etc/DIR_COLORS.256color
+    endif
   endif
 endif
 if ( -f ~/.dircolors ) set COLORS=~/.dircolors
