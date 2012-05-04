@@ -240,5 +240,7 @@ EXEC 01;32
 .xml 00;33
 .epub 00;33
 .abw 00;33
+.htm 00;33
 .html 00;33
+.shtml 00;33
 .wpd 00;33
