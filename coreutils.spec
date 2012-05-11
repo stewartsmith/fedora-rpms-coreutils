@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.17
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,7 @@ Source202:  coreutils-su-l.pamd
 Source203:  coreutils-runuser-l.pamd
 
 # From upstream
+Patch1: coreutils-8.17-ls-rootdir-symlink.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -143,6 +144,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .roodirsymlink
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -416,6 +418,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Fri May 11 2012 Ondrej Vasik <ovasik@redhat.com> 8.17-2
+- ls: upstream fix - correctly show symlinks in /
+
 * Fri May 11 2012 Ondrej Vasik <ovasik@redhat.com> 8.17-1
 - new upstream release 8.17
 
