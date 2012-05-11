@@ -416,8 +416,8 @@ diff -urNp coreutils-8.13-orig/src/ls.c coreutils-8.13/src/ls.c
 +          && (format == long_format || format == security_format
 +              || check_symlink_color))
          {
-           char *linkname;
            struct stat linkstats;
+ 
 @@ -2931,6 +2959,7 @@ gobble_file (char const *name, enum file
                   command line are automatically traced if not being
                   listed as files.  */
@@ -628,29 +628,29 @@ diff -urNp coreutils-8.13-orig/src/runcon.c coreutils-8.13/src/runcon.c
  With neither CONTEXT nor COMMAND, print the current security context.\n\
  \n\
    CONTEXT            Complete security context\n\
-diff -urNp coreutils-8.13-orig/tests/init.cfg coreutils-8.13/tests/init.cfg
---- coreutils-8.13-orig/tests/init.cfg	2011-09-07 18:00:55.000000000 +0200
-+++ coreutils-8.13/tests/init.cfg	2011-09-09 10:32:17.031688699 +0200
+diff -urNp coreutils-8.17-orig/tests/init.cfg coreutils-8.17/tests/init.cfg
+--- coreutils-8.17-orig/tests/init.cfg
++++ coreutils-8.17/tests/init.cfg
 @@ -253,8 +253,8 @@ require_selinux_()
  
    # Independent of whether SELinux is enabled system-wide,
    # the current file system may lack SELinux support.
--  case `ls -Zd .` in
+-  case $(ls -Zd .) in
 -    '? .'|'unlabeled .')
-+  case `ls -Zd . | cut -f4 -d" "` in
++  case $(ls -Zd . | cut -f4 -d" ") in
 +    '?'|'unlabeled')
        skip_ "this system (or maybe just" \
          "the current file system) lacks SELinux support"
      ;;
-diff -urNp coreutils-8.13-orig/tests/misc/selinux coreutils-8.13/tests/misc/selinux
---- coreutils-8.13-orig/tests/misc/selinux	2011-08-08 09:42:16.000000000 +0200
-+++ coreutils-8.13/tests/misc/selinux	2011-09-09 10:30:39.586563144 +0200
+diff -urNp coreutils-8.17-orig/tests/misc/selinux coreutils-8.17/tests/misc/selinux
+--- coreutils-8.17-orig/tests/misc/selinux
++++ coreutils-8.17/tests/misc/selinux
 @@ -37,7 +37,7 @@ chcon $ctx f d p ||
  
  # inspect that context with both ls -Z and stat.
  for i in d f p; do
--  c=`ls -dogZ $i|cut -d' ' -f3`; test x$c = x$ctx || fail=1
-+  c=`ls -dogZ $i|cut -d' ' -f4`; test x$c = x$ctx || fail=1
-   c=`stat --printf %C $i`; test x$c = x$ctx || fail=1
+-  c=$(ls -dogZ $i|cut -d' ' -f3); test x$c = x$ctx || fail=1
++  c=$(ls -dogZ $i|cut -d' ' -f4); test x$c = x$ctx || fail=1
+   c=$(stat --printf %C $i); test x$c = x$ctx || fail=1
  done
  

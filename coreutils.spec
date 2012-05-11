@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.16
-Release: 3%{?dist}
+Version: 8.17
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -416,6 +416,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Fri May 11 2012 Ondrej Vasik <ovasik@redhat.com> 8.17-1
+- new upstream release 8.17
+
 * Fri May 04 2012 Ondrej Vasik <ovasik@redhat.com> 8.16-3
 - add .htm and .shtml to colorized DIR_COLORS document
   type (#817218)
