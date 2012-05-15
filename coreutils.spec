@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.17
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -128,6 +128,7 @@ Provides: stat = %{version}-%{release}
 Provides: textutils = %{version}-%{release}
 #old mktemp package had epoch 3, so we have to use 4 for coreutils
 Provides: mktemp = 4:%{version}-%{release}
+Provides: bundled(gnulib)
 Obsoletes: mktemp < 4:%{version}-%{release}
 Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
@@ -418,6 +419,9 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Tue May 15 2012 Ondrej Vasik <ovasik@redhat.com> 8.16-3
+- add virtual provides for bundled(gnulib) copylib (#821748)
+
 * Fri May 11 2012 Ondrej Vasik <ovasik@redhat.com> 8.17-2
 - ls: upstream fix - correctly show symlinks in /
 
