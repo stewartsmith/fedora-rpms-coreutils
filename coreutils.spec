@@ -419,7 +419,7 @@ fi
 %{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
-* Tue May 15 2012 Ondrej Vasik <ovasik@redhat.com> 8.16-3
+* Tue May 15 2012 Ondrej Vasik <ovasik@redhat.com> 8.17-3
 - add virtual provides for bundled(gnulib) copylib (#821748)
 
 * Fri May 11 2012 Ondrej Vasik <ovasik@redhat.com> 8.17-2
