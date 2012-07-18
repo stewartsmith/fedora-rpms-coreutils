@@ -218,29 +218,31 @@ EXEC 01;32
 .spx 01;36
 .xspf 01;36
 
-# colorize basic documents (brown)
-.pdf 00;33
-.ps 00;33
-.ps.gz 00;33
-.txt 00;33
-.patch 00;33
-.diff 00;33
-.log 00;33
-.tex 00;33
-.xls 00;33
-.xlsx 00;33
-.ppt 00;33
-.pptx 00;33
-.rtf 00;33
-.doc 00;33
-.docx 00;33
-.odt 00;33
-.ods 00;33
-.odp 00;33
-.xml 00;33
-.epub 00;33
-.abw 00;33
-.htm 00;33
-.html 00;33
-.shtml 00;33
-.wpd 00;33
+# colorize binary documents (brown)
+#.pdf 00;33
+#.ps 00;33
+#.ps.gz 00;33
+#.tex 00;33
+#.xls 00;33
+#.xlsx 00;33
+#.ppt 00;33
+#.pptx 00;33
+#.rtf 00;33
+#.doc 00;33
+#.docx 00;33
+#.odt 00;33
+#.ods 00;33
+#.odp 00;33
+#.epub 00;33
+#.abw 00;33
+#.wpd 00;33
+#
+# colorize text documents (brown)
+#.txt 00;33
+#.patch 00;33
+#.diff 00;33
+#.log 00;33
+#.htm 00;33
+#.html 00;33
+#.shtml 00;33
+#.xml 00;33
