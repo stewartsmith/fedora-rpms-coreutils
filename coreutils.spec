@@ -376,6 +376,7 @@ fi
 %changelog
 * Mon Aug 20 2012 Ondrej Vasik <ovasik@redhat.com> 8.19-1
 - new upstream release 8.19
+- fix multibyte issues in cut and expand (M.Briza, #821260)
 
 * Sun Aug 12 2012 Ondrej Vasik <ovasik@redhat.com> 8.18-1
 - new upstream release 8.18
