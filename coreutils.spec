@@ -1,6 +1,6 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.18
+Version: 8.19
 Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
@@ -12,10 +12,6 @@ Source102:  coreutils-DIR_COLORS.lightbgcolor
 Source103:  coreutils-DIR_COLORS.256color
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
-Source200:  coreutils-su.pamd
-Source201:  coreutils-runuser.pamd
-Source202:  coreutils-su-l.pamd
-Source203:  coreutils-runuser-l.pamd
 
 # From upstream
 
@@ -36,27 +32,15 @@ Patch107: coreutils-8.4-mkdir-modenote.patch
 # sh-utils
 #add info about TZ envvar to date manpage
 Patch703: sh-utils-2.0.11-dateman.patch
-#set paths for su explicitly, don't get influenced by paths.h
-#Patch704: sh-utils-1.16-paths.patch
-# RMS will never accept the PAM patch because it removes his historical
-# rant about Twenex and the wheel group, so we'll continue to maintain
-# it here indefinitely. Patch is now the same in Fedora and SUSE.
-#Patch706: coreutils-8.5-pam.patch
 Patch713: coreutils-4.5.3-langinfo.patch
 
 # (sb) lin18nux/lsb compliance - multibyte functionality patch
 Patch800: coreutils-i18n.patch
 
-#Call setsid() in su under some circumstances (bug #173008).
-#Patch900: coreutils-setsid.patch
-#make runuser binary based on su.c
-#Patch907: coreutils-8.7-runuser.patch
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
 #Prevent buffer overflow in who(1) (bug #158405).
 Patch912: coreutils-overflow.patch
-#compile su with pie flag and RELRO protection
-#Patch917: coreutils-8.4-su-pie.patch
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
@@ -93,12 +77,10 @@ Provides: /bin/rmdir
 Provides: /bin/sleep
 Provides: /bin/sort
 Provides: /bin/stty
-Provides: /bin/su
 Provides: /bin/sync
 Provides: /bin/touch
 Provides: /bin/true
 Provides: /bin/uname
-Provides: /sbin/runuser
 
 BuildRequires: libselinux-devel
 BuildRequires: libacl-devel
@@ -106,7 +88,6 @@ BuildRequires: gettext bison
 BuildRequires: texinfo
 BuildRequires: autoconf
 BuildRequires: automake
-#%{?!nopam:BuildRequires: pam-devel}
 BuildRequires: libcap-devel
 BuildRequires: libattr-devel
 BuildRequires: gmp-devel
@@ -117,7 +98,6 @@ Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Requires(post): grep
-#%{?!nopam:Requires: pam >= 1.1.3-7}
 Requires:       ncurses
 Requires:       gmp
 
@@ -155,19 +135,14 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # sh-utils
 %patch703 -p1 -b .dateman
-#%patch704 -p1 -b .paths
-#%patch706 -p1 -b .pam
 %patch713 -p1 -b .langinfo
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 
 # Coreutils
-#%patch900 -p1 -b .setsid
-#%patch907 -p1 -b .runuser
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
-#%patch917 -p1 -b .pie
 
 #SELinux
 %patch950 -p1 -b .selinux
@@ -226,7 +201,6 @@ bzip2 -9f ChangeLog
 
 # let be compatible with old fileutils, sh-utils and textutils packages :
 mkdir -p $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}
-#%{?!nopam:mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/pam.d}
 
 # chroot was in /usr/sbin :
 mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
@@ -238,21 +212,10 @@ install -p -c -m644 %SOURCE103 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.256color
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
-# su
-#install -m 4755 src/su $RPM_BUILD_ROOT/%{_bindir}
-#%{?!norunuser:install -m 755 src/runuser $RPM_BUILD_ROOT/%{_sbindir}}
-# do not ship runuser in /usr/bin/runuser
-#rm -rf $RPM_BUILD_ROOT/%{_bindir}/runuser || :
-
 # These come from util-linux and/or procps.
 for i in hostname uptime kill ; do
     rm $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
 done
-
-#%{?!nopam:install -p -m 644 %SOURCE200 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/su}
-#%{?!nopam:install -p -m 644 %SOURCE202 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/su-l}
-#%{?!nopam:install -p -m 644 %SOURCE201 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/runuser}
-#%{?!nopam:install -p -m 644 %SOURCE203 $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/runuser-l}
 
 # Compress ChangeLogs from before the fileutils/textutils/etc merge
 bzip2 -f9 old/*/C*
@@ -304,10 +267,6 @@ fi
 %dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
-#%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su}
-#%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/su-l}
-#%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser}
-#%{?!nopam:%config(noreplace) %{_sysconfdir}/pam.d/runuser-l}
 %doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
 %{_bindir}/arch
 %{_bindir}/basename
@@ -337,7 +296,6 @@ fi
 %{_bindir}/sleep
 %{_bindir}/sort
 %{_bindir}/stty
-#%attr(4755,root,root) %{_bindir}/su
 %{_bindir}/sync
 %{_bindir}/mktemp
 %{_bindir}/touch
@@ -414,9 +372,11 @@ fi
 %{_libexecdir}/coreutils*
 %{_mandir}/man*/*
 %{_sbindir}/chroot
-#%{?!norunuser:%{_sbindir}/runuser}
 
 %changelog
+* Mon Aug 20 2012 Ondrej Vasik <ovasik@redhat.com> 8.19-1
+- new upstream release 8.19
+
 * Sun Aug 12 2012 Ondrej Vasik <ovasik@redhat.com> 8.18-1
 - new upstream release 8.18
 - su/runuser moved to util-linux
