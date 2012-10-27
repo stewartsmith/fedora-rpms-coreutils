@@ -62,8 +62,8 @@ diff -urNp coreutils-8.13-orig/src/copy.h coreutils-8.13/src/copy.h
 --- coreutils-8.13-orig/src/copy.h	2011-07-28 12:38:27.000000000 +0200
 +++ coreutils-8.13/src/copy.h	2011-09-09 10:30:39.565563712 +0200
 @@ -158,6 +158,9 @@ struct cp_options
-   bool preserve_mode;
    bool preserve_timestamps;
+   bool explicit_no_preserve_mode;
  
 +  /* If true, attempt to set specified security context */
 +  bool set_security_context;
@@ -101,7 +101,7 @@ diff -urNp coreutils-8.13-orig/src/cp.c coreutils-8.13/src/cp.c
        fputs (HELP_OPTION_DESCRIPTION, stdout);
        fputs (VERSION_OPTION_DESCRIPTION, stdout);
 @@ -786,6 +791,7 @@ cp_option_init (struct cp_options *x)
-   x->preserve_timestamps = false;
+   x->explicit_no_preserve_mode = false;
    x->preserve_security_context = false;
    x->require_preserve_context = false;
 +  x->set_security_context = false;
@@ -609,8 +609,8 @@ diff -urNp coreutils-8.13-orig/src/mv.c coreutils-8.13/src/mv.c
 --- coreutils-8.13-orig/src/mv.c	2011-07-28 12:38:27.000000000 +0200
 +++ coreutils-8.13/src/mv.c	2011-09-09 10:30:39.578562234 +0200
 @@ -118,6 +118,7 @@ cp_option_init (struct cp_options *x)
-   x->preserve_mode = true;
    x->preserve_timestamps = true;
+   x->explicit_no_preserve_mode= false;
    x->preserve_security_context = selinux_enabled;
 +  x->set_security_context = false;
    x->reduce_diagnostics = false;
@@ -628,9 +628,9 @@ diff -urNp coreutils-8.13-orig/src/runcon.c coreutils-8.13/src/runcon.c
  With neither CONTEXT nor COMMAND, print the current security context.\n\
  \n\
    CONTEXT            Complete security context\n\
-diff -urNp coreutils-8.17-orig/tests/init.cfg coreutils-8.17/tests/init.cfg
---- coreutils-8.17-orig/tests/init.cfg
-+++ coreutils-8.17/tests/init.cfg
+diff -urNp coreutils-8.20-orig/init.cfg coreutils-8.20/init.cfg
+--- coreutils-8.20-orig/init.cfg
++++ coreutils-8.20/init.cfg
 @@ -253,8 +253,8 @@ require_selinux_()
  
    # Independent of whether SELinux is enabled system-wide,
@@ -642,9 +642,9 @@ diff -urNp coreutils-8.17-orig/tests/init.cfg coreutils-8.17/tests/init.cfg
        skip_ "this system (or maybe just" \
          "the current file system) lacks SELinux support"
      ;;
-diff -urNp coreutils-8.17-orig/tests/misc/selinux coreutils-8.17/tests/misc/selinux
---- coreutils-8.17-orig/tests/misc/selinux
-+++ coreutils-8.17/tests/misc/selinux
+diff -urNp coreutils-8.20-orig/tests/misc/selinux coreutils-8.20/tests/misc/selinux.sh
+--- coreutils-8.20-orig/tests/misc/selinux.sh
++++ coreutils-8.20/tests/misc/selinux.sh
 @@ -37,7 +37,7 @@ chcon $ctx f d p ||
  
  # inspect that context with both ls -Z and stat.

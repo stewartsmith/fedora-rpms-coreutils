@@ -1,6 +1,6 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.19
+Version: 8.20
 Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
@@ -149,7 +149,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch951 -p1 -b .selinuxman
 %patch952 -p1 -b .cpZ
 
-chmod a+x tests/misc/sort-mb-tests tests/df/direct || :
+chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -374,6 +374,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sat Oct 27 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-1
+- new upstream release 8.20
+
 * Mon Aug 20 2012 Ondrej Vasik <ovasik@redhat.com> 8.19-1
 - new upstream release 8.19
 - fix multibyte issues in cut and expand (M.Briza, #821260)
