@@ -166,9 +166,9 @@ touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
 autoconf --force
 automake --copy --add-missing
-%configure --enable-largefile %{?!nopam:--enable-pam} \
+%configure --enable-largefile \
            %{?!noselinux:--enable-selinux} \
-           --enable-install-program=su,hostname,arch \
+           --enable-install-program=hostname,arch \
            --with-tty-group \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 
@@ -176,7 +176,6 @@ automake --copy --add-missing
 touch man/*.x
 
 make all %{?_smp_mflags}
-#         %{?!nopam:CPPFLAGS="-DUSE_PAM"}
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi

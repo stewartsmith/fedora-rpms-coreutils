@@ -136,3 +136,18 @@ diff -urNp coreutils-8.13-orig/tests/touch/no-dereference.sh coreutils-8.13/test
  
  # Changing time of dangling symlink is okay.
  # Skip the test if this fails, but the error text corresponds to
+diff -urNp coreutils-8.20-orig/src/dd.c coreutils-8.20/src/dd.c
+--- coreutils-8.20-orig/src/dd.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/dd.c	2012-11-01 20:50:18.341215667 +0100
+@@ -71,6 +71,10 @@
+ # define O_CIO 0
+ #endif
+ 
++#ifndef O_SYNC
++# define O_SYNC 0
++#endif
++
+ /* On AIX 5.1 and AIX 5.2, O_NOCACHE is defined via <fcntl.h>
+    and would interfere with our use of that name, below.  */
+ #undef O_NOCACHE
+
