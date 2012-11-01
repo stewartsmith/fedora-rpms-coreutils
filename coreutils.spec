@@ -115,6 +115,8 @@ Obsoletes: stat <= 3.3
 Obsoletes: textutils <= 2.0.21
 #coreutils-libs dropped in f17
 Obsoletes: coreutils-libs < 8.13
+#require util-linux >=2.22.1-3 to prevent lack of su/runuser on system
+Requires: util-linux >= 2.22.1-3
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -376,6 +378,8 @@ fi
 %changelog
 * Sat Oct 27 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-1
 - new upstream release 8.20
+- Temporarily require util-linux >= 2.22.1-3 (to prevent missing
+  su/runuser on system)
 
 * Mon Aug 20 2012 Ondrej Vasik <ovasik@redhat.com> 8.19-1
 - new upstream release 8.19
