@@ -54,6 +54,7 @@ diff -urNp coreutils-8.13-orig/gnulib-tests/gnulib.mk coreutils-8.13/gnulib-test
 +#EXTRA_DIST += test-getlogin.c signature.h macros.h
  
  ## end   gnulib module getlogin-tests
+ 
 @@ -918,10 +918,10 @@ EXTRA_DIST += test-link.h test-link.c si
  
  ## begin gnulib module linkat-tests
