@@ -136,3 +136,17 @@ diff -urNp coreutils-8.13-orig/tests/touch/no-dereference.sh coreutils-8.13/test
  
  # Changing time of dangling symlink is okay.
  # Skip the test if this fails, but the error text corresponds to
+diff -urNp coreutils-8.20-orig/lib/fcntl.in.h coreutils-8.20/lib/fcntl.in.h
+--- coreutils-8.20-orig/lib/fcntl.in.h
++++ coreutils-8.20/lib/fcntl.in.h
+@@ -71,6 +71,10 @@
+ # define O_SYNC 0
+ #endif
+ 
++#ifndef __O_SYNC
++# define __O_SYNC 04000000
++#endif
++
+ #ifndef O_TTY_INIT
+ # define O_TTY_INIT 0
+ #endif
