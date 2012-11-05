@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.20
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -375,6 +375,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Nov 05 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-2
+- disable the temporary O_SYNC fix (glibc is fixed - #872366)
+
 * Sat Oct 27 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-1
 - new upstream release 8.20
 - Temporarily require util-linux >= 2.22.1-3 (to prevent missing
