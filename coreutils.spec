@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.20
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -14,6 +14,7 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
+Patch1: coreutils-8.20-powerpcfactor.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -126,6 +127,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .ppcfactor
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -375,6 +377,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Dec 06 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-3
+- fix factor on 32bit powerpc (upstream, #884715)
+
 * Mon Nov 05 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-2
 - disable the temporary O_SYNC fix (glibc is fixed - #872366)
 
