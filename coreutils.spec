@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.20
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -15,6 +15,7 @@ Source106:  coreutils-colorls.csh
 
 # From upstream
 Patch1: coreutils-8.20-powerpcfactor.patch
+Patch2: coreutils-8.20-df-duplicates.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -128,6 +129,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .ppcfactor
+%patch2 -p1 -b .duplic
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -377,6 +379,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Dec 10 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-4
+- fix showing duplicates in df (#709351, O.Oprala, B.Voelker)
+
 * Thu Dec 06 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-3
 - fix factor on 32bit powerpc (upstream, #884715)
 
