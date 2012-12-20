@@ -587,7 +587,7 @@ fi
 - change assertion failure for invalid multibyte input
   in sort to less confusing error message(#591352)
 
-* Wed Sep 09 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-7
+* Wed Sep 08 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-7
 - add RELRO protection to su as well (#630017)
 
 * Mon Sep 06 2010 Ondrej Vasik <ovasik@redhat.com> - 8.5-6
@@ -759,7 +759,7 @@ fi
 - do not ignore sort's version sort for multibyte locales
   (#509688)
 
-* Thu Jun 16 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-2
+* Thu Jun 18 2009 Ondrej Vasik <ovasik@redhat.com> 7.4-2
 - temporarily workaround probable kernel issue with
   TCSADRAIN(#504798)
 
@@ -852,7 +852,7 @@ fi
 * Mon Nov 03 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-17
 - Requires: ncurses (#469277)
 
-* Wed Oct 21 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-16
+* Wed Oct 22 2008 Ondrej Vasik <ovasik@redhat.com> - 6.12-16
 - make possible to disable capability in ls due to
   performance impact when not cached(#467508)
 - do not patch generated manpages - generate them at build
@@ -895,7 +895,7 @@ fi
 * Mon Aug 04 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-8
 - ls -U1 now uses constant memory
 
-* Wed Jul 24 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-7
+* Wed Jul 23 2008 Kamil Dudka <kdudka@redhat.com> - 6.12-7
 - dd: iflag=fullblock now read full blocks if possible
   (#431997, #449263)
 - ls: --color now highlights files with capabilities (#449985)
@@ -1297,11 +1297,11 @@ fi
 - Parametrize SELinux (bug #174067).
 - Fix runuser.pamd (bug #173807).
 
-* Thu Nov 25 2005 Tim Waugh <twaugh@redhat.com> 5.93-4
+* Thu Nov 24 2005 Tim Waugh <twaugh@redhat.com> 5.93-4
 - Rebuild to pick up new glibc *at functions.
 - Apply runuser PAM patch from bug #173807.  Ship runuser PAM file.
 
-* Tue Nov 14 2005 Dan Walsh <dwalsh@redhat.com> 5.93-3
+* Tue Nov 15 2005 Dan Walsh <dwalsh@redhat.com> 5.93-3
 - Remove multiple from su.pamd
 
 * Mon Nov 14 2005 Tim Waugh <twaugh@redhat.com> 5.93-2
@@ -1341,7 +1341,7 @@ fi
 - Allow id to run even when SELinux security context can not be run
 - Change chcon to use raw functions.
 
-* Thu Jun 28 2005 Tim Waugh <twaugh@redhat.com>
+* Tue Jun 28 2005 Tim Waugh <twaugh@redhat.com>
 - Corrected comments in DIR_COLORS.xterm (bug #161711).
 
 * Wed Jun 22 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-52
@@ -1379,7 +1379,7 @@ fi
 * Thu Mar 24 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-43
 - Removed patch that adds -C option to install(1).
 
-* Wed Mar 14 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
+* Wed Mar 16 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-42
 - Fixed pam patch.
 - Fixed broken configure test.
 - Fixed build with GCC 4 (bug #151045).
@@ -1396,7 +1396,7 @@ fi
 * Thu Jan 13 2005 Tim Waugh <twaugh@redhat.com> 5.2.1-37
 - Fixed zh_CN translation (bug #144845).  Patch from Mitrophan Chin.
 
-* Mon Dec 28 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-36
+* Tue Dec 28 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-36
 - Fix to only setdefaultfilecon if not overridden by command line
 
 * Mon Dec 27 2004 Dan Walsh <dwalsh@redhat.com> 5.2.1-35
@@ -1692,7 +1692,7 @@ fi
 * Mon Jul 28 2003 Tim Waugh <twaugh@redhat.com> 5.0-8
 - Actually use the ACL patch (bug #100519).
 
-* Wed Jul 18 2003 Dan Walsh <dwalsh@redhat.com> 5.0-7
+* Wed Jul 16 2003 Dan Walsh <dwalsh@redhat.com> 5.0-7
 - Convert to SELinux
 
 * Mon Jun  9 2003 Tim Waugh <twaugh@redhat.com>

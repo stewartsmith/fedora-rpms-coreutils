@@ -9,30 +9,13 @@ This regression was introduced in commit v8.19-132-g3786fb6.
 and instead insert it into the buffer as for other numbers.
 Also output the terminator unconditionally.
 * tests/misc/seq.pl: Add some basic tests for the -s option.
-* NEWS: Mention the fix.
 * THANKS.in: Reported by Philipp Gortan.
 ---
- NEWS              |    4 ++++
  THANKS.in         |    1 +
  src/seq.c         |   20 +++++++++++++-------
  tests/misc/seq.pl |    5 +++++
- 4 files changed, 23 insertions(+), 7 deletions(-)
+ 3 files changed, 19 insertions(+), 7 deletions(-)
 
-diff --git a/NEWS b/NEWS
-index e4472df..ae7ec2a 100644
---- a/NEWS
-+++ b/NEWS
-@@ -43,6 +43,10 @@ GNU coreutils NEWS                                    -*- outline -*-
-   the output numbers are properly aligned and of the correct width.
-   [This bug was present in "the beginning".]
- 
-+  seq -s now doesn't output an erroneous newline after the first number, and
-+  outputs a newline after the last number rather than a trailing separator.
-+  [bug introduced in coreutils-8.20]
-+
- ** Changes in behavior
- 
-   df --total now prints '-' into the target column (mount point) of the
 diff --git a/THANKS.in b/THANKS.in
 index c2651e7..67b60b9 100644
 --- a/THANKS.in
