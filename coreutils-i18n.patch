@@ -1,6 +1,6 @@
-diff -urNp coreutils-8.19-orig/lib/linebuffer.h coreutils-8.19/lib/linebuffer.h
---- coreutils-8.19-orig/lib/linebuffer.h	2012-01-06 10:14:31.000000000 +0100
-+++ coreutils-8.19/lib/linebuffer.h	2012-08-20 13:52:04.061593006 +0200
+diff -urNp coreutils-8.20-orig/lib/linebuffer.h coreutils-8.20/lib/linebuffer.h
+--- coreutils-8.20-orig/lib/linebuffer.h	2012-10-23 16:17:24.000000000 +0200
++++ coreutils-8.20/lib/linebuffer.h	2013-01-23 09:24:24.619090620 +0100
 @@ -21,6 +21,11 @@
  
  # include <stdio.h>
@@ -23,9 +23,9 @@ diff -urNp coreutils-8.19-orig/lib/linebuffer.h coreutils-8.19/lib/linebuffer.h
  };
  
  /* Initialize linebuffer LINEBUFFER for use. */
-diff -urNp coreutils-8.19-orig/src/cut.c coreutils-8.19/src/cut.c
---- coreutils-8.19-orig/src/cut.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/cut.c	2012-08-20 13:52:52.299593173 +0200
+diff -urNp coreutils-8.20-orig/src/cut.c coreutils-8.20/src/cut.c
+--- coreutils-8.20-orig/src/cut.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/cut.c	2013-01-23 09:24:24.621092254 +0100
 @@ -28,6 +28,11 @@
  #include <assert.h>
  #include <getopt.h>
@@ -633,9 +633,9 @@ diff -urNp coreutils-8.19-orig/src/cut.c coreutils-8.19/src/cut.c
      }
  
    if (optind == argc)
-diff -urNp coreutils-8.19-orig/src/expand.c coreutils-8.19/src/expand.c
---- coreutils-8.19-orig/src/expand.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/expand.c	2012-08-20 13:54:02.974621693 +0200
+diff -urNp coreutils-8.20-orig/src/expand.c coreutils-8.20/src/expand.c
+--- coreutils-8.20-orig/src/expand.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/expand.c	2013-01-23 09:24:24.622088030 +0100
 @@ -37,12 +37,29 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -823,9 +823,9 @@ diff -urNp coreutils-8.19-orig/src/expand.c coreutils-8.19/src/expand.c
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
-diff -urNp coreutils-8.19-orig/src/fold.c coreutils-8.19/src/fold.c
---- coreutils-8.19-orig/src/fold.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/fold.c	2012-08-20 13:52:04.066592980 +0200
+diff -urNp coreutils-8.20-orig/src/fold.c coreutils-8.20/src/fold.c
+--- coreutils-8.20-orig/src/fold.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/fold.c	2013-01-23 09:24:24.623090499 +0100
 @@ -22,12 +22,34 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -1223,9 +1223,9 @@ diff -urNp coreutils-8.19-orig/src/fold.c coreutils-8.19/src/fold.c
            break;
  
          case 's':		/* Break at word boundaries. */
-diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
---- coreutils-8.19-orig/src/join.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/join.c	2012-08-20 13:52:04.069594876 +0200
+diff -urNp coreutils-8.20-orig/src/join.c coreutils-8.20/src/join.c
+--- coreutils-8.20-orig/src/join.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/join.c	2013-01-23 09:29:53.877170828 +0100
 @@ -22,18 +22,32 @@
  #include <sys/types.h>
  #include <getopt.h>
@@ -1444,7 +1444,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
  static void
  freeline (struct line *line)
  {
-@@ -313,56 +472,115 @@ keycmp (struct line const *line1, struct
+@@ -313,56 +472,130 @@ keycmp (struct line const *line1, struct
          size_t jf_1, size_t jf_2)
  {
    /* Start of field to compare in each file.  */
@@ -1458,6 +1458,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
 +  size_t len[2]; 	/* Length of fields to compare.  */
    int diff;
 +  int i, j;
++  int mallocd = 0;
  
    if (jf_1 < line1->nfields)
      {
@@ -1513,7 +1514,8 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
 +
 +        for (i = 0; i < 2; i++)
 +          {
-+            copy[i] = alloca (len[i] + 1);
++            mallocd = 1;
++            copy[i] = xmalloc (len[i] + 1);
 +
 +            for (j = 0; j < MIN (len[0], len[1]);)
 +              {
@@ -1553,7 +1555,8 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
 +      {
 +        for (i = 0; i < 2; i++)
 +          {
-+            copy[i] = alloca (len[i] + 1);
++            mallocd = 1;
++            copy[i] = xmalloc (len[i] + 1);
 +
 +            for (j = 0; j < MIN (len[0], len[1]); j++)
 +              copy[i][j] = toupper (beg[i][j]);
@@ -1572,8 +1575,20 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
      }
  
 +  if (hard_LC_COLLATE)
-+    return xmemcoll ((char *) copy[0], len[0], (char *) copy[1], len[1]);
++    {
++      diff = xmemcoll ((char *) copy[0], len[0], (char *) copy[1], len[1]);
++
++      if (mallocd)
++        for (i = 0; i < 2; i++)
++          free (copy[i]);
++
++      return diff;
++    }
 +  diff = memcmp (copy[0], copy[1], MIN (len[0], len[1]));
++
++  if (mallocd)
++    for (i = 0; i < 2; i++)
++      free (copy[i]);
 +
 +
    if (diff)
@@ -1583,7 +1598,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
  }
  
  /* Check that successive input lines PREV and CURRENT from input file
-@@ -454,6 +672,11 @@ get_line (FILE *fp, struct line **linep,
+@@ -454,6 +687,11 @@ get_line (FILE *fp, struct line **linep,
      }
    ++line_no[which - 1];
  
@@ -1595,7 +1610,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
    xfields (line);
  
    if (prevline[which - 1])
-@@ -553,21 +776,28 @@ prfield (size_t n, struct line const *li
+@@ -553,21 +791,28 @@ prfield (size_t n, struct line const *li
  
  /* Output all the fields in line, other than the join field.  */
  
@@ -1627,7 +1642,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
        prfield (i, line);
      }
  }
-@@ -578,7 +808,6 @@ static void
+@@ -578,7 +823,6 @@ static void
  prjoin (struct line const *line1, struct line const *line2)
  {
    const struct outlist *outlist;
@@ -1635,7 +1650,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
    size_t field;
    struct line const *line;
  
-@@ -612,7 +841,7 @@ prjoin (struct line const *line1, struct
+@@ -612,7 +856,7 @@ prjoin (struct line const *line1, struct
            o = o->next;
            if (o == NULL)
              break;
@@ -1644,7 +1659,7 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
          }
        putchar ('\n');
      }
-@@ -1090,21 +1319,46 @@ main (int argc, char **argv)
+@@ -1090,21 +1334,46 @@ main (int argc, char **argv)
  
          case 't':
            {
@@ -1701,9 +1716,9 @@ diff -urNp coreutils-8.19-orig/src/join.c coreutils-8.19/src/join.c
            break;
  
          case NOCHECK_ORDER_OPTION:
-diff -urNp coreutils-8.19-orig/src/pr.c coreutils-8.19/src/pr.c
---- coreutils-8.19-orig/src/pr.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/pr.c	2012-08-20 13:52:04.074593445 +0200
+diff -urNp coreutils-8.20-orig/src/pr.c coreutils-8.20/src/pr.c
+--- coreutils-8.20-orig/src/pr.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/pr.c	2013-01-23 09:24:24.629439021 +0100
 @@ -312,6 +312,32 @@
  
  #include <getopt.h>
@@ -2447,9 +2462,9 @@ diff -urNp coreutils-8.19-orig/src/pr.c coreutils-8.19/src/pr.c
  /* We've just printed some files and need to clean up things before
     looking for more options and printing the next batch of files.
  
-diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
---- coreutils-8.19-orig/src/sort.c	2012-08-18 07:39:29.000000000 +0200
-+++ coreutils-8.19/src/sort.c	2012-08-20 13:52:04.079596072 +0200
+diff -urNp coreutils-8.20-orig/src/sort.c coreutils-8.20/src/sort.c
+--- coreutils-8.20-orig/src/sort.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/sort.c	2013-01-23 09:35:36.091438847 +0100
 @@ -29,6 +29,14 @@
  #include <sys/wait.h>
  #include <signal.h>
@@ -3024,7 +3039,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
            && ((!key->skipsblanks && !(implicit_skip || maybe_space_aligned))
                || (!key->skipsblanks && key->schar)
                || (!key->skipeblanks && key->echar)))
-@@ -2458,11 +2819,83 @@ key_warnings (struct keyfield const *gke
+@@ -2458,11 +2819,87 @@ key_warnings (struct keyfield const *gke
      error (0, 0, _("option '-r' only applies to last-resort comparison"));
  }
  
@@ -3051,13 +3066,13 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
 +  if (len == 0)
 +    return 0;
 +
-+  month = (char *) alloca (len + 1);
++  month = (char *) xmalloc (len + 1);
 +
-+  tmp = (char *) alloca (len + 1);
++  tmp = (char *) xmalloc (len + 1);
 +  memcpy (tmp, s, len);
 +  tmp[len] = '\0';
 +  pp = (const char **)&tmp;
-+  month_wcs = (wchar_t *) alloca ((len + 1) * sizeof (wchar_t));
++  month_wcs = (wchar_t *) xmalloc ((len + 1) * sizeof (wchar_t));
 +  memset (&state, '\0', sizeof(mbstate_t));
 +
 +  wclength = mbsrtowcs (month_wcs, pp, len + 1, &state);
@@ -3096,6 +3111,10 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
 +  if (ea && result)
 +     *ea = s + strlen (monthtab[lo].name);
 +
++  free (month);
++  free (tmp);
++  free (month_wcs);
++
 +  return result;
 +}
 +#endif
@@ -3109,7 +3128,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
  {
    struct keyfield *key = keylist;
  
-@@ -2547,7 +2980,7 @@ keycompare (struct line const *a, struct
+@@ -2547,7 +2984,7 @@ keycompare (struct line const *a, struct
            else if (key->human_numeric)
              diff = human_numcompare (ta, tb);
            else if (key->month)
@@ -3118,7 +3137,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
            else if (key->random)
              diff = compare_random (ta, tlena, tb, tlenb);
            else if (key->version)
-@@ -2663,6 +3096,180 @@ keycompare (struct line const *a, struct
+@@ -2663,6 +3100,181 @@ keycompare (struct line const *a, struct
    return key->reverse ? -diff : diff;
  }
  
@@ -3174,7 +3193,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
 +        {
 +          if (ignore || translate)
 +            {
-+              char *copy_a = (char *) alloca (lena + 1 + lenb + 1);
++              char *copy_a = (char *) xmalloc (lena + 1 + lenb + 1);
 +              char *copy_b = copy_a + lena + 1;
 +              size_t new_len_a, new_len_b;
 +              size_t i, j;
@@ -3250,6 +3269,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
 +              IGNORE_CHARS (new_len_b, lenb, textb, copy_b,
 +                            wc_b, mblength_b, state_b);
 +              diff = xmemcoll (copy_a, new_len_a, copy_b, new_len_b);
++              free(copy_a);
 +            }
 +          else if (lena == 0)
 +            diff = - NONZERO (lenb);
@@ -3299,7 +3319,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -4158,7 +4765,7 @@ main (int argc, char **argv)
+@@ -4158,7 +4770,7 @@ main (int argc, char **argv)
    initialize_exit_failure (SORT_FAILURE);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
@@ -3308,7 +3328,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -4179,6 +4786,29 @@ main (int argc, char **argv)
+@@ -4179,6 +4791,29 @@ main (int argc, char **argv)
        thousands_sep = -1;
    }
  
@@ -3338,7 +3358,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
    have_read_stdin = false;
    inittables ();
  
-@@ -4453,13 +5083,34 @@ main (int argc, char **argv)
+@@ -4453,13 +5088,34 @@ main (int argc, char **argv)
  
          case 't':
            {
@@ -3377,7 +3397,7 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
                  else
                    {
                      /* Provoke with 'sort -txx'.  Complain about
-@@ -4470,9 +5121,12 @@ main (int argc, char **argv)
+@@ -4470,9 +5126,12 @@ main (int argc, char **argv)
                             quote (optarg));
                    }
                }
@@ -3392,9 +3412,9 @@ diff -urNp coreutils-8.19-orig/src/sort.c coreutils-8.19/src/sort.c
            }
            break;
  
-diff -urNp coreutils-8.19-orig/src/unexpand.c coreutils-8.19/src/unexpand.c
---- coreutils-8.19-orig/src/unexpand.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/unexpand.c	2012-08-20 13:52:04.081596774 +0200
+diff -urNp coreutils-8.20-orig/src/unexpand.c coreutils-8.20/src/unexpand.c
+--- coreutils-8.20-orig/src/unexpand.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/unexpand.c	2013-01-23 09:24:24.636292411 +0100
 @@ -38,12 +38,29 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -3648,9 +3668,9 @@ diff -urNp coreutils-8.19-orig/src/unexpand.c coreutils-8.19/src/unexpand.c
  
    if (have_read_stdin && fclose (stdin) != 0)
      error (EXIT_FAILURE, errno, "-");
-diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
---- coreutils-8.19-orig/src/uniq.c	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.19/src/uniq.c	2012-08-20 13:52:04.083502506 +0200
+diff -urNp coreutils-8.20-orig/src/uniq.c coreutils-8.20/src/uniq.c
+--- coreutils-8.20-orig/src/uniq.c	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/src/uniq.c	2013-01-23 09:46:33.757064880 +0100
 @@ -21,6 +21,16 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -3802,7 +3822,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
    if (check_chars < oldlen)
      oldlen = check_chars;
    if (check_chars < newlen)
-@@ -241,14 +346,92 @@ different (char *old, char *new, size_t 
+@@ -241,14 +346,100 @@ different (char *old, char *new, size_t 
  
    if (ignore_case)
      {
@@ -3810,14 +3830,18 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
 -      return oldlen != newlen || memcasecmp (old, new, oldlen);
 +      size_t i;
 +
-+      copy_old = alloca (oldlen + 1);
-+      copy_new = alloca (oldlen + 1);
++      copy_old = xmalloc (oldlen + 1);
++      copy_new = xmalloc (oldlen + 1);
 +
 +      for (i = 0; i < oldlen; i++)
 +        {
 +          copy_old[i] = toupper (old[i]);
 +          copy_new[i] = toupper (new[i]);
 +        }
++      bool rc = xmemcoll (copy_old, oldlen, copy_new, newlen);
++      free (copy_old);
++      free (copy_new);
++      return rc;
      }
 -  else if (hard_LC_COLLATE)
 -    return xmemcoll (old, oldlen, new, newlen) != 0;
@@ -3829,6 +3853,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
 +    }
 +
 +  return xmemcoll (copy_old, oldlen, copy_new, newlen);
++
 +}
 +
 +#if HAVE_MBRTOWC
@@ -3853,7 +3878,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
 +
 +  for (i = 0; i < 2; i++)
 +    {
-+      copy[i] = alloca (len[i] + 1);
++      copy[i] = xmalloc (len[i] + 1);
 +
 +      for (j = 0, chars = 0; j < len[i] && chars < check_chars; chars++)
 +        {
@@ -3893,14 +3918,17 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
 +      copy[i][j] = '\0';
 +      len[i] = j;
 +    }
++  int rc = xmemcoll (copy[0], len[0], copy[1], len[1]);
++  free (copy[0]);
++  free (copy[1]);
++  return rc;
 +
-+  return xmemcoll (copy[0], len[0], copy[1], len[1]);
  }
 +#endif
  
  /* Output the line in linebuffer LINE to standard output
     provided that the switches say it should be output.
-@@ -304,15 +487,43 @@ check_file (const char *infile, const ch
+@@ -304,15 +495,43 @@ check_file (const char *infile, const ch
      {
        char *prevfield IF_LINT ( = NULL);
        size_t prevlen IF_LINT ( = 0);
@@ -3944,7 +3972,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
            if (prevline->length == 0
                || different (thisfield, prevfield, thislen, prevlen))
              {
-@@ -331,17 +542,26 @@ check_file (const char *infile, const ch
+@@ -331,17 +550,26 @@ check_file (const char *infile, const ch
        size_t prevlen;
        uintmax_t match_count = 0;
        bool first_delimiter = true;
@@ -3971,7 +3999,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
            if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
              {
                if (ferror (stdin))
-@@ -350,6 +570,14 @@ check_file (const char *infile, const ch
+@@ -350,6 +578,14 @@ check_file (const char *infile, const ch
              }
            thisfield = find_field (thisline);
            thislen = thisline->length - 1 - (thisfield - thisline->buffer);
@@ -3986,7 +4014,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
            match = !different (thisfield, prevfield, thislen, prevlen);
            match_count += match;
  
-@@ -382,6 +610,9 @@ check_file (const char *infile, const ch
+@@ -382,6 +618,9 @@ check_file (const char *infile, const ch
                SWAP_LINES (prevline, thisline);
                prevfield = thisfield;
                prevlen = thislen;
@@ -3996,7 +4024,7 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
                if (!match)
                  match_count = 0;
              }
-@@ -427,6 +658,19 @@ main (int argc, char **argv)
+@@ -427,6 +666,19 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  
@@ -4017,8 +4045,8 @@ diff -urNp coreutils-8.19-orig/src/uniq.c coreutils-8.19/src/uniq.c
    skip_fields = 0;
    check_chars = SIZE_MAX;
 diff -urNp coreutils-8.20-orig/tests/misc/cut.pl coreutils-8.20/tests/misc/cut.pl
---- coreutils-8.20-orig/tests/misc/cut.pl	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.20/tests/misc/cut.pl	2012-08-20 13:52:04.086593767 +0200
+--- coreutils-8.20-orig/tests/misc/cut.pl	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/tests/misc/cut.pl	2013-01-23 09:24:24.639346707 +0100
 @@ -23,14 +23,15 @@ use strict;
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
@@ -4049,8 +4077,8 @@ diff -urNp coreutils-8.20-orig/tests/misc/cut.pl coreutils-8.20/tests/misc/cut.p
    ['inval3', '-f', '4,-', {IN=>''}, {OUT=>''}, {EXIT=>1}, {ERR=>$no_endpoint}],
    ['inval4', '-f', '1-2,-', {IN=>''}, {OUT=>''}, {EXIT=>1},
 diff -urNp coreutils-8.20-orig/tests/misc/expand.pl coreutils-8.20/tests/misc/expand.pl
---- coreutils-8.20-orig/tests/misc/expand.pl	2012-07-21 16:54:31.000000000 +0200
-+++ coreutils-8.20/tests/misc/expand.pl	2012-08-20 13:55:44.188467648 +0200
+--- coreutils-8.20-orig/tests/misc/expand.pl	2012-10-23 16:14:12.000000000 +0200
++++ coreutils-8.20/tests/misc/expand.pl	2013-01-23 09:24:24.640439471 +0100
 @@ -23,6 +23,15 @@ use strict;
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
@@ -4107,7 +4135,7 @@ diff -urNp coreutils-8.20-orig/tests/misc/expand.pl coreutils-8.20/tests/misc/ex
  
 diff -urNp coreutils-8.20-orig/tests/misc/mb1.I coreutils-8.20/tests/misc/mb1.I
 --- coreutils-8.20-orig/tests/misc/mb1.I	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.20/tests/misc/mb1.I	2012-08-20 13:52:04.086593767 +0200
++++ coreutils-8.20/tests/misc/mb1.I	2013-01-23 09:24:24.640439471 +0100
 @@ -0,0 +1,4 @@
 +Apple＠10
 +Banana＠5
@@ -4115,7 +4143,7 @@ diff -urNp coreutils-8.20-orig/tests/misc/mb1.I coreutils-8.20/tests/misc/mb1.I
 +Cherry＠30
 diff -urNp coreutils-8.20-orig/tests/misc/mb1.X coreutils-8.20/tests/misc/mb1.X
 --- coreutils-8.20-orig/tests/misc/mb1.X	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.20/tests/misc/mb1.X	2012-08-20 13:52:04.087526516 +0200
++++ coreutils-8.20/tests/misc/mb1.X	2013-01-23 09:24:24.641395635 +0100
 @@ -0,0 +1,4 @@
 +Banana＠5
 +Apple＠10
@@ -4123,7 +4151,7 @@ diff -urNp coreutils-8.20-orig/tests/misc/mb1.X coreutils-8.20/tests/misc/mb1.X
 +Cherry＠30
 diff -urNp coreutils-8.20-orig/tests/misc/mb2.I coreutils-8.20/tests/misc/mb2.I
 --- coreutils-8.20-orig/tests/misc/mb2.I	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.20/tests/misc/mb2.I	2012-08-20 13:52:04.088593815 +0200
++++ coreutils-8.20/tests/misc/mb2.I	2013-01-23 09:24:24.642441918 +0100
 @@ -0,0 +1,4 @@
 +Apple＠ＡＡ10＠＠20
 +Banana＠ＡＡ5＠＠30
@@ -4131,7 +4159,7 @@ diff -urNp coreutils-8.20-orig/tests/misc/mb2.I coreutils-8.20/tests/misc/mb2.I
 +Cherry＠ＡＡ30＠＠10
 diff -urNp coreutils-8.20-orig/tests/misc/mb2.X coreutils-8.20/tests/misc/mb2.X
 --- coreutils-8.20-orig/tests/misc/mb2.X	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.20/tests/misc/mb2.X	2012-08-20 13:52:04.088593815 +0200
++++ coreutils-8.20/tests/misc/mb2.X	2013-01-23 09:24:24.642441918 +0100
 @@ -0,0 +1,4 @@
 +Citrus＠ＡＡ20＠＠5
 +Cherry＠ＡＡ30＠＠10
@@ -4139,7 +4167,7 @@ diff -urNp coreutils-8.20-orig/tests/misc/mb2.X coreutils-8.20/tests/misc/mb2.X
 +Banana＠ＡＡ5＠＠30
 diff -urNp coreutils-8.20-orig/tests/misc/sort-mb-tests.sh coreutils-8.20/tests/misc/sort-mb-tests.sh
 --- coreutils-8.20-orig/tests/misc/sort-mb-tests.sh	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.20/tests/misc/sort-mb-tests.sh	2012-08-20 13:52:04.089593318 +0200
++++ coreutils-8.20/tests/misc/sort-mb-tests.sh	2013-01-23 09:24:24.643201093 +0100
 @@ -0,0 +1,58 @@
 +#! /bin/sh
 +case $# in

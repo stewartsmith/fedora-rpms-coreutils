@@ -381,6 +381,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed Jan 23 2013 Ondrej Vasik <ovasik@redhat.com> 8.20-6
+- fix multiple segmantation faults in i18n patch (by SUSE)
+  (#869442, #902917)
+
 * Thu Dec 20 2012 Ondrej Vasik <ovasik@redhat.com> 8.20-5
 - seq: fix newline output when -s specified (upstream)
 
