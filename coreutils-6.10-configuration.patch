@@ -136,3 +136,22 @@ diff -urNp coreutils-8.13-orig/tests/touch/no-dereference.sh coreutils-8.13/test
  
  # Changing time of dangling symlink is okay.
  # Skip the test if this fails, but the error text corresponds to
+diff -urNp coreutils-8.20-orig/tests/local.mk coreutils-8.20/tests/local.mk
+--- coreutils-8.20-orig/tests/local.mk	2013-01-23 09:50:18.388078004 +0100
++++ coreutils-8.20/tests/local.mk	2013-01-23 10:39:09.090085667 +0100
+@@ -130,6 +130,7 @@ all_root_tests =				\
+   tests/rm/no-give-up.sh			\
+   tests/rm/one-file-system.sh			\
+   tests/rm/read-only.sh				\
++  tests/tail-2/inotify-hash-abuse.sh		\
+   tests/tail-2/append-only.sh			\
+   tests/touch/now-owned-by-other.sh
+ 
+@@ -162,7 +163,6 @@ all_tests =					\
+   tests/rm/cycle.sh				\
+   tests/cp/link-heap.sh				\
+   tests/misc/tty-eof.pl				\
+-  tests/tail-2/inotify-hash-abuse.sh		\
+   tests/tail-2/inotify-hash-abuse2.sh		\
+   tests/tail-2/F-vs-missing.sh			\
+   tests/tail-2/F-vs-rename.sh			\
