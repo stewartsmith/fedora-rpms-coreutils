@@ -1,0 +1,59 @@
+diff -urNp coreutils-8.17-orig/doc/coreutils.texi coreutils-8.17/doc/coreutils.texi
+--- coreutils-8.17-orig/doc/coreutils.texi	2013-02-05 13:53:31.305588244 +0100
++++ coreutils-8.17/doc/coreutils.texi	2013-02-05 13:53:55.480586114 +0100
+@@ -13178,6 +13178,13 @@ Disable modem control signals.  May be n
+ @cindex flow control, hardware
+ @cindex RTS/CTS flow control
+ Enable RTS/CTS flow control.  Non-@acronym{POSIX}.  May be negated.
++
++@item cdtrdsr
++@opindex cdtrdsr
++@cindex hardware flow control
++@cindex flow control, hardware
++@cindex DTR/DSR flow control
++Enable DTR/DSR flow control. Non-@acronym{POSIX}.  May be negated.
+ @end table
+ 
+ 
+diff -urNp coreutils-8.17-orig/src/stty.c coreutils-8.17/src/stty.c
+--- coreutils-8.17-orig/src/stty.c	2013-02-05 13:53:31.278585235 +0100
++++ coreutils-8.17/src/stty.c	2013-02-05 13:53:55.481586255 +0100
+@@ -73,6 +73,9 @@
+ #ifndef CINTR
+ # define CINTR Control ('c')
+ #endif
++#ifndef CDTRDSR
++# define CDTRDSR	  004000000000	/* DTR/DSR flow control */
++#endif
+ #ifndef CQUIT
+ # define CQUIT 28
+ #endif
+@@ -216,7 +219,7 @@ static struct mode_info const mode_info[
+ #ifdef CRTSCTS
+   {"crtscts", control, REV, CRTSCTS, 0},
+ #endif
+-
++  {"cdtrdsr", control, REV, CDTRDSR, 0},
+   {"ignbrk", input, SANE_UNSET | REV, IGNBRK, 0},
+   {"brkint", input, SANE_SET | REV, BRKINT, 0},
+   {"ignpar", input, REV, IGNPAR, 0},
+@@ -576,6 +579,7 @@ Control settings:\n\
+    [-]clocal     disable modem control signals\n\
+    [-]cread      allow input to be received\n\
+  * [-]crtscts    enable RTS/CTS handshaking\n\
++ * [-]cdtrdsr    enable DTR/DSR handshaking\n\
+    csN           set character size to N bits, N in [5..8]\n\
+ "), stdout);
+       fputs (_("\
+diff -urNp coreutils-8.17-orig/tests/misc/stty coreutils-8.17/tests/misc/stty
+--- coreutils-8.17-orig/tests/misc/stty	2012-04-19 19:39:23.000000000 +0200
++++ coreutils-8.17/tests/misc/stty	2013-02-05 13:57:55.779588822 +0100
+@@ -52,7 +52,7 @@ for opt in $options; do
+   # other serial control settings give the same error. So skip them.
+   # Also on ppc*|sparc* glibc platforms 'icanon' gives the same error.
+   # See: http://debbugs.gnu.org/7228#14
+-  case $opt in parenb|parodd|cstopb|crtscts|icanon) continue;; esac
++  case $opt in parenb|parodd|cstopb|crtscts|icanon|cdtrdsr) continue;; esac
+ 
+   stty $opt || fail=1
+ 
