@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.20
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -384,6 +384,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Feb 07 2013 Ondrej Oprala <ooprala@redhat.com> 8.20-8
+- add missing sort-mb-tests.sh to local.mk
+
 * Tue Feb 05 2013 Ondrej Vasik <ovasik@redhat.com> 8.20-7
 - add support for DTR/DSR control flow in stty(#445213)
 
