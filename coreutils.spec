@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.20
-Release: 8%{?dist}
+Version: 8.21
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -15,8 +15,6 @@ Source106:  coreutils-colorls.csh
 
 # From upstream
 Patch1: coreutils-8.20-powerpcfactor.patch
-Patch2: coreutils-8.20-df-duplicates.patch
-Patch3: coreutils-8.20-seq-s.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -31,8 +29,6 @@ Patch103: coreutils-8.2-uname-processortype.patch
 Patch104: coreutils-df-direct.patch
 #add note about mkdir --mode behaviour into info documentation(#610559)
 Patch107: coreutils-8.4-mkdir-modenote.patch
-#add support for dtr/dsr to stty
-Patch108: coreutils-445213-stty-dtrdsr.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -132,8 +128,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .ppcfactor
-%patch2 -p1 -b .duplic
-%patch3 -p1 -b .newline
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -142,7 +136,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
-%patch108 -p1 -b .dtrdsr
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -339,6 +332,7 @@ fi
 %{_bindir}/nl
 %{_bindir}/nohup
 %{_bindir}/nproc
+%{_bindir}/numfmt
 %{_bindir}/od
 %{_bindir}/paste
 %{_bindir}/pathchk
@@ -384,6 +378,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Fri Feb 15 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-1
+- new upstream release 8.21, update patches
+
 * Thu Feb 07 2013 Ondrej Oprala <ooprala@redhat.com> 8.20-8
 - add missing sort-mb-tests.sh to local.mk
 
