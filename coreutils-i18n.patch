@@ -498,7 +498,7 @@ diff -urNp coreutils-8.21-orig/src/cut.c coreutils-8.21/src/cut.c
          case 'f':
            /* Build the field list. */
            if (operating_mode != undefined_mode)
-@@ -808,10 +1150,35 @@ main (int argc, char **argv)
+@@ -808,10 +1150,36 @@ main (int argc, char **argv)
          case 'd':
            /* New delimiter. */
            /* Interpret -d '' to mean 'use the NUL byte as the delimiter.'  */
@@ -523,6 +523,7 @@ diff -urNp coreutils-8.21-orig/src/cut.c coreutils-8.21/src/cut.c
 +                      if (wcdelim != L'\0' && *(optarg + delimlen) != '\0')
 +                        FATAL_ERROR (_("the delimiter must be a single character"));
 +                      memcpy (mbdelim, optarg, delimlen);
++                      mbdelim[delimlen] = '\0';
 +                    }
 +                }
 +
