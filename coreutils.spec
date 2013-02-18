@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -376,6 +376,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Feb 18 2013 Ondrej Oprala <ooprala@redhat.com> 8.21-4
+- fix sort-mb-tests.sh test (B.Voelker)
+
 * Mon Feb 18 2013 Mark Wielaard <mjw@redhat.com> 8.21-3
 - fix coreutils-i18n.patch to terminate mbdelim string (#911929)
 
