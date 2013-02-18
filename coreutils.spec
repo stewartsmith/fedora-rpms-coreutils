@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -14,7 +14,6 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
-Patch1: coreutils-8.20-powerpcfactor.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -127,7 +126,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
-%patch1 -p1 -b .ppcfactor
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -378,6 +376,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Feb 18 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-2
+- remove unnecessary powerpc factor patch
+
 * Fri Feb 15 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-1
 - new upstream release 8.21, update patches
 
