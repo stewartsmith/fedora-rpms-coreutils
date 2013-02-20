@@ -3401,7 +3401,7 @@ diff -urNp coreutils-8.21-orig/src/unexpand.c coreutils-8.21/src/unexpand.c
  /* The official name of this program (e.g., no 'g' prefix).  */
  #define PROGRAM_NAME "unexpand"
  
-@@ -103,6 +120,208 @@ static struct option const longopts[] =
+@@ -103,6 +120,210 @@ static struct option const longopts[] =
    {NULL, 0, NULL, 0}
  };
  
@@ -3421,6 +3421,7 @@ diff -urNp coreutils-8.21-orig/src/unexpand.c coreutils-8.21/src/unexpand.c
 +  wint_t wc;			/* A gotten wide character. */
 +  size_t mblength;		/* The byte size of a multibyte character
 +				   which shows as same character as WC. */
++  bool prev_tab = false;
 +
 +  /* Index in `tab_list' of next tabstop: */
 +  int tab_index = 0;		/* For calculating width of pending tabs. */
@@ -3499,7 +3500,7 @@ diff -urNp coreutils-8.21-orig/src/unexpand.c coreutils-8.21/src/unexpand.c
 +flush_pend_mb:
 +	  /* Flush pending spaces.  Print as many tabs as possible,
 +	     then print the rest as spaces. */
-+	  if (pending == 1)
++	  if (pending == 1 && column != 1 && !prev_tab)
 +	    {
 +	      putchar (' ');
 +	      pending = 0;
@@ -3600,6 +3601,7 @@ diff -urNp coreutils-8.21-orig/src/unexpand.c coreutils-8.21/src/unexpand.c
 +	      fwrite (bufpos, sizeof(char), mblength, stdout);
 +	    }
 +	}
++      prev_tab = wc == L'\t';
 +      buflen -= mblength;
 +      bufpos += mblength;
 +    }
