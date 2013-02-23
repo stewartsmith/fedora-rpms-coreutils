@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -14,6 +14,7 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
+Patch1: coreutils-8.21-install-strip.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -126,6 +127,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .strip
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -376,7 +378,11 @@ fi
 %{_sbindir}/chroot
 
 %changelog
-* Wed Feb 20 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-4
+* Sat Feb 23 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-6
+- install: do proper cleanup when strip fails
+  (O.Oprala, B.Voekler, #632444)
+
+* Wed Feb 20 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-5
 - fix multibyte issue in unexpand(by R.Kollar, #821262)
 
 * Mon Feb 18 2013 Ondrej Oprala <ooprala@redhat.com> 8.21-4
