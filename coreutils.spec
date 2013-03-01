@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -378,6 +378,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Fri Mar 01 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-7
+- ls: colorize several new archive/compressed types (#868510)
+
 * Sat Feb 23 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-6
 - install: do proper cleanup when strip fails
   (O.Oprala, B.Voekler, #632444)
