@@ -1,11 +1,10 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.lightbgcolor
@@ -15,6 +14,7 @@ Source106:  coreutils-colorls.csh
 
 # From upstream
 Patch1: coreutils-8.21-install-strip.patch
+Patch2: coreutils-aarch64-longlong.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -128,6 +128,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .strip
+%patch2 -p1 -b .aarch64
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -186,7 +187,6 @@ sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutil
 make check
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 
 # man pages are not installed with make install
@@ -236,9 +236,6 @@ find %{buildroot}%{_datadir}/locale -type l | \
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %pre
 # We must deinstall these info files since they're merged in
@@ -378,6 +375,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Mar 04 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-8
+- fix factor on AArch64 (M.Salter, #917735)
+
 * Fri Mar 01 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-7
 - ls: colorize several new archive/compressed types (#868510)
 
