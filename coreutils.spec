@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -375,6 +375,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Mar 11 2013 Ondrej Oprala <ooprala@redhat.com> 8.21-9
+- add support for INCLUDE in colorls scripts (#818069)
+
 * Mon Mar 04 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-8
 - fix factor on AArch64 (M.Salter, #917735)
 

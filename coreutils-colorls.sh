@@ -10,11 +10,15 @@ if [ -z "$USER_LS_COLORS" ]; then
   # Skip the rest for noninteractive shells.
   [ -z "$PS1" ] && return
 
+  INCLUDE=
   COLORS=
+  TMP="`mktemp .colorlsXXX`"
 
   for colors in "$HOME/.dir_colors.$TERM" "$HOME/.dircolors.$TERM" \
       "$HOME/.dir_colors" "$HOME/.dircolors"; do
-    [ -e "$colors" ] && COLORS="$colors" && break
+    [ -e "$colors" ] && COLORS="$colors" && \
+    INCLUDE="`cat "$COLORS" | grep '^INCLUDE' | cut -d ' ' -f2-`" && \
+    break
   done
 
   [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.256color" ] && \
@@ -30,9 +34,13 @@ if [ -z "$USER_LS_COLORS" ]; then
   # Existence of $COLORS already checked above.
   [ -n "$COLORS" ] || return
 
-  eval "`dircolors --sh "$COLORS" 2>/dev/null`"
+  [ -e "$INCLUDE" ] && cat "$INCLUDE" > $TMP
+  cat "$COLORS" | grep -v '^INCLUDE' >> $TMP
+
+  eval "`dircolors --sh $TMP 2>/dev/null`"
   [ -z "$LS_COLORS" ] && return
   grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
+  rm -f $TMP
 fi
 
 alias ll='ls -l --color=auto' 2>/dev/null
