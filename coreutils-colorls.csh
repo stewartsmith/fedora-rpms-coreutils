@@ -13,13 +13,13 @@ set COLORS=/etc/DIR_COLORS
 set TMP="`mktemp .colorlsXXX`"
 
 if ($?TERM) then
-  if ( -e "/etc/DIR_COLORS.$TERM" ) then
-     set COLORS="/etc/DIR_COLORS.$TERM"
-  endif
   if ( -e "/etc/DIR_COLORS.256color" ) then
     if ( "`tput colors`" == "256" ) then
        set COLORS=/etc/DIR_COLORS.256color
     endif
+  endif
+  if ( -e "/etc/DIR_COLORS.$TERM" ) then
+     set COLORS="/etc/DIR_COLORS.$TERM"
   endif
 endif
 if ( -f ~/.dircolors ) set COLORS=~/.dircolors

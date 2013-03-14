@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -375,6 +375,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Mar 14 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-10
+- DIR_COLORS.$TERM should have higher priority than
+  DIR_COLORS.256color (#921651)
+
 * Mon Mar 11 2013 Ondrej Oprala <ooprala@redhat.com> 8.21-9
 - add support for INCLUDE in colorls scripts (#818069)
 

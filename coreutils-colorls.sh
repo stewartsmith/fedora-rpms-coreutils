@@ -21,15 +21,15 @@ if [ -z "$USER_LS_COLORS" ]; then
     break
   done
 
-  [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.256color" ] && \
-      [ "x`tty -s && tput colors 2>/dev/null`" = "x256" ] && \
-      COLORS="/etc/DIR_COLORS.256color"
+  [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.$TERM" ] && \
+  COLORS="/etc/DIR_COLORS.$TERM"
 
-  if [ -z "$COLORS" ]; then
-    for colors in "/etc/DIR_COLORS.$TERM" "/etc/DIR_COLORS" ; do
-      [ -e "$colors" ] && COLORS="$colors" && break
-    done
-  fi
+  [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.256color" ] && \
+  [ "x`tty -s && tput colors 2>/dev/null`" = "x256" ] && \
+  COLORS="/etc/DIR_COLORS.256color"
+
+  [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS" ] && \
+  COLORS="/etc/DIR_COLORS"
 
   # Existence of $COLORS already checked above.
   [ -n "$COLORS" ] || return
