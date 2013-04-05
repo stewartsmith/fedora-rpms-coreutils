@@ -12,7 +12,7 @@ if [ -z "$USER_LS_COLORS" ]; then
 
   INCLUDE=
   COLORS=
-  TMP="`mktemp .colorlsXXX`"
+  TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
   for colors in "$HOME/.dir_colors.$TERM" "$HOME/.dircolors.$TERM" \
       "$HOME/.dir_colors" "$HOME/.dircolors"; do

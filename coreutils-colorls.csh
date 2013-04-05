@@ -10,7 +10,7 @@ endif
 alias ll 'ls -l'
 alias l. 'ls -d .*'
 set COLORS=/etc/DIR_COLORS
-set TMP="`mktemp .colorlsXXX`"
+set TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
 if ($?TERM) then
   if ( -e "/etc/DIR_COLORS.256color" ) then
