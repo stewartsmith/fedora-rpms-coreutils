@@ -12,7 +12,6 @@ if [ -z "$USER_LS_COLORS" ]; then
 
   INCLUDE=
   COLORS=
-  TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
   for colors in "$HOME/.dir_colors.$TERM" "$HOME/.dircolors.$TERM" \
       "$HOME/.dir_colors" "$HOME/.dircolors"; do
@@ -34,13 +33,17 @@ if [ -z "$USER_LS_COLORS" ]; then
   # Existence of $COLORS already checked above.
   [ -n "$COLORS" ] || return
 
+  TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
+
   [ -e "$INCLUDE" ] && cat "$INCLUDE" > $TMP
-  cat "$COLORS" | grep -v '^INCLUDE' >> $TMP
+  grep -v '^INCLUDE' "$COLORS" >> $TMP
 
   eval "`dircolors --sh $TMP 2>/dev/null`"
+
+  rm -f $TMP
+
   [ -z "$LS_COLORS" ] && return
   grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
-  rm -f $TMP
 fi
 
 alias ll='ls -l --color=auto' 2>/dev/null

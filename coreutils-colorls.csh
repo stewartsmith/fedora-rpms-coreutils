@@ -10,7 +10,6 @@ endif
 alias ll 'ls -l'
 alias l. 'ls -d .*'
 set COLORS=/etc/DIR_COLORS
-set TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
 if ($?TERM) then
   if ( -e "/etc/DIR_COLORS.256color" ) then
@@ -32,10 +31,14 @@ set INCLUDE="`cat "$COLORS" | grep '^INCLUDE' | cut -d ' ' -f2-`"
 
 if ( ! -e "$COLORS" ) exit
 
+set TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
+
 if ( "$INCLUDE" != '' ) cat "$INCLUDE" > $TMP
-cat "$COLORS" | grep -v '^INCLUDE' >> $TMP
+grep -v '^INCLUDE' "$COLORS" >> $TMP
 
 eval "`dircolors -c $TMP`"
+
+rm -f $TMP
 
 if ( "$LS_COLORS" == '' ) exit
 set color_none=`sed -n '/^COLOR.*none/Ip' < $COLORS`
@@ -44,7 +47,6 @@ if ( "$color_none" != '' ) then
    exit
 endif
 unset color_none
-rm -f $TMP
 
 finish:
 alias ll 'ls -l --color=auto'
