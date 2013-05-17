@@ -101,7 +101,7 @@ Requires(post): /sbin/install-info
 Requires(post): grep
 Requires:       ncurses
 Requires:       gmp
-#to prevent broken links in coreutils info manual (#959697), info doc is there
+#to prevent broken links in coreutils info manual (#959597), info doc is there
 Requires:       glibc-devel
 
 Provides: fileutils = %{version}-%{release}
