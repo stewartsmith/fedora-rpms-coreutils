@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -101,6 +101,8 @@ Requires(post): /sbin/install-info
 Requires(post): grep
 Requires:       ncurses
 Requires:       gmp
+#to prevent broken links in coreutils info manual (#959697), info doc is there
+Requires:       glibc-devel
 
 Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
@@ -375,6 +377,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Fri May 17 2013 Ondrej Vasik <ovasik@redhat.com 8.21-13
+- require glibc-devel to prevent broken links in coreutils
+  info manual (#959697)
+
 * Wed May 08 2013 Ondrej Vasik <ovasik@redhat.com 8.21-12
 - optimization of colorls scripts by Ville Skytta (#961012)
 
