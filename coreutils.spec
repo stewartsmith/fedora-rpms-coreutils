@@ -379,7 +379,7 @@ fi
 %changelog
 * Fri May 17 2013 Ondrej Vasik <ovasik@redhat.com 8.21-13
 - require glibc-devel to prevent broken links in coreutils
-  info manual (#959697)
+  info manual (#959597)
 
 * Wed May 08 2013 Ondrej Vasik <ovasik@redhat.com 8.21-12
 - optimization of colorls scripts by Ville Skytta (#961012)
