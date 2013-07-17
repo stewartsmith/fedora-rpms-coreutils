@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -375,6 +375,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed Jul 17 2013 Ondrej Oprala <ooprala@redhat.com> 8.21-15
+- change the TMP variable name in colorls.csh to _tmp (#981373)
+
 * Fri May 17 2013 Ondrej Vasik <ovasik@redhat.com 8.21-14
 - revert the last change
 

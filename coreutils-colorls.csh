@@ -31,14 +31,14 @@ set INCLUDE="`cat "$COLORS" | grep '^INCLUDE' | cut -d ' ' -f2-`"
 
 if ( ! -e "$COLORS" ) exit
 
-set TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
+set _tmp="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
-if ( "$INCLUDE" != '' ) cat "$INCLUDE" > $TMP
-grep -v '^INCLUDE' "$COLORS" >> $TMP
+if ( "$INCLUDE" != '' ) cat "$INCLUDE" > $_tmp
+grep -v '^INCLUDE' "$COLORS" >> $_tmp
 
-eval "`dircolors -c $TMP`"
+eval "`dircolors -c $_tmp`"
 
-rm -f $TMP
+rm -f $_tmp
 
 if ( "$LS_COLORS" == '' ) exit
 set color_none=`sed -n '/^COLOR.*none/Ip' < $COLORS`
@@ -47,6 +47,7 @@ if ( "$color_none" != '' ) then
    exit
 endif
 unset color_none
+unset _tmp
 
 finish:
 alias ll 'ls -l --color=auto'
