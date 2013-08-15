@@ -2263,7 +2263,7 @@ diff -urNp coreutils-8.21-orig/src/pr.c coreutils-8.21/src/pr.c
      {
        width = TAB_WIDTH (chars_per_c, input_position);
  
-@@ -2724,6 +2930,154 @@ char_to_clump (char c)
+@@ -2724,6 +2930,164 @@ char_to_clump (char c)
    return chars;
  }
  
@@ -2410,7 +2410,17 @@ diff -urNp coreutils-8.21-orig/src/pr.c coreutils-8.21/src/pr.c
 +      mbc_pos -= mblength;
 +    }
 +
-+  input_position += width;
++  /* Too many backspaces must put us in position 0 -- never negative. */
++  if (width < 0 && input_position == 0)
++    {
++      chars = 0;
++      input_position = 0;
++    }
++  else if (width < 0 && input_position <= -width)
++    input_position = 0;
++  else
++   input_position += width;
++
 +  return chars;
 +}
 +#endif

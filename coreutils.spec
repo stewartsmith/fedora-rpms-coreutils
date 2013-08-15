@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -375,6 +375,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Aug 15 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-18
+- pr -e, with a mix of backspaces and TABs, could corrupt the heap
+  in multibyte locales (analyzed by J.Koncicky)
+
 * Wed Aug 14 2013 Ondrej Oprala <ooprala@redhat.com> 8.21-17
 - Fix sort multibyte incompatibilities
 
