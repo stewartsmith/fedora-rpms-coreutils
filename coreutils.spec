@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -15,6 +15,7 @@ Source106:  coreutils-colorls.csh
 # From upstream
 Patch1: coreutils-8.21-install-strip.patch
 Patch2: coreutils-aarch64-longlong.patch
+Patch3: coreutils-cp-nopreserve-invalidargs.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -129,6 +130,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # From upstream
 %patch1 -p1 -b .strip
 %patch2 -p1 -b .aarch64
+%patch3 -p1 -b .nopres
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -375,6 +377,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Oct 14 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-19
+- cp: correct error message for invalid arguments
+  of '--no-preserve' (#1018206)
+
 * Thu Aug 15 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-18
 - pr -e, with a mix of backspaces and TABs, could corrupt the heap
   in multibyte locales (analyzed by J.Koncicky)
