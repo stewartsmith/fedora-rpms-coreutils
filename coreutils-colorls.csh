@@ -33,7 +33,7 @@ if ( ! -e "$COLORS" ) exit
 
 set _tmp="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
-if ( "$INCLUDE" != '' ) cat "$INCLUDE" > $_tmp
+if ( "$INCLUDE" != '' ) cat "$INCLUDE" >> $_tmp
 grep -v '^INCLUDE' "$COLORS" >> $_tmp
 
 eval "`dircolors -c $_tmp`"
