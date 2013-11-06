@@ -35,7 +35,7 @@ if [ -z "$USER_LS_COLORS" ]; then
 
   TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
 
-  [ -e "$INCLUDE" ] && cat "$INCLUDE" > $TMP
+  [ -e "$INCLUDE" ] && cat "$INCLUDE" >> $TMP
   grep -v '^INCLUDE' "$COLORS" >> $TMP
 
   eval "`dircolors --sh $TMP 2>/dev/null`"
