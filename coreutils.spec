@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -377,6 +377,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed Nov 06 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-20
+- fix possible colorls.csh script errors for tcsh with
+  noclobber set and entered include file (#1027279)
+
 * Mon Oct 14 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-19
 - cp: correct error message for invalid arguments
   of '--no-preserve' (#1018206)
