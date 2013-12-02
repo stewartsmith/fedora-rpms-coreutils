@@ -4271,38 +4271,6 @@ diff -urNp coreutils-8.21-orig/tests/misc/join.pl coreutils-8.21/tests/misc/join
  my $save_temps = $ENV{DEBUG};
  my $verbose = $ENV{VERBOSE};
  
-diff -urNp coreutils-8.21-orig/tests/misc/mb1.I coreutils-8.21/tests/misc/mb1.I
---- coreutils-8.21-orig/tests/misc/mb1.I	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.21/tests/misc/mb1.I	2013-02-15 14:25:07.902467891 +0100
-@@ -0,0 +1,4 @@
-+Apple＠10
-+Banana＠5
-+Citrus＠20
-+Cherry＠30
-diff -urNp coreutils-8.21-orig/tests/misc/mb1.X coreutils-8.21/tests/misc/mb1.X
---- coreutils-8.21-orig/tests/misc/mb1.X	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.21/tests/misc/mb1.X	2013-02-15 14:25:07.917467426 +0100
-@@ -0,0 +1,4 @@
-+Banana＠5
-+Apple＠10
-+Citrus＠20
-+Cherry＠30
-diff -urNp coreutils-8.21-orig/tests/misc/mb2.I coreutils-8.21/tests/misc/mb2.I
---- coreutils-8.21-orig/tests/misc/mb2.I	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.21/tests/misc/mb2.I	2013-02-15 14:25:07.933467390 +0100
-@@ -0,0 +1,4 @@
-+Apple＠ＡＡ10＠＠20
-+Banana＠ＡＡ5＠＠30
-+Citrus＠ＡＡ20＠＠5
-+Cherry＠ＡＡ30＠＠10
-diff -urNp coreutils-8.21-orig/tests/misc/mb2.X coreutils-8.21/tests/misc/mb2.X
---- coreutils-8.21-orig/tests/misc/mb2.X	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.21/tests/misc/mb2.X	2013-02-15 14:25:08.002467808 +0100
-@@ -0,0 +1,4 @@
-+Citrus＠ＡＡ20＠＠5
-+Cherry＠ＡＡ30＠＠10
-+Apple＠ＡＡ10＠＠20
-+Banana＠ＡＡ5＠＠30
 diff -urNp coreutils-8.21-orig/tests/misc/sort-mb-tests.sh coreutils-8.21/tests/misc/sort-mb-tests.sh
 --- coreutils-8.21-orig/tests/misc/sort-mb-tests.sh	1970-01-01 01:00:00.000000000 +0100
 +++ coreutils-8.21/tests/misc/sort-mb-tests.sh	2013-02-18 17:44:03.852275681 +0100
