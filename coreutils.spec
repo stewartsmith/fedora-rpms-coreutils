@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 21%{?dist}
+Release: 22%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -16,6 +16,7 @@ Source106:  coreutils-colorls.csh
 Patch1: coreutils-8.21-install-strip.patch
 Patch2: coreutils-aarch64-longlong.patch
 Patch3: coreutils-cp-nopreserve-invalidargs.patch
+Patch4: coreutils-aarch64-tests.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -131,6 +132,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch1 -p1 -b .strip
 %patch2 -p1 -b .aarch64
 %patch3 -p1 -b .nopres
+%patch4 -p1 -b .aarch64tests
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -377,6 +379,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Dec  9 2013 Peter Robinson <pbrobinson@fedoraproject.org> 8.21-22
+- Add upstream patch to fix test failures on aarch64
+
 * Thu Nov 28 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-21
 - turn on the multibyte path in the testsuite to cover
   i18n regressions
