@@ -4437,6 +4437,14 @@ diff -urNp coreutils-8.21-orig/tests/misc/sort.pl coreutils-8.21/tests/misc/sort
  
  @Tests = triple_test \@Tests;
  
+@@ -424,6 +460,7 @@ foreach my $t (@Tests)
+ # Remove the IN_PIPE version of the "output-is-input" test above.
+ # The others aren't susceptible because they have three inputs each.
+ @Tests = grep {$_->[0] ne 'output-is-input.p'} @Tests;
++@Tests = grep {$_->[0] ne 'output-is-input-mb.p'} @Tests;
+ 
+ my $save_temps = $ENV{DEBUG};
+ my $verbose = $ENV{VERBOSE};
 diff -urNp coreutils-8.21-orig/tests/misc/unexpand.pl coreutils-8.21/tests/misc/unexpand.pl
 --- coreutils-8.21-orig/tests/misc/unexpand.pl	2013-01-31 01:46:24.000000000 +0100
 +++ coreutils-8.21/tests/misc/unexpand.pl	2013-11-27 19:47:58.436536269 +0100

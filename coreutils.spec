@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.21
-Release: 22%{?dist}
+Release: 23%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -379,6 +379,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Dec 12 2013 Ondrej Vasik <ovasik@redhat.com> 8.21-23
+- skip output-is-input-mb.p test - failing on armv7l (reported
+  by B.Voelker)
+
 * Mon Dec  9 2013 Peter Robinson <pbrobinson@fedoraproject.org> 8.21-22
 - Add upstream patch to fix test failures on aarch64
 
