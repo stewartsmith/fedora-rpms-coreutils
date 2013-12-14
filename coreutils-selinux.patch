@@ -19,16 +19,16 @@ diff -urNp coreutils-8.21-orig/init.cfg coreutils-8.21/init.cfg
 --- coreutils-8.21-orig/init.cfg	2013-01-31 01:46:24.000000000 +0100
 +++ coreutils-8.21/init.cfg	2013-02-15 14:31:58.957469955 +0100
 @@ -308,8 +308,8 @@ require_selinux_()
- 
    # Independent of whether SELinux is enabled system-wide,
    # the current file system may lack SELinux support.
+   # Also the current build may have SELinux support disabled.
 -  case $(ls -Zd .) in
 -    '? .'|'unlabeled .')
 +  case $(ls -Zd . | cut -f4 -d" ") in
 +    '?'|'unlabeled')
-       skip_ "this system (or maybe just" \
-         "the current file system) lacks SELinux support"
-     ;;
+       test -z "$CONFIG_HEADER" \
+         && framework_failure_ 'CONFIG_HEADER not defined'
+       grep '^#define HAVE_SELINUX_SELINUX_H 1' "$CONFIG_HEADER" > /dev/null \
 diff -urNp coreutils-8.21-orig/man/chcon.x coreutils-8.21/man/chcon.x
 --- coreutils-8.21-orig/man/chcon.x	2011-08-23 15:44:01.000000000 +0200
 +++ coreutils-8.21/man/chcon.x	2013-02-15 14:31:58.937482694 +0100
@@ -48,18 +48,6 @@ diff -urNp coreutils-8.21-orig/man/runcon.x coreutils-8.21/man/runcon.x
  [DESCRIPTION]
  Run COMMAND with completely-specified CONTEXT, or with current or
  transitioned security context modified by one or more of LEVEL,
-diff -urNp coreutils-8.21-orig/src/chcon.c coreutils-8.21/src/chcon.c
---- coreutils-8.21-orig/src/chcon.c	2013-01-31 01:46:24.000000000 +0100
-+++ coreutils-8.21/src/chcon.c	2013-02-15 14:31:58.939469828 +0100
-@@ -355,7 +355,7 @@ Usage: %s [OPTION]... CONTEXT FILE...\n\
- "),
-         program_name, program_name, program_name);
-       fputs (_("\
--Change the security context of each FILE to CONTEXT.\n\
-+Change the SELinux security context of each FILE to CONTEXT.\n\
- With --reference, change the security context of each FILE to that of RFILE.\n\
- "), stdout);
- 
 diff -urNp coreutils-8.21-orig/src/copy.c coreutils-8.21/src/copy.c
 --- coreutils-8.21-orig/src/copy.c	2013-02-07 10:37:05.000000000 +0100
 +++ coreutils-8.21/src/copy.c	2013-02-15 14:31:58.941467872 +0100
@@ -72,30 +60,9 @@ diff -urNp coreutils-8.21-orig/src/copy.c coreutils-8.21/src/copy.c
          }
        else
          {
-diff -urNp coreutils-8.21-orig/src/copy.h coreutils-8.21/src/copy.h
---- coreutils-8.21-orig/src/copy.h	2013-01-31 01:46:24.000000000 +0100
-+++ coreutils-8.21/src/copy.h	2013-02-15 14:31:58.943470982 +0100
-@@ -159,6 +159,9 @@ struct cp_options
-   bool preserve_timestamps;
-   bool explicit_no_preserve_mode;
- 
-+  /* If true, attempt to set specified security context */
-+  bool set_security_context;
-+
-   /* Enabled for mv, and for cp by the --preserve=links option.
-      If true, attempt to preserve in the destination files any
-      logical hard links between the source files.  If used with cp's
 diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
 --- coreutils-8.21-orig/src/cp.c	2013-02-07 10:37:05.000000000 +0100
 +++ coreutils-8.21/src/cp.c	2013-02-15 14:31:58.945468929 +0100
-@@ -141,6 +141,7 @@ static struct option const long_opts[] =
-   {"target-directory", required_argument, NULL, 't'},
-   {"update", no_argument, NULL, 'u'},
-   {"verbose", no_argument, NULL, 'v'},
-+  {"context", required_argument, NULL, 'Z'},
-   {GETOPT_HELP_OPTION_DECL},
-   {GETOPT_VERSION_OPTION_DECL},
-   {NULL, 0, NULL, 0}
 @@ -201,6 +202,9 @@ Copy SOURCE to DEST, or multiple SOURCE(
                                   all\n\
  "), stdout);
@@ -106,28 +73,12 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
        --parents                use full source file name under DIRECTORY\n\
  "), stdout);
-@@ -227,6 +231,7 @@ Copy SOURCE to DEST, or multiple SOURCE(
-                                  destination file is missing\n\
-   -v, --verbose                explain what is being done\n\
-   -x, --one-file-system        stay on this file system\n\
-+  -Z, --context=CONTEXT        set security context of copy to CONTEXT\n\
- "), stdout);
-       fputs (HELP_OPTION_DESCRIPTION, stdout);
-       fputs (VERSION_OPTION_DESCRIPTION, stdout);
-@@ -784,6 +789,7 @@ cp_option_init (struct cp_options *x)
-   x->explicit_no_preserve_mode = false;
-   x->preserve_security_context = false;
-   x->require_preserve_context = false;
-+  x->set_security_context = false;
-   x->preserve_xattr = false;
-   x->reduce_diagnostics = false;
-   x->require_preserve_xattr = false;
 @@ -933,7 +939,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
--  while ((c = getopt_long (argc, argv, "abdfHilLnprst:uvxPRS:T",
-+  while ((c = getopt_long (argc, argv, "abcdfHilLnprst:uvxPRS:TZ:",
+-  while ((c = getopt_long (argc, argv, "abdfHilLnprst:uvxPRS:TZ",
++  while ((c = getopt_long (argc, argv, "abcdfHilLnprst:uvxPRS:TZ",
                             long_opts, NULL))
           != -1)
      {
@@ -148,34 +99,6 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
          case 'd':
            x.preserve_links = true;
            x.dereference = DEREF_NEVER;
-@@ -1091,6 +1107,27 @@ main (int argc, char **argv)
-           x.one_file_system = true;
-           break;
- 
-+
-+        case 'Z':
-+          /* politely decline if we're not on a selinux-enabled kernel. */
-+          if( !selinux_enabled ) {
-+             fprintf( stderr, "Warning:  ignoring --context (-Z). "
-+                              "It requires a SELinux enabled kernel.\n" );
-+             break;
-+         }
-+         if ( x.preserve_security_context ) {
-+            (void) fprintf(stderr, "%s: cannot force target context to '%s' and preserve it\n", argv[0], optarg);
-+            exit( 1 );
-+         }
-+         x.set_security_context = true;
-+         /* if there's a security_context given set new path 
-+            components to that context, too */
-+         if ( setfscreatecon(optarg) < 0 ) {
-+            (void) fprintf(stderr, _("cannot set default security context %s\n"), optarg);
-+            exit( 1 );
-+         }
-+         break;
-+
-         case 'S':
-           make_backups = true;
-           backup_suffix_string = optarg;
 diff -urNp coreutils-8.21-orig/src/id.c coreutils-8.21/src/id.c
 --- coreutils-8.21-orig/src/id.c	2013-01-31 01:46:24.000000000 +0100
 +++ coreutils-8.21/src/id.c	2013-02-15 14:31:58.946469154 +0100
@@ -185,35 +108,27 @@ diff -urNp coreutils-8.21-orig/src/id.c coreutils-8.21/src/id.c
    int optc;
 -  int selinux_enabled = (is_selinux_enabled () > 0);
 +  bool selinux_enabled = (is_selinux_enabled () > 0);
- 
-   /* If true, output the list of all group IDs. -G */
-   bool just_group_list = false;
+   bool smack_enabled = is_smack_enabled ();
+   bool opt_zero = false;
+   char *pw_name = NULL;
 diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
 --- coreutils-8.21-orig/src/install.c	2013-02-07 10:37:05.000000000 +0100
 +++ coreutils-8.21/src/install.c	2013-02-15 14:31:58.948469440 +0100
-@@ -280,6 +280,7 @@ cp_option_init (struct cp_options *x)
-   x->data_copy_required = true;
-   x->require_preserve = false;
-   x->require_preserve_context = false;
-+  x->set_security_context = false;
-   x->require_preserve_xattr = false;
-   x->recursive = false;
-   x->sparse_mode = SPARSE_AUTO;
 @@ -639,7 +640,7 @@ In the 4th form, create all components o
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
        fputs (_("\
 -      --preserve-context  preserve SELinux security context\n\
 +  -P, --preserve-context  preserve SELinux security context\n\
-   -Z, --context=CONTEXT  set SELinux security context of files and directories\
- \n\
+   -Z, --context[=CTX]     set SELinux security context of destination file to\n\
+                             default type, or to CTX if specified\n\
  "), stdout);
 @@ -782,7 +783,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
--  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pt:TvS:Z:", long_options,
-+  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pPt:TvS:Z:", long_options,
+-  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pt:TvS:Z", long_options,
++  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pPt:TvS:Z", long_options,
                                NULL)) != -1)
      {
        switch (optc)
@@ -223,7 +138,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
  
 +        case 'P':
          case PRESERVE_CONTEXT_OPTION:
-           if ( ! selinux_enabled)
+           if (! selinux_enabled)
              {
 @@ -860,6 +862,10 @@ main (int argc, char **argv)
                               "this kernel is not SELinux-enabled"));
@@ -236,14 +151,6 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
            x.preserve_security_context = true;
            use_default_selinux_context = false;
            break;
-@@ -871,6 +877,7 @@ main (int argc, char **argv)
-               break;
-             }
-           scontext = optarg;
-+          x.set_security_context = true;
-           use_default_selinux_context = false;
-           break;
-         case_GETOPT_HELP_CHAR;
 diff -urNp coreutils-8.21-orig/src/ls.c coreutils-8.21/src/ls.c
 --- coreutils-8.21-orig/src/ls.c	2013-02-03 04:24:02.000000000 +0100
 +++ coreutils-8.21/src/ls.c	2013-02-15 14:31:58.953469008 +0100
@@ -411,7 +318,7 @@ diff -urNp coreutils-8.21-orig/src/ls.c coreutils-8.21/src/ls.c
 -      if (format == long_format || print_scontext)
 +      if (format == long_format || format == security_format || print_scontext)
          {
-           bool have_selinux = false;
+           bool have_scontext = false;
            bool have_acl = false;
 @@ -3016,7 +3041,7 @@ gobble_file (char const *name, enum file
                  err = 0;
@@ -619,29 +526,6 @@ diff -urNp coreutils-8.21-orig/src/mknod.c coreutils-8.21/src/mknod.c
    {"mode", required_argument, NULL, 'm'},
    {GETOPT_HELP_OPTION_DECL},
    {GETOPT_VERSION_OPTION_DECL},
-diff -urNp coreutils-8.21-orig/src/mv.c coreutils-8.21/src/mv.c
---- coreutils-8.21-orig/src/mv.c	2013-02-07 10:37:05.000000000 +0100
-+++ coreutils-8.21/src/mv.c	2013-02-15 14:31:58.956469593 +0100
-@@ -120,6 +120,7 @@ cp_option_init (struct cp_options *x)
-   x->preserve_timestamps = true;
-   x->explicit_no_preserve_mode= false;
-   x->preserve_security_context = selinux_enabled;
-+  x->set_security_context = false;
-   x->reduce_diagnostics = false;
-   x->data_copy_required = true;
-   x->require_preserve = false;  /* FIXME: maybe make this an option */
-diff -urNp coreutils-8.21-orig/src/runcon.c coreutils-8.21/src/runcon.c
---- coreutils-8.21-orig/src/runcon.c	2013-01-31 01:46:24.000000000 +0100
-+++ coreutils-8.21/src/runcon.c	2013-02-15 14:31:58.956469593 +0100
-@@ -85,7 +85,7 @@ Usage: %s CONTEXT COMMAND [args]\n\
-   or:  %s [ -c ] [-u USER] [-r ROLE] [-t TYPE] [-l RANGE] COMMAND [args]\n\
- "), program_name, program_name);
-       fputs (_("\
--Run a program in a different security context.\n\
-+Run a program in a different SELinux security context.\n\
- With neither CONTEXT nor COMMAND, print the current security context.\n\
- "), stdout);
- 
 diff -urNp coreutils-8.21-orig/tests/misc/selinux.sh coreutils-8.21/tests/misc/selinux.sh
 --- coreutils-8.21-orig/tests/misc/selinux.sh	2013-01-31 01:46:24.000000000 +0100
 +++ coreutils-8.21/tests/misc/selinux.sh	2013-02-15 14:31:58.957469955 +0100
