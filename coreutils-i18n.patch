@@ -219,20 +219,20 @@ diff -urNp coreutils-8.21-orig/src/cut.c coreutils-8.21/src/cut.c
 +          putchar ('\n');
 +          idx = 0;
 +          print_delimiter = false;
++          current_rp = rp;
 +        }
 +      else
 +        {
 +          next_item (&idx);
-+          bool range_start;
-+          bool *rs = output_delimiter_specified ? &range_start : NULL;
-+          idx += (operating_mode == byte_mode) ? mblength : 1;
++          //idx += (operating_mode == byte_mode) ? mblength : 1;
 +          if (print_kth (idx))
 +            {
-+              if (rs && *rs && print_delimiter)
++              if (output_delimiter_specified)
 +                {
-+                  fwrite (output_delimiter_string, sizeof (char),
-+                         output_delimiter_length, stdout);
-+               }
++                  if (print_delimiter && is_range_start_index (idx))
++                    fwrite (output_delimiter_string, sizeof (char),
++                           output_delimiter_length, stdout);
++                }
 +              print_delimiter = true;
 +              fwrite (bufpos, mblength, sizeof(char), stdout);
 +            }
@@ -247,7 +247,7 @@ diff -urNp coreutils-8.21-orig/src/cut.c coreutils-8.21/src/cut.c
  /* Read from stream STREAM, printing to standard output any selected fields.  */
  
  static void
-@@ -629,13 +782,197 @@ cut_fields (FILE *stream)
+@@ -629,13 +782,198 @@ cut_fields (FILE *stream)
      }
  }
  
@@ -401,6 +401,7 @@ diff -urNp coreutils-8.21-orig/src/cut.c coreutils-8.21/src/cut.c
 +          if (wc == WEOF)
 +            break;
 +          field_idx = 1;
++          current_rp = rp;
 +          found_any_selected_field = 0;
 +        }
 +    }

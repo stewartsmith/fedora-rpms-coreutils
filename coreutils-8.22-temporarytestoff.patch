@@ -9,22 +9,3 @@ diff -urNp coreutils-8.22-orig/tests/df/df-symlink.sh coreutils-8.22/tests/df/df
  
  disk=$(df --out=source '.' | tail -n1) ||
    skip_ "cannot determine '.' file system"
-diff -urNp coreutils-8.22-orig/tests/misc/cut.pl coreutils-8.22/tests/misc/cut.pl
---- coreutils-8.22-orig/tests/misc/cut.pl	2013-12-14 18:18:58.707172051 +0100
-+++ coreutils-8.22/tests/misc/cut.pl	2013-12-14 18:22:14.931010910 +0100
-@@ -23,11 +23,11 @@ use strict;
- # Turn off localization of executable's output.
- @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
- 
--my $mb_locale;
-+my $mb_locale = 'C';
- # uncommented enable multibyte paths
--$mb_locale = $ENV{LOCALE_FR_UTF8};
--! defined $mb_locale || $mb_locale eq 'none'
-- and $mb_locale = 'C';
-+#$mb_locale = $ENV{LOCALE_FR_UTF8};
-+#! defined $mb_locale || $mb_locale eq 'none'
-+# and $mb_locale = 'C';
- 
- my $prog = 'cut';
- my $try = "Try '$prog --help' for more information.\n";
