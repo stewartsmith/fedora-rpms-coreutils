@@ -89,6 +89,7 @@ BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: libcap-devel
 BuildRequires: libattr-devel
+BuildRequires: openssl-devel
 BuildRequires: gmp-devel
 BuildRequires: attr
 BuildRequires: strace
@@ -166,7 +167,7 @@ aclocal -I m4
 autoconf --force
 automake --copy --add-missing
 %configure --enable-largefile \
-           %{?!noselinux:--enable-selinux} \
+           --with-openssl \
            --enable-install-program=hostname,arch \
            --with-tty-group \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
