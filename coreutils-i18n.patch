@@ -166,7 +166,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
                else
                  error (0, 0,
                         _("field number %s is too large"), quote (bad_num));
-@@ -505,6 +584,80 @@ cut_bytes (FILE *stream)
+@@ -505,6 +584,79 @@ cut_bytes (FILE *stream)
      }
  }
  
@@ -182,7 +182,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 +static void
 +cut_characters_or_cut_bytes_no_split (FILE *stream)
 +{
-+  int idx;                /* number of bytes or characters in the line so far. */
++  size_t idx;                /* number of bytes or characters in the line so far. */
 +  char buf[MB_LEN_MAX + BUFSIZ];  /* For spooling a read byte sequence. */
 +  char *bufpos;                /* Next read position of BUF. */
 +  size_t buflen;        /* The length of the byte sequence in buf. */
@@ -224,7 +224,6 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 +      else
 +        {
 +          next_item (&idx);
-+          //idx += (operating_mode == byte_mode) ? mblength : 1;
 +          if (print_kth (idx))
 +            {
 +              if (output_delimiter_specified)
@@ -256,7 +255,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 +cut_fields_mb (FILE *stream)
 +{
 +  int c;
-+  unsigned int field_idx;
++  size_t field_idx;
 +  int found_any_selected_field;
 +  int buffer_first_field;
 +  int empty_input;
