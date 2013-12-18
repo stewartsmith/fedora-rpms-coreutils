@@ -70,7 +70,7 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
            break;
  
 +        case 'c':
-+          fprintf (stderr, "%s: warning: option '-c' is deprecated, please use '--preserve=context' instead", argv[0]);
++          fprintf (stderr, "%s: warning: option '-c' is deprecated, please use '--preserve=context' instead\n", argv[0]);
 +          if ( x.set_security_context ) { 
 +              (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
 +             exit( 1 );
@@ -121,7 +121,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
            break;
  
 +        case 'P':
-+          fprintf (stderr, "%s: warning: option '-P' is deprecated, please use '--preserve-context' instead", argv[0]);
++          fprintf (stderr, "%s: warning: option '-P' is deprecated, please use '--preserve-context' instead\n", argv[0]);
          case PRESERVE_CONTEXT_OPTION:
            if (! selinux_enabled)
              {
