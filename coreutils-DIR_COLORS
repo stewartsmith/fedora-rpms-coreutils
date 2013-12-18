@@ -44,6 +44,7 @@ TERM linux-c
 TERM mach-color
 TERM mlterm
 TERM putty
+TERM putty-256color
 TERM rxvt
 TERM rxvt-256color
 TERM rxvt-cygwin
@@ -56,8 +57,11 @@ TERM screen-256color
 TERM screen-256color-bce
 TERM screen-bce
 TERM screen-w
+TERM screen.Eterm
 TERM screen.rxvt
 TERM screen.linux
+TERM st
+TERM st-256color
 TERM terminator
 TERM vt100
 TERM xterm
@@ -121,6 +125,7 @@ EXEC 01;32
 .arj 01;31
 .taz 01;31
 .lha 01;31
+.lz4 01;31
 .lzh 01;31
 .lzma 01;31
 .tlz 01;31
@@ -179,6 +184,7 @@ EXEC 01;32
 .mpeg 01;35
 .m2v 01;35
 .mkv 01;35
+.webm 01;35
 .ogm 01;35
 .mp4 01;35
 .m4v 01;35

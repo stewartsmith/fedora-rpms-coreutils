@@ -28,6 +28,7 @@ TERM rxvt-unicode256
 TERM screen-256color
 TERM xterm-256color
 TERM gnome-256color
+TERM st-256color
 
 # EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
 EIGHTBIT 1
@@ -94,6 +95,7 @@ EXEC 38;5;34
 .arj 38;5;9
 .taz 38;5;9
 .lha 38;5;9
+.lz4 38;5;9
 .lzh 38;5;9
 .lzma 38;5;9
 .tlz 38;5;9
@@ -152,6 +154,7 @@ EXEC 38;5;34
 .mpeg 38;5;13
 .m2v 38;5;13
 .mkv 38;5;13
+.webm 38;5;13
 .ogm 38;5;13
 .mp4 38;5;13
 .m4v 38;5;13
