@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Dec 19 2013 Ondrej Vasik <ovasik@redhat.com> 8.22-2
+- reset buffer before copying to prevent some rare cases of
+  invalid output in join and uniq(#1036289)
+
 * Sat Dec 14 2013 Ondrej Vasik <ovasik@redhat.com> 8.22-1
 - new upstream version 8.22
 - temporarily disable multibyte cut.pl part and df symlink
