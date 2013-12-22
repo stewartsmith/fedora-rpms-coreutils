@@ -1381,7 +1381,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
  static void
  freeline (struct line *line)
  {
-@@ -320,56 +479,130 @@ keycmp (struct line const *line1, struct
+@@ -320,56 +479,131 @@ keycmp (struct line const *line1, struct
          size_t jf_1, size_t jf_2)
  {
    /* Start of field to compare in each file.  */
@@ -1452,7 +1452,8 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
 +        for (i = 0; i < 2; i++)
 +          {
 +            mallocd = 1;
-+            copy[i] = xcalloc (0, len[i] + 1);
++            copy[i] = xmalloc (len[i] + 1);
++            memset (copy[i], '\0',len[i] + 1);
 +
 +            for (j = 0; j < MIN (len[0], len[1]);)
 +              {
@@ -3796,7 +3797,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
    if (check_chars < oldlen)
      oldlen = check_chars;
    if (check_chars < newlen)
-@@ -284,14 +389,100 @@ different (char *old, char *new, size_t 
+@@ -284,14 +389,101 @@ different (char *old, char *new, size_t 
  
    if (ignore_case)
      {
@@ -3852,7 +3853,8 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
 +
 +  for (i = 0; i < 2; i++)
 +    {
-+      copy[i] = xcalloc (0, len[i] + 1);
++      copy[i] = xmalloc (len[i] + 1);
++      memset (copy[i], '\0', len[i] + 1);
 +
 +      for (j = 0, chars = 0; j < len[i] && chars < check_chars; chars++)
 +        {
