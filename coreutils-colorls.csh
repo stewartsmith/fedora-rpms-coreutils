@@ -1,3 +1,6 @@
+# skip everything for non-interactive shells
+if (! $?prompt) exit
+
 # color-ls initialization
 if ( $?USER_LS_COLORS ) then
   if ( "$USER_LS_COLORS" != "" ) then
