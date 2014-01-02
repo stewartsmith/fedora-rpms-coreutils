@@ -43,6 +43,22 @@ diff -urNp coreutils-8.21-orig/src/copy.c coreutils-8.21/src/copy.c
          }
        else
          {
+@@ -2600,6 +2600,7 @@ copy_internal (char const *src_name, cha
+ 
+   /* With -Z or --preserve=context, set the context for existing files.
+      Note this is done already for copy_reg() for reasons described therein.  */
++  /*
+   if (!new_dst && !x->copy_as_regular
+       && (x->set_security_context || x->preserve_security_context))
+     {
+@@ -2610,6 +2611,7 @@ copy_internal (char const *src_name, cha
+              goto un_backup;
+         }
+     }
++  Temporarily disabled, it screws up the destination CTX for cp -a */
+ 
+   if (command_line_arg && x->dest_info)
+     {
 diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
 --- coreutils-8.21-orig/src/cp.c	2013-02-07 10:37:05.000000000 +0100
 +++ coreutils-8.21/src/cp.c	2013-02-15 14:31:58.945468929 +0100
@@ -50,7 +66,7 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
                                   all\n\
  "), stdout);
        fputs (_("\
-+  -c                           same as --preserve=context\n\
++  -c                           deprecated, same as --preserve=context\n\
 +"), stdout);
 +      fputs (_("\
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
@@ -103,7 +119,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
  "), stdout);
        fputs (_("\
 -      --preserve-context  preserve SELinux security context\n\
-+  -P, --preserve-context  preserve SELinux security context\n\
++  -P, --preserve-context  preserve SELinux security context (-P deprecated)\n\
    -Z, --context[=CTX]     set SELinux security context of destination file to\n\
                              default type, or to CTX if specified\n\
  "), stdout);
