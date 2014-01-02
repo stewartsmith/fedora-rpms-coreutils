@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Thu Jan 02 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-5
+- reverted an old change and constricted it's condition
+- turned off two multibyte tests (wrong strcoll return value)
+
 * Mon Dec 23 2013 Ondrej Vasik <ovasik@redhat.com> 8.22-4
 - skip even the ls aliases in noninteractive mode
   (suggested by T. Cordes, #988152)
