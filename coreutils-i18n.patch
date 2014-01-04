@@ -4605,8 +4605,16 @@ diff -urNp coreutils-8.22-orig/tests/misc/uniq.pl coreutils-8.22/tests/misc/uniq
 +            push @new_t, $sub;
 +            push @$t, $sub;
 +          }
-+          next if ($test_name =~ "schar" or $test_name =~ "^obs-plus"
-+          or $test_name =~ "119" or $test_name =~ "145");
++        # In test #145, replace the each ‘...’ by '...'.
++        if ($test_name =~ "145")
++          {
++            my $sub = { ERR_SUBST => "s/‘([^’]+)’/'\$1'/g"};
++            push @new_t, $sub;
++            push @$t, $sub;
++          }
++        next if (   $test_name =~ "schar"
++                 or $test_name =~ "^obs-plus"
++                 or $test_name =~ "119");
 +        push @new, ["$test_name-mb", @new_t, {ENV => "LC_ALL=$mb_locale"}];
 +      }
 +    push @Tests, @new;
