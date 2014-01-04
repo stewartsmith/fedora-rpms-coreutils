@@ -238,10 +238,12 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 +              if (output_delimiter_specified)
 +                {
 +                  if (print_delimiter && is_range_start_index (idx))
-+                    fwrite (output_delimiter_string, sizeof (char),
-+                           output_delimiter_length, stdout);
++                    {
++                      fwrite (output_delimiter_string, sizeof (char),
++                              output_delimiter_length, stdout);
++                    }
++                  print_delimiter = true;
 +                }
-+              print_delimiter = true;
 +              fwrite (bufpos, mblength, sizeof(char), stdout);
 +            }
 +        }
