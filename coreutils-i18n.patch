@@ -3946,7 +3946,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  
  /* Output the line in linebuffer LINE to standard output
     provided that the switches say it should be output.
-@@ -356,18 +551,55 @@ check_file (const char *infile, const ch
+@@ -356,19 +551,38 @@ check_file (const char *infile, const ch
        char *prevfield IF_LINT ( = NULL);
        size_t prevlen IF_LINT ( = 0);
        bool first_group_printed = false;
@@ -3971,57 +3971,32 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
            thisfield = find_field (thisline);
            thislen = thisline->length - 1 - (thisfield - thisline->buffer);
 +#if HAVE_MBRTOWC
-+        if (MB_CUR_MAX > 1)
++          if (MB_CUR_MAX > 1)
 +            {
-+            thisstate = thisline->state;
-+
-+            new_group = (prevline->length == 0 || different_multi
-+              (thisfield, prevfield, thislen, prevlen, thisstate, prevstate));
-+
-+            if (new_group && grouping != GM_NONE
-+                && (grouping == GM_PREPEND || grouping == GM_BOTH
-+                || (first_group_printed && (grouping == GM_APPEND
-+                || grouping == GM_SEPARATE))))
-+              putchar (delimiter);
-+
-+            if (new_group || grouping != GM_NONE)
-+              {
-+                fwrite (thisline->buffer, sizeof (char),
-+                        thisline->length, stdout);
-+
-+                SWAP_LINES (prevline, thisline);
-+                prevfield = thisfield;
-+                prevlen = thislen;
-+                prevstate = thisstate;
-+                first_group_printed = true;
-+              }
-+          }
-+        else
-+        {
-+#endif
++              thisstate = thisline->state;
  
++              new_group = (prevline->length == 0
++                           || different_multi (thisfield, prevfield,
++                                               thislen, prevlen,
++                                               thisstate, prevstate));
++            }
++          else
++#endif
            new_group = (prevline->length == 0
                         || different (thisfield, prevfield, thislen, prevlen));
-@@ -376,7 +608,7 @@ check_file (const char *infile, const ch
-               && (grouping == GM_PREPEND || grouping == GM_BOTH
-                   || (first_group_printed && (grouping == GM_APPEND
-                                               || grouping == GM_SEPARATE))))
--            putchar (delimiter);
-+		putchar (delimiter);
  
-           if (new_group || grouping != GM_NONE)
-             {
-@@ -388,6 +620,9 @@ check_file (const char *infile, const ch
+@@ -386,6 +600,10 @@ check_file (const char *infile, const ch
+               SWAP_LINES (prevline, thisline);
+               prevfield = thisfield;
                prevlen = thislen;
++#if HAVE_MBRTOWC
++              if (MB_CUR_MAX > 1)
++                prevstate = thisstate;
++#endif
                first_group_printed = true;
              }
-+#if HAVE_MBRTOWC
-+        }
-+#endif
          }
-       if ((grouping == GM_BOTH || grouping == GM_APPEND) && first_group_printed)
-         putchar (delimiter);
-@@ -398,17 +633,26 @@ check_file (const char *infile, const ch
+@@ -398,17 +616,26 @@ check_file (const char *infile, const ch
        size_t prevlen;
        uintmax_t match_count = 0;
        bool first_delimiter = true;
@@ -4048,7 +4023,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
            if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
              {
                if (ferror (stdin))
-@@ -417,6 +661,14 @@ check_file (const char *infile, const ch
+@@ -417,6 +644,14 @@ check_file (const char *infile, const ch
              }
            thisfield = find_field (thisline);
            thislen = thisline->length - 1 - (thisfield - thisline->buffer);
@@ -4063,7 +4038,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
            match = !different (thisfield, prevfield, thislen, prevlen);
            match_count += match;
  
-@@ -449,6 +701,9 @@ check_file (const char *infile, const ch
+@@ -449,6 +684,9 @@ check_file (const char *infile, const ch
                SWAP_LINES (prevline, thisline);
                prevfield = thisfield;
                prevlen = thislen;
@@ -4073,7 +4048,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
                if (!match)
                  match_count = 0;
              }
-@@ -495,6 +750,19 @@ main (int argc, char **argv)
+@@ -495,6 +733,19 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  
