@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Jan 06 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-7
+- Fix sorting by non-first field (#1003544)
+
 * Fri Jan 03 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-6
 - do not modify SELinux contexts of existing parent
   directories when copying files (fix by P.Brady, #1045122)
