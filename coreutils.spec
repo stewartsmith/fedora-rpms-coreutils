@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Jan 06 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-8
+- Don't use cut mb path if not necessary (#1021403)
+
 * Mon Jan 06 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-7
 - Fix sorting by non-first field (#1003544)
 

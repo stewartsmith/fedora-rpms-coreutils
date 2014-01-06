@@ -110,7 +110,16 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  
  struct range_pair
    {
-@@ -106,15 +169,25 @@ enum operating_mode
+@@ -75,6 +138,8 @@ static size_t n_rp;
+ /* Number of `struct range_pair's allocated. */
+ static size_t n_rp_allocated;
+ 
++/* Length of the delimiter given as argument to -d.  */
++size_t delimlen;
+ 
+ /* Append LOW, HIGH to the list RP of range pairs, allocating additional
+    space if necessary.  Update global variable N_RP.  When allocating,
+@@ -106,15 +171,25 @@ enum operating_mode
    {
      undefined_mode,
  
@@ -137,7 +146,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  /* If true do not output lines containing no delimeter characters.
     Otherwise, all such lines are printed.  This option is valid only
     with field mode.  */
-@@ -126,6 +199,9 @@ static bool complement;
+@@ -126,6 +201,9 @@ static bool complement;
  
  /* The delimeter character for field mode. */
  static unsigned char delim;
@@ -147,7 +156,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  
  /* True if the --output-delimiter=STRING option was specified.  */
  static bool output_delimiter_specified;
-@@ -188,7 +264,7 @@ Print selected parts of lines from each 
+@@ -188,7 +266,7 @@ Print selected parts of lines from each
    -f, --fields=LIST       select only these fields;  also print any line\n\
                              that contains no delimiter character, unless\n\
                              the -s option is specified\n\
@@ -156,7 +165,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  "), stdout);
        fputs (_("\
        --complement        complement the set of selected bytes, characters\n\
-@@ -381,6 +457,9 @@ set_fields (const char *fieldstr)
+@@ -381,6 +459,9 @@ set_fields (const char *fieldstr)
                if (operating_mode == byte_mode)
                  error (0, 0,
                         _("byte offset %s is too large"), quote (bad_num));
@@ -166,7 +175,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
                else
                  error (0, 0,
                         _("field number %s is too large"), quote (bad_num));
-@@ -505,6 +584,79 @@ cut_bytes (FILE *stream)
+@@ -505,6 +586,79 @@ cut_bytes (FILE *stream)
      }
  }
  
@@ -246,7 +255,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  /* Read from stream STREAM, printing to standard output any selected fields.  */
  
  static void
-@@ -629,13 +782,198 @@ cut_fields (FILE *stream)
+@@ -629,13 +783,201 @@ cut_fields (FILE *stream)
      }
  }
  
@@ -429,7 +438,10 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 +          break;
 +
 +        case field_mode:
-+          cut_fields_mb (stream);
++          if (delimlen == 1)
++            cut_fields (stream);
++          else
++            cut_fields_mb (stream);
 +          break;
 +
 +        default:
@@ -448,16 +460,15 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  }
  
  /* Process file FILE to standard output.
-@@ -687,6 +1025,8 @@ main (int argc, char **argv)
+@@ -687,6 +1029,7 @@ main (int argc, char **argv)
    bool ok;
    bool delim_specified = false;
    char *spec_list_string IF_LINT ( = NULL);
 +  char mbdelim[MB_LEN_MAX + 1];
-+  size_t delimlen = 0;
  
    initialize_main (&argc, &argv);
    set_program_name (argv[0]);
-@@ -709,7 +1049,6 @@ main (int argc, char **argv)
+@@ -709,7 +1052,6 @@ main (int argc, char **argv)
        switch (optc)
          {
          case 'b':
@@ -465,7 +476,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
            /* Build the byte list. */
            if (operating_mode != undefined_mode)
              FATAL_ERROR (_("only one type of list may be specified"));
-@@ -717,6 +1056,14 @@ main (int argc, char **argv)
+@@ -717,6 +1059,14 @@ main (int argc, char **argv)
            spec_list_string = optarg;
            break;
  
@@ -480,7 +491,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
          case 'f':
            /* Build the field list. */
            if (operating_mode != undefined_mode)
-@@ -728,10 +1075,36 @@ main (int argc, char **argv)
+@@ -728,10 +1078,38 @@ main (int argc, char **argv)
          case 'd':
            /* New delimiter. */
            /* Interpret -d '' to mean 'use the NUL byte as the delimiter.'  */
@@ -506,6 +517,8 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 +                        FATAL_ERROR (_("the delimiter must be a single character"));
 +                      memcpy (mbdelim, optarg, delimlen);
 +                      mbdelim[delimlen] = '\0';
++                      if (delimlen == 1)
++                        delim = *optarg;
 +                    }
 +                }
 +
@@ -521,7 +534,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
            break;
  
          case OUTPUT_DELIMITER_OPTION:
-@@ -744,6 +1117,7 @@ main (int argc, char **argv)
+@@ -744,6 +1122,7 @@ main (int argc, char **argv)
            break;
  
          case 'n':
@@ -529,7 +542,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
            break;
  
          case 's':
-@@ -783,15 +1157,34 @@ main (int argc, char **argv)
+@@ -783,15 +1162,34 @@ main (int argc, char **argv)
      }
  
    if (!delim_specified)
