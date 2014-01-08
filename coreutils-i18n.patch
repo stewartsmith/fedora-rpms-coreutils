@@ -4553,7 +4553,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/uniq.pl coreutils-8.22/tests/misc/uniq
  # When possible, create a "-z"-testing variant of each test.
  sub add_z_variants($)
  {
-@@ -261,6 +269,45 @@ foreach my $t (@Tests)
+@@ -261,6 +269,53 @@ foreach my $t (@Tests)
        and push @$t, {ENV=>'_POSIX2_VERSION=199209'};
    }
  
