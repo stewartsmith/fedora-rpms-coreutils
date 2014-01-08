@@ -1,6 +1,6 @@
 diff -urNp coreutils-8.22-orig/lib/linebuffer.h coreutils-8.22/lib/linebuffer.h
 --- coreutils-8.22-orig/lib/linebuffer.h	2013-12-04 15:53:33.000000000 +0100
-+++ coreutils-8.22/lib/linebuffer.h	2013-12-16 17:40:25.933887985 +0100
++++ coreutils-8.22/lib/linebuffer.h	2014-01-08 13:55:56.106375471 +0100
 @@ -21,6 +21,11 @@
  
  # include <stdio.h>
@@ -25,7 +25,7 @@ diff -urNp coreutils-8.22-orig/lib/linebuffer.h coreutils-8.22/lib/linebuffer.h
  /* Initialize linebuffer LINEBUFFER for use. */
 diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
 --- coreutils-8.22-orig/src/cut.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/cut.c	2013-12-16 17:40:25.935887295 +0100
++++ coreutils-8.22/src/cut.c	2014-01-08 13:55:56.108375451 +0100
 @@ -28,6 +28,11 @@
  #include <assert.h>
  #include <getopt.h>
@@ -156,7 +156,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  
  /* True if the --output-delimiter=STRING option was specified.  */
  static bool output_delimiter_specified;
-@@ -188,7 +266,7 @@ Print selected parts of lines from each
+@@ -188,7 +266,7 @@ Print selected parts of lines from each 
    -f, --fields=LIST       select only these fields;  also print any line\n\
                              that contains no delimiter character, unless\n\
                              the -s option is specified\n\
@@ -175,7 +175,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
                else
                  error (0, 0,
                         _("field number %s is too large"), quote (bad_num));
-@@ -505,6 +586,79 @@ cut_bytes (FILE *stream)
+@@ -505,6 +586,82 @@ cut_bytes (FILE *stream)
      }
  }
  
@@ -258,7 +258,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  /* Read from stream STREAM, printing to standard output any selected fields.  */
  
  static void
-@@ -629,13 +783,201 @@ cut_fields (FILE *stream)
+@@ -629,13 +786,201 @@ cut_fields (FILE *stream)
      }
  }
  
@@ -463,7 +463,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  }
  
  /* Process file FILE to standard output.
-@@ -687,6 +1029,7 @@ main (int argc, char **argv)
+@@ -687,6 +1032,7 @@ main (int argc, char **argv)
    bool ok;
    bool delim_specified = false;
    char *spec_list_string IF_LINT ( = NULL);
@@ -471,7 +471,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
  
    initialize_main (&argc, &argv);
    set_program_name (argv[0]);
-@@ -709,7 +1052,6 @@ main (int argc, char **argv)
+@@ -709,7 +1055,6 @@ main (int argc, char **argv)
        switch (optc)
          {
          case 'b':
@@ -479,7 +479,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
            /* Build the byte list. */
            if (operating_mode != undefined_mode)
              FATAL_ERROR (_("only one type of list may be specified"));
-@@ -717,6 +1059,14 @@ main (int argc, char **argv)
+@@ -717,6 +1062,14 @@ main (int argc, char **argv)
            spec_list_string = optarg;
            break;
  
@@ -494,7 +494,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
          case 'f':
            /* Build the field list. */
            if (operating_mode != undefined_mode)
-@@ -728,10 +1078,38 @@ main (int argc, char **argv)
+@@ -728,10 +1081,38 @@ main (int argc, char **argv)
          case 'd':
            /* New delimiter. */
            /* Interpret -d '' to mean 'use the NUL byte as the delimiter.'  */
@@ -537,7 +537,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
            break;
  
          case OUTPUT_DELIMITER_OPTION:
-@@ -744,6 +1122,7 @@ main (int argc, char **argv)
+@@ -744,6 +1125,7 @@ main (int argc, char **argv)
            break;
  
          case 'n':
@@ -545,7 +545,7 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
            break;
  
          case 's':
-@@ -783,15 +1162,34 @@ main (int argc, char **argv)
+@@ -783,15 +1165,34 @@ main (int argc, char **argv)
      }
  
    if (!delim_specified)
@@ -588,8 +588,8 @@ diff -urNp coreutils-8.22-orig/src/cut.c coreutils-8.22/src/cut.c
    if (optind == argc)
 diff -urNp coreutils-8.22-orig/src/expand.c coreutils-8.22/src/expand.c
 --- coreutils-8.22-orig/src/expand.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/expand.c	2013-12-16 17:40:25.936886952 +0100
-@@ -37,12 +37,29 @@
++++ coreutils-8.22/src/expand.c	2014-01-08 13:55:56.110375431 +0100
+@@ -37,12 +37,34 @@
  #include <stdio.h>
  #include <getopt.h>
  #include <sys/types.h>
@@ -624,7 +624,7 @@ diff -urNp coreutils-8.22-orig/src/expand.c coreutils-8.22/src/expand.c
  /* The official name of this program (e.g., no 'g' prefix).  */
  #define PROGRAM_NAME "expand"
  
-@@ -357,6 +374,142 @@ expand (void)
+@@ -357,6 +379,142 @@ expand (void)
      }
  }
  
@@ -767,7 +767,7 @@ diff -urNp coreutils-8.22-orig/src/expand.c coreutils-8.22/src/expand.c
  int
  main (int argc, char **argv)
  {
-@@ -421,7 +574,12 @@ main (int argc, char **argv)
+@@ -421,7 +579,12 @@ main (int argc, char **argv)
  
    file_list = (optind < argc ? &argv[optind] : stdin_argv);
  
@@ -783,7 +783,7 @@ diff -urNp coreutils-8.22-orig/src/expand.c coreutils-8.22/src/expand.c
      error (EXIT_FAILURE, errno, "-");
 diff -urNp coreutils-8.22-orig/src/fold.c coreutils-8.22/src/fold.c
 --- coreutils-8.22-orig/src/fold.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/fold.c	2013-12-16 17:40:25.938886274 +0100
++++ coreutils-8.22/src/fold.c	2014-01-08 13:55:56.111375421 +0100
 @@ -22,12 +22,34 @@
  #include <getopt.h>
  #include <sys/types.h>
@@ -1183,7 +1183,7 @@ diff -urNp coreutils-8.22-orig/src/fold.c coreutils-8.22/src/fold.c
          case 's':		/* Break at word boundaries. */
 diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
 --- coreutils-8.22-orig/src/join.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/join.c	2013-12-16 17:40:25.940885607 +0100
++++ coreutils-8.22/src/join.c	2014-01-08 13:55:56.113375401 +0100
 @@ -22,18 +22,32 @@
  #include <sys/types.h>
  #include <getopt.h>
@@ -1253,7 +1253,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
      {
        /* Skip leading blanks before the first field.  */
        while (isblank (to_uchar (*ptr)))
-@@ -299,6 +316,148 @@ xfields (struct line *line)
+@@ -299,6 +316,147 @@ xfields (struct line *line)
    extract_field (line, ptr, lim - ptr);
  }
  
@@ -1401,7 +1401,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
  static void
  freeline (struct line *line)
  {
-@@ -320,56 +479,131 @@ keycmp (struct line const *line1, struct
+@@ -320,56 +478,133 @@ keycmp (struct line const *line1, struct
          size_t jf_1, size_t jf_2)
  {
    /* Start of field to compare in each file.  */
@@ -1558,7 +1558,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
  }
  
  /* Check that successive input lines PREV and CURRENT from input file
-@@ -461,6 +694,11 @@ get_line (FILE *fp, struct line **linep,
+@@ -461,6 +696,11 @@ get_line (FILE *fp, struct line **linep,
      }
    ++line_no[which - 1];
  
@@ -1570,7 +1570,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
    xfields (line);
  
    if (prevline[which - 1])
-@@ -560,21 +798,28 @@ prfield (size_t n, struct line const *li
+@@ -560,21 +800,28 @@ prfield (size_t n, struct line const *li
  
  /* Output all the fields in line, other than the join field.  */
  
@@ -1602,7 +1602,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
        prfield (i, line);
      }
  }
-@@ -585,7 +830,6 @@ static void
+@@ -585,7 +832,6 @@ static void
  prjoin (struct line const *line1, struct line const *line2)
  {
    const struct outlist *outlist;
@@ -1610,7 +1610,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
    size_t field;
    struct line const *line;
  
-@@ -619,7 +863,7 @@ prjoin (struct line const *line1, struct
+@@ -619,7 +865,7 @@ prjoin (struct line const *line1, struct
            o = o->next;
            if (o == NULL)
              break;
@@ -1619,7 +1619,7 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
          }
        putchar (eolchar);
      }
-@@ -1097,21 +1341,46 @@ main (int argc, char **argv)
+@@ -1097,21 +1343,46 @@ main (int argc, char **argv)
  
          case 't':
            {
@@ -1678,8 +1678,8 @@ diff -urNp coreutils-8.22-orig/src/join.c coreutils-8.22/src/join.c
          case 'z':
 diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
 --- coreutils-8.22-orig/src/pr.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/pr.c	2013-12-16 17:40:25.944884263 +0100
-@@ -312,6 +312,32 @@
++++ coreutils-8.22/src/pr.c	2014-01-08 13:55:56.118375350 +0100
+@@ -312,6 +312,24 @@
  
  #include <getopt.h>
  #include <sys/types.h>
@@ -1723,7 +1723,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  /* The official name of this program (e.g., no 'g' prefix).  */
  #define PROGRAM_NAME "pr"
  
-@@ -415,7 +453,20 @@ struct COLUMN
+@@ -415,7 +445,20 @@ struct COLUMN
  
  typedef struct COLUMN COLUMN;
  
@@ -1745,7 +1745,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  static bool read_line (COLUMN *p);
  static bool print_page (void);
  static bool print_stored (COLUMN *p);
-@@ -425,6 +476,7 @@ static void print_header (void);
+@@ -425,6 +468,7 @@ static void print_header (void);
  static void pad_across_to (int position);
  static void add_line_number (COLUMN *p);
  static void getoptarg (char *arg, char switch_char, char *character,
@@ -1753,7 +1753,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
                         int *number);
  static void print_files (int number_of_files, char **av);
  static void init_parameters (int number_of_files);
-@@ -438,7 +490,6 @@ static void store_char (char c);
+@@ -438,7 +482,6 @@ static void store_char (char c);
  static void pad_down (int lines);
  static void read_rest_of_line (COLUMN *p);
  static void skip_read (COLUMN *p, int column_number);
@@ -1761,7 +1761,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  static void cleanup (void);
  static void print_sep_string (void);
  static void separator_string (const char *optarg_S);
-@@ -450,7 +501,7 @@ static COLUMN *column_vector;
+@@ -450,7 +493,7 @@ static COLUMN *column_vector;
     we store the leftmost columns contiguously in buff.
     To print a line from buff, get the index of the first character
     from line_vector[i], and print up to line_vector[i + 1]. */
@@ -1770,7 +1770,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
  /* Index of the position in buff where the next character
     will be stored. */
-@@ -554,7 +605,7 @@ static int chars_per_column;
+@@ -554,7 +597,7 @@ static int chars_per_column;
  static bool untabify_input = false;
  
  /* (-e) The input tab character. */
@@ -1779,7 +1779,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
  /* (-e) Tabstops are at chars_per_tab, 2*chars_per_tab, 3*chars_per_tab, ...
     where the leftmost column is 1. */
-@@ -564,7 +615,10 @@ static int chars_per_input_tab = 8;
+@@ -564,7 +607,10 @@ static int chars_per_input_tab = 8;
  static bool tabify_output = false;
  
  /* (-i) The output tab character. */
@@ -1791,7 +1791,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
  /* (-i) The width of the output tab. */
  static int chars_per_output_tab = 8;
-@@ -634,7 +688,13 @@ static int line_number;
+@@ -634,7 +680,13 @@ static int line_number;
  static bool numbered_lines = false;
  
  /* (-n) Character which follows each line number. */
@@ -1806,7 +1806,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
  /* (-n) line counting starts with 1st line of input file (not with 1st
     line of 1st page printed). */
-@@ -687,6 +747,7 @@ static bool use_col_separator = false;
+@@ -687,6 +739,7 @@ static bool use_col_separator = false;
     -a|COLUMN|-m is a 'space' and with the -J option a 'tab'. */
  static char *col_sep_string = (char *) "";
  static int col_sep_length = 0;
@@ -1814,7 +1814,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  static char *column_separator = (char *) " ";
  static char *line_separator = (char *) "\t";
  
-@@ -843,6 +904,13 @@ separator_string (const char *optarg_S)
+@@ -843,6 +896,13 @@ separator_string (const char *optarg_S)
    col_sep_length = (int) strlen (optarg_S);
    col_sep_string = xmalloc (col_sep_length + 1);
    strcpy (col_sep_string, optarg_S);
@@ -1828,7 +1828,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  }
  
  int
-@@ -867,6 +935,21 @@ main (int argc, char **argv)
+@@ -867,6 +927,21 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  
@@ -1850,7 +1850,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
    n_files = 0;
    file_names = (argc > 1
                  ? xmalloc ((argc - 1) * sizeof (char *))
-@@ -943,8 +1026,12 @@ main (int argc, char **argv)
+@@ -943,8 +1018,12 @@ main (int argc, char **argv)
            break;
          case 'e':
            if (optarg)
@@ -1865,7 +1865,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            /* Could check tab width > 0. */
            untabify_input = true;
            break;
-@@ -957,8 +1044,12 @@ main (int argc, char **argv)
+@@ -957,8 +1036,12 @@ main (int argc, char **argv)
            break;
          case 'i':
            if (optarg)
@@ -1880,7 +1880,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            /* Could check tab width > 0. */
            tabify_output = true;
            break;
-@@ -985,8 +1076,8 @@ main (int argc, char **argv)
+@@ -985,8 +1068,8 @@ main (int argc, char **argv)
          case 'n':
            numbered_lines = true;
            if (optarg)
@@ -1891,7 +1891,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            break;
          case 'N':
            skip_count = false;
-@@ -1025,7 +1116,7 @@ main (int argc, char **argv)
+@@ -1025,7 +1108,7 @@ main (int argc, char **argv)
            old_s = false;
            /* Reset an additional input of -s, -S dominates -s */
            col_sep_string = bad_cast ("");
@@ -1900,7 +1900,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            use_col_separator = true;
            if (optarg)
              separator_string (optarg);
-@@ -1182,10 +1273,45 @@ main (int argc, char **argv)
+@@ -1182,10 +1265,45 @@ main (int argc, char **argv)
     a number. */
  
  static void
@@ -1948,7 +1948,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
    if (*arg)
      {
        long int tmp_long;
-@@ -1207,6 +1333,11 @@ static void
+@@ -1207,6 +1325,11 @@ static void
  init_parameters (int number_of_files)
  {
    int chars_used_by_number = 0;
@@ -1960,7 +1960,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
    lines_per_body = lines_per_page - lines_per_header - lines_per_footer;
    if (lines_per_body <= 0)
-@@ -1244,7 +1375,7 @@ init_parameters (int number_of_files)
+@@ -1244,7 +1367,7 @@ init_parameters (int number_of_files)
            else
              col_sep_string = column_separator;
  
@@ -1969,7 +1969,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            use_col_separator = true;
          }
        /* It's rather pointless to define a TAB separator with column
-@@ -1274,11 +1405,11 @@ init_parameters (int number_of_files)
+@@ -1274,11 +1397,11 @@ init_parameters (int number_of_files)
               + TAB_WIDTH (chars_per_input_tab, chars_per_number);   */
  
        /* Estimate chars_per_text without any margin and keep it constant. */
@@ -1983,7 +1983,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
        /* The number is part of the column width unless we are
           printing files in parallel. */
-@@ -1287,7 +1418,7 @@ init_parameters (int number_of_files)
+@@ -1287,7 +1410,7 @@ init_parameters (int number_of_files)
      }
  
    chars_per_column = (chars_per_line - chars_used_by_number
@@ -1992,7 +1992,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
    if (chars_per_column < 1)
      error (EXIT_FAILURE, 0, _("page width too narrow"));
-@@ -1305,7 +1436,7 @@ init_parameters (int number_of_files)
+@@ -1305,7 +1428,7 @@ init_parameters (int number_of_files)
       We've to use 8 as the lower limit, if we use chars_per_default_tab = 8
       to expand a tab which is not an input_tab-char. */
    free (clump_buff);
@@ -2001,7 +2001,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  }
  
  /* Open the necessary files,
-@@ -1413,7 +1544,7 @@ init_funcs (void)
+@@ -1413,7 +1536,7 @@ init_funcs (void)
  
    /* Enlarge p->start_position of first column to use the same form of
       padding_not_printed with all columns. */
@@ -2010,7 +2010,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
    /* This loop takes care of all but the rightmost column. */
  
-@@ -1447,7 +1578,7 @@ init_funcs (void)
+@@ -1447,7 +1570,7 @@ init_funcs (void)
          }
        else
          {
@@ -2019,7 +2019,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            h_next = h + chars_per_column;
          }
      }
-@@ -1738,9 +1869,9 @@ static void
+@@ -1738,9 +1861,9 @@ static void
  align_column (COLUMN *p)
  {
    padding_not_printed = p->start_position;
@@ -2031,7 +2031,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
        padding_not_printed = ANYWHERE;
      }
  
-@@ -2011,13 +2142,13 @@ store_char (char c)
+@@ -2011,13 +2134,13 @@ store_char (char c)
        /* May be too generous. */
        buff = X2REALLOC (buff, &buff_allocated);
      }
@@ -2047,7 +2047,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
    char *s;
    int num_width;
  
-@@ -2034,22 +2165,24 @@ add_line_number (COLUMN *p)
+@@ -2034,22 +2157,24 @@ add_line_number (COLUMN *p)
        /* Tabification is assumed for multiple columns, also for n-separators,
           but 'default n-separator = TAB' hasn't been given priority over
           equal column_width also specified by POSIX. */
@@ -2076,7 +2076,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
          output_position = POS_AFTER_TAB (chars_per_output_tab,
                            output_position);
      }
-@@ -2210,7 +2343,7 @@ print_white_space (void)
+@@ -2210,7 +2335,7 @@ print_white_space (void)
    while (goal - h_old > 1
           && (h_new = POS_AFTER_TAB (chars_per_output_tab, h_old)) <= goal)
      {
@@ -2085,7 +2085,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
        h_old = h_new;
      }
    while (++h_old <= goal)
-@@ -2230,6 +2363,7 @@ print_sep_string (void)
+@@ -2230,6 +2355,7 @@ print_sep_string (void)
  {
    char *s;
    int l = col_sep_length;
@@ -2093,7 +2093,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
    s = col_sep_string;
  
-@@ -2243,6 +2377,7 @@ print_sep_string (void)
+@@ -2243,6 +2369,7 @@ print_sep_string (void)
      {
        for (; separators_not_printed > 0; --separators_not_printed)
          {
@@ -2101,7 +2101,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            while (l-- > 0)
              {
                /* 3 types of sep_strings: spaces only, spaces and chars,
-@@ -2256,12 +2391,15 @@ print_sep_string (void)
+@@ -2256,12 +2383,15 @@ print_sep_string (void)
                  }
                else
                  {
@@ -2118,7 +2118,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
            /* sep_string ends with some spaces */
            if (spaces_not_printed > 0)
              print_white_space ();
-@@ -2289,7 +2427,7 @@ print_clump (COLUMN *p, int n, char *clu
+@@ -2289,7 +2419,7 @@ print_clump (COLUMN *p, int n, char *clu
     required number of tabs and spaces. */
  
  static void
@@ -2127,7 +2127,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  {
    if (tabify_output)
      {
-@@ -2313,6 +2451,74 @@ print_char (char c)
+@@ -2313,6 +2443,74 @@ print_char (char c)
    putchar (c);
  }
  
@@ -2202,7 +2202,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  /* Skip to page PAGE before printing.
     PAGE may be larger than total number of pages. */
  
-@@ -2492,9 +2698,9 @@ read_line (COLUMN *p)
+@@ -2492,9 +2690,9 @@ read_line (COLUMN *p)
            align_empty_cols = false;
          }
  
@@ -2244,7 +2244,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
        padding_not_printed = ANYWHERE;
      }
  
-@@ -2610,8 +2816,8 @@ print_stored (COLUMN *p)
+@@ -2610,8 +2808,8 @@ print_stored (COLUMN *p)
    if (spaces_not_printed == 0)
      {
        output_position = p->start_position + end_vector[line];
@@ -2255,7 +2255,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
      }
  
    return true;
-@@ -2630,7 +2836,7 @@ print_stored (COLUMN *p)
+@@ -2630,7 +2828,7 @@ print_stored (COLUMN *p)
     number of characters is 1.) */
  
  static int
@@ -2264,7 +2264,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  {
    unsigned char uc = c;
    char *s = clump_buff;
-@@ -2640,10 +2846,10 @@ char_to_clump (char c)
+@@ -2640,10 +2838,10 @@ char_to_clump (char c)
    int chars;
    int chars_per_c = 8;
  
@@ -2277,7 +2277,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
      {
        width = TAB_WIDTH (chars_per_c, input_position);
  
-@@ -2724,6 +2930,164 @@ char_to_clump (char c)
+@@ -2724,6 +2922,164 @@ char_to_clump (char c)
    return chars;
  }
  
@@ -2444,7 +2444,7 @@ diff -urNp coreutils-8.22-orig/src/pr.c coreutils-8.22/src/pr.c
  
 diff -urNp coreutils-8.22-orig/src/sort.c coreutils-8.22/src/sort.c
 --- coreutils-8.22-orig/src/sort.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/sort.c	2014-01-02 21:17:32.802621367 +0100
++++ coreutils-8.22/src/sort.c	2014-01-08 13:55:56.123375301 +0100
 @@ -29,6 +29,14 @@
  #include <sys/wait.h>
  #include <signal.h>
@@ -3426,7 +3426,7 @@ diff -urNp coreutils-8.22-orig/src/sort.c coreutils-8.22/src/sort.c
  
 diff -urNp coreutils-8.22-orig/src/unexpand.c coreutils-8.22/src/unexpand.c
 --- coreutils-8.22-orig/src/unexpand.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/unexpand.c	2013-12-16 17:40:25.951881910 +0100
++++ coreutils-8.22/src/unexpand.c	2014-01-08 13:55:56.126375271 +0100
 @@ -38,12 +38,29 @@
  #include <stdio.h>
  #include <getopt.h>
@@ -3684,8 +3684,8 @@ diff -urNp coreutils-8.22-orig/src/unexpand.c coreutils-8.22/src/unexpand.c
      error (EXIT_FAILURE, errno, "-");
 diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
 --- coreutils-8.22-orig/src/uniq.c	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/src/uniq.c	2013-12-16 17:41:06.711697074 +0100
-@@ -21,6 +21,16 @@
++++ coreutils-8.22/src/uniq.c	2014-01-08 13:55:56.127375261 +0100
+@@ -21,6 +21,17 @@
  #include <getopt.h>
  #include <sys/types.h>
  
@@ -3724,7 +3724,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  
  /* The official name of this program (e.g., no 'g' prefix).  */
  #define PROGRAM_NAME "uniq"
-@@ -143,6 +165,10 @@ enum
+@@ -143,6 +166,10 @@ enum
    GROUP_OPTION = CHAR_MAX + 1
  };
  
@@ -3735,7 +3735,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  static struct option const longopts[] =
  {
    {"count", no_argument, NULL, 'c'},
-@@ -249,7 +275,7 @@ size_opt (char const *opt, char const *m
+@@ -249,7 +276,7 @@ size_opt (char const *opt, char const *m
     return a pointer to the beginning of the line's field to be compared. */
  
  static char * _GL_ATTRIBUTE_PURE
@@ -3744,7 +3744,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  {
    size_t count;
    char const *lp = line->buffer;
-@@ -269,6 +295,83 @@ find_field (struct linebuffer const *lin
+@@ -269,6 +296,83 @@ find_field (struct linebuffer const *lin
    return line->buffer + i;
  }
  
@@ -3828,7 +3828,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  /* Return false if two strings OLD and NEW match, true if not.
     OLD and NEW point not to the beginnings of the lines
     but rather to the beginnings of the fields to compare.
-@@ -277,6 +380,8 @@ find_field (struct linebuffer const *lin
+@@ -277,6 +381,8 @@ find_field (struct linebuffer const *lin
  static bool
  different (char *old, char *new, size_t oldlen, size_t newlen)
  {
@@ -3837,7 +3837,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
    if (check_chars < oldlen)
      oldlen = check_chars;
    if (check_chars < newlen)
-@@ -284,14 +389,101 @@ different (char *old, char *new, size_t 
+@@ -284,14 +390,103 @@ different (char *old, char *new, size_t 
  
    if (ignore_case)
      {
@@ -3946,7 +3946,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  
  /* Output the line in linebuffer LINE to standard output
     provided that the switches say it should be output.
-@@ -356,18 +547,55 @@ check_file (const char *infile, const ch
+@@ -356,18 +551,55 @@ check_file (const char *infile, const ch
        char *prevfield IF_LINT ( = NULL);
        size_t prevlen IF_LINT ( = 0);
        bool first_group_printed = false;
@@ -4002,7 +4002,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  
            new_group = (prevline->length == 0
                         || different (thisfield, prevfield, thislen, prevlen));
-@@ -376,7 +604,7 @@ check_file (const char *infile, const ch
+@@ -376,7 +608,7 @@ check_file (const char *infile, const ch
                && (grouping == GM_PREPEND || grouping == GM_BOTH
                    || (first_group_printed && (grouping == GM_APPEND
                                                || grouping == GM_SEPARATE))))
@@ -4011,7 +4011,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
  
            if (new_group || grouping != GM_NONE)
              {
-@@ -388,6 +616,9 @@ check_file (const char *infile, const ch
+@@ -388,6 +620,9 @@ check_file (const char *infile, const ch
                prevlen = thislen;
                first_group_printed = true;
              }
@@ -4021,7 +4021,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
          }
        if ((grouping == GM_BOTH || grouping == GM_APPEND) && first_group_printed)
          putchar (delimiter);
-@@ -398,17 +629,26 @@ check_file (const char *infile, const ch
+@@ -398,17 +633,26 @@ check_file (const char *infile, const ch
        size_t prevlen;
        uintmax_t match_count = 0;
        bool first_delimiter = true;
@@ -4048,7 +4048,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
            if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
              {
                if (ferror (stdin))
-@@ -417,6 +657,14 @@ check_file (const char *infile, const ch
+@@ -417,6 +661,14 @@ check_file (const char *infile, const ch
              }
            thisfield = find_field (thisline);
            thislen = thisline->length - 1 - (thisfield - thisline->buffer);
@@ -4063,7 +4063,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
            match = !different (thisfield, prevfield, thislen, prevlen);
            match_count += match;
  
-@@ -449,6 +697,9 @@ check_file (const char *infile, const ch
+@@ -449,6 +701,9 @@ check_file (const char *infile, const ch
                SWAP_LINES (prevline, thisline);
                prevfield = thisfield;
                prevlen = thislen;
@@ -4073,7 +4073,7 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
                if (!match)
                  match_count = 0;
              }
-@@ -495,6 +746,19 @@ main (int argc, char **argv)
+@@ -495,6 +750,19 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  
@@ -4094,8 +4094,8 @@ diff -urNp coreutils-8.22-orig/src/uniq.c coreutils-8.22/src/uniq.c
    skip_fields = 0;
    check_chars = SIZE_MAX;
 diff -urNp coreutils-8.22-orig/tests/local.mk coreutils-8.22/tests/local.mk
---- coreutils-8.22-orig/tests/local.mk	2013-12-16 17:39:49.187181544 +0100
-+++ coreutils-8.22/tests/local.mk	2013-12-16 17:40:25.955880566 +0100
+--- coreutils-8.22-orig/tests/local.mk	2014-01-08 13:55:24.524683837 +0100
++++ coreutils-8.22/tests/local.mk	2014-01-08 13:55:56.129375241 +0100
 @@ -324,6 +324,7 @@ all_tests =					\
    tests/misc/sort-discrim.sh			\
    tests/misc/sort-files0-from.pl		\
@@ -4106,7 +4106,7 @@ diff -urNp coreutils-8.22-orig/tests/local.mk coreutils-8.22/tests/local.mk
    tests/misc/sort-month.sh			\
 diff -urNp coreutils-8.22-orig/tests/misc/cut.pl coreutils-8.22/tests/misc/cut.pl
 --- coreutils-8.22-orig/tests/misc/cut.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/cut.pl	2013-12-16 17:40:25.956880230 +0100
++++ coreutils-8.22/tests/misc/cut.pl	2014-01-08 13:55:56.130375231 +0100
 @@ -23,9 +23,11 @@ use strict;
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
@@ -4131,7 +4131,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/cut.pl coreutils-8.22/tests/misc/cut.p
      push @Tests, @new;
 diff -urNp coreutils-8.22-orig/tests/misc/expand.pl coreutils-8.22/tests/misc/expand.pl
 --- coreutils-8.22-orig/tests/misc/expand.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/expand.pl	2013-12-16 17:40:25.957879894 +0100
++++ coreutils-8.22/tests/misc/expand.pl	2014-01-08 13:55:56.135375181 +0100
 @@ -23,6 +23,15 @@ use strict;
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
@@ -4188,7 +4188,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/expand.pl coreutils-8.22/tests/misc/ex
  
 diff -urNp coreutils-8.22-orig/tests/misc/fold.pl coreutils-8.22/tests/misc/fold.pl
 --- coreutils-8.22-orig/tests/misc/fold.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/fold.pl	2013-12-16 17:40:25.958879558 +0100
++++ coreutils-8.22/tests/misc/fold.pl	2014-01-08 13:55:56.136375171 +0100
 @@ -20,9 +20,18 @@ use strict;
  
  (my $program_name = $0) =~ s|.*/||;
@@ -4260,7 +4260,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/fold.pl coreutils-8.22/tests/misc/fold
  exit $fail;
 diff -urNp coreutils-8.22-orig/tests/misc/join.pl coreutils-8.22/tests/misc/join.pl
 --- coreutils-8.22-orig/tests/misc/join.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/join.pl	2013-12-16 17:40:25.959879222 +0100
++++ coreutils-8.22/tests/misc/join.pl	2014-01-08 13:55:56.137375161 +0100
 @@ -25,6 +25,15 @@ my $limits = getlimits ();
  
  my $prog = 'join';
@@ -4329,7 +4329,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/join.pl coreutils-8.22/tests/misc/join
  
 diff -urNp coreutils-8.22-orig/tests/misc/sort-mb-tests.sh coreutils-8.22/tests/misc/sort-mb-tests.sh
 --- coreutils-8.22-orig/tests/misc/sort-mb-tests.sh	1970-01-01 01:00:00.000000000 +0100
-+++ coreutils-8.22/tests/misc/sort-mb-tests.sh	2013-12-16 17:40:25.959879222 +0100
++++ coreutils-8.22/tests/misc/sort-mb-tests.sh	2014-01-08 13:55:56.138375151 +0100
 @@ -0,0 +1,45 @@
 +#!/bin/sh
 +# Verify sort's multi-byte support.
@@ -4378,7 +4378,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/sort-mb-tests.sh coreutils-8.22/tests/
 +Exit $fail
 diff -urNp coreutils-8.22-orig/tests/misc/sort-merge.pl coreutils-8.22/tests/misc/sort-merge.pl
 --- coreutils-8.22-orig/tests/misc/sort-merge.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/sort-merge.pl	2013-12-16 17:40:25.960878886 +0100
++++ coreutils-8.22/tests/misc/sort-merge.pl	2014-01-08 13:55:56.139375141 +0100
 @@ -26,6 +26,15 @@ my $prog = 'sort';
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
@@ -4437,7 +4437,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/sort-merge.pl coreutils-8.22/tests/mis
  
 diff -urNp coreutils-8.22-orig/tests/misc/sort.pl coreutils-8.22/tests/misc/sort.pl
 --- coreutils-8.22-orig/tests/misc/sort.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/sort.pl	2013-12-16 17:40:25.962878214 +0100
++++ coreutils-8.22/tests/misc/sort.pl	2014-01-08 13:55:56.140375131 +0100
 @@ -24,10 +24,15 @@ my $prog = 'sort';
  # Turn off localization of executable's output.
  @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
@@ -4503,7 +4503,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/sort.pl coreutils-8.22/tests/misc/sort
  my $verbose = $ENV{VERBOSE};
 diff -urNp coreutils-8.22-orig/tests/misc/unexpand.pl coreutils-8.22/tests/misc/unexpand.pl
 --- coreutils-8.22-orig/tests/misc/unexpand.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/unexpand.pl	2013-12-16 17:40:25.962878214 +0100
++++ coreutils-8.22/tests/misc/unexpand.pl	2014-01-08 13:55:56.140375131 +0100
 @@ -27,6 +27,14 @@ my $limits = getlimits ();
  
  my $prog = 'unexpand';
@@ -4559,7 +4559,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/unexpand.pl coreutils-8.22/tests/misc/
  
 diff -urNp coreutils-8.22-orig/tests/misc/uniq.pl coreutils-8.22/tests/misc/uniq.pl
 --- coreutils-8.22-orig/tests/misc/uniq.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/misc/uniq.pl	2013-12-16 17:41:34.077961751 +0100
++++ coreutils-8.22/tests/misc/uniq.pl	2014-01-08 13:55:56.141375121 +0100
 @@ -23,9 +23,17 @@ my $limits = getlimits ();
  my $prog = 'uniq';
  my $try = "Try '$prog --help' for more information.\n";
@@ -4626,7 +4626,7 @@ diff -urNp coreutils-8.22-orig/tests/misc/uniq.pl coreutils-8.22/tests/misc/uniq
  
 diff -urNp coreutils-8.22-orig/tests/pr/pr-tests.pl coreutils-8.22/tests/pr/pr-tests.pl
 --- coreutils-8.22-orig/tests/pr/pr-tests.pl	2013-12-04 15:48:30.000000000 +0100
-+++ coreutils-8.22/tests/pr/pr-tests.pl	2013-12-16 17:40:25.965877206 +0100
++++ coreutils-8.22/tests/pr/pr-tests.pl	2014-01-08 13:55:56.144375092 +0100
 @@ -23,6 +23,15 @@ use strict;
  
  my $prog = 'pr';
