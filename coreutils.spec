@@ -374,6 +374,8 @@ fi
 %changelog
 * Wed Jan 08 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-8
 - Don't use cut mb path if not necessary (#1021403, #499220)
+- several i18n patch improvements merged from OpenSUSE (fixed
+  compilation warnings, simplify mb handling in uniq)
 
 * Mon Jan 06 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-7
 - Fix sorting by non-first field (#1003544)
