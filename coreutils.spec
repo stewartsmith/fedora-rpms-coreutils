@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Fri Jan 10 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-9
+- Limit the cut optimizations to UTF-8 locales only
+
 * Wed Jan 08 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-8
 - Don't use cut mb path if not necessary (#1021403, #499220)
 - several i18n patch improvements merged from OpenSUSE (fixed
