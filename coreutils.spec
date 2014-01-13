@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -13,6 +13,7 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
+Patch1: coreutils-8.22-cp-selinux.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -126,6 +127,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %setup -q
 
 # From upstream
+%patch1 -p1 -b .nullcontext
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -151,7 +153,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
+chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/cp/no-ctx.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -372,6 +374,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Jan 13 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-11
+- cp/mv/install: do not crash when getfscreatecon() is
+  returning a NULL context
+
 * Mon Jan 13 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-10
 - unset the unnecessary envvars after colorls scripts(#1051703)
 - improve the limitation (check for both utf8 and utf-8)

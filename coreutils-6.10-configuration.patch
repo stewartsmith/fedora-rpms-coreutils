@@ -136,8 +136,8 @@ diff -urNp coreutils-8.21-orig/tests/local.mk coreutils-8.21/tests/local.mk
    tests/touch/now-owned-by-other.sh
  
 @@ -163,7 +164,6 @@ all_tests =					\
-   tests/rm/cycle.sh				\
    tests/cp/link-heap.sh				\
+   tests/cp/no-ctx.sh				\
    tests/misc/tty-eof.pl				\
 -  tests/tail-2/inotify-hash-abuse.sh		\
    tests/tail-2/inotify-hash-abuse2.sh		\
