@@ -51,6 +51,8 @@ if ( "$color_none" != '' ) then
 endif
 unset color_none
 unset _tmp
+unset INCLUDE
+unset COLORS
 
 finish:
 alias ll 'ls -l --color=auto'

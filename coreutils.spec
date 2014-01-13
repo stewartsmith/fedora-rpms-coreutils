@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Jan 13 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-10
+- unset the unnecessary envvars after colorls scripts(#1051703)
+- improve the limitation (check for both utf8 and utf-8)
+
 * Fri Jan 10 2014 Ondrej Oprala <ooprala@redhat.com> 8.22-9
 - Limit the cut optimizations to UTF-8 locales only
 

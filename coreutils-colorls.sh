@@ -45,6 +45,8 @@ if [ -z "$USER_LS_COLORS" ]; then
   grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
 fi
 
+unset TMP COLORS INCLUDE
+
 alias ll='ls -l --color=auto' 2>/dev/null
 alias l.='ls -d .* --color=auto' 2>/dev/null
 alias ls='ls --color=auto' 2>/dev/null
