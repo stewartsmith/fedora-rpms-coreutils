@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -14,6 +14,7 @@ Source106:  coreutils-colorls.csh
 
 # From upstream
 Patch1: coreutils-8.22-cp-selinux.patch
+Patch2: coreutils-8.22-datetzcrash.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -128,6 +129,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 # From upstream
 %patch1 -p1 -b .nullcontext
+%patch2 -p1 -b .tzcrash
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -374,6 +376,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sun Mar 02 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-12
+- fix the date crash or infloop in TZ="" parsing (#1069657)
+
 * Mon Jan 13 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-11
 - cp/mv/install: do not crash when getfscreatecon() is
   returning a NULL context
