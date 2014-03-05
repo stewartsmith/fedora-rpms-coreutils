@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -115,10 +115,6 @@ Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
 Obsoletes: textutils <= 2.0.21
-#coreutils-libs dropped in f17
-Obsoletes: coreutils-libs < 8.13
-#require util-linux >=2.22.1-3 to prevent lack of su/runuser on system
-Requires: util-linux >= 2.22.1-3
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -376,6 +372,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed Mar 05 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-13
+- drop the util-linux requirements (smaller docker images),
+  drop ancient obsoletes of -libs subpackage
+
 * Sun Mar 02 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-12
 - fix the date crash or infloop in TZ="" parsing (#1069657)
 
