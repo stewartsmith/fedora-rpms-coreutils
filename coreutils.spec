@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -15,6 +15,7 @@ Source106:  coreutils-colorls.csh
 # From upstream
 Patch1: coreutils-8.22-cp-selinux.patch
 Patch2: coreutils-8.22-datetzcrash.patch
+Patch3: coreutils-8.22-dd-sparsetest-xfsspeculativeprealloc.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -126,6 +127,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 # From upstream
 %patch1 -p1 -b .nullcontext
 %patch2 -p1 -b .tzcrash
+%patch3 -p1 -b .xfs
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -372,6 +374,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sat Apr 12 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-14
+- fix dd sparse test failure on xfs filesystem(#1085727,
+  by P.Brady)
+
 * Wed Mar 05 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-13
 - drop the util-linux requirements (smaller docker images),
   drop ancient obsoletes of -libs subpackage
