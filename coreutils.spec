@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -374,6 +374,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 8.22-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Sat Apr 12 2014 Ondrej Vasik <ovasik@redhat.com> 8.22-14
 - fix dd sparse test failure on xfs filesystem(#1085727,
   by P.Brady)
