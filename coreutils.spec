@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.22
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -16,6 +16,8 @@ Source106:  coreutils-colorls.csh
 Patch1: coreutils-8.22-cp-selinux.patch
 Patch2: coreutils-8.22-datetzcrash.patch
 Patch3: coreutils-8.22-dd-sparsetest-xfsspeculativeprealloc.patch
+#backport of patch from gnulib fixing tests on powerPC
+Patch4: coreutils-ppc-gnulib-tests.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -128,6 +130,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch1 -p1 -b .nullcontext
 %patch2 -p1 -b .tzcrash
 %patch3 -p1 -b .xfs
+%patch4 -p1 -b .ppc
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -374,6 +377,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Jun 23 2014 Jakub Čajka <jcajka@redhat.com> - 8.22-16
+- fix failed tests on ppc(backport from gnulib upstream)
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 8.22-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
