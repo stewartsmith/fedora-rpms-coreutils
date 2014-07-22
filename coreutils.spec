@@ -259,7 +259,9 @@ fi
 %dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
-%doc COPYING ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
+%doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 %{_bindir}/arch
 %{_bindir}/basename
 %{_bindir}/cat
@@ -371,6 +373,9 @@ fi
 - new upstream release 8.23
 - synchronize the old differences in ls SELinux options
   with upstream
+
+* Fri Jul 11 2014 Tom Callaway <spot@fedoraproject.org> - 8.22-17
+- fix license handling
 
 * Mon Jun 23 2014 Jakub Čajka <jcajka@redhat.com> - 8.22-16
 - fix failed tests on ppc(backport from gnulib upstream)
