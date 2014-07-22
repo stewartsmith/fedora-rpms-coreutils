@@ -1,11 +1,12 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.22
-Release: 16%{?dist}
+Version: 8.23
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
+Source2: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.lightbgcolor
 Source103:  coreutils-DIR_COLORS.256color
@@ -13,11 +14,6 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
-Patch1: coreutils-8.22-cp-selinux.patch
-Patch2: coreutils-8.22-datetzcrash.patch
-Patch3: coreutils-8.22-dd-sparsetest-xfsspeculativeprealloc.patch
-#backport of patch from gnulib fixing tests on powerPC
-Patch4: coreutils-ppc-gnulib-tests.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -125,12 +121,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
 %setup -q
-
-# From upstream
-%patch1 -p1 -b .nullcontext
-%patch2 -p1 -b .tzcrash
-%patch3 -p1 -b .xfs
-%patch4 -p1 -b .ppc
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -377,6 +367,11 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Tue Jul 22 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-1
+- new upstream release 8.23
+- synchronize the old differences in ls SELinux options
+  with upstream
+
 * Mon Jun 23 2014 Jakub Čajka <jcajka@redhat.com> - 8.22-16
 - fix failed tests on ppc(backport from gnulib upstream)
 
