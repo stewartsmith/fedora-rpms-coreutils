@@ -167,3 +167,54 @@ diff -urNp coreutils-8.22-orig/tests/misc/nohup.sh coreutils-8.22/tests/misc/noh
  
  nohup sh -c 'echo stdout; echo stderr 1>&2' 2>err || fail=1
  
+diff -urNp coreutils-8.23-orig/tests/df/skip-duplicates.sh coreutils-8.23/tests/df/skip-duplicates.sh
+--- coreutils-8.23-orig/tests/df/skip-duplicates.sh	2014-07-14 00:09:52.000000000 +0200
++++ coreutils-8.23/tests/df/skip-duplicates.sh	2014-07-24 15:53:33.473031545 +0200
+@@ -25,6 +25,10 @@ require_gcc_shared_
+ # potentially very many remote mounts.
+ df --local || skip_ "df fails"
+ 
++#mark it expensive, to temporarily skip the test in koji
++expensive_
++
++
+ export CU_NONROOT_FS=$(df --local --output=target 2>&1 | grep /. | head -n1)
+ test -z "$CU_NONROOT_FS" && unique_entries=1 || unique_entries=2
+ 
+diff -urNp coreutils-8.23-orig/Makefile.am coreutils-8.23/Makefile.am
+--- coreutils-8.23-orig/Makefile.am	2014-07-14 00:09:52.000000000 +0200
++++ coreutils-8.23/Makefile.am	2014-07-23 13:27:55.400895315 +0200
+@@ -50,7 +50,6 @@ EXTRA_DIST =				\
+   bootstrap				\
+   bootstrap.conf			\
+   build-aux/gen-lists-of-programs.sh	\
+-  build-aux/gen-single-binary.sh	\
+   cfg.mk				\
+   dist-check.mk				\
+   maint.mk				\
+@@ -58,7 +57,7 @@ EXTRA_DIST =				\
+   thanks-gen
+ 
+ gen_progs_lists = $(top_srcdir)/build-aux/gen-lists-of-programs.sh
+-gen_single_binary = $(top_srcdir)/build-aux/gen-single-binary.sh
++#gen_single_binary = $(top_srcdir)/build-aux/gen-single-binary.sh
+ 
+ # Keep these in sync with bootstrap.conf:bootstrap_post_import_hook().
+ # Use '$(top_srcdir)/m4' and '$(srcdir)/src' for the benefit of non-GNU
+@@ -72,10 +72,11 @@ $(srcdir)/src/cu-progs.mk: $(gen_progs_l
+ 	$(AM_V_GEN)rm -f $@ $@-t \
+ 	  && $(SHELL) $(gen_progs_lists) --automake >$@-t \
+ 	  && chmod a-w $@-t && mv -f $@-t $@
+-$(srcdir)/src/single-binary.mk: $(gen_single_binary) $(srcdir)/src/local.mk
+-	$(AM_V_GEN)rm -f $@ $@-t \
+-	  && $(SHELL) $(gen_single_binary) $(srcdir)/src/local.mk >$@-t \
+-	  && chmod a-w $@-t && mv -f $@-t $@
++#disable single binary, probably races in koji
++#$(srcdir)/src/single-binary.mk: $(gen_single_binary) $(srcdir)/src/local.mk
++#	$(AM_V_GEN)rm -f $@ $@-t \
++# 	  && $(SHELL) $(gen_single_binary) $(srcdir)/src/local.mk >$@-t \
++# 	  && chmod a-w $@-t && mv -f $@-t $@
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
+
