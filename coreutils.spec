@@ -170,7 +170,9 @@ automake --copy --add-missing
 # Regenerate manpages
 touch man/*.x
 
-make all %{?_smp_mflags}
+make all
+#recent build is broken with smp_mflags, have to investigate
+#%{?_smp_mflags}
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
