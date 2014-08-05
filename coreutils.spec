@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -14,6 +14,7 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
+Patch1: coreutils-8.23-chroot-chdir.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -122,6 +123,8 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %prep
 %setup -q
 
+%patch1 -p1 -b .chdir
+
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
@@ -170,9 +173,7 @@ automake --copy --add-missing
 # Regenerate manpages
 touch man/*.x
 
-make all
-#recent build is broken with smp_mflags, have to investigate
-#%{?_smp_mflags}
+make all %{?_smp_mflags}
 
 # XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
@@ -371,6 +372,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Tue Aug 05 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-2
+- enable smp_flags again (by B.Voelker)
+- fix regression in chroot
+
 * Tue Jul 22 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-1
 - new upstream release 8.23
 - synchronize the old differences in ls SELinux options
