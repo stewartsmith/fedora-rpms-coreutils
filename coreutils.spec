@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed Oct 01 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-4
+- fix the sorting in multibyte locales (NUL-terminate sort keys)
+  - patch by Andreas Schwab (#1146185)
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 8.23-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
