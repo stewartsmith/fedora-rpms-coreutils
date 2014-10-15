@@ -34,7 +34,14 @@ set INCLUDE="`cat "$COLORS" | grep '^INCLUDE' | cut -d ' ' -f2-`"
 
 if ( ! -e "$COLORS" ) exit
 
-set _tmp="`mktemp .colorlsXXX --tmpdir=/tmp`"
+set _tmp="`mktemp .colorlsXXX -q --tmpdir=/tmp`"
+#if mktemp fails, exit when include was active, otherwise use $COLORS file
+if ( "$_tmp" == '' ) then
+  if ( "$INCLUDE" == '' ) then
+    eval "`dircolors -c $COLORS`"
+  endif
+  goto cleanup
+endif
 
 if ( "$INCLUDE" != '' ) cat "$INCLUDE" >> $_tmp
 grep -v '^INCLUDE' "$COLORS" >> $_tmp
@@ -44,6 +51,7 @@ eval "`dircolors -c $_tmp`"
 rm -f $_tmp
 
 if ( "$LS_COLORS" == '' ) exit
+cleanup:
 set color_none=`sed -n '/^COLOR.*none/Ip' < $COLORS`
 if ( "$color_none" != '' ) then
    unset color_none

@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -372,6 +372,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed Oct 15 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-5
+- handle situation with ro /tmp in colorls scripts (#1149761)
+
 * Wed Oct 01 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-4
 - fix the sorting in multibyte locales (NUL-terminate sort keys)
   - patch by Andreas Schwab (#1146185)

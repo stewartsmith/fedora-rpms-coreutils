@@ -32,14 +32,19 @@ if [ -z "$USER_LS_COLORS" ]; then
   # Existence of $COLORS already checked above.
   [ -n "$COLORS" ] || return
 
-  TMP="`mktemp .colorlsXXX --tmpdir=/tmp`"
+  if [ -e "$INCLUDE" ];
+  then
+    TMP="`mktemp .colorlsXXX -q --tmpdir=/tmp`"
+    [ -z "$TMP" ] && return
 
-  [ -e "$INCLUDE" ] && cat "$INCLUDE" >> $TMP
-  grep -v '^INCLUDE' "$COLORS" >> $TMP
+    cat "$INCLUDE" >> $TMP
+    grep -v '^INCLUDE' "$COLORS" >> $TMP
 
-  eval "`dircolors --sh $TMP 2>/dev/null`"
-
-  rm -f $TMP
+    eval "`dircolors --sh $TMP 2>/dev/null`"
+    rm -f $TMP
+  else
+    eval "`dircolors --sh $COLORS 2>/dev/null`"
+  fi
 
   [ -z "$LS_COLORS" ] && return
   grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
