@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -228,6 +228,8 @@ find %{buildroot}%{_datadir}/locale -type l | \
  done)
 
 %find_lang %name
+#Add the %lang(xyz) ownership for the LC_TIME dirs as well...
+grep LC_TIME %name.lang | cut -d'/' -f1-6 | sed -e 's/) /) %%dir /g' >>%name.lang
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
@@ -259,7 +261,6 @@ fi
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
-%dir %{_datadir}/locale/*/LC_TIME
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
@@ -372,6 +373,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Dec 01 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-6
+- have the LC_TIME subdirs with lang macro (#1169027)
+
 * Wed Oct 15 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-5
 - handle situation with ro /tmp in colorls scripts (#1149761)
 
