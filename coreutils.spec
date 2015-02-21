@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -373,6 +373,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 8.23-7
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
 * Mon Dec 01 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-6
 - have the LC_TIME subdirs with lang macro (#1169027)
 
