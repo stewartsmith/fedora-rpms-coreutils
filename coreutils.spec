@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -263,7 +263,7 @@ fi
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
-%doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
+%doc ABOUT-NLS NEWS README THANKS TODO
 %{!?_licensedir:%global license %%doc}
 %license COPYING
 %{_bindir}/arch
@@ -373,6 +373,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sun Mar 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 8.23-8
+- Drop large ancient docs
+
 * Sat Feb 21 2015 Till Maas <opensource@till.name> - 8.23-7
 - Rebuilt for Fedora 23 Change
   https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
