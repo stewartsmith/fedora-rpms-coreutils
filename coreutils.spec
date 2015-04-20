@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -373,6 +373,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Mon Apr 20 2015 Pádraig Brady <pbrady@redhat.com> - 8.23-9
+- Adjust LS_COLORS in 256 color mode; brighten some, remove hardlink colors (#1196642)
+
 * Sun Mar 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 8.23-8
 - Drop large ancient docs
 
