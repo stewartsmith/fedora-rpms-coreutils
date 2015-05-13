@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -373,6 +373,10 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Wed May 13 2015 Ondrej Oprala <ooprala@redhat.com - 8.23-10
+- sort - fix buffer overflow in some case conversions
+  - patch by Pádraig Brady
+
 * Mon Apr 20 2015 Pádraig Brady <pbrady@redhat.com> - 8.23-9
 - Adjust LS_COLORS in 256 color mode; brighten some, remove hardlink colors (#1196642)
 
