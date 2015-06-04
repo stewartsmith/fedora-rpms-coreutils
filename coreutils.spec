@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 7%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -179,7 +179,7 @@ make all %{?_smp_mflags}
 sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
 
 %check
-make check
+make check %{?_smp_mflags}
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
@@ -263,7 +263,7 @@ fi
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
-%doc ABOUT-NLS ChangeLog.bz2 NEWS README THANKS TODO old/*
+%doc ABOUT-NLS NEWS README THANKS TODO
 %{!?_licensedir:%global license %%doc}
 %license COPYING
 %{_bindir}/arch
@@ -373,8 +373,25 @@ fi
 %{_sbindir}/chroot
 
 %changelog
-* Thu Jun 04 2015 Ondrej Vasik <ovasik@redhat.com> - 8.23-7
+* Thu Jun 04 2015 Ondrej Vasik <ovasik@redhat.com> - 8.23-12
 - call utilities in colorls.* scripts with full path (#1222140)
+
+* Thu May 14 2015 Kamil Dudka <kdudka@redhat.com> - 8.23-11
+- run 'make check' in parallel to speed up the build
+
+* Wed May 13 2015 Ondrej Oprala <ooprala@redhat.com> - 8.23-10
+- sort - fix buffer overflow in some case conversions
+  - patch by Pádraig Brady
+
+* Mon Apr 20 2015 Pádraig Brady <pbrady@redhat.com> - 8.23-9
+- Adjust LS_COLORS in 256 color mode; brighten some, remove hardlink colors (#1196642)
+
+* Sun Mar 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 8.23-8
+- Drop large ancient docs
+
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 8.23-7
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
 
 * Mon Dec 01 2014 Ondrej Vasik <ovasik@redhat.com> - 8.23-6
 - have the LC_TIME subdirs with lang macro (#1169027)

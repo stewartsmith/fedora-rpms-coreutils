@@ -3245,8 +3245,8 @@ diff -urNp coreutils-8.23-orig/src/sort.c coreutils-8.23/src/sort.c
 +
 +      if (ignore || translate)
 +        {
-+          char *copy_a = (char *) xmalloc (lena + 1 + lenb + 1);
-+          char *copy_b = copy_a + lena + 1;
++          char *copy_a = (char *) xmalloc ((lena + lenb) * MB_CUR_MAX + 2);
++          char *copy_b = copy_a + lena * MB_CUR_MAX + 1;
 +          size_t new_len_a, new_len_b;
 +          size_t i, j;
 +
@@ -3452,6 +3452,39 @@ diff -urNp coreutils-8.23-orig/src/sort.c coreutils-8.23/src/sort.c
            }
            break;
  
+diff -urNp coreutils-8.23-orig/tests/i18n/sort.sh coreutils-8.23/tests/i18n/sort.sh
+--- coreutils-8.23-orig/tests/i18n/sort.sh	1970-01-01 01:00:00.000000000 +0100
++++ coreutils-8.23/tests/i18n/sort.sh	2014-07-22 13:45:52.733652016 +0200
+@@ -0,0 +1,29 @@
++#!/bin/sh
++# Verify sort's multi-byte support.
++
++. "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
++print_ver_ sort
++
++export LC_ALL=en_US.UTF-8
++locale -k LC_CTYPE | grep -q "charmap.*UTF-8" \
++  || skip_ "No UTF-8 locale available"
++
++# Enable heap consistency checkng on older systems
++export MALLOC_CHECK_=2
++
++
++# check buffer overflow issue due to
++# expanding multi-byte representation due to case conversion
++# https://bugzilla.suse.com/show_bug.cgi?id=928749
++cat <<EOF > exp
++.
++ɑ
++EOF
++cat <<EOF | sort -f > out || fail=1
++.
++ɑ
++EOF
++compare exp out || { fail=1; cat out; }
++
++
++Exit $fail
 diff -urNp coreutils-8.23-orig/src/unexpand.c coreutils-8.23/src/unexpand.c
 --- coreutils-8.23-orig/src/unexpand.c	2014-07-11 13:00:07.000000000 +0200
 +++ coreutils-8.23/src/unexpand.c	2014-07-22 13:45:52.721651968 +0200
@@ -4099,11 +4132,12 @@ diff -urNp coreutils-8.23-orig/src/uniq.c coreutils-8.23/src/uniq.c
 diff -urNp coreutils-8.23-orig/tests/local.mk coreutils-8.23/tests/local.mk
 --- coreutils-8.23-orig/tests/local.mk	2014-07-22 13:45:10.494422571 +0200
 +++ coreutils-8.23/tests/local.mk	2014-07-22 13:45:52.726651988 +0200
-@@ -331,6 +331,7 @@ all_tests =					\
+@@ -331,6 +331,8 @@ all_tests =					\
    tests/misc/sort-discrim.sh			\
    tests/misc/sort-files0-from.pl		\
    tests/misc/sort-float.sh			\
 +  tests/misc/sort-mb-tests.sh			\
++  tests/i18n/sort.sh				\
    tests/misc/sort-merge.pl			\
    tests/misc/sort-merge-fdlimit.sh		\
    tests/misc/sort-month.sh			\
