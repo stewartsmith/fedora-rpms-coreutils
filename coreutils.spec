@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.23
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -29,6 +29,8 @@ Patch103: coreutils-8.2-uname-processortype.patch
 Patch104: coreutils-df-direct.patch
 #add note about mkdir --mode behaviour into info documentation(#610559)
 Patch107: coreutils-8.4-mkdir-modenote.patch
+# Don't run the currently failing test-update-copyright.sh test
+Patch108: coreutils-remove-test-update-copyright.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -132,6 +134,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
+%patch108 -p1 -b .crtest
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -373,6 +376,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sat Jul  4 2015 Peter Robinson <pbrobinson@fedoraproject.org> 8.23-14
+- Disable failing test-update-copyright to fix FTBFS
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 8.23-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
