@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.23
-Release: 14%{?dist}
+Version: 8.24
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -14,7 +14,6 @@ Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
 # From upstream
-Patch1: coreutils-8.23-chroot-chdir.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -124,8 +123,6 @@ the old GNU fileutils, sh-utils, and textutils packages.
 
 %prep
 %setup -q
-
-%patch1 -p1 -b .chdir
 
 # Our patches
 %patch100 -p1 -b .configure
@@ -376,6 +373,9 @@ fi
 %{_sbindir}/chroot
 
 %changelog
+* Sun Jul 05 2015 Ondrej Vasik <ovasik@redhat.com> 8.24-1
+- new upstream release 8.24
+
 * Sat Jul  4 2015 Peter Robinson <pbrobinson@fedoraproject.org> 8.23-14
 - Disable failing test-update-copyright to fix FTBFS
 
