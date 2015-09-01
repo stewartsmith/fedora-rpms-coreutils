@@ -30,6 +30,8 @@ Patch104: coreutils-df-direct.patch
 Patch107: coreutils-8.4-mkdir-modenote.patch
 # Don't run the currently failing test-update-copyright.sh test
 Patch108: coreutils-remove-test-update-copyright.patch
+#avoid false failure due to extra stat() calls done by opendir() in glibc 2.22
+Patch109: glibc-2.22-test-fix.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -132,6 +134,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
 %patch108 -p1 -b .crtest
+%patch109 -p1 -b .opendir_stat
 
 # sh-utils
 %patch703 -p1 -b .dateman
