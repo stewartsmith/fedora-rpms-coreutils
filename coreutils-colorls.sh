@@ -47,7 +47,7 @@ if [ -z "$USER_LS_COLORS" ]; then
   fi
 
   [ -z "$LS_COLORS" ] && return
-  grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
+  /usr/bin/grep -qi "^COLOR.*none" $COLORS >/dev/null 2>/dev/null && return
 fi
 
 unset TMP COLORS INCLUDE
