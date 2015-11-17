@@ -7,6 +7,7 @@ Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source2: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
+Source50:   supported_utils
 Source101:  coreutils-DIR_COLORS
 Source102:  coreutils-DIR_COLORS.lightbgcolor
 Source103:  coreutils-DIR_COLORS.256color
@@ -152,7 +153,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/cp/no-ctx.sh || :
+chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -167,28 +168,22 @@ touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
 autoconf --force
 automake --copy --add-missing
-%configure --enable-largefile \
+%configure --enable-install-program=arch \
+           --enable-no-install-program=uptime \
            --with-openssl \
-           --enable-install-program=hostname,arch \
            --with-tty-group \
            DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
 
-# Regenerate manpages
-touch man/*.x
-
 make all %{?_smp_mflags}
 
-# XXX docs should say /var/run/[uw]tmp not /etc/[uw]tmp
-sed -i -e 's,/etc/utmp,/var/run/utmp,g;s,/etc/wtmp,/var/run/wtmp,g' doc/coreutils.texi
+# Get the list of supported utilities
+cp %SOURCE50 .
 
 %check
 make check %{?_smp_mflags}
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
-
-# man pages are not installed with make install
-make mandir=$RPM_BUILD_ROOT%{_mandir} install-man
 
 # fix japanese catalog file
 if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
@@ -214,7 +209,10 @@ install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.s
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
 # These come from util-linux and/or procps.
-for i in hostname uptime kill ; do
+# With coreutils > 8.24 one can just add to --enable-no-install-program
+# rather than manually removing here, since tests depending on
+# built utilities are correctly skipped if not present.
+for i in kill ; do
     rm $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
 done
 
@@ -262,118 +260,16 @@ if [ -f %{_infodir}/%{name}.info.gz ]; then
   /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 fi
 
-%files -f %{name}.lang
+%files -f %{name}.lang -f supported_utils
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %doc ABOUT-NLS NEWS README THANKS TODO
 %{!?_licensedir:%global license %%doc}
 %license COPYING
-%{_bindir}/arch
-%{_bindir}/basename
-%{_bindir}/cat
-%{_bindir}/chgrp
-%{_bindir}/chmod
-%{_bindir}/chown
-%{_bindir}/cp
-%{_bindir}/cut
-%{_bindir}/date
-%{_bindir}/dd
-%{_bindir}/df
-%{_bindir}/echo
-%{_bindir}/env
-%{_bindir}/false
-%{_bindir}/link
-%{_bindir}/ln
-%{_bindir}/ls
-%{_bindir}/mkdir
-%{_bindir}/mknod
-%{_bindir}/mv
-%{_bindir}/nice
-%{_bindir}/pwd
-%{_bindir}/readlink
-%{_bindir}/rm
-%{_bindir}/rmdir
-%{_bindir}/sleep
-%{_bindir}/sort
-%{_bindir}/stty
-%{_bindir}/sync
-%{_bindir}/mktemp
-%{_bindir}/touch
-%{_bindir}/true
-%{_bindir}/uname
-%{_bindir}/unlink
-%{_bindir}/[
-%{_bindir}/base64
-%{_bindir}/chcon
-%{_bindir}/cksum
-%{_bindir}/comm
-%{_bindir}/csplit
-%{_bindir}/dir
-%{_bindir}/dircolors
-%{_bindir}/dirname
-%{_bindir}/du
-%{_bindir}/expand
-%{_bindir}/expr
-%{_bindir}/factor
-%{_bindir}/fmt
-%{_bindir}/fold
-%{_bindir}/groups
-%{_bindir}/head
-%{_bindir}/hostid
-%{_bindir}/id
-%{_bindir}/install
-%{_bindir}/join
-%{_bindir}/logname
-%{_bindir}/md5sum
-%{_bindir}/mkfifo
-%{_bindir}/nl
-%{_bindir}/nohup
-%{_bindir}/nproc
-%{_bindir}/numfmt
-%{_bindir}/od
-%{_bindir}/paste
-%{_bindir}/pathchk
-%{_bindir}/pinky
-%{_bindir}/pr
-%{_bindir}/printenv
-%{_bindir}/printf
-%{_bindir}/ptx
-%{_bindir}/realpath
-%{_bindir}/runcon
-%{_bindir}/seq
-%{_bindir}/sha1sum
-%{_bindir}/sha224sum
-%{_bindir}/sha256sum
-%{_bindir}/sha384sum
-%{_bindir}/sha512sum
-%{_bindir}/shred
-%{_bindir}/shuf
-%{_bindir}/split
-%{_bindir}/stat
-%{_bindir}/stdbuf
-%{_bindir}/sum
-%{_bindir}/tac
-%{_bindir}/tail
-%{_bindir}/tee
-%{_bindir}/test
-%{_bindir}/timeout
-%{_bindir}/tr
-%{_bindir}/truncate
-%{_bindir}/tsort
-%{_bindir}/tty
-%{_bindir}/unexpand
-%{_bindir}/uniq
-%{_bindir}/users
-%{_bindir}/vdir
-%{_bindir}/wc
-%{_bindir}/who
-%{_bindir}/whoami
-%{_bindir}/yes
 %{_infodir}/coreutils*
 %{_libexecdir}/coreutils*
 %{_mandir}/man*/*
-%{_sbindir}/chroot
 
 %changelog
 * Wed Sep 16 2015 Kamil Dudka <kdudka@redhat.com> - 8.24-4
