@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 4%{?dist}
+Release: 100%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -55,6 +55,8 @@ Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 
 Conflicts: filesystem < 3
+# To avoid clobbering installs during %post
+Conflicts: coreutils-single
 Provides: /bin/basename
 Provides: /bin/cat
 Provides: /bin/chgrp
@@ -100,6 +102,7 @@ BuildRequires: gmp-devel
 BuildRequires: attr
 BuildRequires: strace
 
+Requires: %{name}-common = %{version}-%{release}
 Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
@@ -119,10 +122,35 @@ Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
 Obsoletes: textutils <= 2.0.21
+Obsoletes: %{name} < 8.24-100
 
 %description
 These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
+
+%package single
+Summary:  coreutils multicall binary
+Suggests: coreutils-common
+Provides: coreutils
+# To avoid clobbering installs during %post
+Conflicts: coreutils < 8.24-100
+# Note RPM doesn't support separate buildroots for %files
+# http://rpm.org/ticket/874 so use RemovePathPostfixes
+# (new in rpm 4.13) to support separate file sets.
+RemovePathPostfixes: .single
+%description single
+These are the GNU core utilities,
+packaged as a single multicall binary.
+
+
+%package common
+# yum obsoleting rules explained at:
+# https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
+Obsoletes: %{name} < 8.24-100
+Summary:  coreutils common optional components
+%description common
+Optional though recommended components,
+including documentation and translations.
 
 %prep
 %setup -q
@@ -168,22 +196,53 @@ touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
 aclocal -I m4
 autoconf --force
 automake --copy --add-missing
-%configure --enable-install-program=arch \
-           --enable-no-install-program=uptime \
-           --with-openssl \
-           --with-tty-group \
-           DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
-
-make all %{?_smp_mflags}
+for type in separate single; do
+  mkdir $type && \
+  (cd $type && ln -s ../configure && \
+  test $type = 'single' && configure_single='--enable-single-binary'
+  %configure $configure_single \
+             --cache-file=../config.cache \
+             --enable-install-program=arch \
+             --enable-no-install-program=uptime \
+             --with-openssl \
+             --with-tty-group \
+             DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
+  mkdir src # not needed with coreutils > 8.24
+  make all %{?_smp_mflags})
+done
 
 # Get the list of supported utilities
 cp %SOURCE50 .
 
 %check
-make check %{?_smp_mflags}
+for type in separate single; do
+  test $type = 'single' && subdirs='SUBDIRS=.' # Only check gnulib once
+  (cd $type && make check %{?_smp_mflags} $subdirs)
+done
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT install
+for type in separate single; do
+  install=install
+  if test $type = 'single'; then
+    subdir=%{_libexecdir}/%{name}; install=install-exec
+  fi
+  (cd $type && make DESTDIR=$RPM_BUILD_ROOT/$subdir $install)
+
+  # chroot was in /usr/sbin :
+  mkdir -p $RPM_BUILD_ROOT/$subdir/{%{_bindir},%{_sbindir}}
+  mv $RPM_BUILD_ROOT/$subdir/{%_bindir,%_sbindir}/chroot
+
+  # Move multicall variants to *.single.
+  # RemovePathPostfixes will strip that later.
+  if test $type = 'single'; then
+    for dir in %{_bindir} %{_sbindir} %{_libexecdir}/%{name}; do
+      for bin in $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/$dir/*; do
+        basebin=$(basename $bin)
+        mv $bin $RPM_BUILD_ROOT/$dir/$basebin.single
+      done
+    done
+  fi
+done
 
 # fix japanese catalog file
 if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
@@ -194,12 +253,6 @@ if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
 fi
 
 bzip2 -9f ChangeLog
-
-# let be compatible with old fileutils, sh-utils and textutils packages :
-mkdir -p $RPM_BUILD_ROOT{%{_bindir},%{_sbindir}}
-
-# chroot was in /usr/sbin :
-mv $RPM_BUILD_ROOT{%_bindir,%_sbindir}/chroot
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
@@ -213,7 +266,8 @@ install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.c
 # rather than manually removing here, since tests depending on
 # built utilities are correctly skipped if not present.
 for i in kill ; do
-    rm $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
+    rm -f $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
+    rm -f $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/{%{_bindir}/$i,%{_mandir}/man1/$i.1}
 done
 
 # Compress ChangeLogs from before the fileutils/textutils/etc merge
@@ -260,18 +314,34 @@ if [ -f %{_infodir}/%{name}.info.gz ]; then
   /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 fi
 
-%files -f %{name}.lang -f supported_utils
+%files -f supported_utils
+%defattr(-,root,root,-)
+%exclude %{_bindir}/*.single
+%{_libexecdir}/coreutils/*.so
+
+%files single
+%defattr(-,root,root,-)
+%{_bindir}/*.single
+%{_sbindir}/chroot.single
+%{_libexecdir}/coreutils/*.so.single
+
+%files common -f %{name}.lang
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
+%{_infodir}/coreutils*
+%{_mandir}/man*/*
+# The following go to /usr/share/doc/coreutils-common
 %doc ABOUT-NLS NEWS README THANKS TODO
 %{!?_licensedir:%global license %%doc}
 %license COPYING
 %{_infodir}/coreutils*
-%{_libexecdir}/coreutils*
 %{_mandir}/man*/*
 
 %changelog
+* Wed Nov 18 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-100
+- Split package to more easily support smaller installs
+
 * Wed Sep 16 2015 Kamil Dudka <kdudka@redhat.com> - 8.24-4
 - fix memory leak in sort/I18N (patches written by Pádraig, #1259942)
 
