@@ -55,7 +55,7 @@ Patch950: coreutils-selinux.patch
 Patch951: coreutils-selinuxmanpages.patch
 
 Conflicts: filesystem < 3
-# To avoid clobbering installs during %post
+# To avoid clobbering installs
 Conflicts: coreutils-single
 Provides: /bin/basename
 Provides: /bin/cat
@@ -132,7 +132,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 Summary:  coreutils multicall binary
 Suggests: coreutils-common
 Provides: coreutils = %{version}-%{release}
-# To avoid clobbering installs during %post
+# To avoid clobbering installs
 Conflicts: coreutils < 8.24-100
 # Note RPM doesn't support separate buildroots for %files
 # http://rpm.org/ticket/874 so use RemovePathPostfixes
