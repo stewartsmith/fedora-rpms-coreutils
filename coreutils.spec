@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 100%{?dist}
+Release: 101%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -131,7 +131,7 @@ the old GNU fileutils, sh-utils, and textutils packages.
 %package single
 Summary:  coreutils multicall binary
 Suggests: coreutils-common
-Provides: coreutils
+Provides: coreutils = %{version}-%{release}
 # To avoid clobbering installs during %post
 Conflicts: coreutils < 8.24-100
 # Note RPM doesn't support separate buildroots for %files
@@ -339,6 +339,9 @@ fi
 %{_mandir}/man*/*
 
 %changelog
+* Mon Nov 30 2015 Ondrej Vasik <ovasik@redhat.com> - 8.24-101
+- coreutils-single should provide versioned coreutils (#1286338)
+
 * Wed Nov 18 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-100
 - Split package to more easily support smaller installs
 
