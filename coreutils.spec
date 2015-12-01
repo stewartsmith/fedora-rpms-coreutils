@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 101%{?dist}
+Release: 102%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -41,6 +41,8 @@ Patch713: coreutils-4.5.3-langinfo.patch
 
 # (sb) lin18nux/lsb compliance - multibyte functionality patch
 Patch800: coreutils-i18n.patch
+# (sb) lin18nux/lsb compliance - expand/unexpand
+Patch801: coreutils-i18n-expand-unexpand.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -171,6 +173,7 @@ including documentation and translations.
 
 # li18nux/lsb
 %patch800 -p1 -b .i18n
+%patch801 -p1 -b .i18n-expand
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
@@ -339,6 +342,9 @@ fi
 %{_mandir}/man*/*
 
 %changelog
+* Tue Dec 01 2015 Ondrej Oprala <ooprala@redhat.com> - 8.24-102
+- Use the new i18n implementation for expand/unexpand
+
 * Mon Nov 30 2015 Ondrej Vasik <ovasik@redhat.com> - 8.24-101
 - coreutils-single should provide versioned coreutils (#1286338)
 
