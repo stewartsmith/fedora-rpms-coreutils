@@ -338,8 +338,6 @@ fi
 %doc ABOUT-NLS NEWS README THANKS TODO
 %{!?_licensedir:%global license %%doc}
 %license COPYING
-%{_infodir}/coreutils*
-%{_mandir}/man*/*
 
 %changelog
 * Tue Dec 01 2015 Ondrej Oprala <ooprala@redhat.com> - 8.24-102
