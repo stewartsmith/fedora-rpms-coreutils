@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 102%{?dist}
+Release: 103%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -270,7 +270,7 @@ install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.c
 # built utilities are correctly skipped if not present.
 for i in kill ; do
     rm -f $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
-    rm -f $RPM_BUILD_ROOT/%{_libexecdir}/%{name}/{%{_bindir}/$i,%{_mandir}/man1/$i.1}
+    rm -f $RPM_BUILD_ROOT%{_bindir}/$i.single
 done
 
 # Compress ChangeLogs from before the fileutils/textutils/etc merge
@@ -340,6 +340,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Dec 03 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-103
+- Remove erroneous /usr/bin/kill from coreutils-single
+
 * Tue Dec 01 2015 Ondrej Oprala <ooprala@redhat.com> - 8.24-102
 - Use the new i18n implementation for expand/unexpand
 
