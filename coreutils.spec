@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 103%{?dist}
+Release: 104%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -13,6 +13,12 @@ Source102:  coreutils-DIR_COLORS.lightbgcolor
 Source103:  coreutils-DIR_COLORS.256color
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
+
+# Provide our own custom requires for coreutils-single package
+Source10: coreutils-find-requires.sh
+%global _use_internal_dependency_generator 0
+%global __find_provides %{_rpmconfigdir}/find-provides
+%global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
 
 # From upstream
 
@@ -110,7 +116,6 @@ Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Requires(post): grep
 Requires:       ncurses
-Requires:       gmp
 
 Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
@@ -201,13 +206,18 @@ autoconf --force
 automake --copy --add-missing
 for type in separate single; do
   mkdir $type && \
-  (cd $type && ln -s ../configure && \
-  test $type = 'single' && configure_single='--enable-single-binary'
-  %configure $configure_single \
+  (cd $type && ln -s ../configure || exit 1
+  if test $type = 'single'; then
+    config_single='--enable-single-binary'
+    config_single="$config_single --without-openssl"  # smaller/slower sha*sum
+    config_single="$config_single --without-gmp"      # expr/factor machine ints
+  else
+    config_single='--with-openssl'  # faster sha*sum
+  fi
+  %configure $config_single \
              --cache-file=../config.cache \
              --enable-install-program=arch \
              --enable-no-install-program=uptime \
-             --with-openssl \
              --with-tty-group \
              DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
   mkdir src # not needed with coreutils > 8.24
@@ -340,6 +350,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Dec 03 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-104
+- Avoid libgmp and libcrypto dependencies from coreutils-single
+
 * Thu Dec 03 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-103
 - Remove erroneous /usr/bin/kill from coreutils-single
 
