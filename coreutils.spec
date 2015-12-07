@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 106%{?dist}
+Release: 107%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -52,6 +52,8 @@ Patch713: coreutils-4.5.3-langinfo.patch
 Patch800: coreutils-i18n.patch
 # (sb) lin18nux/lsb compliance - expand/unexpand
 Patch801: coreutils-i18n-expand-unexpand.patch
+# (sb) lin18nux/lsb compliance - cut
+Patch802: coreutils-i18n-cut.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -184,6 +186,7 @@ including documentation and translations.
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 %patch801 -p1 -b .i18n-expand
+%patch802 -p1 -b .i18n-cut
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
@@ -356,6 +359,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Jan 15 2016 Ondrej Oprala <ooprala@redhat.com> - 8.24-107
+- Use the new i18n implementation for the cut utility
+
 * Wed Jan 13 2016 Ondrej Vasik <ovasik@redhat.com> - 8.24-106
 - mv: prevent dataloss when source dir is specified multiple
   times (#1297464, by P.Brady)

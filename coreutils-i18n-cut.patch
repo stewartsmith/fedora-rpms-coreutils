@@ -1,0 +1,583 @@
+--- coreutils-8.24/src/cut.c	2015-06-26 19:05:22.000000000 +0200
++++ cut.c	2016-01-15 10:15:04.863804121 +0100
+@@ -28,6 +28,11 @@
+ #include <assert.h>
+ #include <getopt.h>
+ #include <sys/types.h>
++
++#include <mbfile.h>
++#include <mbiter.h>
++#include <string.h>
++
+ #include "system.h"
+ 
+ #include "error.h"
+@@ -90,25 +95,16 @@ add_range_pair (size_t lo, size_t hi)
+   ++n_rp;
+ }
+ 
+-/* This buffer is used to support the semantics of the -s option
+-   (or lack of same) when the specified field list includes (does
+-   not include) the first field.  In both of those cases, the entire
+-   first field must be read into this buffer to determine whether it
+-   is followed by a delimiter or a newline before any of it may be
+-   output.  Otherwise, cut_fields can do the job without using this
+-   buffer.  */
+-static char *field_1_buffer;
+-
+-/* The number of bytes allocated for FIELD_1_BUFFER.  */
+-static size_t field_1_bufsize;
+-
+ enum operating_mode
+   {
+     undefined_mode,
+ 
+-    /* Output characters that are in the given bytes. */
++    /* Output the given bytes. */
+     byte_mode,
+ 
++    /* Output characters that are in the given positions . */
++    char_mode,
++
+     /* Output the given delimiter-separated fields. */
+     field_mode
+   };
+@@ -120,12 +116,16 @@ static enum operating_mode operating_mod
+    with field mode.  */
+ static bool suppress_non_delimited;
+ 
++/* Unless true, we do not recognize multibyte characters in byte-splitting
++   mode.  */
++static bool no_break_mb_chars;
++
+ /* If true, print all bytes, characters, or fields _except_
+    those that were specified.  */
+ static bool complement;
+ 
+ /* The delimiter character for field mode. */
+-static unsigned char delim;
++static mbf_char_t delim;
+ 
+ /* True if the --output-delimiter=STRING option was specified.  */
+ static bool output_delimiter_specified;
+@@ -135,7 +135,7 @@ static size_t output_delimiter_length;
+ 
+ /* The output field separator string.  Defaults to the 1-character
+    string consisting of the input delimiter.  */
+-static char *output_delimiter_string;
++static char const *output_delimiter_string;
+ 
+ /* True if we have ever read standard input. */
+ static bool have_read_stdin;
+@@ -189,7 +189,7 @@ Print selected parts of lines from each
+   -f, --fields=LIST       select only these fields;  also print any line\n\
+                             that contains no delimiter character, unless\n\
+                             the -s option is specified\n\
+-  -n                      (ignored)\n\
++  -n                      with -b, don't split multibyte characters\n\
+ "), stdout);
+       fputs (_("\
+       --complement        complement the set of selected bytes, characters\n\
+@@ -435,6 +435,12 @@ next_item (size_t *item_idx)
+     current_rp++;
+ }
+ 
++static inline void
++next_item_n (size_t *item_idx, size_t n)
++{
++  while (n-- > 0)
++    next_item (item_idx);
++}
+ /* Return nonzero if the K'th field or byte is printable. */
+ 
+ static inline bool
+@@ -443,6 +449,15 @@ print_kth (size_t k)
+   return current_rp->lo <= k;
+ }
+ 
++/* The lo and hi params should be used for the current characters byte position
++ * and byte size, respectively. */
++static inline bool
++rp_intersect (size_t lo, size_t hi)
++{
++  return ((current_rp->lo <= lo && current_rp->hi >= lo)
++	  || (current_rp->lo <= hi && current_rp->hi >= hi));
++}
++
+ /* Return nonzero if K'th byte is the beginning of a range. */
+ 
+ static inline bool
+@@ -505,23 +520,216 @@ cut_bytes (FILE *stream)
+ }
+ 
+ /* Read from stream STREAM, printing to standard output any selected fields.  */
++extern ssize_t
++mb_getndelim2 (mbf_char_t **lineptr, size_t *linesize, size_t nmax,
++	       mbf_char_t delim1, mbf_char_t delim2, mb_file_t *stream)
++{
++/* The maximum value that getndelim2 can return without suffering from
++   overflow problems, either internally (because of pointer
++   subtraction overflow) or due to the API (because of ssize_t).  */
++#define GETNDELIM2_MAXIMUM (PTRDIFF_MAX < SSIZE_MAX ? PTRDIFF_MAX : SSIZE_MAX)
++
++/* Try to add at least this many bytes when extending the buffer.
++   MIN_CHUNK must be no greater than GETNDELIM2_MAXIMUM.  */
++#define MIN_CHUNK 64
++  size_t nchars_avail;          /* Allocated but unused chars in *LINEPTR.  */
++  mbf_char_t *read_pos;               /* Where we're reading into *LINEPTR. */
++  ssize_t chars_stored = -1;
++  mbf_char_t *ptr = *lineptr;
++  size_t size = *linesize;
++  bool found_delimiter;
++
++  if (!ptr)
++    {
++      size = nmax < MIN_CHUNK ? nmax : MIN_CHUNK;
++      ptr = malloc (size * sizeof (mbf_char_t));
++      if (!ptr)
++        return -1;
++    }
++
++  if (size < 0)
++    goto done;
++
++  nchars_avail = size;
++  read_pos = ptr;
++
++  if (nchars_avail == 0 && nmax <= size)
++    goto done;
++
++  /* Normalize delimiters, since memchr2 doesn't handle EOF.  */
++  if (mb_iseof (delim1))
++    mb_copy (&delim1, &delim2);
++  else if (mb_iseof (delim2))
++    mb_copy (&delim2, &delim1);
++
++  flockfile (stream);
++
++  found_delimiter = false;
++  do
++    {
++      /* Here always ptr + size == read_pos + nchars_avail.
++         Also nchars_avail > 0 || size < nmax.  */
++
++      mbf_char_t c IF_LINT (= 0);
++        {
++          mbf_getc (c, *stream);
++          if (mb_iseof (c))
++            {
++              /* Return partial line, if any.  */
++              if (read_pos == ptr)
++                goto unlock_done;
++              else
++                break;
++            }
++          if (mb_equal (c, delim1) || mb_equal (c, delim2))
++            found_delimiter = true;
++        }
++
++      /* We always want at least one byte left in the buffer, since we
++         always (unless we get an error while reading the first byte)
++         NUL-terminate the line buffer.  */
++
++      if (!nchars_avail)
++        {
++          /* Grow size proportionally, not linearly, to avoid O(n^2)
++             running time.  */
++          size_t newsize = size < MIN_CHUNK ? size + MIN_CHUNK : 2 * size;
++          mbf_char_t *newptr;
++
++          /* Respect nmax.  This handles possible integer overflow.  */
++          if (! (size < newsize && newsize <= nmax))
++            newsize = nmax;
++
++          if (GETNDELIM2_MAXIMUM < newsize)
++            {
++              size_t newsizemax = GETNDELIM2_MAXIMUM + 1;
++              if (size == newsizemax)
++                goto unlock_done;
++              newsize = newsizemax;
++            }
++          nchars_avail = newsize - (read_pos - ptr);
++          newptr = realloc (ptr, newsize * sizeof (mbf_char_t));
++          if (!newptr)
++            goto unlock_done;
++          ptr = newptr;
++          size = newsize;
++          read_pos = size - nchars_avail + ptr;
++        }
++
++      /* Here, if size < nmax, nchars_avail >= buffer_len + 1.
++         If size == nmax, nchars_avail > 0.  */
++
++      if (1 < nchars_avail)
++        {
++          mb_copy(read_pos++, &c);
++          --nchars_avail;
++        }
++
++    }
++  while (!found_delimiter);
++
++  chars_stored = (read_pos - ptr);
++
++ unlock_done:
++  funlockfile (stream);
++
++ done:
++  *lineptr = ptr;
++  *linesize = size;
++  return chars_stored;
++}
++
++static void
++cut_chars (FILE *stream)
++{
++  size_t char_idx;	/* Number of chars in the line so far. */
++  bool print_delimiter;
++  mbf_char_t c;
++  mb_file_t mbf;
++
++  print_delimiter = false;
++  char_idx = 0;
++  current_rp = rp;
++
++  mbf_init (mbf, stream);
++  while (true)
++    {
++      mbf_getc (c, mbf);
++
++      if (mb_iseq (c, '\n'))
++	{
++	  putc ('\n', stdout);
++	  char_idx = 0;
++	  print_delimiter = false;
++          current_rp = rp;
++	}
++      else if (mb_iseof (c))
++	{
++	  if (char_idx > 0)
++	    putc ('\n', stdout);
++	  break;
++	}
++      else
++	{
++	  /* Forward by one byte.  */
++	  next_item (&char_idx);
++
++	  /* Check if the current characters byte range is within
++	   * the argument list.  */
++	  if (rp_intersect (char_idx, char_idx + mb_len (c) - 1))
++	    {
++	      if (output_delimiter_specified)
++		{
++		  if (print_delimiter && is_range_start_index (char_idx))
++		    {
++		      fwrite (output_delimiter_string, sizeof (char),
++			      output_delimiter_length, stdout);
++		    }
++		  print_delimiter = true;
++		}
++	      mb_putc (c, stdout);
++	    }
++
++	  /* Byte mode with multibyte characters uncut (-b -n).  */
++	  if (no_break_mb_chars)
++	    /* Forward by an additional byte_length (c) - 1.  */
++	    next_item_n (&char_idx, mb_len (c) - 1);
++       }
++    }
++}
+ 
+ static void
+ cut_fields (FILE *stream)
+ {
+-  int c;
++
++  /* This buffer is used to support the semantics of the -s option
++     (or lack of same) when the specified field list includes (does
++     not include) the first field.  In both of those cases, the entire
++     first field must be read into this buffer to determine whether it
++     is followed by a delimiter or a newline before any of it may be
++     output.  Otherwise, cut_fields can do the job without using this
++     buffer.  */
++  mbf_char_t *field_1_buffer = 0;
++  /* The number of bytes allocated for FIELD_1_BUFFER.  */
++  size_t field_1_bufsize;
++
++
++  mbf_char_t c, d;
++  mb_file_t mbf;
+   size_t field_idx = 1;
+   bool found_any_selected_field = false;
+   bool buffer_first_field;
+ 
+   current_rp = rp;
+ 
+-  c = getc (stream);
+-  if (c == EOF)
++  mbf_init (mbf, stream);
++  mbf_getc (c, mbf);
++  if (mb_iseof (c))
+     return;
+ 
+-  ungetc (c, stream);
+-  c = 0;
++  mbf_ungetc (c, mbf);
++  mb_setascii (&c, 0);
++  mb_copy (&d, &delim);
+ 
+   /* To support the semantics of the -s flag, we may have to buffer
+      all of the first field to determine whether it is 'delimited.'
+@@ -536,10 +744,14 @@ cut_fields (FILE *stream)
+       if (field_idx == 1 && buffer_first_field)
+         {
+           ssize_t len;
+-          size_t n_bytes;
++          size_t n_chars;
++	  mbf_char_t nl;
++	  mb_setascii (&nl, '\n');
++
++          len = mb_getndelim2 (&field_1_buffer, &field_1_bufsize,
++			       GETNLINE_NO_LIMIT, d, nl, &mbf);
++
+ 
+-          len = getndelim2 (&field_1_buffer, &field_1_bufsize, 0,
+-                            GETNLINE_NO_LIMIT, delim, '\n', stream);
+           if (len < 0)
+             {
+               free (field_1_buffer);
+@@ -549,15 +761,15 @@ cut_fields (FILE *stream)
+               xalloc_die ();
+             }
+ 
+-          n_bytes = len;
+-          assert (n_bytes != 0);
++          n_chars = len;
++          //assert (n_chars != 0);
+ 
+-          c = 0;
++	  mb_setascii (&c, 0);
+ 
+           /* If the first field extends to the end of line (it is not
+              delimited) and we are printing all non-delimited lines,
+              print this one.  */
+-          if (to_uchar (field_1_buffer[n_bytes - 1]) != delim)
++          if (!mb_equal (field_1_buffer[n_chars - 1], d))
+             {
+               if (suppress_non_delimited)
+                 {
+@@ -565,26 +777,30 @@ cut_fields (FILE *stream)
+                 }
+               else
+                 {
+-                  fwrite (field_1_buffer, sizeof (char), n_bytes, stdout);
++		  for (int i = 0; i < n_chars; ++i)
++		    mb_putc (field_1_buffer[i], stdout);
++
+                   /* Make sure the output line is newline terminated.  */
+-                  if (field_1_buffer[n_bytes - 1] != '\n')
++                  if (!mb_iseq (field_1_buffer[n_chars - 1], '\n'))
+                     putchar ('\n');
+-                  c = '\n';
++                  mb_setascii (&c,'\n');
+                 }
+               continue;
+             }
+           if (print_kth (1))
+             {
+               /* Print the field, but not the trailing delimiter.  */
+-              fwrite (field_1_buffer, sizeof (char), n_bytes - 1, stdout);
++	      for (int i = 0; i < n_chars - 1; ++i)
++		mb_putc (field_1_buffer[i], stdout);
+ 
+               /* With -d$'\n' don't treat the last '\n' as a delimiter.  */
+-              if (delim == '\n')
++              if (mb_iseq (d, '\n'))
+                 {
+-                  int last_c = getc (stream);
+-                  if (last_c != EOF)
++                  mbf_char_t last_c;
++		  mbf_getc (last_c, mbf);
++                  if (!mb_iseof (last_c))
+                     {
+-                      ungetc (last_c, stream);
++                      mbf_ungetc (last_c, mbf);
+                       found_any_selected_field = true;
+                     }
+                 }
+@@ -594,7 +810,8 @@ cut_fields (FILE *stream)
+           next_item (&field_idx);
+         }
+ 
+-      int prev_c = c;
++      mbf_char_t prev_c;
++      mb_copy (&prev_c, &c);
+ 
+       if (print_kth (field_idx))
+         {
+@@ -605,41 +822,46 @@ cut_fields (FILE *stream)
+             }
+           found_any_selected_field = true;
+ 
+-          while ((c = getc (stream)) != delim && c != '\n' && c != EOF)
++	  mbf_getc (c, mbf);
++          while (!mb_equal (c, d) && !mb_iseq (c, '\n') && !mb_iseof (c))
+             {
+-              putchar (c);
+-              prev_c = c;
++              mb_putc (c, stdout);
++	      mb_copy (&prev_c, &c);
++	      mbf_getc (c, mbf);
+             }
+         }
+       else
+         {
+-          while ((c = getc (stream)) != delim && c != '\n' && c != EOF)
++	  mbf_getc (c, mbf);
++          while (!mb_equal (c, d) && !mb_iseq (c, '\n') && !mb_iseof (c))
+             {
+-              prev_c = c;
++	      mb_copy (&prev_c, &c);
++	      mbf_getc (c, mbf);
+             }
+         }
+ 
+       /* With -d$'\n' don't treat the last '\n' as a delimiter.  */
+-      if (delim == '\n' && c == delim)
++      if (mb_iseq (d, '\n') && mb_equal (c, d))
+         {
+-          int last_c = getc (stream);
+-          if (last_c != EOF)
+-            ungetc (last_c, stream);
++	  mbf_char_t last_c;
++	  mbf_getc (last_c, mbf);
++	  if (!mb_iseof (last_c))
++	    mbf_ungetc (last_c, mbf);
+           else
+-            c = last_c;
++	    mb_copy (&c, &last_c);
+         }
+ 
+-      if (c == delim)
++      if (mb_equal (c, d))
+         next_item (&field_idx);
+-      else if (c == '\n' || c == EOF)
++      else if (mb_iseq (c, '\n') || mb_iseof (c))
+         {
+           if (found_any_selected_field
+               || !(suppress_non_delimited && field_idx == 1))
+             {
+-              if (c == '\n' || prev_c != '\n' || delim == '\n')
++              if (mb_iseq (c, '\n') || !mb_iseq (prev_c, '\n') || mb_iseq (d, '\n'))
+                 putchar ('\n');
+             }
+-          if (c == EOF)
++          if (mb_iseof (c))
+             break;
+           field_idx = 1;
+           current_rp = rp;
+@@ -652,7 +874,14 @@ static void
+ cut_stream (FILE *stream)
+ {
+   if (operating_mode == byte_mode)
+-    cut_bytes (stream);
++    {
++      if (no_break_mb_chars)
++	cut_chars (stream);
++      else
++	cut_bytes (stream);
++    }
++  else if (operating_mode == char_mode)
++    cut_chars (stream);
+   else
+     cut_fields (stream);
+ }
+@@ -706,6 +935,7 @@ main (int argc, char **argv)
+   bool ok;
+   bool delim_specified = false;
+   char *spec_list_string IF_LINT ( = NULL);
++  mbi_iterator_t iter;
+ 
+   initialize_main (&argc, &argv);
+   set_program_name (argv[0]);
+@@ -719,8 +949,10 @@ main (int argc, char **argv)
+ 
+   /* By default, all non-delimited lines are printed.  */
+   suppress_non_delimited = false;
++  /* Default behaviour for -b, unless -n is also specified.  */
++  no_break_mb_chars = false;
+ 
+-  delim = '\0';
++  mb_setascii (&delim, '\0');
+   have_read_stdin = false;
+ 
+   while ((optc = getopt_long (argc, argv, "b:c:d:f:ns", longopts, NULL)) != -1)
+@@ -728,7 +960,6 @@ main (int argc, char **argv)
+       switch (optc)
+         {
+         case 'b':
+-        case 'c':
+           /* Build the byte list. */
+           if (operating_mode != undefined_mode)
+             FATAL_ERROR (_("only one type of list may be specified"));
+@@ -736,6 +967,14 @@ main (int argc, char **argv)
+           spec_list_string = optarg;
+           break;
+ 
++        case 'c':
++          /* Build the char list. */
++          if (operating_mode != undefined_mode)
++            FATAL_ERROR (_("only one type of list may be specified"));
++          operating_mode = char_mode;
++          spec_list_string = optarg;
++          break;
++
+         case 'f':
+           /* Build the field list. */
+           if (operating_mode != undefined_mode)
+@@ -747,9 +986,15 @@ main (int argc, char **argv)
+         case 'd':
+           /* New delimiter. */
+           /* Interpret -d '' to mean 'use the NUL byte as the delimiter.'  */
+-          if (optarg[0] != '\0' && optarg[1] != '\0')
++	  mbi_init (iter, optarg, strlen (optarg));
++	  if  (!mbi_avail (iter))
++	    mb_setascii (&delim, '\0');
++	  else
++	    mb_copy (&delim, &mbi_cur (iter));
++
++	  mbi_advance (iter);
++          if (mbi_avail (iter))
+             FATAL_ERROR (_("the delimiter must be a single character"));
+-          delim = optarg[0];
+           delim_specified = true;
+           break;
+ 
+@@ -763,6 +1008,7 @@ main (int argc, char **argv)
+           break;
+ 
+         case 'n':
++	  no_break_mb_chars = true;
+           break;
+ 
+         case 's':
+@@ -802,15 +1048,12 @@ main (int argc, char **argv)
+     }
+ 
+   if (!delim_specified)
+-    delim = '\t';
++    mb_setascii (&delim, '\t');
+ 
+   if (output_delimiter_string == NULL)
+     {
+-      static char dummy[2];
+-      dummy[0] = delim;
+-      dummy[1] = '\0';
+-      output_delimiter_string = dummy;
+-      output_delimiter_length = 1;
++      output_delimiter_string = mb_ptr (delim);
++      output_delimiter_length = mb_len (delim);
+     }
+ 
+   if (optind == argc)
