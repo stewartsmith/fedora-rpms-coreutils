@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 104%{?dist}
+Release: 105%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -65,6 +65,8 @@ Patch951: coreutils-selinuxmanpages.patch
 Conflicts: filesystem < 3
 # To avoid clobbering installs
 Conflicts: coreutils-single
+# To give priority to this package
+Obsoletes: coreutils-single
 Provides: /bin/basename
 Provides: /bin/cat
 Provides: /bin/chgrp
@@ -350,6 +352,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Dec 14 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-105
+- Give explicit priority to coreutils over coreutils-single
+
 * Thu Dec 03 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-104
 - Avoid libgmp and libcrypto dependencies from coreutils-single
 
