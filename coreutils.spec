@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 105%{?dist}
+Release: 106%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -20,7 +20,10 @@ Source10: coreutils-find-requires.sh
 %global __find_provides %{_rpmconfigdir}/find-provides
 %global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
 
-# From upstream
+# From upstream 
+#mv: prevent dataloss when source directory is specified multiple t imes
+Patch1: coreutils-8.24-mv-duplicate-sources.patch
+
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -186,12 +189,13 @@ including documentation and translations.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .testoff
+%patch1 -p1 -b .dupl
 
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
+chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/mv-dup-source.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -352,6 +356,10 @@ fi
 %license COPYING
 
 %changelog
+* Wed Jan 13 2016 Ondrej Vasik <ovasik@redhat.com> - 8.24-106
+- mv: prevent dataloss when source dir is specified multiple
+  times (#1297464, by P.Brady)
+
 * Mon Dec 14 2015 Pádraig Brady <pbrady@redhat.com> - 8.24-105
 - Give explicit priority to coreutils over coreutils-single
 
