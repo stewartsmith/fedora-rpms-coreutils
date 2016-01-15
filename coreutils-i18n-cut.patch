@@ -536,7 +536,7 @@
          case 'f':
            /* Build the field list. */
            if (operating_mode != undefined_mode)
-@@ -747,9 +986,15 @@ main (int argc, char **argv)
+@@ -747,9 +986,17 @@ main (int argc, char **argv)
          case 'd':
            /* New delimiter. */
            /* Interpret -d '' to mean 'use the NUL byte as the delimiter.'  */
@@ -545,11 +545,13 @@
 +	  if  (!mbi_avail (iter))
 +	    mb_setascii (&delim, '\0');
 +	  else
-+	    mb_copy (&delim, &mbi_cur (iter));
++           {
++             mb_copy (&delim, &mbi_cur (iter));
 +
-+	  mbi_advance (iter);
-+          if (mbi_avail (iter))
++             mbi_advance (iter);
++             if (mbi_avail (iter))
              FATAL_ERROR (_("the delimiter must be a single character"));
++           }
 -          delim = optarg[0];
            delim_specified = true;
            break;

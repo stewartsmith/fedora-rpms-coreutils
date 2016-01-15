@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.24
-Release: 107%{?dist}
+Release: 108%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -359,6 +359,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Jan 15 2016 Ondrej Oprala <ooprala@redhat.com> - 8.24-108
+- cut: be MB for ALL archs
+
 * Fri Jan 15 2016 Ondrej Oprala <ooprala@redhat.com> - 8.24-107
 - Use the new i18n implementation for the cut utility
 
