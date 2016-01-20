@@ -13,8 +13,8 @@
  
  #include "error.h"
 @@ -90,25 +95,16 @@ add_range_pair (size_t lo, size_t hi)
-   ++n_rp;
- }
+    CURRENT_RP.HI then we make CURRENT_RP to point to the next range pair. */
+ static struct field_range_pair *current_rp;
  
 -/* This buffer is used to support the semantics of the -s option
 -   (or lack of same) when the specified field list includes (does
@@ -58,8 +58,8 @@
 -static unsigned char delim;
 +static mbf_char_t delim;
  
- /* True if the --output-delimiter=STRING option was specified.  */
- static bool output_delimiter_specified;
+ /* The delimiter for each line/record. */
+ static unsigned char line_delim = '\n';
 @@ -135,7 +135,7 @@ static size_t output_delimiter_length;
  
  /* The output field separator string.  Defaults to the 1-character
@@ -240,24 +240,24 @@
 +
 +  print_delimiter = false;
 +  char_idx = 0;
-+  current_rp = rp;
++  current_rp = frp;
 +
 +  mbf_init (mbf, stream);
 +  while (true)
 +    {
 +      mbf_getc (c, mbf);
 +
-+      if (mb_iseq (c, '\n'))
++      if (mb_iseq (c, line_delim))
 +	{
-+	  putc ('\n', stdout);
++	  putc (line_delim, stdout);
 +	  char_idx = 0;
 +	  print_delimiter = false;
-+          current_rp = rp;
++          current_rp = frp;
 +	}
 +      else if (mb_iseof (c))
 +	{
 +	  if (char_idx > 0)
-+	    putc ('\n', stdout);
++	    putc (line_delim, stdout);
 +	  break;
 +	}
 +      else
@@ -312,7 +312,7 @@
    bool found_any_selected_field = false;
    bool buffer_first_field;
  
-   current_rp = rp;
+   current_rp = frp;
  
 -  c = getc (stream);
 -  if (c == EOF)
@@ -336,14 +336,14 @@
 -          size_t n_bytes;
 +          size_t n_chars;
 +	  mbf_char_t nl;
-+	  mb_setascii (&nl, '\n');
++	  mb_setascii (&nl, line_delim);
 +
 +          len = mb_getndelim2 (&field_1_buffer, &field_1_bufsize,
 +			       GETNLINE_NO_LIMIT, d, nl, &mbf);
 +
  
 -          len = getndelim2 (&field_1_buffer, &field_1_bufsize, 0,
--                            GETNLINE_NO_LIMIT, delim, '\n', stream);
+-                            GETNLINE_NO_LIMIT, delim, line_delim, stream);
            if (len < 0)
              {
                free (field_1_buffer);
@@ -376,11 +376,11 @@
 +		    mb_putc (field_1_buffer[i], stdout);
 +
                    /* Make sure the output line is newline terminated.  */
--                  if (field_1_buffer[n_bytes - 1] != '\n')
-+                  if (!mb_iseq (field_1_buffer[n_chars - 1], '\n'))
-                     putchar ('\n');
--                  c = '\n';
-+                  mb_setascii (&c,'\n');
+-                  if (field_1_buffer[n_bytes - 1] != line_delim)
++                  if (!mb_iseq (field_1_buffer[n_chars - 1], line_delim))
+                     putchar (line_delim);
+-                  c = line_delim;
++                  mb_setascii (&c, line_delim);
                  }
                continue;
              }
@@ -392,8 +392,8 @@
 +		mb_putc (field_1_buffer[i], stdout);
  
                /* With -d$'\n' don't treat the last '\n' as a delimiter.  */
--              if (delim == '\n')
-+              if (mb_iseq (d, '\n'))
+-              if (delim == line_delim)
++              if (mb_iseq (d, line_delim))
                  {
 -                  int last_c = getc (stream);
 -                  if (last_c != EOF)
@@ -416,13 +416,13 @@
  
        if (print_kth (field_idx))
          {
-@@ -605,41 +822,46 @@ cut_fields (FILE *stream)
+@@ -605,42 +822,46 @@ cut_fields (FILE *stream)
              }
            found_any_selected_field = true;
  
--          while ((c = getc (stream)) != delim && c != '\n' && c != EOF)
+-          while ((c = getc (stream)) != delim && c != line_delim && c != EOF)
 +	  mbf_getc (c, mbf);
-+          while (!mb_equal (c, d) && !mb_iseq (c, '\n') && !mb_iseof (c))
++          while (!mb_equal (c, d) && !mb_iseq (c, line_delim) && !mb_iseof (c))
              {
 -              putchar (c);
 -              prev_c = c;
@@ -433,9 +433,9 @@
          }
        else
          {
--          while ((c = getc (stream)) != delim && c != '\n' && c != EOF)
+-          while ((c = getc (stream)) != delim && c != line_delim && c != EOF)
 +	  mbf_getc (c, mbf);
-+          while (!mb_equal (c, d) && !mb_iseq (c, '\n') && !mb_iseof (c))
++          while (!mb_equal (c, d) && !mb_iseq (c, line_delim) && !mb_iseof (c))
              {
 -              prev_c = c;
 +	      mb_copy (&prev_c, &c);
@@ -444,8 +444,8 @@
          }
  
        /* With -d$'\n' don't treat the last '\n' as a delimiter.  */
--      if (delim == '\n' && c == delim)
-+      if (mb_iseq (d, '\n') && mb_equal (c, d))
+-      if (delim == line_delim && c == delim)
++      if (mb_iseq (d, line_delim) && mb_equal (c, d))
          {
 -          int last_c = getc (stream);
 -          if (last_c != EOF)
@@ -462,21 +462,22 @@
 -      if (c == delim)
 +      if (mb_equal (c, d))
          next_item (&field_idx);
--      else if (c == '\n' || c == EOF)
-+      else if (mb_iseq (c, '\n') || mb_iseof (c))
+-      else if (c == line_delim || c == EOF)
++      else if (mb_iseq (c, line_delim) || mb_iseof (c))
          {
            if (found_any_selected_field
                || !(suppress_non_delimited && field_idx == 1))
              {
--              if (c == '\n' || prev_c != '\n' || delim == '\n')
-+              if (mb_iseq (c, '\n') || !mb_iseq (prev_c, '\n') || mb_iseq (d, '\n'))
-                 putchar ('\n');
+-              if (c == line_delim || prev_c != line_delim
+-                  || delim == line_delim)
++              if (mb_iseq (c, line_delim) || !mb_iseq (prev_c, line_delim) || mb_iseq (d, line_delim))
+                 putchar (line_delim);
              }
 -          if (c == EOF)
 +          if (mb_iseof (c))
              break;
            field_idx = 1;
-           current_rp = rp;
+           current_rp = frp;
 @@ -652,7 +874,14 @@ static void
  cut_stream (FILE *stream)
  {
@@ -512,7 +513,7 @@
 +  mb_setascii (&delim, '\0');
    have_read_stdin = false;
  
-   while ((optc = getopt_long (argc, argv, "b:c:d:f:ns", longopts, NULL)) != -1)
+   while ((optc = getopt_long (argc, argv, "b:c:d:f:nsz", longopts, NULL)) != -1)
 @@ -728,7 +960,6 @@ main (int argc, char **argv)
        switch (optc)
          {
@@ -565,7 +566,7 @@
  
          case 's':
 @@ -802,15 +1048,12 @@ main (int argc, char **argv)
-     }
+               | (complement ? SETFLD_COMPLEMENT : 0) );
  
    if (!delim_specified)
 -    delim = '\t';

@@ -150,7 +150,7 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
 -
 -  if (istream == NULL)
 -    {
--      error (0, errno, "%s", filename);
+-      error (0, errno, "%s", quotef (filename));
 -      return false;
 -    }
  
@@ -394,7 +394,7 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
 +
    if (ferror (istream))
      {
-       error (0, saved_errno, "%s", filename);
+       error (0, saved_errno, "%s", quotef (filename));
 @@ -251,7 +498,8 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
@@ -493,7 +493,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 +   else
      {
        /* Skip leading blanks before the first field.  */
-       while (isblank (to_uchar (*ptr)))
+       while (field_sep (*ptr))
 @@ -305,6 +322,147 @@ xfields (struct line *line)
    extract_field (line, ptr, lim - ptr);
  }
@@ -1240,7 +1240,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
 -  clump_buff = xmalloc (MAX (8, chars_per_input_tab));
 +  clump_buff = xmalloc (mb_len * MAX (8, chars_per_input_tab));
  }
- 
+ 
  /* Open the necessary files,
 @@ -1383,7 +1506,7 @@ init_funcs (void)
  
@@ -2685,33 +2685,6 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            }
            break;
  
-@@ -4681,10 +5374,10 @@ main (int argc, char **argv)
- 
-   if (nfiles == 0)
-     {
--      static char *minus = (char *) "-";
-       nfiles = 1;
-       free (files);
--      files = &minus;
-+      files = xmalloc (sizeof *files);
-+      *files = (char *) "-";
-     }
- 
-   /* Need to re-check that we meet the minimum requirement for memory
-@@ -4742,6 +5435,13 @@ main (int argc, char **argv)
-       sort (files, nfiles, outfile, nthreads);
-     }
- 
-+#ifdef lint
-+  if (files_from)
-+    readtokens0_free (&tok);
-+  else
-+    free (files);
-+#endif
-+
-   if (have_read_stdin && fclose (stdin) == EOF)
-     die (_("close failed"), "-");
- 
 diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 --- coreutils-8.24-orig/src/uniq.c	2015-06-26 19:04:19.000000000 +0200
 +++ coreutils-8.24/src/uniq.c	2015-07-05 09:04:33.032546980 +0200
@@ -2733,12 +2706,13 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
  #include "system.h"
  #include "argmatch.h"
  #include "linebuffer.h"
-@@ -32,7 +43,19 @@
+@@ -32,8 +43,20 @@
  #include "stdio--.h"
  #include "xmemcoll.h"
  #include "xstrtol.h"
 -#include "memcasecmp.h"
 +#include "xmemcoll.h"
+ #include "quote.h"
 +
 +/* MB_LEN_MAX is incorrectly defined to be 1 in at least one GCC
 +   installation; work around this configuration error.  */

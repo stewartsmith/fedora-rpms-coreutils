@@ -433,14 +433,14 @@ index 0a40a1a..ed97fd4 100644
 -    {
 -      if (ferror (fp))
 -        {
--          error (0, errno, "%s", prev_file);
+-          error (0, errno, "%s", quotef (prev_file));
 -          exit_status = EXIT_FAILURE;
 -        }
 -      if (STREQ (prev_file, "-"))
 -        clearerr (fp);		/* Also clear EOF.  */
 -      else if (fclose (fp) != 0)
 -        {
--          error (0, errno, "%s", prev_file);
+-          error (0, errno, "%s", quotef (prev_file));
 -          exit_status = EXIT_FAILURE;
 -        }
 -    }
@@ -460,7 +460,7 @@ index 0a40a1a..ed97fd4 100644
 -          fadvise (fp, FADVISE_SEQUENTIAL);
 -          return fp;
 -        }
--      error (0, errno, "%s", file);
+-      error (0, errno, "%s", quotef (file));
 -      exit_status = EXIT_FAILURE;
 -    }
 -  return NULL;
@@ -748,14 +748,14 @@ index e0f7c22..48fbb32 100644
 -    {
 -      if (ferror (fp))
 -        {
--          error (0, errno, "%s", prev_file);
+-          error (0, errno, "%s", quotef (prev_file));
 -          exit_status = EXIT_FAILURE;
 -        }
 -      if (STREQ (prev_file, "-"))
 -        clearerr (fp);		/* Also clear EOF.  */
 -      else if (fclose (fp) != 0)
 -        {
--          error (0, errno, "%s", prev_file);
+-          error (0, errno, "%s", quotef (prev_file));
 -          exit_status = EXIT_FAILURE;
 -        }
 -    }
@@ -775,7 +775,7 @@ index e0f7c22..48fbb32 100644
 -          fadvise (fp, FADVISE_SEQUENTIAL);
 -          return fp;
 -        }
--      error (0, errno, "%s", file);
+-      error (0, errno, "%s", quotef (file));
 -      exit_status = EXIT_FAILURE;
 -    }
 -  return NULL;

@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.24
-Release: 108%{?dist}
+Version: 8.25
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -21,27 +21,18 @@ Source10: coreutils-find-requires.sh
 %global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
 
 # From upstream 
-#mv: prevent dataloss when source directory is specified multiple t imes
-Patch1: coreutils-8.24-mv-duplicate-sources.patch
-
 
 # Our patches
 #general patch to workaround koji build system issues
 Patch100: coreutils-6.10-configuration.patch
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
-#temporarily workaround probable kernel issue with TCSADRAIN(#504798)
-Patch102: coreutils-7.4-sttytcsadrain.patch
 #do display processor type for uname -p/-i based on uname(2) syscall
 Patch103: coreutils-8.2-uname-processortype.patch
 #df --direct
 Patch104: coreutils-df-direct.patch
 #add note about mkdir --mode behaviour into info documentation(#610559)
 Patch107: coreutils-8.4-mkdir-modenote.patch
-# Don't run the currently failing test-update-copyright.sh test
-Patch108: coreutils-remove-test-update-copyright.patch
-#avoid false failure due to extra stat() calls done by opendir() in glibc 2.22
-Patch109: glibc-2.22-test-fix.patch
 
 # sh-utils
 #add info about TZ envvar to date manpage
@@ -172,12 +163,9 @@ including documentation and translations.
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
-%patch102 -p1 -b .tcsadrain
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
-%patch108 -p1 -b .crtest
-%patch109 -p1 -b .opendir_stat
 
 # sh-utils
 %patch703 -p1 -b .dateman
@@ -192,13 +180,12 @@ including documentation and translations.
 %patch908 -p1 -b .getgrouplist
 %patch912 -p1 -b .overflow
 %patch913 -p1 -b .testoff
-%patch1 -p1 -b .dupl
 
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
 
-chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh tests/mv-dup-source.sh || :
+chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -359,6 +346,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Jan 20 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-1
+- new upstream release(#1300282)
+
 * Fri Jan 15 2016 Ondrej Oprala <ooprala@redhat.com> - 8.24-108
 - cut: be MB for ALL archs
 
