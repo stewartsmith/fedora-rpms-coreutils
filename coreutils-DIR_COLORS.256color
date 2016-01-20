@@ -21,14 +21,8 @@ COLOR tty
 OPTIONS -F -T 0
 
 # Below, there should be one TERM entry for each termtype that is colorizable
-TERM putty-256color
-TERM rxvt-256color
-TERM rxvt-unicode-256color
+TERM *256color*
 TERM rxvt-unicode256
-TERM screen-256color
-TERM xterm-256color
-TERM gnome-256color
-TERM st-256color
 
 # EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
 EIGHTBIT 1
