@@ -562,7 +562,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 +          }
 +        mblength = (mblength < 1) ? 1 : mblength;
 +
-+        if (!iswblank(wc))
++        if (!iswblank(wc) && wc != '\n')
 +          break;
 +        ptr += mblength;
 +      }
@@ -593,7 +593,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 +		}
 +	      mblength = (mblength < 1) ? 1 : mblength;
 +
-+	      if (iswblank (wc))
++	      if (iswblank (wc) || wc == '\n')
 +		break;
 +
 +	      sep += mblength;
@@ -626,7 +626,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 +		}
 +	      mblength = (mblength < 1) ? 1 : mblength;
 +
-+	      if (!iswblank (wc))
++	      if (!iswblank (wc) && wc != '\n')
 +		break;
 +
 +	      ptr += mblength;
@@ -1799,7 +1799,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
 +    }
 +
 +  *length = (mblength < 1) ? 1 : mblength;
-+  return iswblank (wc);
++  return iswblank (wc) || wc == '\n';
 +}
 +#endif
 +
@@ -2685,6 +2685,19 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            }
            break;
  
+@@ -5444,12 +5444,10 @@ main (int argc, char **argv)
+       sort (files, nfiles, outfile, nthreads);
+     }
+ 
+-#ifdef lint
+   if (files_from)
+     readtokens0_free (&tok);
+   else
+     free (files);
+-#endif
+ 
+   if (have_read_stdin && fclose (stdin) == EOF)
+     die (_("close failed"), "-");
 diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 --- coreutils-8.24-orig/src/uniq.c	2015-06-26 19:04:19.000000000 +0200
 +++ coreutils-8.24/src/uniq.c	2015-07-05 09:04:33.032546980 +0200
@@ -2799,7 +2812,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 +        {
 +          MBCHAR_TO_WCHAR (wc, mblength, lp, pos, size, statep, convfail);
 + 
-+          if (convfail || !iswblank (wc))
++          if (convfail || !(iswblank (wc) || wc == '\n'))
 +            {
 +              pos += mblength;
 +              break;
@@ -2811,7 +2824,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 +        {
 +          MBCHAR_TO_WCHAR (wc, mblength, lp, pos, size, statep, convfail);
 +
-+          if (!convfail && iswblank (wc))
++          if (!convfail && (iswblank (wc) || wc == '\n'))
 +            break;
 +
 +          pos += mblength;

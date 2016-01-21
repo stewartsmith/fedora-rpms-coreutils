@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -346,6 +346,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Jan 21 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-2
+- Adjust the i18n patch for coreutils-8.25
+
 * Wed Jan 20 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-1
 - new upstream release(#1300282)
 
