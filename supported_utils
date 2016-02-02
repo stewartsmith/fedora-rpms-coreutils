@@ -33,6 +33,7 @@
 %{_bindir}/uname
 %{_bindir}/unlink
 %{_bindir}/[
+%{_bindir}/base32
 %{_bindir}/base64
 %{_bindir}/chcon
 %{_bindir}/cksum

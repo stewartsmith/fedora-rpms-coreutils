@@ -348,6 +348,7 @@ fi
 %changelog
 * Thu Jan 21 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-2
 - Adjust the i18n patch for coreutils-8.25
+- add new base32 binary
 
 * Wed Jan 20 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-1
 - new upstream release(#1300282)
