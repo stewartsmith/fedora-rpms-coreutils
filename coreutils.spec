@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -45,6 +45,8 @@ Patch800: coreutils-i18n.patch
 Patch801: coreutils-i18n-expand-unexpand.patch
 # (sb) lin18nux/lsb compliance - cut
 Patch802: coreutils-i18n-cut.patch
+# The unexpand patch above is not correct. Sent to the patch authors
+Patch803: coreutils-i18n-fix-unexpand.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -175,6 +177,7 @@ including documentation and translations.
 %patch800 -p1 -b .i18n
 %patch801 -p1 -b .i18n-expand
 %patch802 -p1 -b .i18n-cut
+%patch803 -p1 -b .i18n-fix-expand
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
@@ -346,6 +349,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Feb 11 2016 Lubomir Rintel <lkundrak@v3.sk> - 8.25-3
+- Fix a regression in unexpand empty line handling
+
 * Thu Jan 21 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-2
 - Adjust the i18n patch for coreutils-8.25
 - add new base32 binary
