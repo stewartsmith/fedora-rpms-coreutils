@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -349,6 +349,10 @@ fi
 %license COPYING
 
 %changelog
+* Mon Feb 15 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-4
+- cut: fix regression in handling fields for lines wider
+  than 64 chars (#1304839)
+
 * Thu Feb 11 2016 Lubomir Rintel <lkundrak@v3.sk> - 8.25-3
 - Fix a regression in unexpand empty line handling
 

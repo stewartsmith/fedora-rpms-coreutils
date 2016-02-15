@@ -107,7 +107,7 @@
  /* Return nonzero if K'th byte is the beginning of a range. */
  
  static inline bool
-@@ -505,23 +520,216 @@ cut_bytes (FILE *stream)
+@@ -505,23 +520,215 @@ cut_bytes (FILE *stream)
  }
  
  /* Read from stream STREAM, printing to standard output any selected fields.  */
@@ -210,10 +210,9 @@
 +      /* Here, if size < nmax, nchars_avail >= buffer_len + 1.
 +         If size == nmax, nchars_avail > 0.  */
 +
-+      if (1 < nchars_avail)
++      if (1 < nchars_avail--)
 +        {
 +          mb_copy(read_pos++, &c);
-+          --nchars_avail;
 +        }
 +
 +    }
