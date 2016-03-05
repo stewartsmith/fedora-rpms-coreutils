@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -43,8 +43,9 @@ Patch713: coreutils-4.5.3-langinfo.patch
 Patch800: coreutils-i18n.patch
 # (sb) lin18nux/lsb compliance - expand/unexpand
 Patch801: coreutils-i18n-expand-unexpand.patch
-# (sb) lin18nux/lsb compliance - cut
+# (sb) lin18nux/lsb compliance - cut - not stable enough, not applied
 Patch802: coreutils-i18n-cut.patch
+# i18n patch for cut - old version - used
 # The unexpand patch above is not correct. Sent to the patch authors
 Patch803: coreutils-i18n-fix-unexpand.patch
 
@@ -176,7 +177,7 @@ including documentation and translations.
 # li18nux/lsb
 %patch800 -p1 -b .i18n
 %patch801 -p1 -b .i18n-expand
-%patch802 -p1 -b .i18n-cut
+#%%patch802 -p1 -b .i18n-cut
 %patch803 -p1 -b .i18n-fix-expand
 
 # Coreutils
@@ -349,6 +350,9 @@ fi
 %license COPYING
 
 %changelog
+* Sat Mar 05 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-5
+- cut: move back to the old i18n implementation (#1314722)
+
 * Mon Feb 15 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-4
 - cut: fix regression in handling fields for lines wider
   than 64 chars (#1304839)
