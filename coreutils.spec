@@ -46,6 +46,7 @@ Patch801: coreutils-i18n-expand-unexpand.patch
 # (sb) lin18nux/lsb compliance - cut - not stable enough, not applied
 Patch802: coreutils-i18n-cut.patch
 # i18n patch for cut - old version - used
+Patch804: coreutils-i18n-cut-old.patch
 # The unexpand patch above is not correct. Sent to the patch authors
 Patch803: coreutils-i18n-fix-unexpand.patch
 
@@ -179,6 +180,7 @@ including documentation and translations.
 %patch801 -p1 -b .i18n-expand
 #%%patch802 -p1 -b .i18n-cut
 %patch803 -p1 -b .i18n-fix-expand
+%patch804 -p1 -b .i18n-cutold
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
