@@ -219,10 +219,9 @@ for type in separate single; do
   %configure $config_single \
              --cache-file=../config.cache \
              --enable-install-program=arch \
-             --enable-no-install-program=uptime \
+             --enable-no-install-program=kill,uptime \
              --with-tty-group \
              DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
-  mkdir src # not needed with coreutils > 8.24
   make all %{?_smp_mflags})
 done
 
@@ -275,15 +274,6 @@ install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.lightbgc
 install -p -c -m644 %SOURCE103 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.256color
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
-
-# These come from util-linux and/or procps.
-# With coreutils > 8.24 one can just add to --enable-no-install-program
-# rather than manually removing here, since tests depending on
-# built utilities are correctly skipped if not present.
-for i in kill ; do
-    rm -f $RPM_BUILD_ROOT{%{_bindir}/$i,%{_mandir}/man1/$i.1}
-    rm -f $RPM_BUILD_ROOT%{_bindir}/$i.single
-done
 
 # Compress ChangeLogs from before the fileutils/textutils/etc merge
 bzip2 -f9 old/*/C*
