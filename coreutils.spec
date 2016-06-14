@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -49,6 +49,8 @@ Patch802: coreutils-i18n-cut.patch
 Patch804: coreutils-i18n-cut-old.patch
 # The unexpand patch above is not correct. Sent to the patch authors
 Patch803: coreutils-i18n-fix-unexpand.patch
+#(un)expand - allow multiple files on input - broken by patch 801
+Patch805: coreutils-i18n-fix2-expand-unexpand.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -181,6 +183,7 @@ including documentation and translations.
 #%%patch802 -p1 -b .i18n-cut
 %patch803 -p1 -b .i18n-fix-expand
 %patch804 -p1 -b .i18n-cutold
+%patch805 -p1 -b .i18n-fix2-expand-unexpand
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
@@ -342,6 +345,10 @@ fi
 %license COPYING
 
 %changelog
+* Thu Jun 09 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-6
+- (un)expand: fix regression in handling input files, where only
+  the first file was processed.
+
 * Sat Mar 05 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-5
 - cut: move back to the old i18n implementation (#1314722)
 
