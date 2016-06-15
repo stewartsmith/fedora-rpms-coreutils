@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -297,7 +297,7 @@ grep LC_TIME %name.lang | cut -d'/' -f1-6 | sed -e 's/) /) %%dir /g' >>%name.lan
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
-%pre
+%pre common
 # We must deinstall these info files since they're merged in
 # coreutils.info. else their postun'll be run too late
 # and install-info will fail badly because of duplicates
@@ -307,14 +307,14 @@ for file in sh-utils textutils fileutils; do
   fi
 done
 
-%preun
+%preun common
 if [ $1 = 0 ]; then
   if [ -f %{_infodir}/%{name}.info.gz ]; then
     /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
   fi
 fi
 
-%post
+%post common
 %{_bindir}/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
   %{_infodir}/dir.rpmmodify || exit 0
     /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
@@ -345,6 +345,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Jun 15 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-7
+- handle info doc in RPM scriptlets of coreutils-common, which provides it
+
 * Thu Jun 09 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-6
 - (un)expand: fix regression in handling input files, where only
   the first file was processed.
