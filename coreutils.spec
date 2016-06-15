@@ -332,6 +332,9 @@ fi
 %{_bindir}/*.single
 %{_sbindir}/chroot.single
 %{_libexecdir}/coreutils/*.so.single
+# duplicate the license because coreutils-common does not need to be installed
+%{!?_licensedir:%global license %%doc}
+%license COPYING
 
 %files common -f %{name}.lang
 %defattr(-,root,root,-)
@@ -341,12 +344,12 @@ fi
 %{_mandir}/man*/*
 # The following go to /usr/share/doc/coreutils-common
 %doc ABOUT-NLS NEWS README THANKS TODO
-%{!?_licensedir:%global license %%doc}
 %license COPYING
 
 %changelog
 * Wed Jun 15 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-7
 - handle info doc in RPM scriptlets of coreutils-common, which provides it
+- make sure that the license file is installed, even if coreutils-common is not
 
 * Thu Jun 09 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-6
 - (un)expand: fix regression in handling input files, where only
