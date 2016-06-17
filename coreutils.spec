@@ -8,9 +8,6 @@ Url:     http://www.gnu.org/software/coreutils/
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source2: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
 Source50:   supported_utils
-Source101:  coreutils-DIR_COLORS
-Source102:  coreutils-DIR_COLORS.lightbgcolor
-Source103:  coreutils-DIR_COLORS.256color
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
@@ -27,6 +24,8 @@ Source10: coreutils-find-requires.sh
 Patch100: coreutils-6.10-configuration.patch
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
+# downstream changes to default DIR_COLORS
+Patch102: coreutils-8.25-DIR_COLORS.patch
 #do display processor type for uname -p/-i based on uname(2) syscall
 Patch103: coreutils-8.2-uname-processortype.patch
 #df --direct
@@ -166,9 +165,13 @@ including documentation and translations.
 %prep
 %setup -q
 
+# will be modified by coreutils-8.25-DIR_COLORS.patch
+tee DIR_COLORS{,.256color,.lightbgcolor} < src/dircolors.hin
+
 # Our patches
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
+%patch102 -p1
 %patch103 -p1 -b .sysinfo
 %patch104 -p1 -b .dfdirect
 %patch107 -p1 -b .mkdirmode
@@ -272,9 +275,8 @@ fi
 bzip2 -9f ChangeLog
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
-install -p -c -m644 %SOURCE101 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS
-install -p -c -m644 %SOURCE102 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.lightbgcolor
-install -p -c -m644 %SOURCE103 $RPM_BUILD_ROOT%{_sysconfdir}/DIR_COLORS.256color
+install -p -c -m644 DIR_COLORS{,.256color,.lightbgcolor} \
+    $RPM_BUILD_ROOT%{_sysconfdir}
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
