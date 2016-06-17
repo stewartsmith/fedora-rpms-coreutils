@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -347,6 +347,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Jun 17 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-8
+- sync /etc/DIR_COLORS with latest upstream (#1335320)
+
 * Wed Jun 15 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-7
 - handle info doc in RPM scriptlets of coreutils-common, which provides it
 - make sure that the license file is installed, even if coreutils-common is not

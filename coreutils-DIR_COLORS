@@ -1,34 +1,23 @@
-# Configuration file for the color ls utility
-# Synchronized with coreutils 8.5 dircolors
+# Configuration file for dircolors, a utility to help you set the
+# LS_COLORS environment variable used by GNU ls with the --color option.
+
 # This file goes in the /etc directory, and must be world readable.
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
 
-# COLOR needs one of these arguments: 'tty' colorizes output to ttys, but not
-# pipes. 'all' adds color characters to all output. 'none' shuts colorization
-# off.
-COLOR tty
+# Copyright (C) 1996-2016 Free Software Foundation, Inc.
+# Copying and distribution of this file, with or without modification,
+# are permitted provided the copyright notice and this notice are preserved.
 
-# Extra command line options for ls go here.
-# Basically these ones are:
-#  -F = show '/' for dirs, '*' for executables, etc.
-#  -T 0 = don't trust tab spacing when formatting ls output.
-OPTIONS -F -T 0
+# The keywords COLOR, OPTIONS, and EIGHTBIT (honored by the
+# slackware version of dircolors) are recognized but ignored.
 
-# Below, there should be one TERM entry for each termtype that is colorizable
+# Below are TERM entries, which can be a glob patterns, to match
+# against the TERM environment variable to determine if it is colorizable.
 TERM Eterm
 TERM ansi
 TERM color-xterm
-TERM con132x25
-TERM con132x30
-TERM con132x43
-TERM con132x60
-TERM con80x25
-TERM con80x28
-TERM con80x30
-TERM con80x43
-TERM con80x50
-TERM con80x60
+TERM con[0-9]*x[0-9]*
 TERM cons25
 TERM console
 TERM cygwin
@@ -47,34 +36,14 @@ TERM mach-gnu-color
 TERM mlterm
 TERM putty
 TERM putty-256color
-TERM rxvt
-TERM rxvt-256color
-TERM rxvt-cygwin
-TERM rxvt-cygwin-native
-TERM rxvt-unicode
-TERM rxvt-unicode-256color
-TERM rxvt-unicode256
-TERM screen
-TERM screen-256color
-TERM screen-256color-bce
-TERM screen-bce
-TERM screen-w
-TERM screen.Eterm
-TERM screen.rxvt
-TERM screen.linux
+TERM rxvt*
+TERM screen*
 TERM st
 TERM st-256color
 TERM terminator
+TERM tmux*
 TERM vt100
-TERM xterm
-TERM xterm-16color
-TERM xterm-256color
-TERM xterm-88color
-TERM xterm-color
-TERM xterm-debian
-
-# EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
-EIGHTBIT 1
+TERM xterm*
 
 # Below are the color init strings for the basic file types. A color init
 # string consists of one or more of the following numeric codes:
@@ -85,18 +54,18 @@ EIGHTBIT 1
 # Background color codes:
 # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
 #NORMAL 00	# no color code at all
-#FILE 00	# normal file, use no color at all
+#FILE 00	# regular file: use no color at all
 RESET 0		# reset to "normal" color
 DIR 01;34	# directory
-LINK 01;36	# symbolic link (If you set this to 'target' instead of a
-		# numerical value, the color is as for the file pointed to.)
-MULTIHARDLINK 00 # regular file with more than one link
+LINK 01;36	# symbolic link.  (If you set this to 'target' instead of a
+                # numerical value, the color is as for the file pointed to.)
+MULTIHARDLINK 00	# regular file with more than one link
 FIFO 40;33	# pipe
 SOCK 01;35	# socket
 DOOR 01;35	# door
 BLK 40;33;01	# block device driver
 CHR 40;33;01	# character device driver
-ORPHAN 40;31;01  # symlink to nonexistent file, or non-stat'able file
+ORPHAN 40;31;01 # symlink to nonexistent file, or non-stat'able file ...
 MISSING 01;05;37;41 # ... and the files they point to
 SETUID 37;41	# file that is setuid (u+s)
 SETGID 30;43	# file that is setgid (g+s)
@@ -111,16 +80,19 @@ EXEC 01;32
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
 # (and any comments you want to add after a '#')
-# executables (bright green)
-#.cmd 01;32
+
+# If you use DOS-style suffixes, you may want to uncomment the following:
+#.cmd 01;32 # executables (bright green)
 #.exe 01;32
 #.com 01;32
 #.btm 01;32
 #.bat 01;32
+# Or if you want to colorize scripts even if they do not have the
+# executable bit actually set.
 #.sh  01;32
 #.csh 01;32
 
-# archives or compressed (bright red)
+ # archives or compressed (bright red)
 .tar 01;31
 .tgz 01;31
 .arc 01;31
@@ -163,7 +135,7 @@ EXEC 01;32
 .rz  01;31
 .cab 01;31
 
-# image formats (magenta)
+# image formats
 .jpg 01;35
 .jpeg 01;35
 .gif 01;35
@@ -214,7 +186,7 @@ EXEC 01;32
 .ogv 01;35
 .ogx 01;35
 
-# audio formats (cyan)
+# audio formats
 .aac 01;36
 .au 01;36
 .flac 01;36
@@ -233,32 +205,3 @@ EXEC 01;32
 .opus 01;36
 .spx 01;36
 .xspf 01;36
-
-# colorize binary documents (brown)
-#.pdf 00;33
-#.ps 00;33
-#.ps.gz 00;33
-#.tex 00;33
-#.xls 00;33
-#.xlsx 00;33
-#.ppt 00;33
-#.pptx 00;33
-#.rtf 00;33
-#.doc 00;33
-#.docx 00;33
-#.odt 00;33
-#.ods 00;33
-#.odp 00;33
-#.epub 00;33
-#.abw 00;33
-#.wpd 00;33
-#
-# colorize text documents (brown)
-#.txt 00;33
-#.patch 00;33
-#.diff 00;33
-#.log 00;33
-#.htm 00;33
-#.html 00;33
-#.shtml 00;33
-#.xml 00;33

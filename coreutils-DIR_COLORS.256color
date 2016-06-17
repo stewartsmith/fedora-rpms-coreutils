@@ -1,39 +1,28 @@
 # Configuration file for the 256color ls utility
+
 # This file goes in the /etc directory, and must be world readable.
-# Synchronized with coreutils 8.5 dircolors
 # You can copy this file to .dir_colors in your $HOME directory to override
 # the system defaults.
-# In the case that you are not satisfied with supplied colors, please
-# submit your color configuration or attach your file with colors readable
-# on ALL color background schemas (white,gray,black) to RedHat Bugzilla
-# ticket on https://bugzilla.redhat.com/show_bug.cgi?id=429121 . TIA.
-# Please just keep ls color conventions from 8 color scheme.
 
-# COLOR needs one of these arguments: 'tty' colorizes output to ttys, but not
-# pipes. 'all' adds color characters to all output. 'none' shuts colorization
-# off.
-COLOR tty
+# Copyright (C) 1996-2016 Free Software Foundation, Inc.
+# Copying and distribution of this file, with or without modification,
+# are permitted provided the copyright notice and this notice are preserved.
 
-# Extra command line options for ls go here.
-# Basically these ones are:
-#  -F = show '/' for dirs, '*' for executables, etc.
-#  -T 0 = don't trust tab spacing when formatting ls output.
-OPTIONS -F -T 0
+# The keywords COLOR, OPTIONS, and EIGHTBIT (honored by the
+# slackware version of dircolors) are recognized but ignored.
 
-# Below, there should be one TERM entry for each termtype that is colorizable
+# Below are TERM entries, which can be a glob patterns, to match
+# against the TERM environment variable to determine if it is colorizable.
 TERM *256color*
 TERM rxvt-unicode256
-
-# EIGHTBIT, followed by '1' for on, '0' for off. (8-bit output)
-EIGHTBIT 1
 
 # Below are the color init strings for the basic file types. A color init
 # string consists of one or more of the following numeric codes:
 # Attribute codes:
 # 00=none 01=bold 04=underscore 05=blink 07=reverse 08=concealed
-# Text color(8 colors mode) codes:
+# Text color codes:
 # 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
-# Background color(8 colors mode) codes:
+# Background color codes:
 # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
 # Text color(256 colors mode) codes:
 # Valid syntax for text 256color is 38;5;<color number> , where color number
@@ -46,20 +35,20 @@ EIGHTBIT 1
 # You may find following command useful to search the best one for you:
 # for ((x=0; x<=255; x++));do echo -e "${x}:\033[48;5;${x}mcolor\033[000m";done
 
-#NORMAL 00	# global default, no color code at all
-#FILE 00	# normal file, use no color at all
-RESET 0 # reset to "normal" color
+#NORMAL 00	# no color code at all
+#FILE 00	# regular file: use no color at all
+RESET 0		# reset to "normal" color
 DIR 38;5;33	# directory
-LINK 38;5;51	# symbolic link (If you set this to 'target' instead of a
-		# numerical value, the color is as for the file pointed to.)
-MULTIHARDLINK 00 # regular file with more than one link
+LINK 38;5;51	# symbolic link.  (If you set this to 'target' instead of a
+                # numerical value, the color is as for the file pointed to.)
+MULTIHARDLINK 00	# regular file with more than one link
 FIFO 40;38;5;11	# pipe
 SOCK 38;5;13	# socket
 DOOR 38;5;5	# door
 BLK 48;5;232;38;5;11	# block device driver
 CHR 48;5;232;38;5;3	# character device driver
-ORPHAN 48;5;232;38;5;9  # symlink to nonexistent file, or non-stat'able file
-MISSING 01;05;37;41	# ... and the files they point to
+ORPHAN 48;5;232;38;5;9  # symlink to nonexistent file, or non-stat'able file ...
+MISSING 01;05;37;41 # ... and the files they point to
 SETUID 48;5;196;38;5;15	# file that is setuid (u+s)
 SETGID 48;5;11;38;5;16	# file that is setgid (g+s)
 CAPABILITY 48;5;196;38;5;226	# file with capability
@@ -73,16 +62,19 @@ EXEC 38;5;40
 # List any file extensions like '.gz' or '.tar' that you would like ls
 # to colorize below. Put the extension, a space, and the color init string.
 # (and any comments you want to add after a '#')
-# executables (bright green)
-#.cmd 38;5;34
-#.exe 38;5;34
-#.com 38;5;34
-#.btm 38;5;34
-#.bat 38;5;34
-#.sh  38;5;34
-#.csh 38;5;34
 
-# archives or compressed (bright red)
+# If you use DOS-style suffixes, you may want to uncomment the following:
+#.cmd 01;32 # executables (bright green)
+#.exe 01;32
+#.com 01;32
+#.btm 01;32
+#.bat 01;32
+# Or if you want to colorize scripts even if they do not have the
+# executable bit actually set.
+#.sh  01;32
+#.csh 01;32
+
+ # archives or compressed (bright red)
 .tar 38;5;9
 .tgz 38;5;9
 .arc 38;5;9
@@ -125,7 +117,7 @@ EXEC 38;5;40
 .rz  38;5;9
 .cab 38;5;9
 
-# image formats (magenta)
+# image formats
 .jpg 38;5;13
 .jpeg 38;5;13
 .gif 38;5;13
@@ -176,7 +168,7 @@ EXEC 38;5;40
 .ogv 38;5;13
 .ogx 38;5;13
 
-# audio formats (cyan)
+# audio formats
 .aac 38;5;45
 .au 38;5;45
 .flac 38;5;45
@@ -195,32 +187,3 @@ EXEC 38;5;40
 .opus 38;5;45
 .spx 38;5;45
 .xspf 38;5;45
-
-# colorize binary documents (brown)
-#.pdf 00;33
-#.ps 00;33
-#.ps.gz 00;33
-#.tex 00;33
-#.xls 00;33
-#.xlsx 00;33
-#.ppt 00;33
-#.pptx 00;33
-#.rtf 00;33
-#.doc 00;33
-#.docx 00;33
-#.odt 00;33
-#.ods 00;33
-#.odp 00;33
-#.epub 00;33
-#.abw 00;33
-#.wpd 00;33
-#
-# colorize text documents (brown)
-#.txt 00;33
-#.patch 00;33
-#.diff 00;33
-#.log 00;33
-#.htm 00;33
-#.html 00;33
-#.shtml 00;33
-#.xml 00;33
