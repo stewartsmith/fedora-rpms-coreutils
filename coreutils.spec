@@ -100,18 +100,19 @@ Provides: /bin/touch
 Provides: /bin/true
 Provides: /bin/uname
 
-BuildRequires: libselinux-devel
-BuildRequires: libacl-devel
-BuildRequires: gettext bison
-BuildRequires: texinfo
+BuildRequires: attr
 BuildRequires: autoconf
 BuildRequires: automake
-BuildRequires: libcap-devel
-BuildRequires: libattr-devel
-BuildRequires: openssl-devel
+BuildRequires: bison
+BuildRequires: gettext
 BuildRequires: gmp-devel
-BuildRequires: attr
+BuildRequires: libacl-devel
+BuildRequires: libattr-devel
+BuildRequires: libcap-devel
+BuildRequires: libselinux-devel
+BuildRequires: openssl-devel
 BuildRequires: strace
+BuildRequires: texinfo
 
 Requires: %{name}-common = %{version}-%{release}
 Requires: ncurses
