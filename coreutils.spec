@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -114,11 +114,7 @@ BuildRequires: attr
 BuildRequires: strace
 
 Requires: %{name}-common = %{version}-%{release}
-Requires(pre): /sbin/install-info
-Requires(preun): /sbin/install-info
-Requires(post): /sbin/install-info
-Requires(post): grep
-Requires:       ncurses
+Requires: ncurses
 
 Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
@@ -157,6 +153,9 @@ packaged as a single multicall binary.
 # yum obsoleting rules explained at:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
 Obsoletes: %{name} < 8.24-100
+Requires(pre): /sbin/install-info
+Requires(preun): /sbin/install-info
+Requires(post): /sbin/install-info
 Summary:  coreutils common optional components
 %description common
 Optional though recommended components,
@@ -317,9 +316,6 @@ if [ $1 = 0 ]; then
 fi
 
 %post common
-%{_bindir}/grep -v '(sh-utils)\|(fileutils)\|(textutils)' %{_infodir}/dir > \
-  %{_infodir}/dir.rpmmodify || exit 0
-    /bin/mv -f %{_infodir}/dir.rpmmodify %{_infodir}/dir
 if [ -f %{_infodir}/%{name}.info.gz ]; then
   /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
 fi
@@ -349,6 +345,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Jun 20 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-9
+- do not use /bin/mv in %%post to avoid a circular dependency (#1348043)
+
 * Fri Jun 17 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-8
 - sync /etc/DIR_COLORS with latest upstream (#1335320)
 
