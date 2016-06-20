@@ -114,6 +114,11 @@ BuildRequires: openssl-devel
 BuildRequires: strace
 BuildRequires: texinfo
 
+%if 23 < 0%{?fedora} || 7 < 0%{?rhel}
+# needed by i18n test-cases
+BuildRequires: glibc-langpack-en
+%endif
+
 Requires: %{name}-common = %{version}-%{release}
 Requires: ncurses
 
@@ -347,6 +352,7 @@ fi
 
 %changelog
 * Mon Jun 20 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-9
+- add BR for glibc-langpack-en to prevent the expand/mb test from failing
 - do not use /bin/mv in %%post to avoid a circular dependency (#1348043)
 
 * Fri Jun 17 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-8
