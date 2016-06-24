@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -351,6 +351,10 @@ fi
 %license COPYING
 
 %changelog
+* Fri Jun 24 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-10
+- change way of detection of interactive shell in colorls.sh script
+  (#1321648)
+
 * Mon Jun 20 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-9
 - add BR for glibc-langpack-en to prevent the expand/mb test from failing
 - do not use /bin/mv in %%post to avoid a circular dependency (#1348043)
