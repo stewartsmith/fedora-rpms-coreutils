@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -50,6 +50,8 @@ Patch804: coreutils-i18n-cut-old.patch
 Patch803: coreutils-i18n-fix-unexpand.patch
 #(un)expand - allow multiple files on input - broken by patch 801
 Patch805: coreutils-i18n-fix2-expand-unexpand.patch
+#(un)expand - test BOM headers
+Patch806: coreutils-i18n-un-expand-BOM.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -192,6 +194,7 @@ tee DIR_COLORS{,.256color,.lightbgcolor} < src/dircolors.hin
 %patch803 -p1 -b .i18n-fix-expand
 %patch804 -p1 -b .i18n-cutold
 %patch805 -p1 -b .i18n-fix2-expand-unexpand
+%patch806 -p1 -b .i18n-BOM-expand-unexpand
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
@@ -351,6 +354,12 @@ fi
 %license COPYING
 
 %changelog
+* Thu Jul 07 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-10
+- switch to UTF8 locale when (un)expand input contains BOM header
+  (#1158494)
+- fixed regression where (un)expand would end with "long input line"
+  error when BOM header is present
+
 * Fri Jun 24 2016 Ondrej Vasik <ovasik@redhat.com> - 8.25-10
 - change way of detection of interactive shell in colorls.sh script
   (#1321648)
