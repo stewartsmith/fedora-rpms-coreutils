@@ -18,6 +18,7 @@ Source10: coreutils-find-requires.sh
 %global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
 
 # From upstream 
+Patch952: coreutils-8.25-intall-Z-selinux.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -204,8 +205,13 @@ tee DIR_COLORS{,.256color,.lightbgcolor} < src/dircolors.hin
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
+%patch952 -p1
 
-chmod a+x tests/misc/sort-mb-tests.sh tests/df/direct.sh || :
+chmod a+x \
+    tests/df/direct.sh \
+    tests/install/install-Z-selinux.sh \
+    tests/misc/sort-mb-tests.sh \
+    || :
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -345,6 +351,7 @@ fi
 
 %changelog
 * Mon Jul 11 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-12
+- install -Z now sets default SELinux context for created directories (#1339135)
 - drop the %%pre scriptlet, which is no longer needed (#1354078)
 - clarify recognition of "^COLOR.*none" in /etc/DIR_COLORS (#1349579)
 

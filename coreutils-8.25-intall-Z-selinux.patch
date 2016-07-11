@@ -1,0 +1,188 @@
+From c424bbcb532c5b9924349e3522b3b431eaa7c178 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Fri, 8 Jul 2016 18:59:35 +0200
+Subject: [PATCH] install: with -Z, set default SELinux context for created
+ directories
+
+* doc/coreutils.texi (install invocation): Update -Z documentation.
+* src/install.c (make_ancestor): Set default security context before
+calling mkdir() if the -Z option is given.
+(process_dir): Call restorecon() on the destination directory if the
+-Z option is given.
+(usage): Update -Z documentation.
+* tests/install/install-Z-selinux.sh: A new test for 'install -Z -D'
+and 'install -Z -d' based on tests/mkdir/restorecon.sh.
+* tests/local.mk: Reference the test.
+* NEWS: Mention the improvement.
+Reported at https://bugzilla.redhat.com/1339135
+Fixes http://bugs.gnu.org/23868
+
+Upstream-commit: 502518b44039138d148e2e15157d125c82d02af0
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ doc/coreutils.texi                 |  2 +-
+ src/install.c                      | 33 ++++++++++++++++++----
+ tests/install/install-Z-selinux.sh | 58 ++++++++++++++++++++++++++++++++++++++
+ tests/local.mk                     |  1 +
+ 4 files changed, 88 insertions(+), 6 deletions(-)
+ create mode 100644 tests/install/install-Z-selinux.sh
+
+diff --git a/doc/coreutils.texi b/doc/coreutils.texi
+index 092192c..1543f27 100644
+--- a/doc/coreutils.texi
++++ b/doc/coreutils.texi
+@@ -9208,7 +9208,7 @@ Print the name of each file before moving it.
+ @cindex security context
+ This option functions similarly to the @command{restorecon} command,
+ by adjusting the SELinux security context according
+-to the system default type for destination files.
++to the system default type for destination files and each created directory.
+ 
+ @end table
+ 
+diff --git a/src/install.c b/src/install.c
+index 089f298..1b7a209 100644
+--- a/src/install.c
++++ b/src/install.c
+@@ -39,6 +39,7 @@
+ #include "prog-fprintf.h"
+ #include "quote.h"
+ #include "savewd.h"
++#include "selinux.h"
+ #include "stat-time.h"
+ #include "utimens.h"
+ #include "xstrtol.h"
+@@ -423,6 +424,12 @@ announce_mkdir (char const *dir, void *options)
+ static int
+ make_ancestor (char const *dir, char const *component, void *options)
+ {
++  struct cp_options const *x = options;
++  if (x->set_security_context && defaultcon (dir, S_IFDIR) < 0
++      && ! ignorable_ctx_err (errno))
++    error (0, errno, _("failed to set default creation context for %s"),
++           quoteaf (dir));
++
+   int r = mkdir (component, DEFAULT_MODE);
+   if (r == 0)
+     announce_mkdir (dir, options);
+@@ -433,12 +440,28 @@ make_ancestor (char const *dir, char const *component, void *options)
+ static int
+ process_dir (char *dir, struct savewd *wd, void *options)
+ {
+-  return (make_dir_parents (dir, wd,
+-                            make_ancestor, options,
+-                            dir_mode, announce_mkdir,
+-                            dir_mode_bits, owner_id, group_id, false)
++  struct cp_options const *x = options;
++
++  int ret = (make_dir_parents (dir, wd, make_ancestor, options,
++                               dir_mode, announce_mkdir,
++                               dir_mode_bits, owner_id, group_id, false)
+           ? EXIT_SUCCESS
+           : EXIT_FAILURE);
++
++  /* FIXME: Due to the current structure of make_dir_parents()
++     we don't have the facility to call defaultcon() before the
++     final component of DIR is created.  So for now, create the
++     final component with the context from previous component
++     and here we set the context for the final component. */
++  if (ret == EXIT_SUCCESS && x->set_security_context)
++    {
++      if (! restorecon (last_component (dir), false, false)
++          && ! ignorable_ctx_err (errno))
++        error (0, errno, _("failed to restore context for %s"),
++               quoteaf (dir));
++    }
++
++  return ret;
+ }
+ 
+ /* Copy file FROM onto file TO, creating TO if necessary.
+@@ -651,7 +674,7 @@ In the 4th form, create all components of the given DIRECTORY(ies).\n\
+       fputs (_("\
+   -P, --preserve-context  preserve SELinux security context (-P deprecated)\n\
+   -Z                      set SELinux security context of destination\n\
+-                            file to default type\n\
++                            file and each created directory to default type\n\
+       --context[=CTX]     like -Z, or if CTX is specified then set the\n\
+                             SELinux or SMACK security context to CTX\n\
+ "), stdout);
+diff --git a/tests/install/install-Z-selinux.sh b/tests/install/install-Z-selinux.sh
+new file mode 100644
+index 0000000..9c3b642
+--- /dev/null
++++ b/tests/install/install-Z-selinux.sh
+@@ -0,0 +1,58 @@
++#!/bin/sh
++# test 'install -Z -D' and 'install -Z -d'
++# based on tests/mkdir/restorecon.sh
++
++# Copyright (C) 2013-2016 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++. "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
++print_ver_ ginstall
++require_selinux_
++
++
++get_selinux_type() { ls -Zd "$1" | sed -n 's/.*:\(.*_t\):.*/\1/p'; }
++
++mkdir subdir || framework_failure_
++chcon 'root:object_r:tmp_t:s0' subdir || framework_failure_
++cd subdir
++
++# Since in a tmp_t dir, dirs can be created as user_tmp_t ...
++touch standard || framework_failure_
++mkdir restored || framework_failure_
++if restorecon restored 2>/dev/null; then
++  # ... but when restored can be set to user_home_t
++  # So ensure the type for these mkdir -Z cases matches
++  # the directory type as set by restorecon.
++  ginstall -Z standard single || fail=1
++  ginstall -Z -d single_d || fail=1
++  # Run these as separate processes in case global context
++  # set for an arg, impacts on another arg
++  # TODO: Have the defaultcon() vary over these directories
++  for dst in single_d/existing/file multi/ple/file; do
++    ginstall -Z -D standard "$dst" || fail=1
++  done
++  restored_type=$(get_selinux_type 'restored')
++  test "$(get_selinux_type 'single')" = "$restored_type" || fail=1
++  test "$(get_selinux_type 'single_d')" = "$restored_type" || fail=1
++  test "$(get_selinux_type 'single_d/existing')" = "$restored_type" || fail=1
++  test "$(get_selinux_type 'multi')" = "$restored_type" || fail=1
++  test "$(get_selinux_type 'multi/ple')" = "$restored_type" || fail=1
++fi
++if test "$fail" = '1'; then
++  ls -UZd standard restored
++  ls -UZd single single_d single_d/existing multi multi/ple
++fi
++
++Exit $fail
+diff --git a/tests/local.mk b/tests/local.mk
+index ec23448..42d39f2 100644
+--- a/tests/local.mk
++++ b/tests/local.mk
+@@ -548,6 +548,7 @@ all_tests =					\
+   tests/install/d-slashdot.sh			\
+   tests/install/install-C.sh			\
+   tests/install/install-C-selinux.sh		\
++  tests/install/install-Z-selinux.sh		\
+   tests/install/strip-program.sh		\
+   tests/install/trap.sh				\
+   tests/ln/backup-1.sh				\
+-- 
+2.5.5
+
