@@ -173,7 +173,7 @@ including documentation and translations.
 %setup -q
 
 # will be modified by coreutils-8.25-DIR_COLORS.patch
-tee DIR_COLORS{,.256color,.lightbgcolor} < src/dircolors.hin
+tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 
 # Our patches
 %patch100 -p1 -b .configure
