@@ -307,16 +307,6 @@ grep LC_TIME %name.lang | cut -d'/' -f1-6 | sed -e 's/) /) %%dir /g' >>%name.lan
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
-%pre common
-# We must deinstall these info files since they're merged in
-# coreutils.info. else their postun'll be run too late
-# and install-info will fail badly because of duplicates
-for file in sh-utils textutils fileutils; do
-  if [ -f %{_infodir}/$file.info.gz ]; then
-    /sbin/install-info --delete %{_infodir}/$file.info.gz --dir=%{_infodir}/dir &> /dev/null || :
-  fi
-done
-
 %preun common
 if [ $1 = 0 ]; then
   if [ -f %{_infodir}/%{name}.info.gz ]; then
@@ -355,6 +345,7 @@ fi
 
 %changelog
 * Mon Jul 11 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-12
+- drop the %%pre scriptlet, which is no longer needed (#1354078)
 - clarify recognition of "^COLOR.*none" in /etc/DIR_COLORS (#1349579)
 
 * Thu Jul 07 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-11
