@@ -354,7 +354,7 @@ fi
 %license COPYING
 
 %changelog
-* Thu Jul 07 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-10
+* Thu Jul 07 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-11
 - switch to UTF8 locale when (un)expand input contains BOM header
   (#1158494)
 - fixed regression where (un)expand would end with "long input line"
