@@ -162,7 +162,6 @@ packaged as a single multicall binary.
 # yum obsoleting rules explained at:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
 Obsoletes: %{name} < 8.24-100
-Requires(pre): /sbin/install-info
 Requires(preun): /sbin/install-info
 Requires(post): /sbin/install-info
 Summary:  coreutils common optional components
