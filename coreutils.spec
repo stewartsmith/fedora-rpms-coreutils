@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -354,6 +354,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Jul 11 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-12
+- clarify recognition of "^COLOR.*none" in /etc/DIR_COLORS (#1349579)
+
 * Thu Jul 07 2016 Jakub Martisko <jamartis@redhat.com> - 8.25-11
 - switch to UTF8 locale when (un)expand input contains BOM header
   (#1158494)
