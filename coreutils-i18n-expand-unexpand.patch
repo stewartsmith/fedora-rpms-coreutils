@@ -23,19 +23,24 @@ properly.
 
 Co-authored-by: Pádraig Brady <pbrady@redhat.com>
 ---
- NEWS                 |   3 +
  bootstrap.conf       |   1 +
  configure.ac         |   2 +
+ lib/mbfile.c         |   3 +
+ lib/mbfile.h         | 255 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ m4/mbfile.m4         |  14 +++
  po/POTFILES.in       |   1 +
- src/expand-core.c    | 150 +++++++++++++++++++++++++++++++++++++++
- src/expand-core.h    |  44 ++++++++++++
- src/expand.c         | 183 ++++++++++-------------------------------------
+ src/expand-core.c    | 150 ++++++++++++++++++++++++++++++
+ src/expand-core.h    |  41 +++++++++
+ src/expand.c         | 186 ++++++++-----------------------------
  src/local.mk         |   2 +
- src/unexpand.c       | 197 ++++++++++++---------------------------------------
- tests/expand/mb.sh   |  98 +++++++++++++++++++++++++
+ src/unexpand.c       | 195 ++++++++++-----------------------------
+ tests/expand/mb.sh   |  98 ++++++++++++++++++++
  tests/local.mk       |   2 +
- tests/unexpand/mb.sh |  97 +++++++++++++++++++++++++
- 12 files changed, 482 insertions(+), 298 deletions(-)
+ tests/unexpand/mb.sh |  97 ++++++++++++++++++++
+ 14 files changed, 750 insertions(+), 297 deletions(-)
+ create mode 100644 lib/mbfile.c
+ create mode 100644 lib/mbfile.h
+ create mode 100644 m4/mbfile.m4
  create mode 100644 src/expand-core.c
  create mode 100644 src/expand-core.h
  create mode 100755 tests/expand/mb.sh
@@ -45,7 +50,7 @@ diff --git a/bootstrap.conf b/bootstrap.conf
 index ef1c078..ea8cebc 100644
 --- a/bootstrap.conf
 +++ b/bootstrap.conf
-@@ -152,6 +152,7 @@ gnulib_modules="
+@@ -151,6 +151,7 @@ gnulib_modules="
    maintainer-makefile
    malloc-gnu
    manywarnings
@@ -57,7 +62,7 @@ diff --git a/configure.ac b/configure.ac
 index 8dc2192..b8b5114 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -422,6 +422,8 @@ gl_WINSIZE_IN_PTEM
+@@ -425,6 +425,8 @@ fi
  # I'm leaving it here for now.  This whole thing needs to be modernized...
  gl_WINSIZE_IN_PTEM
  
@@ -338,12 +343,10 @@ index 0a40a1a..ed97fd4 100644
  
  static char const shortopts[] = "it:0::1::2::3::4::5::6::7::8::9::";
  
-@@ -125,128 +129,6 @@
-   if (first_free_tab == n_tabs_allocated)
-     tab_list = X2NREALLOC (tab_list, &n_tabs_allocated);
+@@ -135,128 +139,6 @@ add_tab_stop (uintmax_t tabval)
    tab_list[first_free_tab++] = tabval;
--}
--
+ }
+ 
 -/* Add the comma or blank separated list of tab stops STOPS
 -   to the list of tab stops.  */
 -
@@ -464,10 +467,12 @@ index 0a40a1a..ed97fd4 100644
 -      exit_status = EXIT_FAILURE;
 -    }
 -  return NULL;
- }
- 
+-}
+-
  /* Change tabs to spaces, writing to stdout.
-@@ -265,19 +146,19 @@ expand (void)
+    Read each file in 'file_list', in order.  */
+ 
+@@ -265,19 +147,19 @@ expand (void)
  {
    /* Input stream.  */
    FILE *fp = next_file (NULL);
@@ -491,7 +496,7 @@ index 0a40a1a..ed97fd4 100644
        /* The following variables have valid values only when CONVERT
           is true:  */
  
-@@ -287,17 +168,23 @@ expand (void)
+@@ -287,17 +169,23 @@ expand (void)
        /* Index in TAB_LIST of next tab stop to examine.  */
        size_t tab_index = 0;
  
@@ -519,7 +524,7 @@ index 0a40a1a..ed97fd4 100644
                  {
                    /* Column the next input tab stop is on.  */
                    uintmax_t next_tab_column;
-@@ -328,32 +215,34 @@ expand (void)
+@@ -328,32 +216,34 @@ expand (void)
                      if (putchar (' ') < 0)
                        error (EXIT_FAILURE, errno, _("write error"));
  
@@ -562,7 +567,7 @@ index 0a40a1a..ed97fd4 100644
      }
  }
  
-@@ -385,19 +274,19 @@ main (int argc, char **argv)
+@@ -385,19 +275,19 @@ main (int argc, char **argv)
            break;
  
          case 't':
@@ -589,7 +594,7 @@ diff --git a/src/local.mk b/src/local.mk
 index 536b7cc..bfede88 100644
 --- a/src/local.mk
 +++ b/src/local.mk
-@@ -362,6 +362,8 @@ src_coreutils_SOURCES = src/coreutils.c
+@@ -361,6 +361,8 @@ src_coreutils_SOURCES = src/coreutils.c
  
  src_cp_SOURCES = src/cp.c $(copy_sources) $(selinux_sources)
  src_dir_SOURCES = src/ls.c src/ls-dir.c
@@ -655,7 +660,7 @@ index e0f7c22..48fbb32 100644
  
  /* For long options that have no equivalent short option, use a
     non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
-@@ -154,128 +156,6 @@ add_tab_stop (uintmax_t tabval)
+@@ -154,128 +158,6 @@ add_tab_stop (uintmax_t tabval)
      }
  }
  
@@ -784,7 +789,7 @@ index e0f7c22..48fbb32 100644
  /* Change blanks to tabs, writing to stdout.
     Read each file in 'file_list', in order.  */
  
-@@ -284,11 +164,12 @@ unexpand (void)
+@@ -284,11 +166,12 @@ unexpand (void)
  {
    /* Input stream.  */
    FILE *fp = next_file (NULL);
@@ -798,7 +803,7 @@ index e0f7c22..48fbb32 100644
  
    if (!fp)
      return;
-@@ -296,12 +177,14 @@ unexpand (void)
+@@ -296,12 +179,14 @@ unexpand (void)
    /* The worst case is a non-blank character, then one blank, then a
       tab stop, then MAX_COLUMN_WIDTH - 1 blanks, then a non-blank; so
       allocate MAX_COLUMN_WIDTH bytes to store the blanks.  */
@@ -815,7 +820,7 @@ index e0f7c22..48fbb32 100644
  
        /* If true, perform translations.  */
        bool convert = true;
-@@ -335,12 +218,19 @@ unexpand (void)
+@@ -335,12 +220,19 @@ unexpand (void)
  
        do
          {
@@ -838,7 +843,7 @@ index e0f7c22..48fbb32 100644
  
                if (blank)
                  {
-@@ -372,16 +262,16 @@ unexpand (void)
+@@ -372,16 +264,16 @@ unexpand (void)
                        if (next_tab_column < column)
                          error (EXIT_FAILURE, 0, _("input line is too long"));
  
@@ -858,7 +863,7 @@ index e0f7c22..48fbb32 100644
  
                            if (! (prev_blank && column == next_tab_column))
                              {
-@@ -389,13 +279,14 @@ unexpand (void)
+@@ -389,13 +281,14 @@ unexpand (void)
                                   will be replaced by tabs.  */
                                if (column == next_tab_column)
                                  one_blank_before_tab_stop = true;
@@ -875,7 +880,7 @@ index e0f7c22..48fbb32 100644
                          }
  
                        /* Discard pending blanks, unless it was a single
-@@ -403,7 +294,7 @@ unexpand (void)
+@@ -403,7 +296,7 @@ unexpand (void)
                        pending = one_blank_before_tab_stop;
                      }
                  }
@@ -884,7 +889,7 @@ index e0f7c22..48fbb32 100644
                  {
                    /* Go back one column, and force recalculation of the
                       next tab stop.  */
-@@ -413,7 +304,7 @@ unexpand (void)
+@@ -413,7 +306,7 @@ unexpand (void)
                  }
                else
                  {
@@ -893,7 +898,7 @@ index e0f7c22..48fbb32 100644
                    if (!column)
                      error (EXIT_FAILURE, 0, _("input line is too long"));
                  }
-@@ -421,9 +312,13 @@ unexpand (void)
+@@ -421,9 +314,13 @@ unexpand (void)
                if (pending)
                  {
                    if (pending > 1 && one_blank_before_tab_stop)
@@ -909,7 +914,7 @@ index e0f7c22..48fbb32 100644
                    pending = 0;
                    one_blank_before_tab_stop = false;
                  }
-@@ -432,16 +327,16 @@ unexpand (void)
+@@ -432,16 +329,16 @@ unexpand (void)
                convert &= convert_entire_line || blank;
              }
  
@@ -930,7 +935,7 @@ index e0f7c22..48fbb32 100644
      }
  }
  
-@@ -482,7 +377,7 @@ main (int argc, char **argv)
+@@ -482,7 +379,7 @@ main (int argc, char **argv)
            break;
          case 't':
            convert_entire_line = true;
@@ -1047,7 +1052,7 @@ diff --git a/tests/local.mk b/tests/local.mk
 index 7df04da..d3462be 100644
 --- a/tests/local.mk
 +++ b/tests/local.mk
-@@ -532,6 +532,7 @@ all_tests =					\
+@@ -536,6 +536,7 @@ all_tests =					\
    tests/du/threshold.sh				\
    tests/du/trailing-slash.sh			\
    tests/du/two-args.sh				\
@@ -1055,7 +1060,7 @@ index 7df04da..d3462be 100644
    tests/id/gnu-zero-uids.sh			\
    tests/id/no-context.sh			\
    tests/id/context.sh				\
-@@ -671,6 +672,7 @@ all_tests =					\
+@@ -674,6 +675,7 @@ all_tests =					\
    tests/touch/read-only.sh			\
    tests/touch/relative.sh			\
    tests/touch/trailing-slash.sh			\
@@ -1166,11 +1171,11 @@ index 0000000..60d4c1a
 +
 +unexpand -a < in > out || fail=1
 +compare exp out > /dev/null 2>&1 || fail=1
--- 
-2.4.3
-
---- /dev/null	2015-11-30 08:40:17.566742513 +0100
-+++ coreutils-8.24/m4/mbfile.m4	2015-12-01 09:30:55.951149907 +0100
+diff --git a/m4/mbfile.m4 b/m4/mbfile.m4
+new file mode 100644
+index 0000000..8589902
+--- /dev/null
++++ b/m4/mbfile.m4
 @@ -0,0 +1,14 @@
 +# mbfile.m4 serial 7
 +dnl Copyright (C) 2005, 2008-2015 Free Software Foundation, Inc.
@@ -1186,14 +1191,20 @@ index 0000000..60d4c1a
 +  AC_REQUIRE([AC_TYPE_MBSTATE_T])
 +  :
 +])
---- /dev/null	2015-11-30 08:40:17.566742513 +0100
-+++ coreutils-8.24/lib/mbfile.c	2015-12-01 09:28:22.254928468 +0100
+diff --git a/lib/mbfile.c b/lib/mbfile.c
+new file mode 100644
+index 0000000..b0a468e
+--- /dev/null
++++ b/lib/mbfile.c
 @@ -0,0 +1,3 @@
 +#include <config.h>
 +#define MBFILE_INLINE _GL_EXTERN_INLINE
 +#include "mbfile.h"
---- /dev/null	2015-11-30 08:40:17.566742513 +0100
-+++ coreutils-8.24/lib/mbfile.h	2015-12-01 09:28:30.829885570 +0100
+diff --git a/lib/mbfile.h b/lib/mbfile.h
+new file mode 100644
+index 0000000..11f1b12
+--- /dev/null
++++ b/lib/mbfile.h
 @@ -0,0 +1,255 @@
 +/* Multibyte character I/O: macros for multi-byte encodings.
 +   Copyright (C) 2001, 2005, 2009-2015 Free Software Foundation, Inc.
@@ -1450,3 +1461,6 @@ index 0000000..60d4c1a
 +_GL_INLINE_HEADER_BEGIN
 +
 +#endif /* _MBFILE_H */
+-- 
+2.5.5
+

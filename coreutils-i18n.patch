@@ -106,7 +106,7 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
    {"spaces", no_argument, NULL, 's'},
    {"width", required_argument, NULL, 'w'},
    {GETOPT_HELP_OPTION_DECL},
-@@ -75,6 +118,7 @@ Wrap input lines in each FILE, writing t
+@@ -75,6 +118,7 @@ Wrap input lines in each FILE, writing to standard output.\n\
  
        fputs (_("\
    -b, --bytes         count bytes rather than columns\n\
@@ -114,7 +114,7 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
    -s, --spaces        break at spaces\n\
    -w, --width=WIDTH   use WIDTH columns instead of 80\n\
  "), stdout);
-@@ -92,7 +136,7 @@ Wrap input lines in each FILE, writing t
+@@ -92,7 +136,7 @@ Wrap input lines in each FILE, writing to standard output.\n\
  static size_t
  adjust_column (size_t column, char c)
  {
@@ -156,7 +156,7 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
  
    fadvise (istream, FADVISE_SEQUENTIAL);
  
-@@ -168,6 +196,15 @@ fold_file (char const *filename, size_t
+@@ -168,6 +196,15 @@ fold_file (char const *filename, size_t width)
                bool found_blank = false;
                size_t logical_end = offset_out;
  
@@ -172,16 +172,16 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
                /* Look for the last blank. */
                while (logical_end)
                  {
-@@ -214,11 +251,221 @@ fold_file (char const *filename, size_t
+@@ -214,11 +251,221 @@ fold_file (char const *filename, size_t width)
        line_out[offset_out++] = c;
      }
  
 -  saved_errno = errno;
 +  *saved_errno = errno;
-+
-+  if (offset_out)
-+    fwrite (line_out, sizeof (char), (size_t) offset_out, stdout);
-+
+ 
+   if (offset_out)
+     fwrite (line_out, sizeof (char), (size_t) offset_out, stdout);
+ 
 +}
 +
 +#if HAVE_MBRTOWC
@@ -353,10 +353,10 @@ diff -urNp coreutils-8.24-orig/src/fold.c coreutils-8.24/src/fold.c
 +    }
 +
 +  *saved_errno = errno;
- 
-   if (offset_out)
-     fwrite (line_out, sizeof (char), (size_t) offset_out, stdout);
- 
++
++  if (offset_out)
++    fwrite (line_out, sizeof (char), (size_t) offset_out, stdout);
++
 +}
 +#endif
 +
@@ -642,7 +642,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
  static void
  freeline (struct line *line)
  {
-@@ -326,56 +484,133 @@ keycmp (struct line const *line1, struct
+@@ -326,56 +484,133 @@ keycmp (struct line const *line1, struct line const *line2,
          size_t jf_1, size_t jf_2)
  {
    /* Start of field to compare in each file.  */
@@ -773,8 +773,8 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 -      diff = memcmp (beg1, beg2, MIN (len1, len2));
 +      copy[0] = beg[0];
 +      copy[1] = beg[1];
-+    }
-+
+     }
+ 
 +  if (hard_LC_COLLATE)
 +    {
 +      diff = xmemcoll ((char *) copy[0], len[0], (char *) copy[1], len[1]);
@@ -784,14 +784,14 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 +          free (copy[i]);
 +
 +      return diff;
-     }
++    }
 +  diff = memcmp (copy[0], copy[1], MIN (len[0], len[1]));
 +
 +  if (mallocd)
 +    for (i = 0; i < 2; i++)
 +      free (copy[i]);
 +
- 
++
    if (diff)
      return diff;
 -  return len1 < len2 ? -1 : len1 != len2;
@@ -799,7 +799,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
  }
  
  /* Check that successive input lines PREV and CURRENT from input file
-@@ -467,6 +702,11 @@ get_line (FILE *fp, struct line **linep,
+@@ -467,6 +702,11 @@ get_line (FILE *fp, struct line **linep, int which)
      }
    ++line_no[which - 1];
  
@@ -811,7 +811,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
    xfields (line);
  
    if (prevline[which - 1])
-@@ -566,21 +806,28 @@ prfield (size_t n, struct line const *li
+@@ -566,21 +806,28 @@ prfield (size_t n, struct line const *line)
  
  /* Output all the fields in line, other than the join field.  */
  
@@ -851,7 +851,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
    size_t field;
    struct line const *line;
  
-@@ -625,7 +871,7 @@ prjoin (struct line const *line1, struct
+@@ -625,7 +871,7 @@ prjoin (struct line const *line1, struct line const *line2)
            o = o->next;
            if (o == NULL)
              break;
@@ -920,7 +920,7 @@ diff -urNp coreutils-8.24-orig/src/join.c coreutils-8.24/src/join.c
 diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
 --- coreutils-8.24-orig/src/pr.c	2015-06-26 19:05:22.000000000 +0200
 +++ coreutils-8.24/src/pr.c	2015-07-05 09:04:33.030546965 +0200
-@@ -312,6 +312,24 @@
+@@ -311,6 +311,24 @@
  
  #include <getopt.h>
  #include <sys/types.h>
@@ -945,7 +945,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  #include "system.h"
  #include "error.h"
  #include "fadvise.h"
-@@ -324,6 +342,18 @@
+@@ -323,6 +341,18 @@
  #include "xstrtol.h"
  #include "xdectoint.h"
  
@@ -964,7 +964,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  /* The official name of this program (e.g., no 'g' prefix).  */
  #define PROGRAM_NAME "pr"
  
-@@ -416,7 +446,20 @@ struct COLUMN
+@@ -415,7 +445,20 @@ struct COLUMN
  
  typedef struct COLUMN COLUMN;
  
@@ -986,7 +986,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  static bool read_line (COLUMN *p);
  static bool print_page (void);
  static bool print_stored (COLUMN *p);
-@@ -428,6 +471,7 @@ static void add_line_number (COLUMN *p);
+@@ -427,6 +470,7 @@ static void add_line_number (COLUMN *p);
  static void getoptnum (const char *n_str, int min, int *num,
                         const char *errfmt);
  static void getoptarg (char *arg, char switch_char, char *character,
@@ -994,7 +994,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
                         int *number);
  static void print_files (int number_of_files, char **av);
  static void init_parameters (int number_of_files);
-@@ -441,7 +485,6 @@ static void store_char (char c);
+@@ -440,7 +484,6 @@ static void store_char (char c);
  static void pad_down (unsigned int lines);
  static void read_rest_of_line (COLUMN *p);
  static void skip_read (COLUMN *p, int column_number);
@@ -1002,7 +1002,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  static void cleanup (void);
  static void print_sep_string (void);
  static void separator_string (const char *optarg_S);
-@@ -453,7 +496,7 @@ static COLUMN *column_vector;
+@@ -452,7 +495,7 @@ static COLUMN *column_vector;
     we store the leftmost columns contiguously in buff.
     To print a line from buff, get the index of the first character
     from line_vector[i], and print up to line_vector[i + 1]. */
@@ -1011,7 +1011,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  
  /* Index of the position in buff where the next character
     will be stored. */
-@@ -557,7 +600,7 @@ static int chars_per_column;
+@@ -556,7 +599,7 @@ static int chars_per_column;
  static bool untabify_input = false;
  
  /* (-e) The input tab character. */
@@ -1020,7 +1020,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  
  /* (-e) Tabstops are at chars_per_tab, 2*chars_per_tab, 3*chars_per_tab, ...
     where the leftmost column is 1. */
-@@ -567,7 +610,10 @@ static int chars_per_input_tab = 8;
+@@ -566,7 +609,10 @@ static int chars_per_input_tab = 8;
  static bool tabify_output = false;
  
  /* (-i) The output tab character. */
@@ -1032,7 +1032,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  
  /* (-i) The width of the output tab. */
  static int chars_per_output_tab = 8;
-@@ -637,7 +683,13 @@ static int line_number;
+@@ -636,7 +682,13 @@ static int line_number;
  static bool numbered_lines = false;
  
  /* (-n) Character which follows each line number. */
@@ -1047,7 +1047,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  
  /* (-n) line counting starts with 1st line of input file (not with 1st
     line of 1st page printed). */
-@@ -690,6 +742,7 @@ static bool use_col_separator = false;
+@@ -689,6 +741,7 @@ static bool use_col_separator = false;
     -a|COLUMN|-m is a 'space' and with the -J option a 'tab'. */
  static char *col_sep_string = (char *) "";
  static int col_sep_length = 0;
@@ -1055,7 +1055,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  static char *column_separator = (char *) " ";
  static char *line_separator = (char *) "\t";
  
-@@ -840,6 +893,13 @@ separator_string (const char *optarg_S)
+@@ -839,6 +892,13 @@ separator_string (const char *optarg_S)
    col_sep_length = (int) strlen (optarg_S);
    col_sep_string = xmalloc (col_sep_length + 1);
    strcpy (col_sep_string, optarg_S);
@@ -1069,7 +1069,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
  }
  
  int
-@@ -864,6 +924,21 @@ main (int argc, char **argv)
+@@ -863,6 +923,21 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  
@@ -1091,7 +1091,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
    n_files = 0;
    file_names = (argc > 1
                  ? xmalloc ((argc - 1) * sizeof (char *))
-@@ -940,8 +1015,12 @@ main (int argc, char **argv)
+@@ -939,8 +1014,12 @@ main (int argc, char **argv)
            break;
          case 'e':
            if (optarg)
@@ -1106,7 +1106,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
            /* Could check tab width > 0. */
            untabify_input = true;
            break;
-@@ -954,8 +1033,12 @@ main (int argc, char **argv)
+@@ -953,8 +1032,12 @@ main (int argc, char **argv)
            break;
          case 'i':
            if (optarg)
@@ -1121,7 +1121,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
            /* Could check tab width > 0. */
            tabify_output = true;
            break;
-@@ -973,8 +1056,8 @@ main (int argc, char **argv)
+@@ -972,8 +1055,8 @@ main (int argc, char **argv)
          case 'n':
            numbered_lines = true;
            if (optarg)
@@ -1132,7 +1132,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
            break;
          case 'N':
            skip_count = false;
-@@ -998,7 +1081,7 @@ main (int argc, char **argv)
+@@ -997,7 +1080,7 @@ main (int argc, char **argv)
            old_s = false;
            /* Reset an additional input of -s, -S dominates -s */
            col_sep_string = bad_cast ("");
@@ -1141,7 +1141,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
            use_col_separator = true;
            if (optarg)
              separator_string (optarg);
-@@ -1152,10 +1235,45 @@ getoptnum (const char *n_str, int min, i
+@@ -1152,10 +1235,45 @@ getoptnum (const char *n_str, int min, int *num, const char *err)
     a number. */
  
  static void
@@ -1359,7 +1359,7 @@ diff -urNp coreutils-8.24-orig/src/pr.c coreutils-8.24/src/pr.c
            /* sep_string ends with some spaces */
            if (spaces_not_printed > 0)
              print_white_space ();
-@@ -2259,7 +2389,7 @@ print_clump (COLUMN *p, int n, char *clu
+@@ -2259,7 +2389,7 @@ print_clump (COLUMN *p, int n, char *clump)
     required number of tabs and spaces. */
  
  static void
@@ -1701,7 +1701,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  #include "system.h"
  #include "argmatch.h"
  #include "error.h"
-@@ -164,14 +172,39 @@ static int decimal_point;
+@@ -163,14 +171,39 @@ static int decimal_point;
  /* Thousands separator; if -1, then there isn't one.  */
  static int thousands_sep;
  
@@ -1742,7 +1742,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  /* The kind of blanks for '-b' to skip in various options. */
  enum blanktype { bl_start, bl_end, bl_both };
  
-@@ -345,13 +378,11 @@ static bool reverse;
+@@ -344,13 +377,11 @@ static bool reverse;
     they were read if all keys compare equal.  */
  static bool stable;
  
@@ -1815,7 +1815,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  
  static int
  struct_month_cmp (void const *m1, void const *m2)
-@@ -1269,7 +1340,7 @@ struct_month_cmp (void const *m1, void c
+@@ -1269,7 +1340,7 @@ struct_month_cmp (void const *m1, void const *m2)
  /* Initialize the character class tables. */
  
  static void
@@ -1833,7 +1833,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
    /* If we're not in the "C" locale, read different names for months.  */
    if (hard_LC_TIME)
      {
-@@ -1363,6 +1434,84 @@ specify_nmerge (int oi, char c, char con
+@@ -1363,6 +1434,84 @@ specify_nmerge (int oi, char c, char const *s)
      xstrtol_fatal (e, oi, c, long_options, s);
  }
  
@@ -1918,7 +1918,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  /* Specify the amount of main memory to use when sorting.  */
  static void
  specify_sort_size (int oi, char c, char const *s)
-@@ -1596,7 +1745,7 @@ buffer_linelim (struct buffer const *buf
+@@ -1596,7 +1745,7 @@ buffer_linelim (struct buffer const *buf)
     by KEY in LINE. */
  
  static char *
@@ -1927,7 +1927,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t sword = key->sword;
-@@ -1605,10 +1754,10 @@ begfield (struct line const *line, struc
+@@ -1605,10 +1754,10 @@ begfield (struct line const *line, struct keyfield const *key)
    /* The leading field separator itself is included in a field when -t
       is absent.  */
  
@@ -1940,7 +1940,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            ++ptr;
          if (ptr < lim)
            ++ptr;
-@@ -1634,11 +1783,70 @@ begfield (struct line const *line, struc
+@@ -1634,11 +1783,70 @@ begfield (struct line const *line, struct keyfield const *key)
    return ptr;
  }
  
@@ -2012,7 +2012,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t eword = key->eword, echar = key->echar;
-@@ -1653,10 +1861,10 @@ limfield (struct line const *line, struc
+@@ -1653,10 +1861,10 @@ limfield (struct line const *line, struct keyfield const *key)
       'beginning' is the first character following the delimiting TAB.
       Otherwise, leave PTR pointing at the first 'blank' character after
       the preceding field.  */
@@ -2025,7 +2025,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            ++ptr;
          if (ptr < lim && (eword || echar))
            ++ptr;
-@@ -1702,10 +1910,10 @@ limfield (struct line const *line, struc
+@@ -1702,10 +1910,10 @@ limfield (struct line const *line, struct keyfield const *key)
       */
  
    /* Make LIM point to the end of (one byte past) the current field.  */
@@ -2038,7 +2038,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
        if (newlim)
          lim = newlim;
      }
-@@ -1736,6 +1944,130 @@ limfield (struct line const *line, struc
+@@ -1736,6 +1944,130 @@ limfield (struct line const *line, struct keyfield const *key)
    return ptr;
  }
  
@@ -2169,7 +2169,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  /* Fill BUF reading from FP, moving buf->left bytes from the end
     of buf->buf to the beginning first.  If EOF is reached and the
     file wasn't terminated by a newline, supply one.  Set up BUF's line
-@@ -1822,8 +2154,22 @@ fillbuf (struct buffer *buf, FILE *fp, c
+@@ -1822,8 +2154,22 @@ fillbuf (struct buffer *buf, FILE *fp, char const *file)
                    else
                      {
                        if (key->skipsblanks)
@@ -2194,7 +2194,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
                        line->keybeg = line_start;
                      }
                  }
-@@ -1944,7 +2290,7 @@ human_numcompare (char const *a, char co
+@@ -1944,7 +2290,7 @@ human_numcompare (char const *a, char const *b)
     hideously fast. */
  
  static int
@@ -2203,7 +2203,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  {
    while (blanks[to_uchar (*a)])
      a++;
-@@ -1954,6 +2300,25 @@ numcompare (char const *a, char const *b
+@@ -1954,6 +2300,25 @@ numcompare (char const *a, char const *b)
    return strnumcmp (a, b, decimal_point, thousands_sep);
  }
  
@@ -2229,7 +2229,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  /* Work around a problem whereby the long double value returned by glibc's
     strtold ("NaN", ...) contains uninitialized bits: clear all bytes of
     A and B before calling strtold.  FIXME: remove this function once
-@@ -2004,7 +2369,7 @@ general_numcompare (char const *sa, char
+@@ -2004,7 +2369,7 @@ general_numcompare (char const *sa, char const *sb)
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -2238,7 +2238,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  {
    size_t lo = 0;
    size_t hi = MONTHS_PER_YEAR;
-@@ -2279,15 +2644,14 @@ debug_key (struct line const *line, stru
+@@ -2280,15 +2645,14 @@ debug_key (struct line const *line, struct keyfield const *key)
            char saved = *lim;
            *lim = '\0';
  
@@ -2256,7 +2256,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            else if (key->general_numeric)
              ignore_value (strtold (beg, &tighter_lim));
            else if (key->numeric || key->human_numeric)
-@@ -2431,7 +2795,7 @@ key_warnings (struct keyfield const *gke
+@@ -2432,7 +2796,7 @@ key_warnings (struct keyfield const *gkey, bool gkey_only)
        bool maybe_space_aligned = !hard_LC_COLLATE && default_key_compare (key)
                                   && !(key->schar || key->echar);
        bool line_offset = key->eword == 0 && key->echar != 0; /* -k1.x,1.y  */
@@ -2265,7 +2265,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            && ((!key->skipsblanks && !(implicit_skip || maybe_space_aligned))
                || (!key->skipsblanks && key->schar)
                || (!key->skipeblanks && key->echar)))
-@@ -2489,11 +2853,87 @@ key_warnings (struct keyfield const *gke
+@@ -2490,11 +2854,87 @@ key_warnings (struct keyfield const *gkey, bool gkey_only)
      error (0, 0, _("option '-r' only applies to last-resort comparison"));
  }
  
@@ -2354,7 +2354,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  {
    struct keyfield *key = keylist;
  
-@@ -2578,7 +3018,7 @@ keycompare (struct line const *a, struct
+@@ -2579,7 +3019,7 @@ keycompare (struct line const *a, struct line const *b)
            else if (key->human_numeric)
              diff = human_numcompare (ta, tb);
            else if (key->month)
@@ -2363,7 +2363,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            else if (key->random)
              diff = compare_random (ta, tlena, tb, tlenb);
            else if (key->version)
-@@ -2694,6 +3134,211 @@ keycompare (struct line const *a, struct
+@@ -2695,6 +3135,211 @@ keycompare (struct line const *a, struct line const *b)
    return key->reverse ? -diff : diff;
  }
  
@@ -2575,7 +2575,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -2721,7 +3366,7 @@ compare (struct line const *a, struct line const *b)
+@@ -2722,7 +3367,7 @@ compare (struct line const *a, struct line const *b)
      diff = - NONZERO (blen);
    else if (blen == 0)
      diff = 1;
@@ -2584,7 +2584,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
      {
        /* Note xmemcoll0 is a performance enhancement as
           it will not unconditionally write '\0' after the
-@@ -4120,6 +4765,7 @@ set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype)
+@@ -4121,6 +4766,7 @@ set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype)
            break;
          case 'f':
            key->translate = fold_toupper;
@@ -2592,7 +2592,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            break;
          case 'g':
            key->general_numeric = true;
-@@ -4197,7 +4843,7 @@ main (int argc, char **argv)
+@@ -4199,7 +4845,7 @@ main (int argc, char **argv)
    initialize_exit_failure (SORT_FAILURE);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
@@ -2601,7 +2601,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -4218,6 +4864,29 @@ main (int argc, char **argv)
+@@ -4220,6 +4866,29 @@ main (int argc, char **argv)
        thousands_sep = -1;
    }
  
@@ -2631,7 +2631,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
    have_read_stdin = false;
    inittables ();
  
-@@ -4492,13 +5161,34 @@ main (int argc, char **argv)
+@@ -4494,13 +5163,34 @@ main (int argc, char **argv)
  
          case 't':
            {
@@ -2670,7 +2670,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
                  else
                    {
                      /* Provoke with 'sort -txx'.  Complain about
-@@ -4509,9 +5199,12 @@ main (int argc, char **argv)
+@@ -4511,9 +5201,12 @@ main (int argc, char **argv)
                             quote (optarg));
                    }
                }
@@ -2685,7 +2685,7 @@ diff -urNp coreutils-8.24-orig/src/sort.c coreutils-8.24/src/sort.c
            }
            break;
  
-@@ -5444,12 +5444,10 @@ main (int argc, char **argv)
+@@ -4751,12 +5444,10 @@ main (int argc, char **argv)
        sort (files, nfiles, outfile, nthreads);
      }
  
@@ -2719,14 +2719,14 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
  #include "system.h"
  #include "argmatch.h"
  #include "linebuffer.h"
-@@ -32,8 +43,20 @@
+@@ -31,9 +42,21 @@
  #include "stdio--.h"
  #include "xmemcoll.h"
  #include "xstrtol.h"
 -#include "memcasecmp.h"
 +#include "xmemcoll.h"
  #include "quote.h"
-+
+ 
 +/* MB_LEN_MAX is incorrectly defined to be 1 in at least one GCC
 +   installation; work around this configuration error.  */
 +#if !defined MB_LEN_MAX || MB_LEN_MAX < 2
@@ -2738,9 +2738,10 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 +# define mbrtowc(pwc, s, n, ps) (mbrtowc) (pwc, s, n, 0)
 +#endif
 +
- 
++
  /* The official name of this program (e.g., no 'g' prefix).  */
  #define PROGRAM_NAME "uniq"
+ 
 @@ -143,6 +166,10 @@ enum
    GROUP_OPTION = CHAR_MAX + 1
  };
@@ -2752,7 +2753,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
  static struct option const longopts[] =
  {
    {"count", no_argument, NULL, 'c'},
-@@ -251,7 +278,7 @@ size_opt (char const *opt, char const *m
+@@ -252,7 +279,7 @@ size_opt (char const *opt, char const *msgid)
     return a pointer to the beginning of the line's field to be compared. */
  
  static char * _GL_ATTRIBUTE_PURE
@@ -2761,7 +2762,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
  {
    size_t count;
    char const *lp = line->buffer;
-@@ -271,6 +298,83 @@ find_field (struct linebuffer const *lin
+@@ -272,6 +299,83 @@ find_field (struct linebuffer const *line)
    return line->buffer + i;
  }
  
@@ -2845,7 +2846,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
  /* Return false if two strings OLD and NEW match, true if not.
     OLD and NEW point not to the beginnings of the lines
     but rather to the beginnings of the fields to compare.
-@@ -279,6 +383,8 @@ find_field (struct linebuffer const *lin
+@@ -280,6 +384,8 @@ find_field (struct linebuffer const *line)
  static bool
  different (char *old, char *new, size_t oldlen, size_t newlen)
  {
@@ -2854,7 +2855,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
    if (check_chars < oldlen)
      oldlen = check_chars;
    if (check_chars < newlen)
-@@ -286,15 +392,104 @@ different (char *old, char *new, size_t
+@@ -287,14 +393,103 @@ different (char *old, char *new, size_t oldlen, size_t newlen)
  
    if (ignore_case)
      {
@@ -2886,8 +2887,8 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 +
 +  return xmemcoll (copy_old, oldlen, copy_new, newlen);
 +
- }
- 
++}
++
 +#if HAVE_MBRTOWC
 +static int
 +different_multi (const char *old, const char *new, size_t oldlen, size_t newlen, mbstate_t oldstate, mbstate_t newstate)
@@ -2958,13 +2959,12 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
 +  free (copy[1]);
 +  return rc;
 +
-+}
+ }
 +#endif
-+
+ 
  /* Output the line in linebuffer LINE to standard output
     provided that the switches say it should be output.
-    MATCH is true if the line matches the previous line.
-@@ -358,19 +553,38 @@ check_file (const char *infile, const ch
+@@ -359,19 +554,38 @@ check_file (const char *infile, const char *outfile, char delimiter)
        char *prevfield IF_LINT ( = NULL);
        size_t prevlen IF_LINT ( = 0);
        bool first_group_printed = false;
@@ -3003,7 +3003,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
            new_group = (prevline->length == 0
                         || different (thisfield, prevfield, thislen, prevlen));
  
-@@ -388,6 +602,10 @@ check_file (const char *infile, const ch
+@@ -389,6 +603,10 @@ check_file (const char *infile, const char *outfile, char delimiter)
                SWAP_LINES (prevline, thisline);
                prevfield = thisfield;
                prevlen = thislen;
@@ -3014,7 +3014,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
                first_group_printed = true;
              }
          }
-@@ -400,17 +618,26 @@ check_file (const char *infile, const ch
+@@ -401,17 +619,26 @@ check_file (const char *infile, const char *outfile, char delimiter)
        size_t prevlen;
        uintmax_t match_count = 0;
        bool first_delimiter = true;
@@ -3041,7 +3041,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
            if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
              {
                if (ferror (stdin))
-@@ -419,6 +646,14 @@ check_file (const char *infile, const ch
+@@ -420,6 +647,14 @@ check_file (const char *infile, const char *outfile, char delimiter)
              }
            thisfield = find_field (thisline);
            thislen = thisline->length - 1 - (thisfield - thisline->buffer);
@@ -3056,7 +3056,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
            match = !different (thisfield, prevfield, thislen, prevlen);
            match_count += match;
  
-@@ -451,6 +686,9 @@ check_file (const char *infile, const ch
+@@ -452,6 +687,9 @@ check_file (const char *infile, const char *outfile, char delimiter)
                SWAP_LINES (prevline, thisline);
                prevfield = thisfield;
                prevlen = thislen;
@@ -3066,7 +3066,7 @@ diff -urNp coreutils-8.24-orig/src/uniq.c coreutils-8.24/src/uniq.c
                if (!match)
                  match_count = 0;
              }
-@@ -497,6 +735,19 @@ main (int argc, char **argv)
+@@ -498,6 +736,19 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  
@@ -3122,7 +3122,7 @@ diff -urNp coreutils-8.24-orig/tests/i18n/sort.sh coreutils-8.24/tests/i18n/sort
 diff -urNp coreutils-8.24-orig/tests/local.mk coreutils-8.24/tests/local.mk
 --- coreutils-8.24-orig/tests/local.mk	2015-07-05 09:00:46.526859558 +0200
 +++ coreutils-8.24/tests/local.mk	2015-07-05 09:04:33.033546987 +0200
-@@ -341,6 +341,8 @@ all_tests =					\
+@@ -344,6 +344,8 @@ all_tests =					\
    tests/misc/sort-discrim.sh			\
    tests/misc/sort-files0-from.pl		\
    tests/misc/sort-float.sh			\
@@ -3148,7 +3148,7 @@ diff -urNp coreutils-8.24-orig/tests/misc/cut.pl coreutils-8.24/tests/misc/cut.p
  
  my $prog = 'cut';
  my $try = "Try '$prog --help' for more information.\n";
-@@ -227,6 +229,7 @@ if ($mb_locale ne 'C')
+@@ -240,6 +242,7 @@ if ($mb_locale ne 'C')
          my @new_t = @$t;
          my $test_name = shift @new_t;
  
@@ -3304,7 +3304,7 @@ diff -urNp coreutils-8.24-orig/tests/misc/join.pl coreutils-8.24/tests/misc/join
  my $delim = chr 0247;
  sub t_subst ($)
  {
-@@ -326,8 +335,49 @@ foreach my $t (@tv)
+@@ -329,8 +338,49 @@ foreach my $t (@tv)
      push @Tests, $new_ent;
    }
  
@@ -3482,7 +3482,7 @@ diff -urNp coreutils-8.24-orig/tests/misc/sort.pl coreutils-8.24/tests/misc/sort
  # Since each test is run with a file name and with redirected stdin,
  # the name in the diagnostic is either the file name or "-".
  # Normalize each diagnostic to use '-'.
-@@ -419,6 +428,38 @@ foreach my $t (@Tests)
+@@ -424,6 +429,38 @@ foreach my $t (@Tests)
        }
    }
  
@@ -3521,7 +3521,7 @@ diff -urNp coreutils-8.24-orig/tests/misc/sort.pl coreutils-8.24/tests/misc/sort
  @Tests = triple_test \@Tests;
  
  # Remember that triple_test creates from each test with exactly one "IN"
-@@ -428,6 +469,7 @@ foreach my $t (@Tests)
+@@ -433,6 +470,7 @@ foreach my $t (@Tests)
  # Remove the IN_PIPE version of the "output-is-input" test above.
  # The others aren't susceptible because they have three inputs each.
  @Tests = grep {$_->[0] ne 'output-is-input.p'} @Tests;
@@ -3606,7 +3606,7 @@ diff -urNp coreutils-8.24-orig/tests/misc/uniq.pl coreutils-8.24/tests/misc/uniq
  # When possible, create a "-z"-testing variant of each test.
  sub add_z_variants($)
  {
-@@ -261,6 +269,53 @@ foreach my $t (@Tests)
+@@ -262,6 +270,53 @@ foreach my $t (@Tests)
        and push @$t, {ENV=>'_POSIX2_VERSION=199209'};
    }
  

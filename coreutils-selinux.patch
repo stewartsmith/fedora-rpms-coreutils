@@ -20,7 +20,7 @@ diff -urNp coreutils-8.21-orig/man/runcon.x coreutils-8.21/man/runcon.x
 diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
 --- coreutils-8.21-orig/src/cp.c	2013-02-07 10:37:05.000000000 +0100
 +++ coreutils-8.21/src/cp.c	2013-02-15 14:31:58.945468929 +0100
-@@ -201,6 +202,9 @@ Copy SOURCE to DEST, or multiple SOURCE(
+@@ -202,6 +202,9 @@ Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.\n\
                                   all\n\
  "), stdout);
        fputs (_("\
@@ -30,7 +30,7 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
        --parents                use full source file name under DIRECTORY\n\
  "), stdout);
-@@ -933,7 +939,7 @@ main (int argc, char **argv)
+@@ -943,7 +946,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
@@ -39,7 +39,7 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
                             long_opts, NULL))
           != -1)
      {
-@@ -981,6 +987,17 @@ main (int argc, char **argv)
+@@ -991,6 +994,17 @@ main (int argc, char **argv)
            copy_contents = true;
            break;
  
@@ -60,7 +60,7 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
 diff -urNp coreutils-8.21-orig/src/id.c coreutils-8.21/src/id.c
 --- coreutils-8.21-orig/src/id.c	2013-01-31 01:46:24.000000000 +0100
 +++ coreutils-8.21/src/id.c	2013-02-15 14:31:58.946469154 +0100
-@@ -106,7 +106,7 @@ int
+@@ -113,7 +113,7 @@ int
  main (int argc, char **argv)
  {
    int optc;
@@ -72,7 +72,7 @@ diff -urNp coreutils-8.21-orig/src/id.c coreutils-8.21/src/id.c
 diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
 --- coreutils-8.21-orig/src/install.c	2013-02-07 10:37:05.000000000 +0100
 +++ coreutils-8.21/src/install.c	2013-02-15 14:31:58.948469440 +0100
-@@ -639,7 +640,7 @@ In the 4th form, create all components o
+@@ -649,7 +649,7 @@ In the 4th form, create all components of the given DIRECTORY(ies).\n\
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
        fputs (_("\
@@ -81,7 +81,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
    -Z                      set SELinux security context of destination\n\
                              file to default type\n\
        --context[=CTX]     like -Z, or if CTX is specified then set the\n\
-@@ -782,7 +783,7 @@ main (int argc, char **argv)
+@@ -817,7 +817,7 @@ main (int argc, char **argv)
       we'll actually use backup_suffix_string.  */
    backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
  
@@ -90,7 +90,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
                                NULL)) != -1)
      {
        switch (optc)
-@@ -853,6 +854,8 @@ main (int argc, char **argv)
+@@ -878,6 +878,8 @@ main (int argc, char **argv)
            no_target_directory = true;
            break;
  
@@ -99,7 +99,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
          case PRESERVE_CONTEXT_OPTION:
            if (! selinux_enabled)
              {
-@@ -860,6 +862,10 @@ main (int argc, char **argv)
+@@ -885,6 +887,10 @@ main (int argc, char **argv)
                               "this kernel is not SELinux-enabled"));
                break;
              }

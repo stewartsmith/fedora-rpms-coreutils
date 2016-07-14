@@ -132,7 +132,7 @@ diff -urNp coreutils-8.25-orig/src/cut.c coreutils-8.25/src/cut.c
  
  /* The delimiter for each line/record. */
  static unsigned char line_delim = '\n';
-@@ -164,7 +243,7 @@ Print selected parts of lines from each
+@@ -164,7 +243,7 @@ Print selected parts of lines from each FILE to standard output.\n\
    -f, --fields=LIST       select only these fields;  also print any line\n\
                              that contains no delimiter character, unless\n\
                              the -s option is specified\n\

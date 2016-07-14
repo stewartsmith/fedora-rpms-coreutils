@@ -12,7 +12,7 @@
  #include "system.h"
  
  #include "error.h"
-@@ -90,25 +95,16 @@ add_range_pair (size_t lo, size_t hi)
+@@ -61,25 +66,16 @@
     CURRENT_RP.HI then we make CURRENT_RP to point to the next range pair. */
  static struct field_range_pair *current_rp;
  
@@ -42,7 +42,7 @@
      /* Output the given delimiter-separated fields. */
      field_mode
    };
-@@ -120,12 +116,16 @@ static enum operating_mode operating_mod
+@@ -91,12 +87,16 @@ static enum operating_mode operating_mode;
     with field mode.  */
  static bool suppress_non_delimited;
  
@@ -60,7 +60,7 @@
  
  /* The delimiter for each line/record. */
  static unsigned char line_delim = '\n';
-@@ -135,7 +135,7 @@ static size_t output_delimiter_length;
+@@ -109,7 +109,7 @@ static size_t output_delimiter_length;
  
  /* The output field separator string.  Defaults to the 1-character
     string consisting of the input delimiter.  */
@@ -69,7 +69,7 @@
  
  /* True if we have ever read standard input. */
  static bool have_read_stdin;
-@@ -189,7 +189,7 @@ Print selected parts of lines from each
+@@ -164,7 +164,7 @@ Print selected parts of lines from each FILE to standard output.\n\
    -f, --fields=LIST       select only these fields;  also print any line\n\
                              that contains no delimiter character, unless\n\
                              the -s option is specified\n\
@@ -78,7 +78,7 @@
  "), stdout);
        fputs (_("\
        --complement        complement the set of selected bytes, characters\n\
-@@ -435,6 +435,12 @@ next_item (size_t *item_idx)
+@@ -211,6 +211,12 @@ next_item (size_t *item_idx)
      current_rp++;
  }
  
@@ -91,7 +91,7 @@
  /* Return nonzero if the K'th field or byte is printable. */
  
  static inline bool
-@@ -443,6 +449,15 @@ print_kth (size_t k)
+@@ -219,6 +225,15 @@ print_kth (size_t k)
    return current_rp->lo <= k;
  }
  
@@ -107,7 +107,7 @@
  /* Return nonzero if K'th byte is the beginning of a range. */
  
  static inline bool
-@@ -505,23 +520,215 @@ cut_bytes (FILE *stream)
+@@ -281,23 +296,215 @@ cut_bytes (FILE *stream)
  }
  
  /* Read from stream STREAM, printing to standard output any selected fields.  */
@@ -328,7 +328,7 @@
  
    /* To support the semantics of the -s flag, we may have to buffer
       all of the first field to determine whether it is 'delimited.'
-@@ -536,10 +744,14 @@ cut_fields (FILE *stream)
+@@ -312,10 +519,14 @@ cut_fields (FILE *stream)
        if (field_idx == 1 && buffer_first_field)
          {
            ssize_t len;
@@ -346,7 +346,7 @@
            if (len < 0)
              {
                free (field_1_buffer);
-@@ -549,15 +761,15 @@ cut_fields (FILE *stream)
+@@ -325,15 +536,15 @@ cut_fields (FILE *stream)
                xalloc_die ();
              }
  
@@ -366,7 +366,7 @@
              {
                if (suppress_non_delimited)
                  {
-@@ -565,26 +777,30 @@ cut_fields (FILE *stream)
+@@ -341,26 +552,30 @@ cut_fields (FILE *stream)
                  }
                else
                  {
@@ -405,7 +405,7 @@
                        found_any_selected_field = true;
                      }
                  }
-@@ -594,7 +810,8 @@ cut_fields (FILE *stream)
+@@ -370,7 +585,8 @@ cut_fields (FILE *stream)
            next_item (&field_idx);
          }
  
@@ -415,7 +415,7 @@
  
        if (print_kth (field_idx))
          {
-@@ -605,42 +822,46 @@ cut_fields (FILE *stream)
+@@ -381,42 +597,46 @@ cut_fields (FILE *stream)
              }
            found_any_selected_field = true;
  
@@ -477,7 +477,7 @@
              break;
            field_idx = 1;
            current_rp = frp;
-@@ -652,7 +874,14 @@ static void
+@@ -429,7 +649,14 @@ static void
  cut_stream (FILE *stream)
  {
    if (operating_mode == byte_mode)
@@ -493,7 +493,7 @@
    else
      cut_fields (stream);
  }
-@@ -706,6 +935,7 @@ main (int argc, char **argv)
+@@ -483,6 +710,7 @@ main (int argc, char **argv)
    bool ok;
    bool delim_specified = false;
    char *spec_list_string IF_LINT ( = NULL);
@@ -501,7 +501,7 @@
  
    initialize_main (&argc, &argv);
    set_program_name (argv[0]);
-@@ -719,8 +949,10 @@ main (int argc, char **argv)
+@@ -496,8 +724,10 @@ main (int argc, char **argv)
  
    /* By default, all non-delimited lines are printed.  */
    suppress_non_delimited = false;
@@ -513,7 +513,7 @@
    have_read_stdin = false;
  
    while ((optc = getopt_long (argc, argv, "b:c:d:f:nsz", longopts, NULL)) != -1)
-@@ -728,7 +960,6 @@ main (int argc, char **argv)
+@@ -505,7 +735,6 @@ main (int argc, char **argv)
        switch (optc)
          {
          case 'b':
@@ -521,7 +521,7 @@
            /* Build the byte list. */
            if (operating_mode != undefined_mode)
              FATAL_ERROR (_("only one type of list may be specified"));
-@@ -736,6 +967,14 @@ main (int argc, char **argv)
+@@ -513,6 +742,14 @@ main (int argc, char **argv)
            spec_list_string = optarg;
            break;
  
@@ -536,7 +536,7 @@
          case 'f':
            /* Build the field list. */
            if (operating_mode != undefined_mode)
-@@ -747,9 +986,17 @@ main (int argc, char **argv)
+@@ -524,9 +761,17 @@ main (int argc, char **argv)
          case 'd':
            /* New delimiter. */
            /* Interpret -d '' to mean 'use the NUL byte as the delimiter.'  */
@@ -551,12 +551,12 @@
 +             mbi_advance (iter);
 +             if (mbi_avail (iter))
              FATAL_ERROR (_("the delimiter must be a single character"));
-+           }
 -          delim = optarg[0];
++           }
            delim_specified = true;
            break;
  
-@@ -763,6 +1008,7 @@ main (int argc, char **argv)
+@@ -540,6 +785,7 @@ main (int argc, char **argv)
            break;
  
          case 'n':
@@ -564,7 +564,7 @@
            break;
  
          case 's':
-@@ -802,15 +1048,12 @@ main (int argc, char **argv)
+@@ -579,15 +825,12 @@ main (int argc, char **argv)
                | (complement ? SETFLD_COMPLEMENT : 0) );
  
    if (!delim_specified)
