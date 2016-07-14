@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -53,6 +53,8 @@ Patch803: coreutils-i18n-fix-unexpand.patch
 Patch805: coreutils-i18n-fix2-expand-unexpand.patch
 #(un)expand - test BOM headers
 Patch806: coreutils-i18n-un-expand-BOM.patch
+# make 'sort -h' work for arbitrary column even when using UTF-8 locales
+Patch807: coreutils-i18n-sort-human.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -195,6 +197,7 @@ tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 %patch804 -p1 -b .i18n-cutold
 %patch805 -p1 -b .i18n-fix2-expand-unexpand
 %patch806 -p1 -b .i18n-BOM-expand-unexpand
+%patch807 -p1
 
 # Coreutils
 %patch908 -p1 -b .getgrouplist
@@ -349,6 +352,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Jul 14 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-13
+- make 'sort -h' work for arbitrary column even when using UTF-8 locales
+
 * Mon Jul 11 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-12
 - install -Z now sets default SELinux context for created directories (#1339135)
 - drop the %%pre scriptlet, which is no longer needed (#1354078)
