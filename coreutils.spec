@@ -111,7 +111,7 @@ BuildRequires: attr
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: bison
-BuildRequires: gettext
+BuildRequires: gettext-devel
 BuildRequires: gmp-devel
 BuildRequires: libacl-devel
 BuildRequires: libattr-devel
@@ -226,14 +226,11 @@ find ./po/ -name "*.p*" | xargs \
  sed -i \
  -e 's/-dpR/-cdpR/'
 
+autoreconf -fiv
+
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
-#autoreconf -i -v
-touch aclocal.m4 configure config.hin Makefile.in */Makefile.in
-aclocal -I m4
-autoconf --force
-automake --copy --add-missing
 for type in separate single; do
   mkdir $type && \
   (cd $type && ln -s ../configure || exit 1
@@ -351,6 +348,7 @@ fi
 
 %changelog
 * Tue Jul 19 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-14
+- run autoreconf in %%prep
 - drop post-install fix for Japanese locales that no longer applies
 - fix 'sort -h -k' in locales that use blank as thousands separator (#1355780)
 
