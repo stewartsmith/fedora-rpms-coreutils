@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,6 +19,8 @@ Source10: coreutils-find-requires.sh
 
 # From upstream 
 Patch952: coreutils-8.25-intall-Z-selinux.patch
+# fix 'sort -h -k' in locales that use blank as thousands separator (#1355780)
+Patch953: coreutils-8.25-sort-thousands-sep.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -209,9 +211,13 @@ tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 %patch951 -p1 -b .selinuxman
 %patch952 -p1
 
+# upstream patches
+%patch953 -p1
+
 chmod a+x \
     tests/df/direct.sh \
     tests/install/install-Z-selinux.sh \
+    tests/misc/sort-h-thousands-sep.sh \
     tests/misc/sort-mb-tests.sh \
     || :
 
@@ -352,6 +358,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Jul 19 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-14
+- fix 'sort -h -k' in locales that use blank as thousands separator (#1355780)
+
 * Thu Jul 14 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-13
 - make 'sort -h' work for arbitrary column even when using UTF-8 locales
 
