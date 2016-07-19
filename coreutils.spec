@@ -286,14 +286,6 @@ for type in separate single; do
   fi
 done
 
-# fix japanese catalog file
-if [ -d $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES ]; then
-   mkdir -p $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
-   mv $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC/LC_MESSAGES/*mo \
-      $RPM_BUILD_ROOT%{_datadir}/locale/ja/LC_MESSAGES
-   rm -rf $RPM_BUILD_ROOT%{_datadir}/locale/ja_JP.EUC
-fi
-
 bzip2 -9f ChangeLog
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
@@ -359,6 +351,7 @@ fi
 
 %changelog
 * Tue Jul 19 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-14
+- drop post-install fix for Japanese locales that no longer applies
 - fix 'sort -h -k' in locales that use blank as thousands separator (#1355780)
 
 * Thu Jul 14 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-13
