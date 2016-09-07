@@ -283,16 +283,11 @@ for type in separate single; do
   fi
 done
 
-bzip2 -9f ChangeLog
-
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 install -p -c -m644 DIR_COLORS{,.256color,.lightbgcolor} \
     $RPM_BUILD_ROOT%{_sysconfdir}
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
-
-# Compress ChangeLogs from before the fileutils/textutils/etc merge
-bzip2 -f9 old/*/C*
 
 # Use hard links instead of symbolic links for LC_TIME files (bug #246729).
 find %{buildroot}%{_datadir}/locale -type l | \
