@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -21,6 +21,8 @@ Source10: coreutils-find-requires.sh
 Patch952: coreutils-8.25-intall-Z-selinux.patch
 # fix 'sort -h -k' in locales that use blank as thousands separator (#1355780)
 Patch953: coreutils-8.25-sort-thousands-sep.patch
+# ls: allow interruption when reading slow directories (#1365933)
+Patch954: coreutils-8.25-ls-signal.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -213,6 +215,7 @@ tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 
 # upstream patches
 %patch953 -p1
+%patch954 -p1
 
 chmod a+x \
     tests/df/direct.sh \
@@ -342,6 +345,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Sep 07 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-15
+- ls: allow interruption when reading slow directories (#1365933)
+
 * Tue Jul 19 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-14
 - run autoreconf in %%prep
 - drop post-install fix for Japanese locales that no longer applies
