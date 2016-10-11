@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -345,6 +345,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Oct 11 2016 Tomáš Mráz <tmraz@redhat.com> - 8.25-16
+- rebuild with OpenSSL 1.1.0
+
 * Wed Sep 07 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-15
 - ls: allow interruption when reading slow directories (#1365933)
 
