@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.25
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -23,6 +23,8 @@ Patch952: coreutils-8.25-intall-Z-selinux.patch
 Patch953: coreutils-8.25-sort-thousands-sep.patch
 # ls: allow interruption when reading slow directories (#1365933)
 Patch954: coreutils-8.25-ls-signal.patch
+# md5sum,sha*sum: fix --ignore-missing with checksums starting with 00
+Patch955: coreutils-8.25-sum-ignore-missing.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -216,6 +218,7 @@ tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 # upstream patches
 %patch953 -p1
 %patch954 -p1
+%patch955 -p1
 
 chmod a+x \
     tests/df/direct.sh \
@@ -345,6 +348,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Oct 31 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-17
+- md5sum,sha*sum: fix --ignore-missing with checksums starting with 00
+
 * Tue Oct 11 2016 Tomáš Mráz <tmraz@redhat.com> - 8.25-16
 - rebuild with OpenSSL 1.1.0
 
