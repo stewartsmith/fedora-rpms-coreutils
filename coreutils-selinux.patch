@@ -1,15 +1,17 @@
-diff -urNp coreutils-8.21-orig/man/chcon.x coreutils-8.21/man/chcon.x
---- coreutils-8.21-orig/man/chcon.x	2011-08-23 15:44:01.000000000 +0200
-+++ coreutils-8.21/man/chcon.x	2013-02-15 14:31:58.937482694 +0100
+diff --git a/man/chcon.x b/man/chcon.x
+index 8c1ff6f..c84fb96 100644
+--- a/man/chcon.x
++++ b/man/chcon.x
 @@ -1,4 +1,4 @@
  [NAME]
 -chcon \- change file security context
 +chcon \- change file SELinux security context
  [DESCRIPTION]
  .\" Add any additional description here
-diff -urNp coreutils-8.21-orig/man/runcon.x coreutils-8.21/man/runcon.x
---- coreutils-8.21-orig/man/runcon.x	2011-08-23 15:44:01.000000000 +0200
-+++ coreutils-8.21/man/runcon.x	2013-02-15 14:31:58.938486496 +0100
+diff --git a/man/runcon.x b/man/runcon.x
+index d2df13e..5c5f5d8 100644
+--- a/man/runcon.x
++++ b/man/runcon.x
 @@ -1,5 +1,5 @@
  [NAME]
 -runcon \- run command with specified security context
@@ -17,10 +19,11 @@ diff -urNp coreutils-8.21-orig/man/runcon.x coreutils-8.21/man/runcon.x
  [DESCRIPTION]
  Run COMMAND with completely-specified CONTEXT, or with current or
  transitioned security context modified by one or more of LEVEL,
-diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
---- coreutils-8.21-orig/src/cp.c	2013-02-07 10:37:05.000000000 +0100
-+++ coreutils-8.21/src/cp.c	2013-02-15 14:31:58.945468929 +0100
-@@ -202,6 +202,9 @@ Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.\n\
+diff --git a/src/cp.c b/src/cp.c
+index 1b528c6..25dbb88 100644
+--- a/src/cp.c
++++ b/src/cp.c
+@@ -203,6 +203,9 @@ Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.\n\
                                   all\n\
  "), stdout);
        fputs (_("\
@@ -30,16 +33,16 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
        --no-preserve=ATTR_LIST  don't preserve the specified attributes\n\
        --parents                use full source file name under DIRECTORY\n\
  "), stdout);
-@@ -943,7 +946,7 @@ main (int argc, char **argv)
-      we'll actually use backup_suffix_string.  */
-   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+@@ -929,7 +932,7 @@ main (int argc, char **argv)
+   selinux_enabled = (0 < is_selinux_enabled ());
+   cp_option_init (&x);
  
 -  while ((c = getopt_long (argc, argv, "abdfHilLnprst:uvxPRS:TZ",
 +  while ((c = getopt_long (argc, argv, "abcdfHilLnprst:uvxPRS:TZ",
                             long_opts, NULL))
           != -1)
      {
-@@ -991,6 +994,17 @@ main (int argc, char **argv)
+@@ -977,6 +980,17 @@ main (int argc, char **argv)
            copy_contents = true;
            break;
  
@@ -57,10 +60,11 @@ diff -urNp coreutils-8.21-orig/src/cp.c coreutils-8.21/src/cp.c
          case 'd':
            x.preserve_links = true;
            x.dereference = DEREF_NEVER;
-diff -urNp coreutils-8.21-orig/src/id.c coreutils-8.21/src/id.c
---- coreutils-8.21-orig/src/id.c	2013-01-31 01:46:24.000000000 +0100
-+++ coreutils-8.21/src/id.c	2013-02-15 14:31:58.946469154 +0100
-@@ -113,7 +113,7 @@ int
+diff --git a/src/id.c b/src/id.c
+index 05d98a5..d6eb002 100644
+--- a/src/id.c
++++ b/src/id.c
+@@ -114,7 +114,7 @@ int
  main (int argc, char **argv)
  {
    int optc;
@@ -69,28 +73,29 @@ diff -urNp coreutils-8.21-orig/src/id.c coreutils-8.21/src/id.c
    bool smack_enabled = is_smack_enabled ();
    bool opt_zero = false;
    char *pw_name = NULL;
-diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
---- coreutils-8.21-orig/src/install.c	2013-02-07 10:37:05.000000000 +0100
-+++ coreutils-8.21/src/install.c	2013-02-15 14:31:58.948469440 +0100
-@@ -649,7 +649,7 @@ In the 4th form, create all components of the given DIRECTORY(ies).\n\
+diff --git a/src/install.c b/src/install.c
+index d79d597..437889a 100644
+--- a/src/install.c
++++ b/src/install.c
+@@ -673,7 +673,7 @@ In the 4th form, create all components of the given DIRECTORY(ies).\n\
    -v, --verbose       print the name of each directory as it is created\n\
  "), stdout);
        fputs (_("\
 -      --preserve-context  preserve SELinux security context\n\
 +  -P, --preserve-context  preserve SELinux security context (-P deprecated)\n\
    -Z                      set SELinux security context of destination\n\
-                             file to default type\n\
+                             file and each created directory to default type\n\
        --context[=CTX]     like -Z, or if CTX is specified then set the\n\
-@@ -817,7 +817,7 @@ main (int argc, char **argv)
-      we'll actually use backup_suffix_string.  */
-   backup_suffix_string = getenv ("SIMPLE_BACKUP_SUFFIX");
+@@ -824,7 +824,7 @@ main (int argc, char **argv)
+   dir_arg = false;
+   umask (0);
  
 -  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pt:TvS:Z", long_options,
 +  while ((optc = getopt_long (argc, argv, "bcCsDdg:m:o:pPt:TvS:Z", long_options,
                                NULL)) != -1)
      {
        switch (optc)
-@@ -878,6 +878,8 @@ main (int argc, char **argv)
+@@ -885,6 +885,8 @@ main (int argc, char **argv)
            no_target_directory = true;
            break;
  
@@ -99,7 +104,7 @@ diff -urNp coreutils-8.21-orig/src/install.c coreutils-8.21/src/install.c
          case PRESERVE_CONTEXT_OPTION:
            if (! selinux_enabled)
              {
-@@ -885,6 +887,10 @@ main (int argc, char **argv)
+@@ -892,6 +894,10 @@ main (int argc, char **argv)
                               "this kernel is not SELinux-enabled"));
                break;
              }

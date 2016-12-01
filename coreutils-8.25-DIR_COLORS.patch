@@ -4,10 +4,10 @@ Date: Fri, 17 Jun 2016 16:58:18 +0200
 Subject: [PATCH] downstream changes to default DIR_COLORS
 
 ---
- DIR_COLORS              |  44 +++----
- DIR_COLORS.256color     | 296 +++++++++++++++++++++++-------------------------
- DIR_COLORS.lightbgcolor | 203 +++++++++++++++++----------------
- 3 files changed, 271 insertions(+), 272 deletions(-)
+ DIR_COLORS              |  44 ++++----
+ DIR_COLORS.256color     | 294 +++++++++++++++++++++++-------------------------
+ DIR_COLORS.lightbgcolor | 207 +++++++++++++++++-----------------
+ 3 files changed, 271 insertions(+), 274 deletions(-)
 
 diff --git a/DIR_COLORS b/DIR_COLORS
 index d2ea453..27af9d7 100644
@@ -34,7 +34,7 @@ index d2ea453..27af9d7 100644
  
  # Below are TERM entries, which can be a glob patterns, to match
  # against the TERM environment variable to determine if it is colorizable.
-@@ -62,7 +68,7 @@ DOOR 01;35	# door
+@@ -56,7 +62,7 @@ DOOR 01;35	# door
  BLK 40;33;01	# block device driver
  CHR 40;33;01	# character device driver
  ORPHAN 40;31;01 # symlink to nonexistent file, or non-stat'able file ...
@@ -43,7 +43,7 @@ index d2ea453..27af9d7 100644
  SETUID 37;41	# file that is setuid (u+s)
  SETGID 30;43	# file that is setgid (g+s)
  CAPABILITY 30;41	# file with capability
-@@ -183,21 +189,21 @@ EXEC 01;32
+@@ -181,21 +187,21 @@ EXEC 01;32
  .ogx 01;35
  
  # audio formats
@@ -85,7 +85,7 @@ diff --git a/DIR_COLORS.256color b/DIR_COLORS.256color
 index d2ea453..74c34ba 100644
 --- a/DIR_COLORS.256color
 +++ b/DIR_COLORS.256color
-@@ -1,45 +1,22 @@
+@@ -1,39 +1,22 @@
 -# Configuration file for dircolors, a utility to help you set the
 -# LS_COLORS environment variable used by GNU ls with the --color option.
 +# Configuration file for the 256color ls utility
@@ -109,30 +109,24 @@ index d2ea453..74c34ba 100644
  # against the TERM environment variable to determine if it is colorizable.
 -TERM Eterm
 -TERM ansi
--TERM color-xterm
+-TERM *color*
 -TERM con[0-9]*x[0-9]*
 -TERM cons25
 -TERM console
 -TERM cygwin
 -TERM dtterm
--TERM eterm-color
 -TERM gnome
--TERM gnome-256color
 -TERM hurd
 -TERM jfbterm
 -TERM konsole
 -TERM kterm
 -TERM linux
 -TERM linux-c
--TERM mach-color
--TERM mach-gnu-color
 -TERM mlterm
 -TERM putty
--TERM putty-256color
 -TERM rxvt*
 -TERM screen*
 -TERM st
--TERM st-256color
 -TERM terminator
 -TERM tmux*
 -TERM vt100
@@ -142,7 +136,7 @@ index d2ea453..74c34ba 100644
  
  # Below are the color init strings for the basic file types. A color init
  # string consists of one or more of the following numeric codes:
-@@ -49,29 +26,40 @@ TERM xterm*
+@@ -43,29 +26,40 @@ TERM xterm*
  # 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
  # Background color codes:
  # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
@@ -199,7 +193,7 @@ index d2ea453..74c34ba 100644
  
  # List any file extensions like '.gz' or '.tar' that you would like ls
  # to colorize below. Put the extension, a space, and the color init string.
-@@ -89,115 +77,115 @@ EXEC 01;32
+@@ -83,119 +77,115 @@ EXEC 01;32
  #.csh 01;32
  
   # archives or compressed (bright red)
@@ -225,6 +219,8 @@ index d2ea453..74c34ba 100644
 -.lz  01;31
 -.lzo 01;31
 -.xz  01;31
+-.zst 01;31
+-.tzst 01;31
 -.bz2 01;31
 -.bz  01;31
 -.tbz 01;31
@@ -289,6 +285,8 @@ index d2ea453..74c34ba 100644
  # image formats
 -.jpg 01;35
 -.jpeg 01;35
+-.mjpg 01;35
+-.mjpeg 01;35
 -.gif 01;35
 -.bmp 01;35
 -.pbm 01;35
@@ -445,7 +443,7 @@ index d2ea453..95d6879 100644
  
  # Below are TERM entries, which can be a glob patterns, to match
  # against the TERM environment variable to determine if it is colorizable.
-@@ -52,17 +57,17 @@ TERM xterm*
+@@ -46,17 +51,17 @@ TERM xterm*
  #NORMAL 00	# no color code at all
  #FILE 00	# regular file: use no color at all
  RESET 0		# reset to "normal" color
@@ -468,7 +466,7 @@ index d2ea453..95d6879 100644
  SETUID 37;41	# file that is setuid (u+s)
  SETGID 30;43	# file that is setgid (g+s)
  CAPABILITY 30;41	# file with capability
-@@ -71,7 +76,7 @@ OTHER_WRITABLE 34;42 # dir that is other-writable (o+w) and not sticky
+@@ -65,7 +70,7 @@ OTHER_WRITABLE 34;42 # dir that is other-writable (o+w) and not sticky
  STICKY 37;44	# dir with the sticky bit set (+t) and not other-writable
  
  # This is for files with execute permission:
@@ -477,7 +475,7 @@ index d2ea453..95d6879 100644
  
  # List any file extensions like '.gz' or '.tar' that you would like ls
  # to colorize below. Put the extension, a space, and the color init string.
-@@ -88,99 +93,99 @@ EXEC 01;32
+@@ -82,103 +87,99 @@ EXEC 01;32
  #.sh  01;32
  #.csh 01;32
  
@@ -504,6 +502,8 @@ index d2ea453..95d6879 100644
 -.lz  01;31
 -.lzo 01;31
 -.xz  01;31
+-.zst 01;31
+-.tzst 01;31
 -.bz2 01;31
 -.bz  01;31
 -.tbz 01;31
@@ -569,6 +569,8 @@ index d2ea453..95d6879 100644
  # image formats
 -.jpg 01;35
 -.jpeg 01;35
+-.mjpg 01;35
+-.mjpeg 01;35
 -.gif 01;35
 -.bmp 01;35
 -.pbm 01;35

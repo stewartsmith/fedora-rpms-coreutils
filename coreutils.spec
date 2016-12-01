@@ -1,12 +1,11 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.25
-Release: 17%{?dist}
+Version: 8.26
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
 Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-Source2: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
 Source50:   supported_utils
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
@@ -16,15 +15,6 @@ Source10: coreutils-find-requires.sh
 %global _use_internal_dependency_generator 0
 %global __find_provides %{_rpmconfigdir}/find-provides
 %global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
-
-# From upstream 
-Patch952: coreutils-8.25-intall-Z-selinux.patch
-# fix 'sort -h -k' in locales that use blank as thousands separator (#1355780)
-Patch953: coreutils-8.25-sort-thousands-sep.patch
-# ls: allow interruption when reading slow directories (#1365933)
-Patch954: coreutils-8.25-ls-signal.patch
-# md5sum,sha*sum: fix --ignore-missing with checksums starting with 00
-Patch955: coreutils-8.25-sum-ignore-missing.patch
 
 # Our patches
 #general patch to workaround koji build system issues
@@ -213,12 +203,6 @@ tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 #SELinux
 %patch950 -p1 -b .selinux
 %patch951 -p1 -b .selinuxman
-%patch952 -p1
-
-# upstream patches
-%patch953 -p1
-%patch954 -p1
-%patch955 -p1
 
 chmod a+x \
     tests/df/direct.sh \
@@ -348,6 +332,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Dec 01 2016 Kamil Dudka <kdudka@redhat.com> - 8.26-1
+- new upstream release 8.26
+
 * Mon Oct 31 2016 Kamil Dudka <kdudka@redhat.com> - 8.25-17
 - md5sum,sha*sum: fix --ignore-missing with checksums starting with 00
 

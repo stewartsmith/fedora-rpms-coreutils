@@ -1,7 +1,8 @@
-diff -urNp coreutils-6.10-orig/doc/coreutils.texi coreutils-6.10/doc/coreutils.texi
---- coreutils-6.10-orig/doc/coreutils.texi	2008-04-07 17:52:11.000000000 +0200
-+++ coreutils-6.10/doc/coreutils.texi	2008-04-07 18:01:43.000000000 +0200
-@@ -8002,6 +8002,11 @@ done
+diff --git a/doc/coreutils.texi b/doc/coreutils.texi
+index 47e4480..cff2ead 100644
+--- a/doc/coreutils.texi
++++ b/doc/coreutils.texi
+@@ -8083,6 +8083,11 @@ done
  exit $fail
  @end example
  
