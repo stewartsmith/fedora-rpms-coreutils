@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.26
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -41,8 +41,6 @@ Patch713: coreutils-4.5.3-langinfo.patch
 Patch800: coreutils-i18n.patch
 # (sb) lin18nux/lsb compliance - expand/unexpand
 Patch801: coreutils-i18n-expand-unexpand.patch
-# (sb) lin18nux/lsb compliance - cut - not stable enough, not applied
-Patch802: coreutils-i18n-cut.patch
 # i18n patch for cut - old version - used
 Patch804: coreutils-i18n-cut-old.patch
 # The unexpand patch above is not correct. Sent to the patch authors
@@ -170,49 +168,17 @@ Optional though recommended components,
 including documentation and translations.
 
 %prep
-%setup -q
+%autosetup -N
 
 # will be modified by coreutils-8.25-DIR_COLORS.patch
 tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 
-# Our patches
-%patch1 -p1
-%patch100 -p1 -b .configure
-%patch101 -p1 -b .manpages
-%patch102 -p1
-%patch103 -p1 -b .sysinfo
-%patch104 -p1 -b .dfdirect
-%patch107 -p1 -b .mkdirmode
+# apply all patches
+%autopatch -p1
 
-# sh-utils
-%patch703 -p1 -b .dateman
-%patch713 -p1 -b .langinfo
-
-# li18nux/lsb
-%patch800 -p1 -b .i18n
-%patch801 -p1 -b .i18n-expand
-#%%patch802 -p1 -b .i18n-cut
-%patch803 -p1 -b .i18n-fix-expand
-%patch804 -p1 -b .i18n-cutold
-%patch805 -p1 -b .i18n-fix2-expand-unexpand
-%patch806 -p1 -b .i18n-BOM-expand-unexpand
-%patch807 -p1
-
-# Coreutils
-%patch908 -p1 -b .getgrouplist
-%patch912 -p1 -b .overflow
-%patch913 -p1 -b .testoff
-
-#SELinux
-%patch950 -p1 -b .selinux
-%patch951 -p1 -b .selinuxman
-
-chmod a+x \
-    tests/df/direct.sh \
-    tests/install/install-Z-selinux.sh \
-    tests/misc/sort-h-thousands-sep.sh \
-    tests/misc/sort-mb-tests.sh \
-    || :
+(echo ">>> Fixing permissions on tests") 2>/dev/null
+find tests -name '*.sh' -perm 0644 -print -exec chmod 0755 '{}' '+'
+(echo "<<< done") 2>/dev/null
 
 #fix typos/mistakes in localized documentation(#439410, #440056)
 find ./po/ -name "*.p*" | xargs \
@@ -335,6 +301,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Dec 02 2016 Kamil Dudka <kdudka@redhat.com> - 8.26-2
+- apply patches automatically to ease maintenance
+
 * Thu Dec 01 2016 Kamil Dudka <kdudka@redhat.com> - 8.26-1
 - new upstream release 8.26
 

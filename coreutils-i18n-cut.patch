@@ -1,3 +1,5 @@
+(sb) lin18nux/lsb compliance - cut - not stable enough, not applied
+
 --- coreutils-8.24/src/cut.c	2015-06-26 19:05:22.000000000 +0200
 +++ cut.c	2016-01-15 10:15:04.863804121 +0100
 @@ -28,6 +28,11 @@
