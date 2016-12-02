@@ -1,0 +1,35 @@
+From 812480a9fb21b26f2e705b992ce75810f36d08c9 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Fri, 2 Dec 2016 10:12:09 +0100
+Subject: [PATCH] disable the test-lock gnulib test prone to deadlock
+
+See https://lists.gnu.org/archive/html/bug-gnulib/2015-07/msg00033.html
+and https://libvirt.org/git/?p=libvirt.git;a=commitdiff;h=25fb4c6 for
+some context.
+---
+ gnulib-tests/gnulib.mk | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/gnulib-tests/gnulib.mk b/gnulib-tests/gnulib.mk
+index 8f32431..c9943d8 100644
+--- a/gnulib-tests/gnulib.mk
++++ b/gnulib-tests/gnulib.mk
+@@ -1207,15 +1207,6 @@ EXTRA_DIST += test-localename.c macros.h
+ 
+ ## end   gnulib module localename-tests
+ 
+-## begin gnulib module lock-tests
+-
+-TESTS += test-lock
+-check_PROGRAMS += test-lock
+-test_lock_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
+-EXTRA_DIST += test-lock.c
+-
+-## end   gnulib module lock-tests
+-
+ ## begin gnulib module lseek-tests
+ 
+ TESTS += test-lseek.sh
+-- 
+2.7.4
+

@@ -16,7 +16,9 @@ Source10: coreutils-find-requires.sh
 %global __find_provides %{_rpmconfigdir}/find-provides
 %global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
 
-# Our patches
+# disable the test-lock gnulib test prone to deadlock
+Patch1:   coreutils-8.26-test-lock.patch
+
 #general patch to workaround koji build system issues
 Patch100: coreutils-6.10-configuration.patch
 #add note about no difference between binary/text mode on Linux - md5sum manpage
@@ -174,6 +176,7 @@ including documentation and translations.
 tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 
 # Our patches
+%patch1 -p1
 %patch100 -p1 -b .configure
 %patch101 -p1 -b .manpages
 %patch102 -p1
