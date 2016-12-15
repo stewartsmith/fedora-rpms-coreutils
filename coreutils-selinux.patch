@@ -60,19 +60,22 @@ index 1b528c6..25dbb88 100644
          case 'd':
            x.preserve_links = true;
            x.dereference = DEREF_NEVER;
-diff --git a/src/id.c b/src/id.c
-index 05d98a5..d6eb002 100644
---- a/src/id.c
-+++ b/src/id.c
-@@ -114,7 +114,7 @@ int
- main (int argc, char **argv)
- {
-   int optc;
--  int selinux_enabled = (is_selinux_enabled () > 0);
-+  bool selinux_enabled = (is_selinux_enabled () > 0);
-   bool smack_enabled = is_smack_enabled ();
-   bool opt_zero = false;
-   char *pw_name = NULL;
+diff --git a/doc/coreutils.texi b/doc/coreutils.texi
+index 47e4480..cff2ead 100644
+--- a/doc/coreutils.texi
++++ b/doc/coreutils.texi
+@@ -8083,6 +8083,11 @@ done
+ exit $fail
+ @end example
+ 
++@item -c
++@cindex SELinux security context information, preserving
++Preserve SELinux security context of the original files if possible.
++Some file systems don't support storing of SELinux security context.
++
+ @item --copy-contents
+ @cindex directories, copying recursively
+ @cindex copying directories recursively
 diff --git a/src/install.c b/src/install.c
 index d79d597..437889a 100644
 --- a/src/install.c

@@ -58,7 +58,6 @@ Patch912: coreutils-overflow.patch
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
-Patch951: coreutils-selinuxmanpages.patch
 
 Conflicts: filesystem < 3
 # To avoid clobbering installs
