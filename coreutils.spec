@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.26
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -19,8 +19,6 @@ Source10: coreutils-find-requires.sh
 # disable the test-lock gnulib test prone to deadlock
 Patch1:   coreutils-8.26-test-lock.patch
 
-#general patch to workaround koji build system issues
-Patch100: coreutils-6.10-configuration.patch
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
 # downstream changes to default DIR_COLORS
@@ -56,8 +54,6 @@ Patch807: coreutils-i18n-sort-human.patch
 Patch908: coreutils-getgrouplist.patch
 #Prevent buffer overflow in who(1) (bug #158405).
 Patch912: coreutils-overflow.patch
-#Temporarily disable df symlink test, failing
-Patch913: coreutils-8.22-temporarytestoff.patch
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
@@ -301,6 +297,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Dec 15 2016 Kamil Dudka <kdudka@redhat.com> - 8.26-3
+- drop build fixes no longer needed
+
 * Fri Dec 02 2016 Kamil Dudka <kdudka@redhat.com> - 8.26-2
 - apply patches automatically to ease maintenance
 
