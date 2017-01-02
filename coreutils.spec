@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.26
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -296,6 +296,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Jan 02 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-4
+- use upstream patch for gnulib's test-lock (instead of disabling it)
+
 * Thu Dec 15 2016 Kamil Dudka <kdudka@redhat.com> - 8.26-3
 - drop build fixes no longer needed
 

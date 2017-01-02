@@ -1,35 +1,202 @@
-From 812480a9fb21b26f2e705b992ce75810f36d08c9 Mon Sep 17 00:00:00 2001
-From: Kamil Dudka <kdudka@redhat.com>
-Date: Fri, 2 Dec 2016 10:12:09 +0100
-Subject: [PATCH] disable the test-lock gnulib test prone to deadlock
+From 4f6cb65ce4d643aca0c6bf7db2e8b32c0d08eb89 Mon Sep 17 00:00:00 2001
+From: Bruno Haible <bruno@clisp.org>
+Date: Sat, 24 Dec 2016 18:21:59 +0100
+Subject: [PATCH] lock test: Fix performance problem on multi-core machines.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-See https://lists.gnu.org/archive/html/bug-gnulib/2015-07/msg00033.html
-and https://libvirt.org/git/?p=libvirt.git;a=commitdiff;h=25fb4c6 for
-some context.
+* tests/test-lock.c (USE_VOLATILE): New macro.
+(struct atomic_int): New type.
+(init_atomic_int, get_atomic_int_value, set_atomic_int_value): New
+functions.
+(lock_checker_done, rwlock_checker_done, reclock_checker_done): Define
+as 'struct atomic_int'.
+(lock_checker_thread, test_lock, rwlock_checker_thread, test_rwlock,
+reclock_checker_thread, test_recursive_lock): Use the new functions.
+Reported by Eric Blake in
+https://www.redhat.com/archives/libvir-list/2012-March/msg00854.html
+and by Pádraig Brady in
+http://lists.gnu.org/archive/html/bug-gnulib/2016-12/msg00117.html.
+
+Upstream-commit: 480d374e596a0ee3fed168ab42cd84c313ad3c89
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
 ---
- gnulib-tests/gnulib.mk | 9 ---------
- 1 file changed, 9 deletions(-)
+ gnulib-tests/test-lock.c | 79 ++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 67 insertions(+), 12 deletions(-)
 
-diff --git a/gnulib-tests/gnulib.mk b/gnulib-tests/gnulib.mk
-index 8f32431..c9943d8 100644
---- a/gnulib-tests/gnulib.mk
-+++ b/gnulib-tests/gnulib.mk
-@@ -1207,15 +1207,6 @@ EXTRA_DIST += test-localename.c macros.h
+diff --git a/gnulib-tests/test-lock.c b/gnulib-tests/test-lock.c
+index cb734b4..aa6de27 100644
+--- a/gnulib-tests/test-lock.c
++++ b/gnulib-tests/test-lock.c
+@@ -50,6 +50,13 @@
+    Uncomment this to see if the operating system has a fair scheduler.  */
+ #define EXPLICIT_YIELD 1
  
- ## end   gnulib module localename-tests
++/* Whether to use 'volatile' on some variables that communicate information
++   between threads.  If set to 0, a lock is used to protect these variables.
++   If set to 1, 'volatile' is used; this is theoretically equivalent but can
++   lead to much slower execution (e.g. 30x slower total run time on a 40-core
++   machine.  */
++#define USE_VOLATILE 0
++
+ /* Whether to print debugging messages.  */
+ #define ENABLE_DEBUGGING 0
  
--## begin gnulib module lock-tests
--
--TESTS += test-lock
--check_PROGRAMS += test-lock
--test_lock_LDADD = $(LDADD) @LIBMULTITHREAD@ @YIELD_LIB@
--EXTRA_DIST += test-lock.c
--
--## end   gnulib module lock-tests
--
- ## begin gnulib module lseek-tests
+@@ -103,6 +110,51 @@
+ # define yield()
+ #endif
  
- TESTS += test-lseek.sh
++#if USE_VOLATILE
++struct atomic_int {
++  volatile int value;
++};
++static void
++init_atomic_int (struct atomic_int *ai)
++{
++}
++static int
++get_atomic_int_value (struct atomic_int *ai)
++{
++  return ai->value;
++}
++static void
++set_atomic_int_value (struct atomic_int *ai, int new_value)
++{
++  ai->value = new_value;
++}
++#else
++struct atomic_int {
++  gl_lock_define (, lock)
++  int value;
++};
++static void
++init_atomic_int (struct atomic_int *ai)
++{
++  gl_lock_init (ai->lock);
++}
++static int
++get_atomic_int_value (struct atomic_int *ai)
++{
++  gl_lock_lock (ai->lock);
++  int ret = ai->value;
++  gl_lock_unlock (ai->lock);
++  return ret;
++}
++static void
++set_atomic_int_value (struct atomic_int *ai, int new_value)
++{
++  gl_lock_lock (ai->lock);
++  ai->value = new_value;
++  gl_lock_unlock (ai->lock);
++}
++#endif
++
+ #define ACCOUNT_COUNT 4
+ 
+ static int account[ACCOUNT_COUNT];
+@@ -170,12 +222,12 @@ lock_mutator_thread (void *arg)
+   return NULL;
+ }
+ 
+-static volatile int lock_checker_done;
++static struct atomic_int lock_checker_done;
+ 
+ static void *
+ lock_checker_thread (void *arg)
+ {
+-  while (!lock_checker_done)
++  while (get_atomic_int_value (&lock_checker_done) == 0)
+     {
+       dbgprintf ("Checker %p before check lock\n", gl_thread_self_pointer ());
+       gl_lock_lock (my_lock);
+@@ -200,7 +252,8 @@ test_lock (void)
+   /* Initialization.  */
+   for (i = 0; i < ACCOUNT_COUNT; i++)
+     account[i] = 1000;
+-  lock_checker_done = 0;
++  init_atomic_int (&lock_checker_done);
++  set_atomic_int_value (&lock_checker_done, 0);
+ 
+   /* Spawn the threads.  */
+   checkerthread = gl_thread_create (lock_checker_thread, NULL);
+@@ -210,7 +263,7 @@ test_lock (void)
+   /* Wait for the threads to terminate.  */
+   for (i = 0; i < THREAD_COUNT; i++)
+     gl_thread_join (threads[i], NULL);
+-  lock_checker_done = 1;
++  set_atomic_int_value (&lock_checker_done, 1);
+   gl_thread_join (checkerthread, NULL);
+   check_accounts ();
+ }
+@@ -254,12 +307,12 @@ rwlock_mutator_thread (void *arg)
+   return NULL;
+ }
+ 
+-static volatile int rwlock_checker_done;
++static struct atomic_int rwlock_checker_done;
+ 
+ static void *
+ rwlock_checker_thread (void *arg)
+ {
+-  while (!rwlock_checker_done)
++  while (get_atomic_int_value (&rwlock_checker_done) == 0)
+     {
+       dbgprintf ("Checker %p before check rdlock\n", gl_thread_self_pointer ());
+       gl_rwlock_rdlock (my_rwlock);
+@@ -284,7 +337,8 @@ test_rwlock (void)
+   /* Initialization.  */
+   for (i = 0; i < ACCOUNT_COUNT; i++)
+     account[i] = 1000;
+-  rwlock_checker_done = 0;
++  init_atomic_int (&rwlock_checker_done);
++  set_atomic_int_value (&rwlock_checker_done, 0);
+ 
+   /* Spawn the threads.  */
+   for (i = 0; i < THREAD_COUNT; i++)
+@@ -295,7 +349,7 @@ test_rwlock (void)
+   /* Wait for the threads to terminate.  */
+   for (i = 0; i < THREAD_COUNT; i++)
+     gl_thread_join (threads[i], NULL);
+-  rwlock_checker_done = 1;
++  set_atomic_int_value (&rwlock_checker_done, 1);
+   for (i = 0; i < THREAD_COUNT; i++)
+     gl_thread_join (checkerthreads[i], NULL);
+   check_accounts ();
+@@ -356,12 +410,12 @@ reclock_mutator_thread (void *arg)
+   return NULL;
+ }
+ 
+-static volatile int reclock_checker_done;
++static struct atomic_int reclock_checker_done;
+ 
+ static void *
+ reclock_checker_thread (void *arg)
+ {
+-  while (!reclock_checker_done)
++  while (get_atomic_int_value (&reclock_checker_done) == 0)
+     {
+       dbgprintf ("Checker %p before check lock\n", gl_thread_self_pointer ());
+       gl_recursive_lock_lock (my_reclock);
+@@ -386,7 +440,8 @@ test_recursive_lock (void)
+   /* Initialization.  */
+   for (i = 0; i < ACCOUNT_COUNT; i++)
+     account[i] = 1000;
+-  reclock_checker_done = 0;
++  init_atomic_int (&reclock_checker_done);
++  set_atomic_int_value (&reclock_checker_done, 0);
+ 
+   /* Spawn the threads.  */
+   checkerthread = gl_thread_create (reclock_checker_thread, NULL);
+@@ -396,7 +451,7 @@ test_recursive_lock (void)
+   /* Wait for the threads to terminate.  */
+   for (i = 0; i < THREAD_COUNT; i++)
+     gl_thread_join (threads[i], NULL);
+-  reclock_checker_done = 1;
++  set_atomic_int_value (&reclock_checker_done, 1);
+   gl_thread_join (checkerthread, NULL);
+   check_accounts ();
+ }
 -- 
 2.7.4
 
