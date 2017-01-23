@@ -300,7 +300,7 @@ fi
 
 %changelog
 * Mon Jan 23 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-5
-- date: fix fix TZ= regression (patch by Pádraig Brady)
+- date: fix TZ= regression (patch by Pádraig Brady)
 
 * Mon Jan 02 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-4
 - use upstream patch for gnulib's test-lock (instead of disabling it)
