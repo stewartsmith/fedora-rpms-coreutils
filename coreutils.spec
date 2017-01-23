@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.26
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -18,6 +18,9 @@ Source10: coreutils-find-requires.sh
 
 # disable the test-lock gnulib test prone to deadlock
 Patch1:   coreutils-8.26-test-lock.patch
+
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=851934#10
+Patch2:   coreutils-8.26-date-fix-tz-regre.patch
 
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
@@ -296,6 +299,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Jan 23 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-5
+- date: fix fix TZ= regression (patch by Pádraig Brady)
+
 * Mon Jan 02 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-4
 - use upstream patch for gnulib's test-lock (instead of disabling it)
 

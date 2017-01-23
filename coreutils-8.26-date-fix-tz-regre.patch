@@ -1,0 +1,82 @@
+From 12284825dcc5d9485ebaa78aedd93f450bad7b73 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Fri, 20 Jan 2017 12:40:35 +0000
+Subject: [PATCH 1/2] date: fix TZ= regression
+
+On 17/03/16 17:38, Paul Eggert wrote:
+> On 03/16/2016 08:51 PM, Assaf Gordon wrote:
+>> I suspect it has something to do with this commit:
+>>    commit    037e3b9847feb46cf6b58d99ce960d3987faaf52
+>
+> You're right, and thanks for that detailed bug report. I installed the
+> attached patch, which fixed the bug for me.
+
+This introduced a bug unfortunately due to the side effects of
+parse_datetime().
+parse_datetime resets the TZ env variable but doesn't call tzset().
+Hence using the wrong timezone for output.
+Previously localtime() called tzset() implicitly.
+Perhaps we should call tzset() in parse_datetime() if needed?
+I'm not sure as to whether this undoes the fix for bug 23035?
+
+Anyway this avoids the issue on GNU/Linux.
+
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/date.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/date.c b/src/date.c
+index 619a72b..2b3d890 100644
+--- a/src/date.c
++++ b/src/date.c
+@@ -571,6 +571,8 @@ show_date (const char *format, struct timespec when, timezone_t tz)
+ {
+   struct tm tm;
+ 
++  tzset ();
++
+   if (localtime_rz (tz, &when.tv_sec, &tm))
+     {
+       if (format == rfc_2822_format)
+-- 
+2.7.4
+
+
+From 3c082157634bd4fbc79c26e9c56abb4da79e9a2d Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Fri, 20 Jan 2017 18:24:02 -0800
+Subject: [PATCH 2/2] date: test for TZ= regression
+
+Problem reported by Paul Wise for Debian, in:
+https://bugs.debian.org/851934
+This is fallout from the fix for GNU Bug#23035.
+* tests/misc/date.pl: Test the fix.
+
+Upstream-commit: b14be5085cd1aefd473a000456b21270e6070711
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ tests/misc/date-debug.sh | 4 ++--
+ tests/misc/date.pl       | 6 ++++++
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/tests/misc/date.pl b/tests/misc/date.pl
+index 7e45e98..be8b39e 100755
+--- a/tests/misc/date.pl
++++ b/tests/misc/date.pl
+@@ -291,6 +291,12 @@ my @Tests =
+       {ERR => "date: invalid date 'TZ=\"\"\"'\n"},
+       {EXIT => 1},
+      ],
++
++     # https://bugs.debian.org/851934#10
++     ['cross-TZ-mishandled', "-d 'TZ=\"EST5\" 1970-01-01 00:00'",
++      {ENV => 'TZ=PST8'},
++      {OUT => 'Wed Dec 31 21:00:00 PST 1969'},
++     ],
+     );
+ 
+ # Repeat the cross-dst test, using Jan 1, 2005 and every interval from 1..364.
+-- 
+2.7.4
+
