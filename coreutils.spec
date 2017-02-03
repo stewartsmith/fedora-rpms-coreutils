@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.26
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     http://www.gnu.org/software/coreutils/
@@ -52,6 +52,8 @@ Patch805: coreutils-i18n-fix2-expand-unexpand.patch
 Patch806: coreutils-i18n-un-expand-BOM.patch
 # make 'sort -h' work for arbitrary column even when using UTF-8 locales
 Patch807: coreutils-i18n-sort-human.patch
+# fold: preserve new-lines in mutlibyte text (#1418505)
+Patch808: coreutils-i18n-fold-newline.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
@@ -299,6 +301,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Feb 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-6
+- fold: preserve new-lines in mutlibyte text (#1418505)
+
 * Mon Jan 23 2017 Kamil Dudka <kdudka@redhat.com> - 8.26-5
 - date: fix TZ= regression (patch by Pádraig Brady)
 
