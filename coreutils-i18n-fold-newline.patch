@@ -4,8 +4,8 @@ Date: Fri, 3 Feb 2017 12:26:53 +0100
 Subject: [PATCH] fold.c: preserve new-lines in mutlibyte text
 
 ---
- src/fold.c | 55 +++++++++++++++++++++++++++----------------------------
- 1 file changed, 27 insertions(+), 28 deletions(-)
+ src/fold.c | 49 ++++++++++++++++++++++++-------------------------
+ 1 file changed, 24 insertions(+), 25 deletions(-)
 
 diff --git a/src/fold.c b/src/fold.c
 index d23edd5..8c232a7 100644
@@ -43,15 +43,24 @@ index d23edd5..8c232a7 100644
 -                  fwrite (line_out, sizeof(char), offset_out, stdout);
 -                  START_NEW_LINE;
 -                  continue;
--                  
++            case L'\b':
++              increment = (column > 0) ? -1 : 0;
++              break;
+ 
 -                case L'\b':
 -                  increment = (column > 0) ? -1 : 0;
 -                  break;
--
++            case L'\r':
++              increment = -1 * column;
++              break;
+ 
 -                case L'\r':
 -                  increment = -1 * column;
 -                  break;
--
++            case L'\t':
++              increment = 8 - column % 8;
++              break;
+ 
 -                case L'\t':
 -                  increment = 8 - column % 8;
 -                  break;
@@ -60,18 +69,6 @@ index d23edd5..8c232a7 100644
 -                  increment = wcwidth (wc);
 -                  increment = (increment < 0) ? 0 : increment;
 -                }
-+            case L'\b':
-+              increment = (column > 0) ? -1 : 0;
-+              break;
-+
-+            case L'\r':
-+              increment = -1 * column;
-+              break;
-+
-+            case L'\t':
-+              increment = 8 - column % 8;
-+              break;
-+
 +            default:
 +              increment = wcwidth (wc);
 +              increment = (increment < 0) ? 0 : increment;

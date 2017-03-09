@@ -1,11 +1,11 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.26
-Release: 7%{?dist}
+Version: 8.27
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
-Url:     http://www.gnu.org/software/coreutils/
-Source0: ftp://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
+Url:     https://www.gnu.org/software/coreutils/
+Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source50:   supported_utils
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
@@ -18,9 +18,6 @@ Source10: coreutils-find-requires.sh
 
 # disable the test-lock gnulib test prone to deadlock
 Patch1:   coreutils-8.26-test-lock.patch
-
-# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=851934#10
-Patch2:   coreutils-8.26-date-fix-tz-regre.patch
 
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
@@ -172,6 +169,8 @@ including documentation and translations.
 
 # will be modified by coreutils-8.25-DIR_COLORS.patch
 tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
+# git add DIR_COLORS{,.256color,.lightbgcolor}
+# git commit -m "clone DIR_COLORS before patching"
 
 # apply all patches
 %autopatch -p1
@@ -301,6 +300,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Mar 09 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-1
+- new upstream release 8.27
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8.26-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

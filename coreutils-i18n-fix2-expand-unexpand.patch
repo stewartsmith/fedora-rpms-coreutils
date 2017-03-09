@@ -22,7 +22,7 @@ index 380e020..310b349 100644
 +              }
              }
 -          while (false);
-+          
++
  
            if (convert)
              {
@@ -50,7 +50,7 @@ index 3bbbd66..863a90a 100644
 +              }
              }
 -          while (false);
-+          
++
  
            if (convert)
              {

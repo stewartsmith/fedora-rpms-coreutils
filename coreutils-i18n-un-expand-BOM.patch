@@ -1,3 +1,17 @@
+From 7a7c776a4e228d180e74614fd8c8afcad5d4bdf7 Mon Sep 17 00:00:00 2001
+From: Jakub Martisko <jamartis@redhat.com>
+Date: Thu, 7 Jul 2016 12:53:26 +0200
+Subject: [PATCH] coreutils-i18n-un-expand-BOM.patch
+
+---
+ src/expand-common.c  | 114 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/expand-common.h  |  12 ++++++
+ src/expand.c         |  45 +++++++++++++++++++-
+ src/unexpand.c       |  43 ++++++++++++++++++-
+ tests/expand/mb.sh   |  71 ++++++++++++++++++++++++++++++++
+ tests/unexpand/mb.sh |  59 ++++++++++++++++++++++++++
+ 6 files changed, 342 insertions(+), 2 deletions(-)
+
 diff --git a/src/expand-common.c b/src/expand-common.c
 index 4657e46..97cbb09 100644
 --- a/src/expand-common.c
@@ -10,8 +24,8 @@ index 4657e46..97cbb09 100644
  #include "system.h"
  #include "die.h"
  #include "error.h"
-@@ -85,6 +86,119 @@ add_tab_stop (uintmax_t tabval)
-     }
+@@ -105,6 +106,119 @@ set_extend_size (uintmax_t tabval)
+   return ok;
  }
  
 +extern int
@@ -40,12 +54,12 @@ index 4657e46..97cbb09 100644
 +check_utf_locale(void)
 +{
 +  char* locale = setlocale (LC_CTYPE , NULL);
-+  if (locale == NULL) 
++  if (locale == NULL)
 +  {
 +    return false;
 +  }
 +  else if (strcasestr(locale, "utf8") == NULL && strcasestr(locale, "utf-8") == NULL)
-+  { 
++  {
 +    return false;
 +  }
 +  return true;
@@ -147,7 +161,7 @@ index 8cb2079..763bfda 100644
 +extern bool
 +check_bom(FILE* fp, mb_file_t *mbf);
 +
-+extern void 
++extern void
 +print_bom(void);
 +
  /* Add tab stop TABVAL to the end of 'tab_list'.  */
@@ -161,14 +175,13 @@ index 310b349..4136824 100644
    FILE *fp = next_file (NULL);
    mb_file_t mbf;
    mbf_char_t c;
--
 +  /* True if the starting locale is utf8.  */
 +  bool using_utf_locale;
-+ 
++
 +  /* True if the first file contains BOM header.  */
 +  bool found_bom;
 +  using_utf_locale=check_utf_locale();
-+  
+ 
    if (!fp)
      return;
 -
@@ -178,13 +191,13 @@ index 310b349..4136824 100644
 +  if (using_utf_locale == false && found_bom == true)
 +  {
 +    /*try using some predefined locale */
-+    
++
 +    if (set_utf_locale () != 0)
 +    {
 +      error (EXIT_FAILURE, errno, _("cannot set UTF-8 locale"));
 +    }
 +  }
-+ 
++
 +
 +  if (found_bom == true)
 +  {
@@ -212,7 +225,7 @@ index 310b349..4136824 100644
 +                  {
 +                    if(using_utf_locale==false && found_bom==true)
 +                    {
-+                      /*First file conatined BOM header - locale was switched to UTF 
++                      /*First file conatined BOM header - locale was switched to UTF
 +                      /*all subsequent files should contain BOM. */
 +                      error (EXIT_FAILURE, errno, _("combination of files with and without BOM header"));
 +                    }
@@ -231,7 +244,7 @@ index 863a90a..5681b58 100644
    mbf_char_t *pending_blank;
 +  /* True if the starting locale is utf8.  */
 +  bool using_utf_locale;
-+ 
++
 +  /* True if the first file contains BOM header.  */
 +  bool found_bom;
 +  using_utf_locale=check_utf_locale();
@@ -240,11 +253,11 @@ index 863a90a..5681b58 100644
      return;
 +  mbf_init (mbf, fp);
 +  found_bom=check_bom(fp,&mbf);
- 
++
 +  if (using_utf_locale == false && found_bom == true)
 +  {
 +    /*try using some predefined locale */
-+    
+ 
 +    if (set_utf_locale () != 0)
 +    {
 +      error (EXIT_FAILURE, errno, _("cannot set UTF-8 locale"));
@@ -282,7 +295,7 @@ index 863a90a..5681b58 100644
 +                  {
 +                    if(using_utf_locale==false && found_bom==true)
 +                    {
-+                      /*First file conatined BOM header - locale was switched to UTF 
++                      /*First file conatined BOM header - locale was switched to UTF
 +                      /*all subsequent files should contain BOM. */
 +                      error (EXIT_FAILURE, errno, _("combination of files with and without BOM header"));
 +                    }
@@ -301,7 +314,7 @@ index 031be7a..1621c84 100755
  
 +
 +
-+#BOM header test 1 
++#BOM header test 1
 +printf "\xEF\xBB\xBF" > in; cat <<\EOF >> in || framework_failure_
 +1234567812345678123456781
 +.       .       .       .
@@ -380,7 +393,7 @@ index 8d75652..9d4ee3e 100755
  unexpand -a < in > out || fail=1
  compare exp out > /dev/null 2>&1 || fail=1
 +
-+#BOM header test 1 
++#BOM header test 1
 +printf "\xEF\xBB\xBF" > in; cat <<\EOF >> in || framework_failure_
 +1234567812345678123456781
 +.       .       .       .
@@ -438,3 +451,6 @@ index 8d75652..9d4ee3e 100755
 +
 +LC_ALL=C unexpand in in > out || fail=1
 +compare exp out > /dev/null 2>&1 || fail=1
+-- 
+2.9.3
+

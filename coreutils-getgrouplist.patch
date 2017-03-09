@@ -30,7 +30,7 @@ index 76474c2..0a9d221 100644
 -                  : getgroups (0, NULL));
 +  if (!username)
 +    max_n_groups = getgroups(0, NULL);
-+  else 
++  else
 +  {
 +#ifdef HAVE_GETGROUPLIST
 +    max_n_groups = 0;

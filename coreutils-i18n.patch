@@ -315,7 +315,7 @@ index 8cd0d6b..d23edd5 100644
 +                  fwrite (line_out, sizeof(char), offset_out, stdout);
 +                  START_NEW_LINE;
 +                  continue;
-+                  
++
 +                case L'\b':
 +                  increment = (column > 0) ? -1 : 0;
 +                  break;
@@ -672,7 +672,7 @@ index 98b461c..9990f38 100644
 +  extract_field (line, ptr, lim - ptr);
 +}
 +#endif
-+ 
++
  static void
  freeline (struct line *line)
  {
@@ -2843,7 +2843,7 @@ index 87a0c93..9f755d9 100644
 +      while (pos < size)
 +        {
 +          MBCHAR_TO_WCHAR (wc, mblength, lp, pos, size, statep, convfail);
-+ 
++
 +          if (convfail || !(iswblank (wc) || wc == '\n'))
 +            {
 +              pos += mblength;
@@ -2886,7 +2886,7 @@ index 87a0c93..9f755d9 100644
    if (check_chars < oldlen)
      oldlen = check_chars;
    if (check_chars < newlen)
-@@ -295,14 +401,103 @@ different (char *old, char *new, size_t oldlen, size_t newlen)
+@@ -295,15 +401,104 @@ different (char *old, char *new, size_t oldlen, size_t newlen)
  
    if (ignore_case)
      {
@@ -2918,8 +2918,8 @@ index 87a0c93..9f755d9 100644
 +
 +  return xmemcoll (copy_old, oldlen, copy_new, newlen);
 +
-+}
-+
+ }
+ 
 +#if HAVE_MBRTOWC
 +static int
 +different_multi (const char *old, const char *new, size_t oldlen, size_t newlen, mbstate_t oldstate, mbstate_t newstate)
@@ -2990,11 +2990,12 @@ index 87a0c93..9f755d9 100644
 +  free (copy[1]);
 +  return rc;
 +
- }
++}
 +#endif
- 
++
  /* Output the line in linebuffer LINE to standard output
     provided that the switches say it should be output.
+    MATCH is true if the line matches the previous line.
 @@ -367,19 +562,38 @@ check_file (const char *infile, const char *outfile, char delimiter)
        char *prevfield IF_LINT ( = NULL);
        size_t prevlen IF_LINT ( = 0);
@@ -3156,7 +3157,7 @@ diff --git a/tests/local.mk b/tests/local.mk
 index 568944e..192f776 100644
 --- a/tests/local.mk
 +++ b/tests/local.mk
-@@ -350,6 +350,8 @@ all_tests =					\
+@@ -352,6 +352,8 @@ all_tests =					\
    tests/misc/sort-discrim.sh			\
    tests/misc/sort-files0-from.pl		\
    tests/misc/sort-float.sh			\
@@ -3211,8 +3212,8 @@ index 8a9cad1..9293e39 100755
  my @Tests =
    (
     ['t1', '--tabs=3',     {IN=>"a\tb"}, {OUT=>"a  b"}],
-@@ -140,6 +149,8 @@ my @Tests =
- 
+@@ -152,6 +161,8 @@ my @Tests =
+    ['trail9', '--tab=1,2 -t/5',{IN=>"\ta\tb\tc"}, {OUT=>" a   b    c"}],
  
     # Test errors
 +   # FIXME: The following tests contain ‘quoting’ specific to LC_MESSAGES
@@ -3220,8 +3221,8 @@ index 8a9cad1..9293e39 100755
     ['e1', '--tabs="a"', {IN=>''}, {OUT=>''}, {EXIT=>1},
      {ERR => "$prog: tab size contains invalid character(s): 'a'\n"}],
     ['e2', "-t $UINTMAX_OFLOW", {IN=>''}, {OUT=>''}, {EXIT=>1},
-@@ -150,6 +161,37 @@ my @Tests =
-     {ERR => "$prog: tab sizes must be ascending\n"}],
+@@ -168,6 +179,37 @@ my @Tests =
+     {ERR => "$prog: '/' specifier not at start of number: '/'\n"}],
    );
  
 +if ($mb_locale ne 'C')
@@ -3533,7 +3534,7 @@ index c3e7f8e..6ecd3ff 100755
  # Since each test is run with a file name and with redirected stdin,
  # the name in the diagnostic is either the file name or "-".
  # Normalize each diagnostic to use '-'.
-@@ -424,6 +429,38 @@ foreach my $t (@Tests)
+@@ -423,6 +428,38 @@ foreach my $t (@Tests)
        }
    }
  
@@ -3572,7 +3573,7 @@ index c3e7f8e..6ecd3ff 100755
  @Tests = triple_test \@Tests;
  
  # Remember that triple_test creates from each test with exactly one "IN"
-@@ -433,6 +470,7 @@ foreach my $t (@Tests)
+@@ -432,6 +469,7 @@ foreach my $t (@Tests)
  # Remove the IN_PIPE version of the "output-is-input" test above.
  # The others aren't susceptible because they have three inputs each.
  @Tests = grep {$_->[0] ne 'output-is-input.p'} @Tests;

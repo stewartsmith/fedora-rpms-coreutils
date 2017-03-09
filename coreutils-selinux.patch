@@ -48,7 +48,7 @@ index 1b528c6..25dbb88 100644
  
 +        case 'c':
 +          fprintf (stderr, "%s: warning: option '-c' is deprecated, please use '--preserve=context' instead\n", argv[0]);
-+          if ( x.set_security_context ) { 
++          if ( x.set_security_context ) {
 +              (void) fprintf(stderr, "%s: cannot force target context and preserve it\n", argv[0]);
 +             exit( 1 );
 +           }
