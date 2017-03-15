@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -16,8 +16,11 @@ Source10: coreutils-find-requires.sh
 %global __find_provides %{_rpmconfigdir}/find-provides
 %global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
 
+# upstream patches
+Patch1:   coreutils-8.27-date-debug-test.patch
+
 # disable the test-lock gnulib test prone to deadlock
-Patch1:   coreutils-8.26-test-lock.patch
+Patch100: coreutils-8.26-test-lock.patch
 
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
@@ -300,6 +303,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Mar 15 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-2
+- fix spurious build failure caused by the misc/date-debug test
+
 * Thu Mar 09 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-1
 - new upstream release 8.27
 

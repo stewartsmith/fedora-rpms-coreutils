@@ -1,0 +1,50 @@
+From ee2017f191f1ad177405fbd8816df0a55127804a Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 9 Mar 2017 23:59:05 -0800
+Subject: [PATCH] tests: port to tzdb-2017a
+
+Problem reported by Bernhard Voelker in:
+http://lists.gnu.org/archive/html/coreutils/2017-03/msg00026.html
+* tests/misc/date-debug.sh: Port test to tzdb 2017a,
+and future-proof the America/Belize test.
+
+Upstream-commit: 612086660bab9bf981894da146550e9101224b17
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ tests/misc/date-debug.sh | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/tests/misc/date-debug.sh b/tests/misc/date-debug.sh
+index 48f4605..8e0b2af 100755
+--- a/tests/misc/date-debug.sh
++++ b/tests/misc/date-debug.sh
+@@ -52,10 +52,11 @@ date: output timezone: +09:00 (set from TZ="Asia/Tokyo" environment value)
+ date: final: 661095000.000000000 (epoch-seconds)
+ date: final: (Y-M-D) 1990-12-13 13:30:00 (UTC0)
+ date: final: (Y-M-D) 1990-12-13 22:30:00 (output timezone TZ=+09:00)
+-Thu Dec 13 07:30:00 CST 1990
++Thu Dec 13 07:30:00 -0600 1990
+ EOF
+ 
+-TZ=America/Belize date --debug -d "$in1" >out1 2>&1 || fail=1
++TZ=America/Belize date --debug -d "$in1" +'%a %b %e %T %z %Y' >out1 2>&1 ||
++  fail=1
+ 
+ compare exp1 out1 || fail=1
+ 
+@@ -94,10 +95,10 @@ date: output timezone: -05:00 (set from TZ="America/Lima" environment value)
+ date: final: 1.000000000 (epoch-seconds)
+ date: final: (Y-M-D) 1970-01-01 00:00:01 (UTC0)
+ date: final: (Y-M-D) 1969-12-31 19:00:01 (output timezone TZ=-05:00)
+-Wed Dec 31 19:00:01 PET 1969
++Wed Dec 31 19:00:01 -0500 1969
+ EOF
+ 
+-TZ=America/Lima date --debug -d "$in3" >out3 2>&1 || fail=1
++TZ=America/Lima date --debug -d "$in3" +'%a %b %e %T %z %Y' >out3 2>&1 || fail=1
+ compare exp3 out3 || fail=1
+ 
+ ##
+-- 
+2.9.3
+
