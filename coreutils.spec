@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -67,8 +67,6 @@ Patch950: coreutils-selinux.patch
 Conflicts: filesystem < 3
 # To avoid clobbering installs
 Conflicts: coreutils-single
-# To give priority to this package
-Obsoletes: coreutils-single
 Provides: /bin/basename
 Provides: /bin/cat
 Provides: /bin/chgrp
@@ -303,6 +301,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Apr 25 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-3
+- do not obsolete coreutils-single, so it can be installed by DNF2 (#1444802)
+
 * Wed Mar 15 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-2
 - fix spurious build failure caused by the misc/date-debug test
 
