@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -18,6 +18,9 @@ Source10: coreutils-find-requires.sh
 
 # upstream patches
 Patch1:   coreutils-8.27-date-debug-test.patch
+
+# date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
+Patch2:   coreutils-8.27-CVE-2017-7476.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -301,6 +304,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Apr 27 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-4
+- date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
+
 * Tue Apr 25 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-3
 - do not obsolete coreutils-single, so it can be installed by DNF2 (#1444802)
 
