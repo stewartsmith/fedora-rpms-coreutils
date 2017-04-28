@@ -1,0 +1,168 @@
+From ba5fe2d4b8b6a8366f48b1ad1f97fe26c9089b53 Mon Sep 17 00:00:00 2001
+From: Sebastian Kisela <skisela@redhat.com>
+Date: Wed, 5 Apr 2017 09:40:41 +0200
+Subject: [PATCH] tail: revert to polling if a followed directory is replaced
+
+* src/tail.c (tail_forever_inotify): Add the IN_DELETE_SELF flag when
+creating watch for the parent directory.  After the parent directory
+is removed, an event is caught and then we switch from inotify to
+polling mode.  Till now, inotify has always frozen because it waited for
+an event from a watched dir, which has been already deleted and was not
+added again.
+* tests/tail-2/inotify-dir-recreate.sh: Add a test case.
+* tests/local.mk: Reference the new test.
+Fixes http://bugs.gnu.org/26363
+Reported at https://bugzilla.redhat.com/1283760
+
+Upstream-commit: ba5fe2d4b8b6a8366f48b1ad1f97fe26c9089b53
+
+---
+ src/tail.c                           | 22 +++++++++-
+ tests/local.mk                       |  1 +
+ tests/tail-2/inotify-dir-recreate.sh | 82 ++++++++++++++++++++++++++++++++++++
+ 4 files changed, 107 insertions(+), 1 deletion(-)
+ create mode 100755 tests/tail-2/inotify-dir-recreate.sh
+
+diff --git a/src/tail.c b/src/tail.c
+index d1552d4..6328fe0 100644
+--- a/src/tail.c
++++ b/src/tail.c
+@@ -1457,7 +1457,8 @@ tail_forever_inotify (int wd, struct File_spec *f, size_t n_files,
+                   In that case the same watch descriptor is returned.  */
+               f[i].parent_wd = inotify_add_watch (wd, dirlen ? f[i].name : ".",
+                                                   (IN_CREATE | IN_DELETE
+-                                                   | IN_MOVED_TO | IN_ATTRIB));
++                                                   | IN_MOVED_TO | IN_ATTRIB
++                                                   | IN_DELETE_SELF));
+ 
+               f[i].name[dirlen] = prev;
+ 
+@@ -1628,6 +1629,25 @@ tail_forever_inotify (int wd, struct File_spec *f, size_t n_files,
+       ev = void_ev;
+       evbuf_off += sizeof (*ev) + ev->len;
+ 
++      /* If a directory is deleted, IN_DELETE_SELF is emitted
++         with ev->name of length 0.
++         We need to catch it, otherwise it would wait forever,
++         as wd for directory becomes inactive. Revert to polling now.   */
++      if ((ev->mask & IN_DELETE_SELF) && ! ev->len)
++        {
++          for (i = 0; i < n_files; i++)
++            {
++              if (ev->wd == f[i].parent_wd)
++                {
++                  hash_free (wd_to_name);
++                  error (0, 0,
++                      _("directory containing watched file was removed"));
++                  errno = 0;  /* we've already diagnosed enough errno detail. */
++                  return true;
++                }
++            }
++        }
++
+       if (ev->len) /* event on ev->name in watched directory.  */
+         {
+           size_t j;
+diff --git a/tests/local.mk b/tests/local.mk
+index 3fe9ba8..e890c9a 100644
+--- a/tests/local.mk
++++ b/tests/local.mk
+@@ -176,6 +176,7 @@ all_tests =					\
+   tests/tail-2/descriptor-vs-rename.sh		\
+   tests/tail-2/inotify-rotate.sh		\
+   tests/tail-2/inotify-rotate-resources.sh	\
++  tests/tail-2/inotify-dir-recreate.sh		\
+   tests/chmod/no-x.sh				\
+   tests/chgrp/basic.sh				\
+   tests/rm/dangling-symlink.sh			\
+diff --git a/tests/tail-2/inotify-dir-recreate.sh b/tests/tail-2/inotify-dir-recreate.sh
+new file mode 100755
+index 0000000..eaa8422
+--- /dev/null
++++ b/tests/tail-2/inotify-dir-recreate.sh
+@@ -0,0 +1,82 @@
++#!/bin/sh
++# Makes sure, inotify will switch to polling mode if directory
++# of the watched file was removed and recreated.
++# (...instead of getting stuck forever)
++
++# Copyright (C) 2006-2017 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++. "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
++print_ver_ tail
++
++
++# Terminate any background tail process
++cleanup_() { kill $pid 2>/dev/null && wait $pid; }
++
++cleanup_fail_ ()
++{
++  warn_ $1
++  cleanup_
++  fail=1
++}
++
++# $check_re - string to be found
++# $check_f - file to be searched
++check_tail_output_ ()
++{
++  local delay="$1"
++  grep $check_re $check_f > /dev/null ||
++    { sleep $delay ; return 1; }
++}
++
++grep_timeout_ ()
++{
++  check_re="$1"
++  check_f="$2"
++  retry_delay_ check_tail_output_ .1 5
++}
++
++# Prepare the file to be watched
++mkdir dir && echo 'inotify' > dir/file || framework_failure_
++
++#tail must print content of the file to stdout, verify
++timeout 60 tail -F dir/file &>out & pid=$!
++grep_timeout_ 'inotify' 'out' ||
++{ cleanup_fail_ 'file to be tailed does not exist'; }
++
++# Remove the directory, should get the message about the deletion
++rm -r dir || framework_failure_
++grep_timeout_ 'polling' 'out' ||
++{ cleanup_fail_ 'tail did not switch to polling mode'; }
++
++# Recreate the dir, must get a message about recreation
++mkdir dir && touch dir/file || framework_failure_
++grep_timeout_ 'appeared' 'out' ||
++{ cleanup_fail_ 'previously removed file did not appear'; }
++
++cleanup_
++
++# Expected result for the whole process
++cat <<\EOF > exp || framework_failure_
++inotify
++tail: 'dir/file' has become inaccessible: No such file or directory
++tail: directory containing watched file was removed
++tail: inotify cannot be used, reverting to polling
++tail: 'dir/file' has appeared;  following new file
++EOF
++
++compare exp out || fail=1
++
++Exit $fail
+-- 
+2.9.3
+

@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -21,6 +21,9 @@ Patch1:   coreutils-8.27-date-debug-test.patch
 
 # date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
 Patch2:   coreutils-8.27-CVE-2017-7476.patch
+
+# tail: revert to polling if a followed directory is replaced
+Patch3:   coreutils-8.27-tail-inotify-recreate.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -304,6 +307,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Apr 28 2017 Sebastian Kisela <skisela@redhat.com> - 8.27-5
+- tail: revert to polling if a followed directory is replaced
+
 * Thu Apr 27 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-4
 - date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
 
