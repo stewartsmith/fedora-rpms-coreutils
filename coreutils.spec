@@ -254,17 +254,8 @@ install -p -c -m644 DIR_COLORS{,.256color,.lightbgcolor} \
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
-# Use hard links instead of symbolic links for LC_TIME files (bug #246729).
-find %{buildroot}%{_datadir}/locale -type l | \
-(while read link
- do
-   target=$(readlink "$link")
-   rm -f "$link"
-   ln "$(dirname "$link")/$target" "$link"
- done)
-
 %find_lang %name
-#Add the %lang(xyz) ownership for the LC_TIME dirs as well...
+# Add the %%lang(xyz) ownership for the LC_TIME dirs as well...
 grep LC_TIME %name.lang | cut -d'/' -f1-6 | sed -e 's/) /) %%dir /g' >>%name.lang
 
 # (sb) Deal with Installed (but unpackaged) file(s) found
@@ -305,6 +296,7 @@ fi
 
 %changelog
 * Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-6
+- drop workaround no longer needed for 10 years old rpm-build bug (#246729)
 - drop unnecessary uses of %%defattr
 
 * Fri Apr 28 2017 Sebastian Kisela <skisela@redhat.com> - 8.27-5
