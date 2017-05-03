@@ -186,11 +186,6 @@ tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
 find tests -name '*.sh' -perm 0644 -print -exec chmod 0755 '{}' '+'
 (echo "<<< done") 2>/dev/null
 
-#fix typos/mistakes in localized documentation(#439410, #440056)
-find ./po/ -name "*.p*" | xargs \
- sed -i \
- -e 's/-dpR/-cdpR/'
-
 autoreconf -fiv
 
 %build
@@ -296,6 +291,7 @@ fi
 
 %changelog
 * Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-6
+- do not mention a deprecated option in localized man pages
 - drop workaround no longer needed for 10 years old rpm-build bug (#246729)
 - drop unnecessary uses of %%defattr
 
