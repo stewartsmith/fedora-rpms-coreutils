@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -60,8 +60,6 @@ Patch808: coreutils-i18n-fold-newline.patch
 
 #getgrouplist() patch from Ulrich Drepper.
 Patch908: coreutils-getgrouplist.patch
-#Prevent buffer overflow in who(1) (bug #158405).
-Patch912: coreutils-overflow.patch
 
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
@@ -287,6 +285,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-8
+- drop coreutils-overflow.patch no longer needed (#158405)
+
 * Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-7
 - drop workaround for already fixed rpm-build bug (#1306559)
 
