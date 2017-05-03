@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -10,11 +10,8 @@ Source50:   supported_utils
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
-# Provide our own custom requires for coreutils-single package
-Source10: coreutils-find-requires.sh
-%global _use_internal_dependency_generator 0
-%global __find_provides %{_rpmconfigdir}/find-provides
-%global __find_requires %{SOURCE10} %{_rpmconfigdir}/find-requires
+# do not make coreutils-single depend on /usr/bin/coreutils
+%global __requires_exclude ^%{_bindir}/coreutils$
 
 # upstream patches
 Patch1:   coreutils-8.27-date-debug-test.patch
@@ -290,6 +287,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-7
+- drop workaround for already fixed rpm-build bug (#1306559)
+
 * Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-6
 - do not mention a deprecated option in localized man pages
 - drop workaround no longer needed for 10 years old rpm-build bug (#246729)
