@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -22,7 +22,7 @@ Patch1:   coreutils-8.27-date-debug-test.patch
 # date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
 Patch2:   coreutils-8.27-CVE-2017-7476.patch
 
-# tail: revert to polling if a followed directory is replaced
+# tail: revert to polling if a followed directory is replaced (#1283760)
 Patch3:   coreutils-8.27-tail-inotify-recreate.patch
 
 # disable the test-lock gnulib test prone to deadlock
@@ -283,12 +283,10 @@ if [ -f %{_infodir}/%{name}.info.gz ]; then
 fi
 
 %files -f supported_utils
-%defattr(-,root,root,-)
 %exclude %{_bindir}/*.single
 %{_libexecdir}/coreutils/*.so
 
 %files single
-%defattr(-,root,root,-)
 %{_bindir}/*.single
 %{_sbindir}/chroot.single
 %{_libexecdir}/coreutils/*.so.single
@@ -297,7 +295,6 @@ fi
 %license COPYING
 
 %files common -f %{name}.lang
-%defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/DIR_COLORS*
 %config(noreplace) %{_sysconfdir}/profile.d/*
 %{_infodir}/coreutils*
@@ -307,8 +304,11 @@ fi
 %license COPYING
 
 %changelog
+* Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-6
+- drop unnecessary uses of %%defattr
+
 * Fri Apr 28 2017 Sebastian Kisela <skisela@redhat.com> - 8.27-5
-- tail: revert to polling if a followed directory is replaced
+- tail: revert to polling if a followed directory is replaced (#1283760)
 
 * Thu Apr 27 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-4
 - date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
