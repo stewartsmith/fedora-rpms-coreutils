@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -122,14 +122,17 @@ BuildRequires: glibc-langpack-en
 Requires: %{name}-common = %{version}-%{release}
 Requires: ncurses
 
+Provides: bundled(gnulib)
+Provides: coreutils-full = %{version}-%{release}
 Provides: fileutils = %{version}-%{release}
 Provides: sh-utils = %{version}-%{release}
 Provides: stat = %{version}-%{release}
 Provides: textutils = %{version}-%{release}
+
 #old mktemp package had epoch 3, so we have to use 4 for coreutils
 Provides: mktemp = 4:%{version}-%{release}
-Provides: bundled(gnulib)
 Obsoletes: mktemp < 4:%{version}-%{release}
+
 Obsoletes: fileutils <= 4.1.9
 Obsoletes: sh-utils <= 2.0.12
 Obsoletes: stat <= 3.3
@@ -285,6 +288,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue May 16 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-9
+- add coreutils-full provides for coreutils to make it explicitly installable
+
 * Wed May 03 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-8
 - drop coreutils-overflow.patch no longer needed (#158405)
 
