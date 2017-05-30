@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -21,6 +21,9 @@ Patch2:   coreutils-8.27-CVE-2017-7476.patch
 
 # tail: revert to polling if a followed directory is replaced (#1283760)
 Patch3:   coreutils-8.27-tail-inotify-recreate.patch
+
+# doc: mention `setpriv --no-new-privs` feature in runcon info
+Patch4:   coreutils-8.27-runcon-doc.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -288,6 +291,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue May 30 2017 Sebastian Kisela <skisela@redhat.com> - 8.27-10
+- doc: mention `setpriv --no-new-privs` feature in runcon info
+
 * Tue May 16 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-9
 - add coreutils-full provides for coreutils to make it explicitly installable
 
