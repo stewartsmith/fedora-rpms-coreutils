@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -291,6 +291,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8.27-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Tue May 30 2017 Sebastian Kisela <skisela@redhat.com> - 8.27-10
 - doc: mention `setpriv --no-new-privs` feature in runcon info
 
