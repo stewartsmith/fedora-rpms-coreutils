@@ -1,7 +1,11 @@
+# avoid build failure caused broken RPM code that produces debuginfo packages
+# reported at https://github.com/rpm-software-management/rpm/issues/280
+%undefine _debuginfo_subpackages
+
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -291,6 +295,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Jul 26 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-12
+- avoid build failure caused broken RPM code that produces debuginfo packages
+
 * Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8.27-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
