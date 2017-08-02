@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -291,6 +291,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8.27-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
 * Fri Jul 28 2017 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 8.27-13
 - Enable separate debuginfo back
 
