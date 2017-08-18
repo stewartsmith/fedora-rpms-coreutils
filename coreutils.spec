@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -24,6 +24,9 @@ Patch3:   coreutils-8.27-tail-inotify-recreate.patch
 
 # doc: mention `setpriv --no-new-privs` feature in runcon info
 Patch4:   coreutils-8.27-runcon-doc.patch
+
+# ptx: fix a possible crash caused by integer overflow (#1482445)
+Patch5:   coreutils-8.27-ptx-int-overflow.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -291,6 +294,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Aug 18 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-15
+- ptx: fix a possible crash caused by integer overflow (#1482445)
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 8.27-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
