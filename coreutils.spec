@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.27
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -274,11 +274,13 @@ fi
 
 %files -f supported_utils
 %exclude %{_bindir}/*.single
+%dir %{_libexecdir}/coreutils
 %{_libexecdir}/coreutils/*.so
 
 %files single
 %{_bindir}/*.single
 %{_sbindir}/chroot.single
+%dir %{_libexecdir}/coreutils
 %{_libexecdir}/coreutils/*.so.single
 # duplicate the license because coreutils-common does not need to be installed
 %{!?_licensedir:%global license %%doc}
@@ -294,6 +296,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Aug 22 2017 Ville Skyttä <ville.skytta@iki.fi> - 8.27-16
+- Own the %%{_libexecdir}/coreutils dir
+
 * Fri Aug 18 2017 Kamil Dudka <kdudka@redhat.com> - 8.27-15
 - ptx: fix a possible crash caused by integer overflow (#1482445)
 
