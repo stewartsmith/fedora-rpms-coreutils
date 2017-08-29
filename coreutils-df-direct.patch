@@ -112,7 +112,7 @@ index 8f760db..a7385fd 100644
      {
        if (posix_format)
 diff --git a/tests/df/direct.sh b/tests/df/direct.sh
-new file mode 100644
+new file mode 100755
 index 0000000..8e4cfb8
 --- /dev/null
 +++ b/tests/df/direct.sh

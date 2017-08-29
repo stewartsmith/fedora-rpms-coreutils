@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.27
-Release: 16%{?dist}
+Version: 8.28
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -12,21 +12,6 @@ Source106:  coreutils-colorls.csh
 
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
-
-# upstream patches
-Patch1:   coreutils-8.27-date-debug-test.patch
-
-# date, touch: fix out-of-bounds write via large TZ variable (CVE-2017-7476)
-Patch2:   coreutils-8.27-CVE-2017-7476.patch
-
-# tail: revert to polling if a followed directory is replaced (#1283760)
-Patch3:   coreutils-8.27-tail-inotify-recreate.patch
-
-# doc: mention `setpriv --no-new-privs` feature in runcon info
-Patch4:   coreutils-8.27-runcon-doc.patch
-
-# ptx: fix a possible crash caused by integer overflow (#1482445)
-Patch5:   coreutils-8.27-ptx-int-overflow.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -296,6 +281,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Sep 04 2017 Kamil Dudka <kdudka@redhat.com> - 8.28-1
+- new upstream release 8.28
+
 * Tue Aug 22 2017 Ville Skyttä <ville.skytta@iki.fi> - 8.27-16
 - Own the %%{_libexecdir}/coreutils dir
 
