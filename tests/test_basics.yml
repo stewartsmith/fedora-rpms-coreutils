@@ -1,0 +1,9 @@
+---
+# This first play always runs on the local staging system
+- hosts: localhost
+  tags:
+  - atomic
+  - classic
+  - container
+  roles:
+  - { role: standard-test-beakerlib, tests: [ test-basics, readlink-cannot-handle-recursive-symlinks ] }
