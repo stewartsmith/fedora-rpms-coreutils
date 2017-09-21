@@ -1,1 +1,2 @@
+# Fedora Continuous Integration: https://fedoraproject.org/wiki/CI
 - include: test_basics.yml
