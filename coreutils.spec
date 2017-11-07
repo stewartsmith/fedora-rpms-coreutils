@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.28
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -115,19 +115,6 @@ Requires: ncurses
 
 Provides: bundled(gnulib)
 Provides: coreutils-full = %{version}-%{release}
-Provides: fileutils = %{version}-%{release}
-Provides: sh-utils = %{version}-%{release}
-Provides: stat = %{version}-%{release}
-Provides: textutils = %{version}-%{release}
-
-#old mktemp package had epoch 3, so we have to use 4 for coreutils
-Provides: mktemp = 4:%{version}-%{release}
-Obsoletes: mktemp < 4:%{version}-%{release}
-
-Obsoletes: fileutils <= 4.1.9
-Obsoletes: sh-utils <= 2.0.12
-Obsoletes: stat <= 3.3
-Obsoletes: textutils <= 2.0.21
 Obsoletes: %{name} < 8.24-100
 
 %description
@@ -281,6 +268,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Nov 07 2017 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 8.28-2
+- Remove very old Provides (mktemp, sh-utils, textwrap, fileutils, stat)
+
 * Mon Sep 04 2017 Kamil Dudka <kdudka@redhat.com> - 8.28-1
 - new upstream release 8.28
 
