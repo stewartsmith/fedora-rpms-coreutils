@@ -16,6 +16,9 @@ Source106:  coreutils-colorls.csh
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
+# require_selinux_(): use selinuxenabled(8) if available
+Patch105: coreutils-8.26-selinuxenable.patch
+
 #add note about no difference between binary/text mode on Linux - md5sum manpage
 Patch101: coreutils-6.10-manpages.patch
 # downstream changes to default DIR_COLORS
@@ -102,6 +105,7 @@ BuildRequires: libacl-devel
 BuildRequires: libattr-devel
 BuildRequires: libcap-devel
 BuildRequires: libselinux-devel
+BuildRequires: libselinux-utils
 BuildRequires: openssl-devel
 BuildRequires: strace
 BuildRequires: texinfo
