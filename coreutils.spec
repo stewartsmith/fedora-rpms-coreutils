@@ -97,6 +97,7 @@ BuildRequires: automake
 BuildRequires: bison
 BuildRequires: gettext-devel
 BuildRequires: gmp-devel
+BuildRequires: hostname
 BuildRequires: libacl-devel
 BuildRequires: libattr-devel
 BuildRequires: libcap-devel
