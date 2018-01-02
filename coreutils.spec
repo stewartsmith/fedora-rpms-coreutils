@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.28
-Release: 2%{?dist}
+Version: 8.29
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -268,6 +268,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Jan 02 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-1
+- new upstream release 8.29
+
 * Tue Nov 07 2017 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 8.28-2
 - Remove very old Provides (mktemp, sh-utils, textwrap, fileutils, stat)
 
