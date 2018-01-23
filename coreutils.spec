@@ -17,6 +17,9 @@ Source106:  coreutils-colorls.csh
 # http://git.savannah.gnu.org/cgit/coreutils.git/commit/?id=v8.29-9-g29baf25aa
 Patch1:   coreutils-8.29-mv-n-noreplace.patch
 
+# doc: warn about following symlinks recursively in chown/chgrp (CVE-2017-18018)
+Patch2:   coreutils-8.29-CVE-2017-18018.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
@@ -278,6 +281,7 @@ fi
 
 %changelog
 * Tue Jan 23 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-2
+- doc: warn about following symlinks recursively in chown/chgrp (CVE-2017-18018)
 - mv -n: do not overwrite the destination
 
 * Tue Jan 02 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-1
