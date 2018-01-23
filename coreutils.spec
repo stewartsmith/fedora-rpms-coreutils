@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -12,6 +12,10 @@ Source106:  coreutils-colorls.csh
 
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
+
+# mv -n: do not overwrite the destination, superseded by
+# http://git.savannah.gnu.org/cgit/coreutils.git/commit/?id=v8.29-9-g29baf25aa
+Patch1:   coreutils-8.29-mv-n-noreplace.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -273,6 +277,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Jan 23 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-2
+- mv -n: do not overwrite the destination
+
 * Tue Jan 02 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-1
 - new upstream release 8.29
 

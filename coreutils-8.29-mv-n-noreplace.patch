@@ -1,0 +1,63 @@
+From 76df06ff8fa39ae0cb0d167b7f622139778dc7d7 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Thu, 4 Jan 2018 09:42:10 +0100
+Subject: [PATCH] mv -n: do not overwrite the destination
+
+... if it is created by another process after mv has checked its
+non-existence.
+
+* src/copy.c (copy_internal): Use renameat2 (..., RENAME_NOREPLACE)
+if called by mv -n.  If it fails with EEXIST in that case, pretend
+successful rename as if the existing destination file was detected
+by the preceding lstat call.
+
+Fixes https://bugs.gnu.org/29961
+---
+ src/copy.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 2a804945e..be4e357a8 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -53,6 +53,7 @@
+ #include "ignore-value.h"
+ #include "ioblksize.h"
+ #include "quote.h"
++#include "renameat2.h"
+ #include "root-uid.h"
+ #include "same.h"
+ #include "savedir.h"
+@@ -2319,7 +2320,12 @@ copy_internal (char const *src_name, char const *dst_name,
+ 
+   if (x->move_mode)
+     {
+-      if (rename (src_name, dst_name) == 0)
++      int flags = 0;
++      if (x->interactive == I_ALWAYS_NO)
++        /* do not replace DST_NAME if it was created since our last check */
++        flags = RENAME_NOREPLACE;
++
++      if (renameat2 (AT_FDCWD, src_name, AT_FDCWD, dst_name, flags) == 0)
+         {
+           if (x->verbose)
+             {
+@@ -2351,6 +2357,15 @@ copy_internal (char const *src_name, char const *dst_name,
+           return true;
+         }
+ 
++      if ((flags & RENAME_NOREPLACE) && (errno == EEXIST))
++        {
++          /* Pretend the rename succeeded, so the caller (mv)
++             doesn't end up removing the source file.  */
++          if (rename_succeeded)
++            *rename_succeeded = true;
++          return true;
++        }
++
+       /* FIXME: someday, consider what to do when moving a directory into
+          itself but when source and destination are on different devices.  */
+ 
+-- 
+2.13.6
+
