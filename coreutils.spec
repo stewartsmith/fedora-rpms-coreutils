@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -280,6 +280,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 8.29-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Tue Jan 23 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-2
 - doc: warn about following symlinks recursively in chown/chgrp (CVE-2017-18018)
 - mv -n: do not overwrite the destination
