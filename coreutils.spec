@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -105,6 +105,7 @@ BuildRequires: attr
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: bison
+BuildRequires: gcc
 BuildRequires: gettext-devel
 BuildRequires: gmp-devel
 BuildRequires: hostname
@@ -280,6 +281,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Feb 19 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-4
+- add explicit BR for the gcc compiler
+
 * Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 8.29-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
