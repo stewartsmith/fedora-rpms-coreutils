@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -69,37 +69,6 @@ Patch950: coreutils-selinux.patch
 Conflicts: filesystem < 3
 # To avoid clobbering installs
 Conflicts: coreutils-single
-Provides: /bin/basename
-Provides: /bin/cat
-Provides: /bin/chgrp
-Provides: /bin/chmod
-Provides: /bin/chown
-Provides: /bin/cp
-Provides: /bin/cut
-Provides: /bin/date
-Provides: /bin/dd
-Provides: /bin/df
-Provides: /bin/echo
-Provides: /bin/env
-Provides: /bin/false
-Provides: /bin/ln
-Provides: /bin/ls
-Provides: /bin/mkdir
-Provides: /bin/mknod
-Provides: /bin/mktemp
-Provides: /bin/mv
-Provides: /bin/nice
-Provides: /bin/pwd
-Provides: /bin/readlink
-Provides: /bin/rm
-Provides: /bin/rmdir
-Provides: /bin/sleep
-Provides: /bin/sort
-Provides: /bin/stty
-Provides: /bin/sync
-Provides: /bin/touch
-Provides: /bin/true
-Provides: /bin/uname
 
 BuildRequires: attr
 BuildRequires: autoconf
@@ -281,6 +250,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Feb 26 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 8.29-5
+- Remove /bin/* Provides
+
 * Mon Feb 19 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-4
 - add explicit BR for the gcc compiler
 
