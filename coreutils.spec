@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -19,6 +19,10 @@ Patch1:   coreutils-8.29-mv-n-noreplace.patch
 
 # doc: warn about following symlinks recursively in chown/chgrp (CVE-2017-18018)
 Patch2:   coreutils-8.29-CVE-2017-18018.patch
+
+# fix build failure with glibc-2.28
+# https://lists.gnu.org/r/bug-gnulib/2018-03/msg00000.html
+Patch3:   coreutils-8.29-gnulib-fflush.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -250,6 +254,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Mar 06 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-6
+- fix build failure with glibc-2.28
+
 * Mon Feb 26 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 8.29-5
 - Remove /bin/* Provides
 
