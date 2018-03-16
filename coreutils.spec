@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -169,7 +169,11 @@ for type in separate single; do
              --enable-no-install-program=kill,uptime \
              --with-tty-group \
              DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
-  make all %{?_smp_mflags})
+  make all %{?_smp_mflags}
+
+  # make sure that parse-datetime.{c,y} ends up in debuginfo (#1555079)
+  ln -v ../lib/parse-datetime.{c,y} .
+  )
 done
 
 # Get the list of supported utilities
@@ -254,6 +258,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Mar 16 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-7
+- make sure that parse-datetime.{c,y} ends up in debuginfo (#1555079)
+
 * Tue Mar 06 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-6
 - fix build failure with glibc-2.28
 
