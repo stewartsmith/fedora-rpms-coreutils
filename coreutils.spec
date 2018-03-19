@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -77,7 +77,6 @@ Conflicts: coreutils-single
 BuildRequires: attr
 BuildRequires: autoconf
 BuildRequires: automake
-BuildRequires: bison
 BuildRequires: gcc
 BuildRequires: gettext-devel
 BuildRequires: gmp-devel
@@ -258,6 +257,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Mar 19 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-8
+- drop BR for bison, which is not used during the build
+
 * Fri Mar 16 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-7
 - make sure that parse-datetime.{c,y} ends up in debuginfo (#1555079)
 
