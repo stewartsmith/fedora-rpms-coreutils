@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -102,6 +102,14 @@ Provides: bundled(gnulib)
 Provides: coreutils-full = %{version}-%{release}
 Obsoletes: %{name} < 8.24-100
 
+# make it possible to install the latest available Adobe Reader RPM for Linux
+Provides: /bin/cat
+Provides: /bin/chmod
+Provides: /bin/echo
+Provides: /bin/ln
+Provides: /bin/touch
+Provides: /bin/rm
+
 %description
 These are the GNU core utilities.  This package is the combination of
 the old GNU fileutils, sh-utils, and textutils packages.
@@ -116,6 +124,15 @@ Conflicts: coreutils < 8.24-100
 # http://rpm.org/ticket/874 so use RemovePathPostfixes
 # (new in rpm 4.13) to support separate file sets.
 RemovePathPostfixes: .single
+
+# make it possible to install the latest available Adobe Reader RPM for Linux
+Provides: /bin/cat
+Provides: /bin/chmod
+Provides: /bin/echo
+Provides: /bin/ln
+Provides: /bin/touch
+Provides: /bin/rm
+
 %description single
 These are the GNU core utilities,
 packaged as a single multicall binary.
@@ -257,6 +274,9 @@ fi
 %license COPYING
 
 %changelog
+* Fri Mar 23 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-9
+- make it possible to install the latest available Adobe Reader RPM for Linux
+
 * Mon Mar 19 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-8
 - drop BR for bison, which is not used during the build
 
