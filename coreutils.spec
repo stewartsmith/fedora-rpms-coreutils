@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -26,6 +26,9 @@ Patch3:   coreutils-8.29-gnulib-fflush.patch
 
 # fix crash caused by mistakenly enabled leaf optimization (#1558249)
 Patch4:   coreutils-8.29-fts-leaf-opt.patch
+
+# date, ls: pick strftime fixes from glibc to improve locale support (#1577872)
+Patch5:   coreutils-8.29-gnulib-strftime.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -277,6 +280,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon May 28 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-11
+- date, ls: pick strftime fixes from glibc to improve locale support (#1577872)
+
 * Fri Apr 20 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-10
 - fix crash caused by mistakenly enabled leaf optimization (#1558249)
 
