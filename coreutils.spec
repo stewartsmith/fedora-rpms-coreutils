@@ -30,6 +30,9 @@ Patch4:   coreutils-8.29-fts-leaf-opt.patch
 # date, ls: pick strftime fixes from glibc to improve locale support (#1577872)
 Patch5:   coreutils-8.29-gnulib-strftime.patch
 
+# ls: increase the allowed abmon width from 5 to 12 (#1577872)
+Patch6:   coreutils-8.29-ls-abmon-width.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
@@ -281,6 +284,7 @@ fi
 
 %changelog
 * Mon May 28 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-11
+- ls: increase the allowed abmon width from 5 to 12 (#1577872)
 - date, ls: pick strftime fixes from glibc to improve locale support (#1577872)
 
 * Fri Apr 20 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-10
