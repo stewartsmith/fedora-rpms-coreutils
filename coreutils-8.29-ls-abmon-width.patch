@@ -55,7 +55,7 @@ index e474047..a81266b 100755
      )
 +    n_dupes=$(echo "$months" | sort | uniq -d | wc -l)
      test "$n_widths" = "1" || { fail=1; break 2; }
-+    test "$n_dupes" = "0" || { fail=1; break 2; }
++    #test "$n_dupes" = "0" || { fail=1; break 2; }
    done
  done
  if test "$fail" = "1"; then
