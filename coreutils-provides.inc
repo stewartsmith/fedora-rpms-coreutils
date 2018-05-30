@@ -5,5 +5,5 @@ Provides: /bin/cat
 Provides: /bin/chmod
 Provides: /bin/echo
 Provides: /bin/ln
-Provides: /bin/touch
 Provides: /bin/rm
+Provides: /bin/touch
