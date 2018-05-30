@@ -1,12 +1,13 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.29
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source50:   supported_utils
+Source51:   coreutils-provides.inc
 Source105:  coreutils-colorls.sh
 Source106:  coreutils-colorls.csh
 
@@ -107,17 +108,9 @@ BuildRequires: glibc-langpack-en
 Requires: %{name}-common = %{version}-%{release}
 Requires: ncurses
 
-Provides: bundled(gnulib)
 Provides: coreutils-full = %{version}-%{release}
+%include %{SOURCE51}
 Obsoletes: %{name} < 8.24-100
-
-# make it possible to install the latest available Adobe Reader RPM for Linux
-Provides: /bin/cat
-Provides: /bin/chmod
-Provides: /bin/echo
-Provides: /bin/ln
-Provides: /bin/touch
-Provides: /bin/rm
 
 %description
 These are the GNU core utilities.  This package is the combination of
@@ -127,21 +120,14 @@ the old GNU fileutils, sh-utils, and textutils packages.
 Summary:  coreutils multicall binary
 Suggests: coreutils-common
 Provides: coreutils = %{version}-%{release}
+Provides: coreutils%{?_isa} = %{version}-%{release}
+%include %{SOURCE51}
 # To avoid clobbering installs
 Conflicts: coreutils < 8.24-100
 # Note RPM doesn't support separate buildroots for %files
 # http://rpm.org/ticket/874 so use RemovePathPostfixes
 # (new in rpm 4.13) to support separate file sets.
 RemovePathPostfixes: .single
-
-# make it possible to install the latest available Adobe Reader RPM for Linux
-Provides: /bin/cat
-Provides: /bin/chmod
-Provides: /bin/echo
-Provides: /bin/ln
-Provides: /bin/touch
-Provides: /bin/rm
-
 %description single
 These are the GNU core utilities,
 packaged as a single multicall binary.
@@ -283,6 +269,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed May 30 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-12
+- add provides to coreutils-single to make it a drop-in replacement
+
 * Mon May 28 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-11
 - ls: increase the allowed abmon width from 5 to 12 (#1577872)
 - date, ls: pick strftime fixes from glibc to improve locale support (#1577872)
