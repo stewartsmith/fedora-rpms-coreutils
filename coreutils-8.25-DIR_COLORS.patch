@@ -5,9 +5,9 @@ Subject: [PATCH] downstream changes to default DIR_COLORS
 
 ---
  DIR_COLORS              |  41 ++++---
- DIR_COLORS.256color     | 302 ++++++++++++++++++++++++------------------------
- DIR_COLORS.lightbgcolor | 215 +++++++++++++++++-----------------
- 3 files changed, 286 insertions(+), 272 deletions(-)
+ DIR_COLORS.256color     | 300 ++++++++++++++++++++++++------------------------
+ DIR_COLORS.lightbgcolor | 211 ++++++++++++++++++----------------
+ 3 files changed, 283 insertions(+), 269 deletions(-)
 
 diff --git a/DIR_COLORS b/DIR_COLORS
 index d2ea453..27af9d7 100644
@@ -21,7 +21,7 @@ index d2ea453..27af9d7 100644
 +# You can copy this file to .dir_colors in your $HOME directory to override
 +# the system defaults.
 +
- # Copyright (C) 1996-2017 Free Software Foundation, Inc.
+ # Copyright (C) 1996-2018 Free Software Foundation, Inc.
  # Copying and distribution of this file, with or without modification,
  # are permitted provided the copyright notice and this notice are preserved.
 @@ -8,6 +12,9 @@
@@ -43,7 +43,7 @@ index d2ea453..27af9d7 100644
  SETUID 37;41	# file that is setuid (u+s)
  SETGID 30;43	# file that is setgid (g+s)
  CAPABILITY 30;41	# file with capability
-@@ -185,21 +192,21 @@ EXEC 01;32
+@@ -184,21 +191,21 @@ EXEC 01;32
  .ogx 01;35
  
  # audio formats
@@ -190,7 +190,7 @@ index d2ea453..74c34ba 100644
  
  # List any file extensions like '.gz' or '.tar' that you would like ls
  # to colorize below. Put the extension, a space, and the color init string.
-@@ -83,123 +81,123 @@ EXEC 01;32
+@@ -83,122 +81,122 @@ EXEC 01;32
  #.csh 01;32
  
   # archives or compressed (bright red)
@@ -209,7 +209,6 @@ index d2ea453..74c34ba 100644
 -.t7z 01;31
 -.zip 01;31
 -.z   01;31
--.Z   01;31
 -.dz  01;31
 -.gz  01;31
 -.lrz 01;31
@@ -256,7 +255,6 @@ index d2ea453..74c34ba 100644
 +.t7z 38;5;9
 +.zip 38;5;9
 +.z   38;5;9
-+.Z   38;5;9
 +.dz  38;5;9
 +.gz  38;5;9
 +.lrz 38;5;9
@@ -482,11 +480,10 @@ index d2ea453..95d6879 100644
  
  # List any file extensions like '.gz' or '.tar' that you would like ls
  # to colorize below. Put the extension, a space, and the color init string.
-@@ -82,107 +91,107 @@ EXEC 01;32
- #.sh  01;32
+@@ -83,105 +92,105 @@ EXEC 01;32
  #.csh 01;32
  
-- # archives or compressed (bright red)
+  # archives or compressed (bright red)
 -.tar 01;31
 -.tgz 01;31
 -.arc 01;31
@@ -502,7 +499,6 @@ index d2ea453..95d6879 100644
 -.t7z 01;31
 -.zip 01;31
 -.z   01;31
--.Z   01;31
 -.dz  01;31
 -.gz  01;31
 -.lrz 01;31
@@ -534,7 +530,6 @@ index d2ea453..95d6879 100644
 -.swm 01;31
 -.dwm 01;31
 -.esd 01;31
-+# archives or compressed (red)
 +.tar 00;31
 +.tgz 00;31
 +.arc 00;31
@@ -550,7 +545,6 @@ index d2ea453..95d6879 100644
 +.t7z 00;31
 +.zip 00;31
 +.z   00;31
-+.Z   00;31
 +.dz  00;31
 +.gz  00;31
 +.lrz 00;31

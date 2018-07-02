@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.29
-Release: 12%{?dist}
+Version: 8.30
+Release: 1%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -13,26 +13,6 @@ Source106:  coreutils-colorls.csh
 
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
-
-# mv -n: do not overwrite the destination, superseded by
-# http://git.savannah.gnu.org/cgit/coreutils.git/commit/?id=v8.29-9-g29baf25aa
-Patch1:   coreutils-8.29-mv-n-noreplace.patch
-
-# doc: warn about following symlinks recursively in chown/chgrp (CVE-2017-18018)
-Patch2:   coreutils-8.29-CVE-2017-18018.patch
-
-# fix build failure with glibc-2.28
-# https://lists.gnu.org/r/bug-gnulib/2018-03/msg00000.html
-Patch3:   coreutils-8.29-gnulib-fflush.patch
-
-# fix crash caused by mistakenly enabled leaf optimization (#1558249)
-Patch4:   coreutils-8.29-fts-leaf-opt.patch
-
-# date, ls: pick strftime fixes from glibc to improve locale support (#1577872)
-Patch5:   coreutils-8.29-gnulib-strftime.patch
-
-# ls: increase the allowed abmon width from 5 to 12 (#1577872)
-Patch6:   coreutils-8.29-ls-abmon-width.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -269,6 +249,9 @@ fi
 %license COPYING
 
 %changelog
+* Mon Jul 02 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-1
+- new upstream release 8.30
+
 * Wed May 30 2018 Kamil Dudka <kdudka@redhat.com> - 8.29-12
 - add provides to coreutils-single to make it a drop-in replacement
 

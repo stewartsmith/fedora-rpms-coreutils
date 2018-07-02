@@ -158,7 +158,7 @@ index 7ab6be4..022d0ad 100644
 +static void
 +cut_characters_or_cut_bytes_no_split (FILE *stream)
 +{
-+  size_t idx;                /* number of bytes or characters in the line so far. */
++  uintmax_t idx;             /* number of bytes or characters in the line so far. */
 +  char buf[MB_LEN_MAX + BUFSIZ];  /* For spooling a read byte sequence. */
 +  char *bufpos;                /* Next read position of BUF. */
 +  size_t buflen;        /* The length of the byte sequence in buf. */
