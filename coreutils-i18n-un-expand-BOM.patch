@@ -226,7 +226,7 @@ index 310b349..4136824 100644
 +                    if(using_utf_locale==false && found_bom==true)
 +                    {
 +                      /*First file conatined BOM header - locale was switched to UTF
-+                      /*all subsequent files should contain BOM. */
++                       *all subsequent files should contain BOM. */
 +                      error (EXIT_FAILURE, errno, _("combination of files with and without BOM header"));
 +                    }
 +                  }
@@ -296,7 +296,7 @@ index 863a90a..5681b58 100644
 +                    if(using_utf_locale==false && found_bom==true)
 +                    {
 +                      /*First file conatined BOM header - locale was switched to UTF
-+                      /*all subsequent files should contain BOM. */
++                       *all subsequent files should contain BOM. */
 +                      error (EXIT_FAILURE, errno, _("combination of files with and without BOM header"));
 +                    }
 +                  }

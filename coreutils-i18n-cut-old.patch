@@ -234,7 +234,7 @@ index 7ab6be4..022d0ad 100644
 +cut_fields_mb (FILE *stream)
 +{
 +  int c;
-+  size_t field_idx;
++  uintmax_t field_idx;
 +  int found_any_selected_field;
 +  int buffer_first_field;
 +  int empty_input;

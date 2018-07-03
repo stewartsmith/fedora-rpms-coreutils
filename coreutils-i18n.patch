@@ -13,7 +13,6 @@ TODO: merge upstream
  src/uniq.c                  | 265 ++++++++++++++-
  tests/i18n/sort.sh          |  29 ++
  tests/local.mk              |   2 +
- tests/misc/cut.pl           |   7 +-
  tests/misc/expand.pl        |  42 +++
  tests/misc/fold.pl          |  50 ++-
  tests/misc/join.pl          |  50 +++
@@ -23,9 +22,9 @@ TODO: merge upstream
  tests/misc/unexpand.pl      |  39 +++
  tests/misc/uniq.pl          |  55 ++++
  tests/pr/pr-tests.pl        |  49 +++
- 18 files changed, 2435 insertions(+), 162 deletions(-)
- create mode 100644 tests/i18n/sort.sh
- create mode 100644 tests/misc/sort-mb-tests.sh
+ 17 files changed, 2430 insertions(+), 160 deletions(-)
+ create mode 100755 tests/i18n/sort.sh
+ create mode 100755 tests/misc/sort-mb-tests.sh
 
 diff --git a/lib/linebuffer.h b/lib/linebuffer.h
 index 64181af..9b8fe5a 100644
@@ -3157,7 +3156,7 @@ diff --git a/tests/local.mk b/tests/local.mk
 index 568944e..192f776 100644
 --- a/tests/local.mk
 +++ b/tests/local.mk
-@@ -358,6 +358,8 @@ all_tests =					\
+@@ -362,6 +362,8 @@ all_tests =					\
    tests/misc/sort-discrim.sh			\
    tests/misc/sort-files0-from.pl		\
    tests/misc/sort-float.sh			\
@@ -3166,32 +3165,6 @@ index 568944e..192f776 100644
    tests/misc/sort-h-thousands-sep.sh		\
    tests/misc/sort-merge.pl			\
    tests/misc/sort-merge-fdlimit.sh		\
-diff --git a/tests/misc/cut.pl b/tests/misc/cut.pl
-index f6f8a56..b426a80 100755
---- a/tests/misc/cut.pl
-+++ b/tests/misc/cut.pl
-@@ -23,9 +23,11 @@ use strict;
- # Turn off localization of executable's output.
- @ENV{qw(LANGUAGE LANG LC_ALL)} = ('C') x 3;
- 
--my $mb_locale = $ENV{LOCALE_FR_UTF8};
-+my $mb_locale;
-+# uncommented enable multibyte paths
-+$mb_locale = $ENV{LOCALE_FR_UTF8};
- ! defined $mb_locale || $mb_locale eq 'none'
--  and $mb_locale = 'C';
-+ and $mb_locale = 'C';
- 
- my $prog = 'cut';
- my $try = "Try '$prog --help' for more information.\n";
-@@ -240,6 +242,7 @@ if ($mb_locale ne 'C')
-         my @new_t = @$t;
-         my $test_name = shift @new_t;
- 
-+        next if ($test_name =~ "newline-[12][0-9]");
-         push @new, ["$test_name-mb", @new_t, {ENV => "LC_ALL=$mb_locale"}];
-       }
-     push @Tests, @new;
 diff --git a/tests/misc/expand.pl b/tests/misc/expand.pl
 index 8a9cad1..9293e39 100755
 --- a/tests/misc/expand.pl

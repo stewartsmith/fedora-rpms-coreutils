@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.30
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -249,6 +249,9 @@ fi
 %license COPYING
 
 %changelog
+* Wed Jul 04 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-2
+- sync i18n patches with Suse (patch by Bernhard Voelker)
+
 * Mon Jul 02 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-1
 - new upstream release 8.30
 
