@@ -1,0 +1,451 @@
+From 57ee8db4fee8eb6772df1ff18d275594c0b034d4 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 5 Jul 2018 09:22:09 -0700
+Subject: [PATCH 1/2] renameatu: rename from renameat2
+
+It's looking like Glibc will add a renameat2 function
+that is incompatible with Gnulib renameat2; see:
+https://sourceware.org/ml/libc-alpha/2018-07/msg00064.html
+To help avoid future confusion, rename renameat2 to something else.
+Use the name 'renameatu', as the Gnulib function is close to the
+Glibc function.  Perhaps someday there will also be a renameat2
+Gnulib module, which mimicks the future glibc renameat2, but that
+can wait as nobody seems to need such a module now.
+* NEWS: Mention this.
+* lib/renameatu.c: Rename from lib/renameat2.c.
+* lib/renameatu.h: Rename from lib/renameat2.h.
+* modules/renameatu: Rename from modules/renameat2.
+* modules/renameatu-tests: Rename from modules/renameat2-tests.
+All uses of "renameat2" in identifiers or file name
+changed to "renameatu", except for two instances in
+lib/renameatu.c that deal with the Linux kernel's
+renameat2 syscall.
+
+Upstream-commit: 2522322e5304e7d86c63e607e2bc83c8d8b0a889
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ gnulib-tests/gnulib.mk                             | 12 +++---
+ .../{test-renameat2.c => test-renameatu.c}         | 48 +++++++++++-----------
+ lib/backupfile.c                                   |  4 +-
+ lib/gnulib.mk                                      | 10 ++---
+ lib/renameat.c                                     |  4 +-
+ lib/{renameat2.c => renameatu.c}                   |  9 ++--
+ lib/{renameat2.h => renameatu.h}                   |  8 ++--
+ 7 files changed, 48 insertions(+), 47 deletions(-)
+ rename gnulib-tests/{test-renameat2.c => test-renameatu.c} (80%)
+ rename lib/{renameat2.c => renameatu.c} (94%)
+ rename lib/{renameat2.h => renameatu.h} (84%)
+
+diff --git a/gnulib-tests/gnulib.mk b/gnulib-tests/gnulib.mk
+index be2b99e..891425b 100644
+--- a/gnulib-tests/gnulib.mk
++++ b/gnulib-tests/gnulib.mk
+@@ -1750,14 +1750,14 @@ EXTRA_DIST += test-rename.h test-renameat.c signature.h macros.h
+ 
+ ## end   gnulib module renameat-tests
+ 
+-## begin gnulib module renameat2-tests
++## begin gnulib module renameatu-tests
+ 
+-TESTS += test-renameat2
+-check_PROGRAMS += test-renameat2
+-test_renameat2_LDADD = $(LDADD) @LIBINTL@
+-EXTRA_DIST += test-rename.h test-renameat2.c signature.h macros.h
++TESTS += test-renameatu
++check_PROGRAMS += test-renameatu
++test_renameatu_LDADD = $(LDADD) @LIBINTL@
++EXTRA_DIST += test-rename.h test-renameatu.c signature.h macros.h
+ 
+-## end   gnulib module renameat2-tests
++## end   gnulib module renameatu-tests
+ 
+ ## begin gnulib module rmdir-tests
+ 
+diff --git a/gnulib-tests/test-renameat2.c b/gnulib-tests/test-renameatu.c
+similarity index 80%
+rename from gnulib-tests/test-renameat2.c
+rename to gnulib-tests/test-renameatu.c
+index 0104890..988428b 100644
+--- a/gnulib-tests/test-renameat2.c
++++ b/gnulib-tests/test-renameatu.c
+@@ -1,4 +1,4 @@
+-/* Test renameat2.
++/* Test renameatu.
+    Copyright (C) 2009-2018 Free Software Foundation, Inc.
+ 
+    This program is free software: you can redistribute it and/or modify
+@@ -18,12 +18,12 @@
+ 
+ #include <config.h>
+ 
+-#include <renameat2.h>
++#include <renameatu.h>
+ 
+ #include <stdio.h>
+ 
+ #include "signature.h"
+-SIGNATURE_CHECK (renameat2, int,
++SIGNATURE_CHECK (renameatu, int,
+                  (int, char const *, int, char const *, unsigned int));
+ 
+ #include <dirent.h>
+@@ -39,18 +39,18 @@ SIGNATURE_CHECK (renameat2, int,
+ #include "ignore-value.h"
+ #include "macros.h"
+ 
+-#define BASE "test-renameat2.t"
++#define BASE "test-renameatu.t"
+ 
+ #include "test-rename.h"
+ 
+ static int dfd1 = AT_FDCWD;
+ static int dfd2 = AT_FDCWD;
+ 
+-/* Wrapper to test renameat2 like rename.  */
++/* Wrapper to test renameatu like rename.  */
+ static int
+ do_rename (char const *name1, char const *name2)
+ {
+-  return renameat2 (dfd1, name1, dfd2, name2, 0);
++  return renameatu (dfd1, name1, dfd2, name2, 0);
+ }
+ 
+ int
+@@ -67,24 +67,24 @@ main (void)
+   /* Test behaviour for invalid file descriptors.  */
+   {
+     errno = 0;
+-    ASSERT (renameat2 (-1, "foo", AT_FDCWD, "bar", 0) == -1);
++    ASSERT (renameatu (-1, "foo", AT_FDCWD, "bar", 0) == -1);
+     ASSERT (errno == EBADF);
+   }
+   {
+     close (99);
+     errno = 0;
+-    ASSERT (renameat2 (99, "foo", AT_FDCWD, "bar", 0) == -1);
++    ASSERT (renameatu (99, "foo", AT_FDCWD, "bar", 0) == -1);
+     ASSERT (errno == EBADF);
+   }
+   ASSERT (close (creat (BASE "oo", 0600)) == 0);
+   {
+     errno = 0;
+-    ASSERT (renameat2 (AT_FDCWD, BASE "oo", -1, "bar", 0) == -1);
++    ASSERT (renameatu (AT_FDCWD, BASE "oo", -1, "bar", 0) == -1);
+     ASSERT (errno == EBADF);
+   }
+   {
+     errno = 0;
+-    ASSERT (renameat2 (AT_FDCWD, BASE "oo", 99, "bar", 0) == -1);
++    ASSERT (renameatu (AT_FDCWD, BASE "oo", 99, "bar", 0) == -1);
+     ASSERT (errno == EBADF);
+   }
+   ASSERT (unlink (BASE "oo") == 0);
+@@ -133,13 +133,13 @@ main (void)
+ 
+       ASSERT (sprintf (strchr (file1, '\0') - 2, "%02d", i) == 2);
+       ASSERT (sprintf (strchr (file2, '\0') - 2, "%02d", i + 1) == 2);
+-      ASSERT (renameat2 (fd1, file1, fd2, file2, 0) == 0);
++      ASSERT (renameatu (fd1, file1, fd2, file2, 0) == 0);
+       free (file1);
+       free (file2);
+     }
+   dfd2 = open ("..", O_RDONLY);
+   ASSERT (0 <= dfd2);
+-  ASSERT (renameat2 (dfd, "../" BASE "16", dfd2, BASE "17", 0) == 0);
++  ASSERT (renameatu (dfd, "../" BASE "16", dfd2, BASE "17", 0) == 0);
+   ASSERT (close (dfd2) == 0);
+ 
+   /* Now we change back to the parent directory, and set dfd to ".";
+@@ -152,47 +152,47 @@ main (void)
+ 
+   ASSERT (close (creat (BASE "sub2/file", 0600)) == 0);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "sub1", dfd, BASE "sub2", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "sub1", dfd, BASE "sub2", 0) == -1);
+   ASSERT (errno == EEXIST || errno == ENOTEMPTY);
+   ASSERT (unlink (BASE "sub2/file") == 0);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "sub2", dfd, BASE "sub1/.", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "sub2", dfd, BASE "sub1/.", 0) == -1);
+   ASSERT (errno == EINVAL || errno == EISDIR || errno == EBUSY
+           || errno == ENOTEMPTY || errno == EEXIST
+           || errno == ENOENT /* WSL */);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "sub2/.", dfd, BASE "sub1", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "sub2/.", dfd, BASE "sub1", 0) == -1);
+   ASSERT (errno == EINVAL || errno == EBUSY || errno == EEXIST
+           || errno == ENOENT /* WSL */);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "17", dfd, BASE "sub1", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "17", dfd, BASE "sub1", 0) == -1);
+   ASSERT (errno == EISDIR);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "nosuch", dfd, BASE "18", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "nosuch", dfd, BASE "18", 0) == -1);
+   ASSERT (errno == ENOENT);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, "", dfd, BASE "17", 0) == -1);
++  ASSERT (renameatu (dfd, "", dfd, BASE "17", 0) == -1);
+   ASSERT (errno == ENOENT);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "17", dfd, "", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "17", dfd, "", 0) == -1);
+   ASSERT (errno == ENOENT);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "sub2", dfd, BASE "17", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "sub2", dfd, BASE "17", 0) == -1);
+   ASSERT (errno == ENOTDIR);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "17/", dfd, BASE "18", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "17/", dfd, BASE "18", 0) == -1);
+   ASSERT (errno == ENOTDIR);
+   errno = 0;
+-  ASSERT (renameat2 (dfd, BASE "17", dfd, BASE "18/", 0) == -1);
++  ASSERT (renameatu (dfd, BASE "17", dfd, BASE "18/", 0) == -1);
+   ASSERT (errno == ENOTDIR || errno == ENOENT);
+ 
+   /* Finally, make sure we cannot overwrite existing files.  */
+   ASSERT (close (creat (BASE "sub2/file", 0600)) == 0);
+   errno = 0;
+-  ASSERT ((renameat2 (dfd, BASE "sub2", dfd, BASE "sub1", RENAME_NOREPLACE)
++  ASSERT ((renameatu (dfd, BASE "sub2", dfd, BASE "sub1", RENAME_NOREPLACE)
+            == -1)
+           && errno == EEXIST);
+-  ASSERT ((renameat2 (dfd, BASE "sub2/file", dfd, BASE "17", RENAME_NOREPLACE)
++  ASSERT ((renameatu (dfd, BASE "sub2/file", dfd, BASE "17", RENAME_NOREPLACE)
+            == -1)
+           && errno == EEXIST);
+ 
+diff --git a/lib/backupfile.c b/lib/backupfile.c
+index d438455..637be6c 100644
+--- a/lib/backupfile.c
++++ b/lib/backupfile.c
+@@ -23,7 +23,7 @@
+ #include "backup-internal.h"
+ 
+ #include "dirname.h"
+-#include "renameat2.h"
++#include "renameatu.h"
+ #include "xalloc-oversized.h"
+ 
+ #include <fcntl.h>
+@@ -353,7 +353,7 @@ backupfile_internal (char const *file, enum backup_type backup_type, bool rename
+           base_offset = 0;
+         }
+       unsigned flags = backup_type == simple_backups ? 0 : RENAME_NOREPLACE;
+-      if (renameat2 (AT_FDCWD, file, sdir, s + base_offset, flags) == 0)
++      if (renameatu (AT_FDCWD, file, sdir, s + base_offset, flags) == 0)
+         break;
+       int e = errno;
+       if (e != EEXIST)
+diff --git a/lib/gnulib.mk b/lib/gnulib.mk
+index 04473d5..0b747e3 100644
+--- a/lib/gnulib.mk
++++ b/lib/gnulib.mk
+@@ -21,7 +21,7 @@
+ # the same distribution terms as the rest of that program.
+ #
+ # Generated by gnulib-tool.
+-# Reproduce by: gnulib-tool --import --local-dir=gl --lib=libcoreutils --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=gnulib-tests --aux-dir=build-aux --with-tests --avoid=canonicalize-lgpl --avoid=dummy --makefile-name=gnulib.mk --no-conditional-dependencies --no-libtool --macro-prefix=gl acl alignof alloca announce-gen areadlink-with-size argmatch argv-iter assert autobuild backup-rename backupfile base32 base64 buffer-lcm c-strcase c-strtod c-strtold calloc-gnu canon-host canonicalize chown cloexec closein closeout config-h configmake crypto/md5 crypto/sha1 crypto/sha256 crypto/sha512 cycle-check d-ino d-type di-set diacrit dirfd dirname do-release-commit-and-tag dtoastr dup2 environ error euidaccess exclude exitfail explicit_bzero faccessat fadvise fchdir fchmodat fchownat fclose fcntl fcntl-safer fd-reopen fdatasync fdl fdopen fdutimensat file-has-acl file-type fileblocks filemode filenamecat filevercmp flexmember fnmatch-gnu fopen-safer fprintftime freopen freopen-safer fseeko fstatat fsusage fsync ftoastr ftruncate fts full-read full-write getgroups gethrxtime getline getloadavg getlogin getndelim2 getopt-gnu getpagesize getpass-gnu gettext-h gettime gettimeofday getugroups getusershell git-version-gen gitlog-to-changelog gnu-make gnu-web-doc-update gnumakefile gnupload group-member hard-locale hash hash-pjw heap host-os human idcache ignore-value inttostr inttypes isapipe isatty isblank largefile lchmod lchown ldtoastr lib-ignore linebuffer link link-follow linkat long-options lstat maintainer-makefile malloc-gnu manywarnings mbrlen mbrtowc mbsalign mbschr mbslen mbswidth memcasecmp memchr memcmp2 mempcpy memrchr mgetgroups mkancesdirs mkdir mkdir-p mkfifo mknod mkostemp mkstemp mktime modechange mountlist mpsort netinet_in non-recursive-gnulib-prefix-hack nproc nstrftime obstack open parse-datetime pathmax perl physmem pipe-posix pipe2 posix-shell posixtm posixver priv-set progname propername pthread putenv quote quotearg randint randperm read-file readlink readtokens readtokens0 readutmp realloc-gnu regex remove rename renameat renameat2 rmdir root-dev-ino rpmatch safe-read same save-cwd savedir savewd selinux-at setenv settime sig2str sigaction smack ssize_t stat-macros stat-size stat-time statat stdbool stdlib-safer stpcpy stpncpy strdup-posix strncat strnumcmp strsignal strtod strtoimax strtoumax symlinkat sys_ioctl sys_resource sys_stat sys_wait tempname termios time_rz timer-time timespec tzset uname unicodeio unistd-safer unlink-busy unlinkat unlocked-io unsetenv update-copyright uptime useless-if-before-free userspec utimecmp utimens vasprintf-posix vc-list-files verify verror version-etc-fsf wchar-single wcswidth wcwidth winsz-ioctl winsz-termios write-any-file xalloc xbinary-io xdectoint xfts xgetcwd xgetgroups xgethostname xmemcoll xnanosleep xprintf xprintf-posix xreadlink xstrtod xstrtoimax xstrtol xstrtold xstrtoumax year2038 yesno
++# Reproduce by: gnulib-tool --import --local-dir=gl --lib=libcoreutils --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=gnulib-tests --aux-dir=build-aux --with-tests --avoid=canonicalize-lgpl --avoid=dummy --makefile-name=gnulib.mk --no-conditional-dependencies --no-libtool --macro-prefix=gl acl alignof alloca announce-gen areadlink-with-size argmatch argv-iter assert autobuild backup-rename backupfile base32 base64 buffer-lcm c-strcase c-strtod c-strtold calloc-gnu canon-host canonicalize chown cloexec closein closeout config-h configmake crypto/md5 crypto/sha1 crypto/sha256 crypto/sha512 cycle-check d-ino d-type di-set diacrit dirfd dirname do-release-commit-and-tag dtoastr dup2 environ error euidaccess exclude exitfail explicit_bzero faccessat fadvise fchdir fchmodat fchownat fclose fcntl fcntl-safer fd-reopen fdatasync fdl fdopen fdutimensat file-has-acl file-type fileblocks filemode filenamecat filevercmp flexmember fnmatch-gnu fopen-safer fprintftime freopen freopen-safer fseeko fstatat fsusage fsync ftoastr ftruncate fts full-read full-write getgroups gethrxtime getline getloadavg getlogin getndelim2 getopt-gnu getpagesize getpass-gnu gettext-h gettime gettimeofday getugroups getusershell git-version-gen gitlog-to-changelog gnu-make gnu-web-doc-update gnumakefile gnupload group-member hard-locale hash hash-pjw heap host-os human idcache ignore-value inttostr inttypes isapipe isatty isblank largefile lchmod lchown ldtoastr lib-ignore linebuffer link link-follow linkat long-options lstat maintainer-makefile malloc-gnu manywarnings mbrlen mbrtowc mbsalign mbschr mbslen mbswidth memcasecmp memchr memcmp2 mempcpy memrchr mgetgroups mkancesdirs mkdir mkdir-p mkfifo mknod mkostemp mkstemp mktime modechange mountlist mpsort netinet_in non-recursive-gnulib-prefix-hack nproc nstrftime obstack open parse-datetime pathmax perl physmem pipe-posix pipe2 posix-shell posixtm posixver priv-set progname propername pthread putenv quote quotearg randint randperm read-file readlink readtokens readtokens0 readutmp realloc-gnu regex remove rename renameat renameatu rmdir root-dev-ino rpmatch safe-read same save-cwd savedir savewd selinux-at setenv settime sig2str sigaction smack ssize_t stat-macros stat-size stat-time statat stdbool stdlib-safer stpcpy stpncpy strdup-posix strncat strnumcmp strsignal strtod strtoimax strtoumax symlinkat sys_ioctl sys_resource sys_stat sys_wait tempname termios time_rz timer-time timespec tzset uname unicodeio unistd-safer unlink-busy unlinkat unlocked-io unsetenv update-copyright uptime useless-if-before-free userspec utimecmp utimens vasprintf-posix vc-list-files verify verror version-etc-fsf wchar-single wcswidth wcwidth winsz-ioctl winsz-termios write-any-file xalloc xbinary-io xdectoint xfts xgetcwd xgetgroups xgethostname xmemcoll xnanosleep xprintf xprintf-posix xreadlink xstrtod xstrtoimax xstrtol xstrtold xstrtoumax year2038 yesno
+ 
+ 
+ MOSTLYCLEANFILES += lib/core lib/*.stackdump
+@@ -3218,15 +3218,15 @@ EXTRA_lib_libcoreutils_a_SOURCES += lib/renameat.c
+ 
+ ## end   gnulib module renameat
+ 
+-## begin gnulib module renameat2
++## begin gnulib module renameatu
+ 
+-lib_libcoreutils_a_SOURCES += lib/renameat2.c
++lib_libcoreutils_a_SOURCES += lib/renameatu.c
+ 
+-EXTRA_DIST += lib/at-func2.c lib/renameat2.h
++EXTRA_DIST += lib/at-func2.c lib/renameatu.h
+ 
+ EXTRA_lib_libcoreutils_a_SOURCES += lib/at-func2.c
+ 
+-## end   gnulib module renameat2
++## end   gnulib module renameatu
+ 
+ ## begin gnulib module rewinddir
+ 
+diff --git a/lib/renameat.c b/lib/renameat.c
+index 0cb7d33..67be22b 100644
+--- a/lib/renameat.c
++++ b/lib/renameat.c
+@@ -16,10 +16,10 @@
+ 
+ #include <config.h>
+ #include <stdio.h>
+-#include "renameat2.h"
++#include "renameatu.h"
+ 
+ int
+ renameat (int fd1, char const *src, int fd2, char const *dst)
+ {
+-  return renameat2 (fd1, src, fd2, dst, 0);
++  return renameatu (fd1, src, fd2, dst, 0);
+ }
+diff --git a/lib/renameat2.c b/lib/renameatu.c
+similarity index 94%
+rename from lib/renameat2.c
+rename to lib/renameatu.c
+index a295ec3..b013ad6 100644
+--- a/lib/renameat2.c
++++ b/lib/renameatu.c
+@@ -18,7 +18,7 @@
+ 
+ #include <config.h>
+ 
+-#include "renameat2.h"
++#include "renameatu.h"
+ 
+ #include <errno.h>
+ #include <stdio.h>
+@@ -68,10 +68,13 @@ rename_noreplace (char const *src, char const *dst)
+    the restore_cwd fails, then give a diagnostic and exit nonzero.
+ 
+    Obey FLAGS when doing the renaming.  If FLAGS is zero, this
+-   function is equivalent to renameat (FD1, SRC, FD2, DST).  */
++   function is equivalent to renameat (FD1, SRC, FD2, DST).
++   Otherwise, attempt to implement FLAGS even if the implementation is
++   not atomic; this differs from the GNU/Linux native renameat2,
++   which fails if it cannot guarantee atomicity.  */
+ 
+ int
+-renameat2 (int fd1, char const *src, int fd2, char const *dst,
++renameatu (int fd1, char const *src, int fd2, char const *dst,
+            unsigned int flags)
+ {
+   int ret_val = -1;
+diff --git a/lib/renameat2.h b/lib/renameatu.h
+similarity index 84%
+rename from lib/renameat2.h
+rename to lib/renameatu.h
+index aba7966..7d79775 100644
+--- a/lib/renameat2.h
++++ b/lib/renameatu.h
+@@ -16,15 +16,13 @@
+ 
+ /* written by Paul Eggert */
+ 
+-/* Get RENAME_* macros from linux/fs.h if present, otherwise supply
++/* Get RENAME_* macros from <stdio.h> if present, otherwise supply
+    the traditional Linux values.  */
+-#if HAVE_LINUX_FS_H
+-# include <linux/fs.h>
+-#endif
++#include <stdio.h>
+ #ifndef RENAME_NOREPLACE
+ # define RENAME_NOREPLACE  (1 << 0)
+ # define RENAME_EXCHANGE   (1 << 1)
+ # define RENAME_WHITEOUT   (1 << 2)
+ #endif
+ 
+-extern int renameat2 (int, char const *, int, char const *, unsigned int);
++extern int renameatu (int, char const *, int, char const *, unsigned int);
+-- 
+2.14.4
+
+
+From a6b7ff5ef538bbdff4550a56fed878e9cd951d6d Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 5 Jul 2018 09:33:48 -0700
+Subject: [PATCH 2/2] build: update gnulib submodule to latest
+
+* bootstrap.conf, src/copy.c, src/mv.c, src/shred.c:
+Adjust to renaming of renameat2 to renameatu.
+
+Upstream-commit: 439741053256618eb651e6d43919df29625b8714
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ bootstrap.conf | 2 +-
+ src/copy.c     | 4 ++--
+ src/mv.c       | 4 ++--
+ src/shred.c    | 4 ++--
+ 4 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/bootstrap.conf b/bootstrap.conf
+index 4da4f94..fcf29dc 100644
+--- a/bootstrap.conf
++++ b/bootstrap.conf
+@@ -210,7 +210,7 @@ gnulib_modules="
+   remove
+   rename
+   renameat
+-  renameat2
++  renameatu
+   rmdir
+   root-dev-ino
+   rpmatch
+diff --git a/src/copy.c b/src/copy.c
+index 58d2f6e..1a9cdd1 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -53,7 +53,7 @@
+ #include "ignore-value.h"
+ #include "ioblksize.h"
+ #include "quote.h"
+-#include "renameat2.h"
++#include "renameatu.h"
+ #include "root-uid.h"
+ #include "same.h"
+ #include "savedir.h"
+@@ -1873,7 +1873,7 @@ copy_internal (char const *src_name, char const *dst_name,
+   if (x->move_mode)
+     {
+       if (rename_errno < 0)
+-        rename_errno = (renameat2 (AT_FDCWD, src_name, AT_FDCWD, dst_name,
++        rename_errno = (renameatu (AT_FDCWD, src_name, AT_FDCWD, dst_name,
+                                    RENAME_NOREPLACE)
+                         ? errno : 0);
+       new_dst = rename_errno == 0;
+diff --git a/src/mv.c b/src/mv.c
+index b6dd72d..36fd1af 100644
+--- a/src/mv.c
++++ b/src/mv.c
+@@ -31,7 +31,7 @@
+ #include "error.h"
+ #include "filenamecat.h"
+ #include "remove.h"
+-#include "renameat2.h"
++#include "renameatu.h"
+ #include "root-dev-ino.h"
+ #include "priv-set.h"
+ 
+@@ -456,7 +456,7 @@ main (int argc, char **argv)
+     {
+       assert (2 <= n_files);
+       if (n_files == 2)
+-        x.rename_errno = (renameat2 (AT_FDCWD, file[0], AT_FDCWD, file[1],
++        x.rename_errno = (renameatu (AT_FDCWD, file[0], AT_FDCWD, file[1],
+                                      RENAME_NOREPLACE)
+                           ? errno : 0);
+       if (x.rename_errno != 0 && target_directory_operand (file[n_files - 1]))
+diff --git a/src/shred.c b/src/shred.c
+index 2ddaadd..270b1e9 100644
+--- a/src/shred.c
++++ b/src/shred.c
+@@ -93,7 +93,7 @@
+ #include "human.h"
+ #include "randint.h"
+ #include "randread.h"
+-#include "renameat2.h"
++#include "renameatu.h"
+ #include "stat-size.h"
+ 
+ /* Default number of times to overwrite.  */
+@@ -1096,7 +1096,7 @@ wipename (char *oldname, char const *qoldname, struct Options const *flags)
+         memset (base, nameset[0], len);
+         base[len] = 0;
+         bool rename_ok;
+-        while (! (rename_ok = (renameat2 (AT_FDCWD, oldname, AT_FDCWD, newname,
++        while (! (rename_ok = (renameatu (AT_FDCWD, oldname, AT_FDCWD, newname,
+                                           RENAME_NOREPLACE)
+                                == 0))
+                && errno == EEXIST && incname (base, len))
+-- 
+2.14.4
+

@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.30
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -13,6 +13,9 @@ Source106:  coreutils-colorls.csh
 
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
+
+# rename gnulib's renameat2 to renameatu to avoid clash with glibc (#1598518)
+Patch1:   coreutils-8.30-renameatu.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -249,6 +252,9 @@ fi
 %license COPYING
 
 %changelog
+* Tue Jul 10 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-3
+- rename gnulib's renameat2 to renameatu to avoid clash with glibc (#1598518)
+
 * Wed Jul 04 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-2
 - sync i18n patches with Suse (patch by Bernhard Voelker)
 
