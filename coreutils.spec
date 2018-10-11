@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.30
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -16,6 +16,9 @@ Source106:  coreutils-colorls.csh
 
 # rename gnulib's renameat2 to renameatu to avoid clash with glibc (#1598518)
 Patch1:   coreutils-8.30-renameatu.patch
+
+# fix heap-based buffer overflow in vasnprintf() (CVE-2018-17942)
+Patch2:   coreutils-8.30-CVE-2018-17942.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -252,6 +255,9 @@ fi
 %license COPYING
 
 %changelog
+* Thu Oct 11 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-5
+- fix heap-based buffer overflow in vasnprintf() (CVE-2018-17942)
+
 * Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 8.30-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
