@@ -252,7 +252,7 @@ fi
 %license COPYING
 
 %changelog
-* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org>
+* Thu Jul 12 2018 Fedora Release Engineering <releng@fedoraproject.org> - 8.30-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
 * Tue Jul 10 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-3
