@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.30
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -123,8 +123,6 @@ packaged as a single multicall binary.
 # yum obsoleting rules explained at:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
 Obsoletes: %{name} < 8.24-100
-Requires(preun): /sbin/install-info
-Requires(post): /sbin/install-info
 Summary:  coreutils common optional components
 %description common
 Optional though recommended components,
@@ -243,6 +241,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Sat Nov 03 2018 Kevin Fenzi <kevin@scrye.com> - 8.30-7
+- Also remove Requires pre/post used by info scriptlets.
+
 * Sat Nov 03 2018 Kevin Fenzi <kevin@scrye.com> - 8.30-6
 - Remove no longer needed info scriptlets
 
