@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.30
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -219,18 +219,6 @@ grep LC_TIME %name.lang | cut -d'/' -f1-6 | sed -e 's/) /) %%dir /g' >>%name.lan
 # (sb) Deal with Installed (but unpackaged) file(s) found
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
-%preun common
-if [ $1 = 0 ]; then
-  if [ -f %{_infodir}/%{name}.info.gz ]; then
-    /sbin/install-info --delete %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-  fi
-fi
-
-%post common
-if [ -f %{_infodir}/%{name}.info.gz ]; then
-  /sbin/install-info %{_infodir}/%{name}.info.gz %{_infodir}/dir || :
-fi
-
 %files -f supported_utils
 %exclude %{_bindir}/*.single
 %dir %{_libexecdir}/coreutils
@@ -255,6 +243,9 @@ fi
 %license COPYING
 
 %changelog
+* Sat Nov 03 2018 Kevin Fenzi <kevin@scrye.com> - 8.30-6
+- Remove no longer needed info scriptlets
+
 * Thu Oct 11 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-5
 - fix heap-based buffer overflow in vasnprintf() (CVE-2018-17942)
 
