@@ -21,7 +21,15 @@ diff --git a/lib/mgetgroups.c b/lib/mgetgroups.c
 index 76474c2..0a9d221 100644
 --- a/lib/mgetgroups.c
 +++ b/lib/mgetgroups.c
-@@ -121,9 +121,17 @@ mgetgroups (char const *username, gid_t gid, gid_t **groups)
+@@ -31,6 +31,7 @@
+ #endif
+ 
+ #include "getugroups.h"
++#include "xalloc.h"
+ #include "xalloc-oversized.h"
+ 
+ /* Work around an incompatibility of OS X 10.11: getgrouplist
+@@ -121,9 +122,17 @@ mgetgroups (char const *username, gid_t gid, gid_t **groups)
    /* else no username, so fall through and use getgroups. */
  #endif
  
@@ -42,7 +50,7 @@ index 76474c2..0a9d221 100644
  
    /* If we failed to count groups because there is no supplemental
       group support, then return an array containing just GID.
-@@ -145,10 +153,25 @@ mgetgroups (char const *username, gid_t gid, gid_t **groups)
+@@ -145,10 +154,25 @@ mgetgroups (char const *username, gid_t gid, gid_t **groups)
    if (g == NULL)
      return -1;
  

@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.30
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
@@ -241,6 +241,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Wed Nov 07 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-8
+- fix implicit declaration warning in coreutils-getgrouplist.patch
+
 * Sat Nov 03 2018 Kevin Fenzi <kevin@scrye.com> - 8.30-7
 - Also remove Requires pre/post used by info scriptlets.
 
