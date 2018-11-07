@@ -1,0 +1,77 @@
+From 2eabfbee57be82f755c74cbb05755dce1469ea7c Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Tue, 6 Nov 2018 10:35:16 -0800
+Subject: [PATCH 1/2] sync: fix open fallback bug
+
+Problem caught by Coverity Analysis
+and reported by Kamil Dudka (Bug#33287).
+* src/sync.c (sync_arg): Fix typo in fallback code.
+
+Upstream-commit: 94d364f157f007f2b23c70863ac8eefe9b21229d
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/sync.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/sync.c b/src/sync.c
+index bd3671a..607fa8f 100644
+--- a/src/sync.c
++++ b/src/sync.c
+@@ -111,8 +111,10 @@ sync_arg (enum sync_mode mode, char const *file)
+       if (open_flags != (O_WRONLY | O_NONBLOCK))
+         fd = open (file, O_WRONLY | O_NONBLOCK);
+       if (fd < 0)
+-        error (0, rd_errno, _("error opening %s"), quoteaf (file));
+-      return false;
++        {
++          error (0, rd_errno, _("error opening %s"), quoteaf (file));
++          return false;
++        }
+     }
+ 
+   /* We used O_NONBLOCK above to not hang with fifos,
+-- 
+2.17.2
+
+
+From e62ff3068f1f1b1e84d3319f54f1b869bb0bf6cc Mon Sep 17 00:00:00 2001
+From: Bernhard Voelker <mail@bernhard-voelker.de>
+Date: Wed, 7 Nov 2018 00:26:01 +0100
+Subject: [PATCH 2/2] sync: add test for the fix in the previous commit
+
+* tests/misc/sync.sh: Add a test with a write-only file for the fix.
+
+Upstream-commit: 4711c49312d54e84996c13c612f7081c95f821a6
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ tests/misc/sync.sh | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/tests/misc/sync.sh b/tests/misc/sync.sh
+index f60d28c..3bb6e17 100755
+--- a/tests/misc/sync.sh
++++ b/tests/misc/sync.sh
+@@ -19,7 +19,7 @@
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
+ print_ver_ sync
+ 
+-touch file
++touch file || framework_failure_
+ 
+ # fdatasync+syncfs is nonsensical
+ returns_ 1 sync --data --file-system || fail=1
+@@ -30,6 +30,11 @@ returns_ 1 sync -d || fail=1
+ # Test syncing of file (fsync) (little side effects)
+ sync file || fail=1
+ 
++# Test syncing of write-only file - which failed since adding argument
++# support to sync in coreutils-8.24.
++chmod 0200 file || framework_failure_
++sync file || fail=1
++
+ # Ensure multiple args are processed and diagnosed
+ returns_ 1 sync file nofile || fail=1
+ 
+-- 
+2.17.2
+

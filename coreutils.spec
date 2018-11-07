@@ -20,6 +20,9 @@ Patch1:   coreutils-8.30-renameatu.patch
 # fix heap-based buffer overflow in vasnprintf() (CVE-2018-17942)
 Patch2:   coreutils-8.30-CVE-2018-17942.patch
 
+# sync: fix open() fallback bug
+Patch3:   coreutils-8.30-fsync-fallback.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
@@ -242,6 +245,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Wed Nov 07 2018 Kamil Dudka <kdudka@redhat.com> - 8.30-8
+- sync: fix open() fallback bug
 - fix implicit declaration warning in coreutils-getgrouplist.patch
 
 * Sat Nov 03 2018 Kevin Fenzi <kevin@scrye.com> - 8.30-7
