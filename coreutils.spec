@@ -3,7 +3,6 @@ Name:    coreutils
 Version: 8.30
 Release: 8%{?dist}
 License: GPLv3+
-Group:   System Environment/Base
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
 Source50:   supported_utils
