@@ -1731,7 +1731,7 @@ index 6d2eec5..f189a0d 100644
  #include "system.h"
  #include "argmatch.h"
  #include "die.h"
-@@ -169,14 +177,39 @@ static int decimal_point;
+@@ -161,14 +169,39 @@ static int decimal_point;
  /* Thousands separator; if -1, then there isn't one.  */
  static int thousands_sep;
  
@@ -1772,7 +1772,7 @@ index 6d2eec5..f189a0d 100644
  /* The kind of blanks for '-b' to skip in various options. */
  enum blanktype { bl_start, bl_end, bl_both };
  
-@@ -350,13 +383,11 @@ static bool reverse;
+@@ -342,13 +375,11 @@ static bool reverse;
     they were read if all keys compare equal.  */
  static bool stable;
  
@@ -1789,7 +1789,7 @@ index 6d2eec5..f189a0d 100644
  
  /* Flag to remove consecutive duplicate lines from the output.
     Only the last of a sequence of equal lines will be output. */
-@@ -814,6 +845,46 @@ reap_all (void)
+@@ -806,6 +837,46 @@ reap_all (void)
      reap (-1);
  }
  
@@ -1836,7 +1836,7 @@ index 6d2eec5..f189a0d 100644
  /* Clean up any remaining temporary files.  */
  
  static void
-@@ -1264,7 +1335,7 @@ zaptemp (char const *name)
+@@ -1274,7 +1345,7 @@ zaptemp (char const *name)
    free (node);
  }
  
@@ -1845,7 +1845,7 @@ index 6d2eec5..f189a0d 100644
  
  static int
  struct_month_cmp (void const *m1, void const *m2)
-@@ -1279,7 +1350,7 @@ struct_month_cmp (void const *m1, void const *m2)
+@@ -1289,7 +1360,7 @@ struct_month_cmp (void const *m1, void const *m2)
  /* Initialize the character class tables. */
  
  static void
@@ -1854,7 +1854,7 @@ index 6d2eec5..f189a0d 100644
  {
    size_t i;
  
-@@ -1291,7 +1362,7 @@ inittables (void)
+@@ -1301,7 +1372,7 @@ inittables (void)
        fold_toupper[i] = toupper (i);
      }
  
@@ -1863,7 +1863,7 @@ index 6d2eec5..f189a0d 100644
    /* If we're not in the "C" locale, read different names for months.  */
    if (hard_LC_TIME)
      {
-@@ -1373,6 +1444,84 @@ specify_nmerge (int oi, char c, char const *s)
+@@ -1383,6 +1454,84 @@ specify_nmerge (int oi, char c, char const *s)
      xstrtol_fatal (e, oi, c, long_options, s);
  }
  
@@ -1948,7 +1948,7 @@ index 6d2eec5..f189a0d 100644
  /* Specify the amount of main memory to use when sorting.  */
  static void
  specify_sort_size (int oi, char c, char const *s)
-@@ -1604,7 +1753,7 @@ buffer_linelim (struct buffer const *buf)
+@@ -1614,7 +1763,7 @@ buffer_linelim (struct buffer const *buf)
     by KEY in LINE. */
  
  static char *
@@ -1957,7 +1957,7 @@ index 6d2eec5..f189a0d 100644
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t sword = key->sword;
-@@ -1613,10 +1762,10 @@ begfield (struct line const *line, struct keyfield const *key)
+@@ -1623,10 +1772,10 @@ begfield (struct line const *line, struct keyfield const *key)
    /* The leading field separator itself is included in a field when -t
       is absent.  */
  
@@ -1970,7 +1970,7 @@ index 6d2eec5..f189a0d 100644
            ++ptr;
          if (ptr < lim)
            ++ptr;
-@@ -1642,11 +1791,70 @@ begfield (struct line const *line, struct keyfield const *key)
+@@ -1652,11 +1801,70 @@ begfield (struct line const *line, struct keyfield const *key)
    return ptr;
  }
  
@@ -2042,7 +2042,7 @@ index 6d2eec5..f189a0d 100644
  {
    char *ptr = line->text, *lim = ptr + line->length - 1;
    size_t eword = key->eword, echar = key->echar;
-@@ -1661,10 +1869,10 @@ limfield (struct line const *line, struct keyfield const *key)
+@@ -1671,10 +1879,10 @@ limfield (struct line const *line, struct keyfield const *key)
       'beginning' is the first character following the delimiting TAB.
       Otherwise, leave PTR pointing at the first 'blank' character after
       the preceding field.  */
@@ -2055,7 +2055,7 @@ index 6d2eec5..f189a0d 100644
            ++ptr;
          if (ptr < lim && (eword || echar))
            ++ptr;
-@@ -1710,10 +1918,10 @@ limfield (struct line const *line, struct keyfield const *key)
+@@ -1720,10 +1928,10 @@ limfield (struct line const *line, struct keyfield const *key)
       */
  
    /* Make LIM point to the end of (one byte past) the current field.  */
@@ -2068,7 +2068,7 @@ index 6d2eec5..f189a0d 100644
        if (newlim)
          lim = newlim;
      }
-@@ -1744,6 +1952,130 @@ limfield (struct line const *line, struct keyfield const *key)
+@@ -1754,6 +1962,130 @@ limfield (struct line const *line, struct keyfield const *key)
    return ptr;
  }
  
@@ -2199,7 +2199,7 @@ index 6d2eec5..f189a0d 100644
  /* Fill BUF reading from FP, moving buf->left bytes from the end
     of buf->buf to the beginning first.  If EOF is reached and the
     file wasn't terminated by a newline, supply one.  Set up BUF's line
-@@ -1830,8 +2162,22 @@ fillbuf (struct buffer *buf, FILE *fp, char const *file)
+@@ -1840,8 +2172,22 @@ fillbuf (struct buffer *buf, FILE *fp, char const *file)
                    else
                      {
                        if (key->skipsblanks)
@@ -2224,7 +2224,7 @@ index 6d2eec5..f189a0d 100644
                        line->keybeg = line_start;
                      }
                  }
-@@ -1981,7 +2327,7 @@ human_numcompare (char const *a, char const *b)
+@@ -1991,7 +2337,7 @@ human_numcompare (char const *a, char const *b)
     hideously fast. */
  
  static int
@@ -2233,7 +2233,7 @@ index 6d2eec5..f189a0d 100644
  {
    while (blanks[to_uchar (*a)])
      a++;
-@@ -1991,6 +2337,25 @@ numcompare (char const *a, char const *b)
+@@ -2001,6 +2347,25 @@ numcompare (char const *a, char const *b)
    return strnumcmp (a, b, decimal_point, thousands_sep);
  }
  
@@ -2258,8 +2258,8 @@ index 6d2eec5..f189a0d 100644
 +
  /* Work around a problem whereby the long double value returned by glibc's
     strtold ("NaN", ...) contains uninitialized bits: clear all bytes of
-    A and B before calling strtold.  FIXME: remove this function once
-@@ -2041,7 +2406,7 @@ general_numcompare (char const *sa, char const *sb)
+    A and B before calling strtold.  FIXME: remove this function if
+@@ -2051,7 +2416,7 @@ general_numcompare (char const *sa, char const *sb)
     Return 0 if the name in S is not recognized.  */
  
  static int
@@ -2268,7 +2268,7 @@ index 6d2eec5..f189a0d 100644
  {
    size_t lo = 0;
    size_t hi = MONTHS_PER_YEAR;
-@@ -2317,15 +2682,14 @@ debug_key (struct line const *line, struct keyfield const *key)
+@@ -2327,15 +2692,14 @@ debug_key (struct line const *line, struct keyfield const *key)
            char saved = *lim;
            *lim = '\0';
  
@@ -2286,7 +2286,7 @@ index 6d2eec5..f189a0d 100644
            else if (key->general_numeric)
              ignore_value (strtold (beg, &tighter_lim));
            else if (key->numeric || key->human_numeric)
-@@ -2459,7 +2823,7 @@ key_warnings (struct keyfield const *gkey, bool gkey_only)
+@@ -2469,7 +2833,7 @@ key_warnings (struct keyfield const *gkey, bool gkey_only)
        /* Warn about significant leading blanks.  */
        bool implicit_skip = key_numeric (key) || key->month;
        bool line_offset = key->eword == 0 && key->echar != 0; /* -k1.x,1.y  */
@@ -2295,7 +2295,7 @@ index 6d2eec5..f189a0d 100644
            && ((!key->skipsblanks && !implicit_skip)
                || (!key->skipsblanks && key->schar)
                || (!key->skipeblanks && key->echar)))
-@@ -2517,11 +2881,87 @@ key_warnings (struct keyfield const *gkey, bool gkey_only)
+@@ -2527,11 +2891,87 @@ key_warnings (struct keyfield const *gkey, bool gkey_only)
      error (0, 0, _("option '-r' only applies to last-resort comparison"));
  }
  
@@ -2384,7 +2384,7 @@ index 6d2eec5..f189a0d 100644
  {
    struct keyfield *key = keylist;
  
-@@ -2606,7 +3046,7 @@ keycompare (struct line const *a, struct line const *b)
+@@ -2616,7 +3056,7 @@ keycompare (struct line const *a, struct line const *b)
            else if (key->human_numeric)
              diff = human_numcompare (ta, tb);
            else if (key->month)
@@ -2393,7 +2393,7 @@ index 6d2eec5..f189a0d 100644
            else if (key->random)
              diff = compare_random (ta, tlena, tb, tlenb);
            else if (key->version)
-@@ -2722,6 +3162,211 @@ keycompare (struct line const *a, struct line const *b)
+@@ -2732,6 +3172,211 @@ keycompare (struct line const *a, struct line const *b)
    return key->reverse ? -diff : diff;
  }
  
@@ -2605,7 +2605,7 @@ index 6d2eec5..f189a0d 100644
  /* Compare two lines A and B, returning negative, zero, or positive
     depending on whether A compares less than, equal to, or greater than B. */
  
-@@ -2749,7 +3394,7 @@ compare (struct line const *a, struct line const *b)
+@@ -2759,7 +3404,7 @@ compare (struct line const *a, struct line const *b)
      diff = - NONZERO (blen);
    else if (blen == 0)
      diff = 1;
@@ -2614,7 +2614,7 @@ index 6d2eec5..f189a0d 100644
      {
        /* xmemcoll0 is a performance enhancement as
           it will not unconditionally write '\0' after the
-@@ -4144,6 +4789,7 @@ set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype)
+@@ -4149,6 +4794,7 @@ set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype)
            break;
          case 'f':
            key->translate = fold_toupper;
@@ -2622,7 +2622,7 @@ index 6d2eec5..f189a0d 100644
            break;
          case 'g':
            key->general_numeric = true;
-@@ -4223,7 +4869,7 @@ main (int argc, char **argv)
+@@ -4228,7 +4874,7 @@ main (int argc, char **argv)
    initialize_exit_failure (SORT_FAILURE);
  
    hard_LC_COLLATE = hard_locale (LC_COLLATE);
@@ -2631,7 +2631,7 @@ index 6d2eec5..f189a0d 100644
    hard_LC_TIME = hard_locale (LC_TIME);
  #endif
  
-@@ -4244,6 +4890,29 @@ main (int argc, char **argv)
+@@ -4249,6 +4895,29 @@ main (int argc, char **argv)
        thousands_sep = -1;
    }
  
@@ -2661,7 +2661,7 @@ index 6d2eec5..f189a0d 100644
    have_read_stdin = false;
    inittables ();
  
-@@ -4518,13 +5187,34 @@ main (int argc, char **argv)
+@@ -4523,13 +5192,34 @@ main (int argc, char **argv)
  
          case 't':
            {
@@ -2700,7 +2700,7 @@ index 6d2eec5..f189a0d 100644
                  else
                    {
                      /* Provoke with 'sort -txx'.  Complain about
-@@ -4535,9 +5225,11 @@ main (int argc, char **argv)
+@@ -4540,9 +5230,11 @@ main (int argc, char **argv)
                           quote (optarg));
                    }
                }
@@ -2714,7 +2714,7 @@ index 6d2eec5..f189a0d 100644
            }
            break;
  
-@@ -4765,12 +5457,10 @@ main (int argc, char **argv)
+@@ -4771,12 +5463,10 @@ main (int argc, char **argv)
        sort (files, nfiles, outfile, nthreads);
      }
  
@@ -3156,7 +3156,7 @@ diff --git a/tests/local.mk b/tests/local.mk
 index 568944e..192f776 100644
 --- a/tests/local.mk
 +++ b/tests/local.mk
-@@ -362,6 +362,8 @@ all_tests =					\
+@@ -368,6 +368,8 @@ all_tests =					\
    tests/misc/sort-discrim.sh			\
    tests/misc/sort-files0-from.pl		\
    tests/misc/sort-float.sh			\
@@ -3325,7 +3325,7 @@ index 4d399d8..07f2823 100755
  my $delim = chr 0247;
  sub t_subst ($)
  {
-@@ -329,8 +338,49 @@ foreach my $t (@tv)
+@@ -333,8 +342,49 @@ foreach my $t (@tv)
      push @Tests, $new_ent;
    }
  

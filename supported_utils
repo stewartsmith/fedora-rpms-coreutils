@@ -1,6 +1,7 @@
 %{_bindir}/arch
 %{_bindir}/b2sum
 %{_bindir}/basename
+%{_bindir}/basenc
 %{_bindir}/cat
 %{_bindir}/chgrp
 %{_bindir}/chmod

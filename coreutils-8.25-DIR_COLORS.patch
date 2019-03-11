@@ -13,17 +13,14 @@ diff --git a/DIR_COLORS b/DIR_COLORS
 index d2ea453..27af9d7 100644
 --- a/DIR_COLORS
 +++ b/DIR_COLORS
-@@ -1,6 +1,10 @@
- # Configuration file for dircolors, a utility to help you set the
- # LS_COLORS environment variable used by GNU ls with the --color option.
- 
+@@ -1,3 +1,7 @@
 +# This file goes in the /etc directory, and must be world readable.
 +# You can copy this file to .dir_colors in your $HOME directory to override
 +# the system defaults.
 +
- # Copyright (C) 1996-2018 Free Software Foundation, Inc.
- # Copying and distribution of this file, with or without modification,
- # are permitted provided the copyright notice and this notice are preserved.
+ # Configuration file for dircolors, a utility to help you set the
+ # LS_COLORS environment variable used by GNU ls with the --color option.
+ 
 @@ -8,6 +12,9 @@
  # The keywords COLOR, OPTIONS, and EIGHTBIT (honored by the
  # slackware version of dircolors) are recognized but ignored.
@@ -34,7 +31,7 @@ index d2ea453..27af9d7 100644
  # Below are TERM entries, which can be a glob patterns, to match
  # against the TERM environment variable to determine if it is colorizable.
  TERM Eterm
-@@ -56,7 +63,7 @@ DOOR 01;35	# door
+@@ -58,7 +65,7 @@ DOOR 01;35	# door
  BLK 40;33;01	# block device driver
  CHR 40;33;01	# character device driver
  ORPHAN 40;31;01 # symlink to nonexistent file, or non-stat'able file ...
@@ -43,7 +40,7 @@ index d2ea453..27af9d7 100644
  SETUID 37;41	# file that is setuid (u+s)
  SETGID 30;43	# file that is setgid (g+s)
  CAPABILITY 30;41	# file with capability
-@@ -184,21 +191,21 @@ EXEC 01;32
+@@ -186,21 +193,21 @@ EXEC 01;32
  .ogx 01;35
  
  # audio formats
@@ -131,9 +128,9 @@ index d2ea453..74c34ba 100644
 +TERM *256color*
 +TERM rxvt-unicode256
  
- # Below are the color init strings for the basic file types. A color init
- # string consists of one or more of the following numeric codes:
-@@ -43,29 +30,40 @@ TERM xterm*
+ # Below are the color init strings for the basic file types.
+ # One can use codes for 256 or more colors supported by modern terminals.
+@@ -45,29 +32,40 @@ TERM xterm*
  # 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
  # Background color codes:
  # 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
@@ -190,7 +187,7 @@ index d2ea453..74c34ba 100644
  
  # List any file extensions like '.gz' or '.tar' that you would like ls
  # to colorize below. Put the extension, a space, and the color init string.
-@@ -83,122 +81,122 @@ EXEC 01;32
+@@ -85,122 +83,122 @@ EXEC 01;32
  #.csh 01;32
  
   # archives or compressed (bright red)
@@ -448,7 +445,7 @@ index d2ea453..95d6879 100644
  # Below are TERM entries, which can be a glob patterns, to match
  # against the TERM environment variable to determine if it is colorizable.
  TERM Eterm
-@@ -46,17 +55,17 @@ TERM xterm*
+@@ -48,17 +57,17 @@ TERM xterm*
  #NORMAL 00	# no color code at all
  #FILE 00	# regular file: use no color at all
  RESET 0		# reset to "normal" color
@@ -471,7 +468,7 @@ index d2ea453..95d6879 100644
  SETUID 37;41	# file that is setuid (u+s)
  SETGID 30;43	# file that is setgid (g+s)
  CAPABILITY 30;41	# file with capability
-@@ -65,7 +74,7 @@ OTHER_WRITABLE 34;42 # dir that is other-writable (o+w) and not sticky
+@@ -67,7 +76,7 @@ OTHER_WRITABLE 34;42 # dir that is other-writable (o+w) and not sticky
  STICKY 37;44	# dir with the sticky bit set (+t) and not other-writable
  
  # This is for files with execute permission:
@@ -480,7 +477,7 @@ index d2ea453..95d6879 100644
  
  # List any file extensions like '.gz' or '.tar' that you would like ls
  # to colorize below. Put the extension, a space, and the color init string.
-@@ -83,105 +92,105 @@ EXEC 01;32
+@@ -85,105 +94,105 @@ EXEC 01;32
  #.csh 01;32
  
   # archives or compressed (bright red)

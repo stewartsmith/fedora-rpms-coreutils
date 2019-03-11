@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
-Version: 8.30
-Release: 9%{?dist}
+Version: 8.31
+Release: 1%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -12,15 +12,6 @@ Source106:  coreutils-colorls.csh
 
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
-
-# rename gnulib's renameat2 to renameatu to avoid clash with glibc (#1598518)
-Patch1:   coreutils-8.30-renameatu.patch
-
-# fix heap-based buffer overflow in vasnprintf() (CVE-2018-17942)
-Patch2:   coreutils-8.30-CVE-2018-17942.patch
-
-# sync: fix open() fallback bug
-Patch3:   coreutils-8.30-fsync-fallback.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -243,6 +234,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon Mar 11 2019 Kamil Dudka <kdudka@redhat.com> - 8.31-1
+- new upstream release 8.31
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org>
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
