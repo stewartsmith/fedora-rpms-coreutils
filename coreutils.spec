@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.31
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -13,14 +13,15 @@ Source106:  coreutils-colorls.csh
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
 
+# md5sum,b2sum,sha*sum: --help: add note about binary/text mode
+Patch1:   coreutils-8.31-sums-man-pages.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
 # require_selinux_(): use selinuxenabled(8) if available
 Patch105: coreutils-8.26-selinuxenable.patch
 
-#add note about no difference between binary/text mode on Linux - md5sum manpage
-Patch101: coreutils-6.10-manpages.patch
 # downstream changes to default DIR_COLORS
 Patch102: coreutils-8.25-DIR_COLORS.patch
 #do display processor type for uname -p/-i based on uname(2) syscall
@@ -234,6 +235,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon Mar 18 2019 Kamil Dudka <kdudka@redhat.com> - 8.31-2
+- fix formatting of sha512sum(1) man page (#1688740)
+
 * Mon Mar 11 2019 Kamil Dudka <kdudka@redhat.com> - 8.31-1
 - new upstream release 8.31
 
