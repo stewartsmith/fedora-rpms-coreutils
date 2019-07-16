@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.31
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -235,6 +235,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Tue Jul 16 2019 Kamil Dudka <kdudka@redhat.com> - 8.31-3
+- disable flashing in ls colors for broken symbolic links (#1728986)
+
 * Mon Mar 18 2019 Kamil Dudka <kdudka@redhat.com> - 8.31-2
 - fix formatting of sha512sum(1) man page (#1688740)
 
