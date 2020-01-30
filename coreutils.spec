@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.31
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -15,6 +15,9 @@ Source106:  coreutils-colorls.csh
 
 # md5sum,b2sum,sha*sum: --help: add note about binary/text mode
 Patch1:   coreutils-8.31-sums-man-pages.patch
+
+# skip a test that relies on /proc/kallsyms having immutable content
+Patch2:   coreutils-8.31-disable-test-cp-proc-short-read.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -235,6 +238,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Thu Jan 30 2020 Kamil Dudka <kdudka@redhat.com> - 8.31-8
+- skip a test that relies on /proc/kallsyms having immutable content
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org>
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 

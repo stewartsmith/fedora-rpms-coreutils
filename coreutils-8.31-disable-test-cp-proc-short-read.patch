@@ -1,0 +1,26 @@
+From 0618c1b3b62cd68d22371b55fe6ca9dc8a00ea51 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Thu, 30 Jan 2020 14:58:37 +0100
+Subject: [PATCH] tests/cp/proc-short-read.sh: skip unreliable test
+
+Bug: https://debbugs.gnu.org/39357
+---
+ tests/cp/proc-short-read.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/cp/proc-short-read.sh b/tests/cp/proc-short-read.sh
+index e466720..2a61127 100755
+--- a/tests/cp/proc-short-read.sh
++++ b/tests/cp/proc-short-read.sh
+@@ -21,7 +21,7 @@ print_ver_ cp
+ 
+ kall=/proc/kallsyms
+ 
+-test -r $kall || skip_ "your system lacks $kall"
++skip_ "If the content of $kall changed on the fly, this test would fail."
+ 
+ # Before coreutils-7.3, cp would copy less than 4KiB of this 1MB+ file.
+ cp $kall 1    || fail=1
+-- 
+2.21.1
+
