@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.31
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -18,6 +18,9 @@ Patch1:   coreutils-8.31-sums-man-pages.patch
 
 # improve an upstream test that relied on /proc/kallsyms being immutable
 Patch2:   coreutils-8.31-improve-test-cp-proc-short-read.patch
+
+# make upstream test-suite work with root privileges (#1800597)
+Patch3:   coreutils-8.31-root-tests.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -238,6 +241,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Tue Feb 11 2020 Kamil Dudka <kdudka@redhat.com> - 8.31-10
+- make upstream test-suite work with root privileges (#1800597)
+
 * Wed Feb 05 2020 Kamil Dudka <kdudka@redhat.com> - 8.31-9
 - use upstream fix the cp/proc-short-read test
 
