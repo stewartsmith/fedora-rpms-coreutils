@@ -20,7 +20,7 @@ Patch100: coreutils-8.26-test-lock.patch
 Patch105: coreutils-8.26-selinuxenable.patch
 
 # downstream changes to default DIR_COLORS
-Patch102: coreutils-8.25-DIR_COLORS.patch
+Patch102: coreutils-8.32-DIR_COLORS.patch
 #do display processor type for uname -p/-i based on uname(2) syscall
 Patch103: coreutils-8.2-uname-processortype.patch
 #df --direct
@@ -122,8 +122,20 @@ including documentation and translations.
 %prep
 %autosetup -N
 
-# will be modified by coreutils-8.25-DIR_COLORS.patch
-tee DIR_COLORS{,.256color,.lightbgcolor} <src/dircolors.hin >/dev/null
+# will be further modified by coreutils-8.32-DIR_COLORS.patch
+sed src/dircolors.hin \
+        -e 's| 00;36$| 01;36|' \
+        > DIR_COLORS
+sed src/dircolors.hin \
+        -e 's| 01;31$| 38;5;9|'  \
+        -e 's| 01;35$| 38;5;13|' \
+        -e 's| 01;36$| 38;5;45|' \
+        > DIR_COLORS.256color
+sed src/dircolors.hin \
+        -e 's| 01;31$| 00;31|' \
+        -e 's| 01;35$| 00;35|' \
+        > DIR_COLORS.lightbgcolor
+
 # git add DIR_COLORS{,.256color,.lightbgcolor}
 # git commit -m "clone DIR_COLORS before patching"
 
