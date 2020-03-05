@@ -13,6 +13,10 @@ Source106:  coreutils-colorls.csh
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
 
+
+# ls: fix compilation failure on aarch64 - https://debbugs.gnu.org/39929
+Patch1:   coreutils-8.32-ls-aarch64.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 

@@ -1,0 +1,31 @@
+From 9dfe2b73e7ff3e4b1b1cf95a0f5a2753ad4c27b6 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Thu, 5 Mar 2020 17:23:43 +0100
+Subject: [PATCH] ls: fix compilation failure on aarch64
+
+../src/ls.c: In function 'print_dir':
+../src/ls.c:3026:24: error: 'SYS_getdents' undeclared (first use in this function); did you mean 'SYS_getdents64'?
+ 3026 |           if (syscall (SYS_getdents, dirfd (dirp), NULL, 0) == -1
+      |                        ^~~~~~~~~~~~
+      |                        SYS_getdents64
+../src/ls.c:3026:24: note: each undeclared identifier is reported only once for each function it appears in
+---
+ src/ls.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ls.c b/src/ls.c
+index 24b9832..64ecf40 100644
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -3018,7 +3018,7 @@ print_dir (char const *name, char const *realname, bool command_line_arg)
+           if (errno != EOVERFLOW)
+             break;
+         }
+-#ifdef __linux__
++#if defined(__linux__) && defined(__x86_64__)
+       else if (! found_any_entries)
+         {
+           /* If readdir finds no directory entries at all, not even "." or
+-- 
+2.21.1
+
