@@ -60,6 +60,9 @@ Patch908: coreutils-getgrouplist.patch
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
 
+# do not use IF_LINT for initialization of scalar variables
+Patch951: coreutils-8.32-if-lint.patch
+
 Conflicts: filesystem < 3
 # To avoid clobbering installs
 Conflicts: coreutils-single
