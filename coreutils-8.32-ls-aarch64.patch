@@ -10,8 +10,9 @@ Subject: [PATCH] ls: fix compilation failure on aarch64
       |                        SYS_getdents64
 ../src/ls.c:3026:24: note: each undeclared identifier is reported only once for each function it appears in
 ---
- src/ls.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/ls.c                      | 2 +-
+ tests/ls/removed-directory.sh | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/ls.c b/src/ls.c
 index 24b9832..64ecf40 100644
@@ -26,6 +27,19 @@ index 24b9832..64ecf40 100644
        else if (! found_any_entries)
          {
            /* If readdir finds no directory entries at all, not even "." or
+diff --git a/tests/ls/removed-directory.sh b/tests/ls/removed-directory.sh
+index e8c835d..d3f4bae 100755
+--- a/tests/ls/removed-directory.sh
++++ b/tests/ls/removed-directory.sh
+@@ -22,7 +22,7 @@
+ print_ver_ ls
+ 
+ case $host_triplet in
+-  *linux*) ;;
++  x86_64-redhat-linux-gnu) ;;
+   *) skip_ 'non linux kernel' ;;
+ esac
+ 
 -- 
 2.21.1
 
