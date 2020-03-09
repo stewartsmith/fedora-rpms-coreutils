@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -13,8 +13,8 @@ Source106:  coreutils-colorls.csh
 # do not make coreutils-single depend on /usr/bin/coreutils
 %global __requires_exclude ^%{_bindir}/coreutils$
 
-# ls: fix compilation failure on aarch64 - https://debbugs.gnu.org/39929
-Patch1:   coreutils-8.32-ls-aarch64.patch
+# ls: restore 8.31 behavior on removed directories
+Patch1:   coreutils-8.32-ls-removed-dir.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -250,6 +250,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon Mar 09 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-2
+- ls: restore 8.31 behavior on removed directories
+
 * Thu Mar 05 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-1
 - new upstream release 8.32
 

@@ -1,0 +1,153 @@
+From 8c022656320592dbad146f5d3a3ae1875f419446 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 5 Mar 2020 17:25:29 -0800
+Subject: [PATCH 1/2] ls: restore 8.31 behavior on removed directories
+
+* NEWS: Mention this.
+* src/ls.c: Do not include <sys/sycall.h>
+(print_dir): Don't worry about whether the directory is removed.
+* tests/ls/removed-directory.sh: Adjust to match new (i.e., old)
+behavior.
+
+Upstream-commit: 10fcb97bd728f09d4a027eddf8ad2900f0819b0a
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/ls.c                      | 22 ----------------------
+ tests/ls/removed-directory.sh | 10 ++--------
+ 2 files changed, 2 insertions(+), 30 deletions(-)
+
+diff --git a/src/ls.c b/src/ls.c
+index 9d25f62..850ecc2 100644
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -49,10 +49,6 @@
+ # include <sys/ptem.h>
+ #endif
+ 
+-#ifdef __linux__
+-# include <sys/syscall.h>
+-#endif
+-
+ #include <stdio.h>
+ #include <assert.h>
+ #include <setjmp.h>
+@@ -2896,7 +2892,6 @@ print_dir (char const *name, char const *realname, bool command_line_arg)
+   struct dirent *next;
+   uintmax_t total_blocks = 0;
+   static bool first = true;
+-  bool found_any_entries = false;
+ 
+   errno = 0;
+   dirp = opendir (name);
+@@ -2972,7 +2967,6 @@ print_dir (char const *name, char const *realname, bool command_line_arg)
+       next = readdir (dirp);
+       if (next)
+         {
+-          found_any_entries = true;
+           if (! file_ignored (next->d_name))
+             {
+               enum filetype type = unknown;
+@@ -3018,22 +3012,6 @@ print_dir (char const *name, char const *realname, bool command_line_arg)
+           if (errno != EOVERFLOW)
+             break;
+         }
+-#ifdef __linux__
+-      else if (! found_any_entries)
+-        {
+-          /* If readdir finds no directory entries at all, not even "." or
+-             "..", then double check that the directory exists.  */
+-          if (syscall (SYS_getdents, dirfd (dirp), NULL, 0) == -1
+-              && errno != EINVAL)
+-            {
+-              /* We exclude EINVAL as that pertains to buffer handling,
+-                 and we've passed NULL as the buffer for simplicity.
+-                 ENOENT is returned if appropriate before buffer handling.  */
+-              file_failure (command_line_arg, _("reading directory %s"), name);
+-            }
+-          break;
+-        }
+-#endif
+       else
+         break;
+ 
+diff --git a/tests/ls/removed-directory.sh b/tests/ls/removed-directory.sh
+index e8c835d..fe8f929 100755
+--- a/tests/ls/removed-directory.sh
++++ b/tests/ls/removed-directory.sh
+@@ -26,20 +26,14 @@ case $host_triplet in
+   *) skip_ 'non linux kernel' ;;
+ esac
+ 
+-LS_FAILURE=2
+-
+-cat <<\EOF >exp-err || framework_failure_
+-ls: reading directory '.': No such file or directory
+-EOF
+-
+ cwd=$(pwd)
+ mkdir d || framework_failure_
+ cd d || framework_failure_
+ rmdir ../d || framework_failure_
+ 
+-returns_ $LS_FAILURE ls >../out 2>../err || fail=1
++ls >../out 2>../err || fail=1
+ cd "$cwd" || framework_failure_
+ compare /dev/null out || fail=1
+-compare exp-err err || fail=1
++compare /dev/null err || fail=1
+ 
+ Exit $fail
+-- 
+2.21.1
+
+
+From 847324a0debd9d12062c79e7a7a9d3d8ce76390d Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Sat, 7 Mar 2020 10:29:51 -0800
+Subject: [PATCH 2/2] ls: improve removed-directory test
+
+* tests/ls/removed-directory.sh: Remove host_triplet test.
+Skip this test if one cannot remove the working directory.
+From a suggestion by Bernhard Voelker (Bug#39929).
+
+Upstream-commit: 672819c73f2e94e61386dc0584bddf9da860cc26
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ tests/ls/removed-directory.sh | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/tests/ls/removed-directory.sh b/tests/ls/removed-directory.sh
+index fe8f929..63b209d 100755
+--- a/tests/ls/removed-directory.sh
++++ b/tests/ls/removed-directory.sh
+@@ -1,7 +1,7 @@
+ #!/bin/sh
+-# If ls is asked to list a removed directory (e.g. the parent process's
+-# current working directory that has been removed by another process), it
+-# emits an error message.
++# If ls is asked to list a removed directory (e.g., the parent process's
++# current working directory has been removed by another process), it
++# should not emit an error message merely because the directory is removed.
+ 
+ # Copyright (C) 2020 Free Software Foundation, Inc.
+ 
+@@ -21,15 +21,10 @@
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
+ print_ver_ ls
+ 
+-case $host_triplet in
+-  *linux*) ;;
+-  *) skip_ 'non linux kernel' ;;
+-esac
+-
+ cwd=$(pwd)
+ mkdir d || framework_failure_
+ cd d || framework_failure_
+-rmdir ../d || framework_failure_
++rmdir ../d || skip_ "can't remove working directory on this platform"
+ 
+ ls >../out 2>../err || fail=1
+ cd "$cwd" || framework_failure_
+-- 
+2.21.1
+
