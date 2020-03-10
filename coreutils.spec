@@ -156,6 +156,10 @@ autoreconf -fiv
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
+
+# make mknod work again in chroot without /proc being mounted (#1811038)
+export ac_cv_func_lchmod="no"
+
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 for type in separate single; do
   mkdir $type && \
@@ -251,6 +255,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Mon Mar 09 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-2
+- make mknod work again in chroot without /proc being mounted (#1811038)
 - ls: restore 8.31 behavior on removed directories
 
 * Thu Mar 05 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-1
