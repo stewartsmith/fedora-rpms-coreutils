@@ -6,23 +6,23 @@ Subject: [PATCH] coreutils-i18n.patch
 TODO: merge upstream
 ---
  lib/linebuffer.h            |   8 +
- src/fold.c                  | 308 ++++++++++++++++--
- src/join.c                  | 359 ++++++++++++++++++---
- src/pr.c                    | 443 ++++++++++++++++++++++---
- src/sort.c                  | 764 +++++++++++++++++++++++++++++++++++++++++---
- src/uniq.c                  | 265 ++++++++++++++-
+ src/fold.c                  | 308 +++++++++++++--
+ src/join.c                  | 359 ++++++++++++++---
+ src/pr.c                    | 443 +++++++++++++++++++--
+ src/sort.c                  | 764 ++++++++++++++++++++++++++++++++++--
+ src/uniq.c                  | 119 +++++-
  tests/i18n/sort.sh          |  29 ++
  tests/local.mk              |   2 +
- tests/misc/expand.pl        |  42 +++
+ tests/misc/expand.pl        |  42 ++
  tests/misc/fold.pl          |  50 ++-
  tests/misc/join.pl          |  50 +++
  tests/misc/sort-mb-tests.sh |  45 +++
- tests/misc/sort-merge.pl    |  42 +++
- tests/misc/sort.pl          |  40 ++-
- tests/misc/unexpand.pl      |  39 +++
- tests/misc/uniq.pl          |  55 ++++
+ tests/misc/sort-merge.pl    |  42 ++
+ tests/misc/sort.pl          |  40 +-
+ tests/misc/unexpand.pl      |  39 ++
+ tests/misc/uniq.pl          |  55 +++
  tests/pr/pr-tests.pl        |  49 +++
- 17 files changed, 2430 insertions(+), 160 deletions(-)
+ 17 files changed, 2290 insertions(+), 154 deletions(-)
  create mode 100755 tests/i18n/sort.sh
  create mode 100755 tests/misc/sort-mb-tests.sh
 
@@ -2749,12 +2749,8 @@ index 87a0c93..9f755d9 100644
  #include "system.h"
  #include "argmatch.h"
  #include "linebuffer.h"
-@@ -30,9 +41,21 @@
- #include "posixver.h"
- #include "stdio--.h"
- #include "xstrtol.h"
--#include "memcasecmp.h"
-+#include "xmemcoll.h"
+@@ -33,6 +44,18 @@
+ #include "memcasecmp.h"
  #include "quote.h"
  
 +/* MB_LEN_MAX is incorrectly defined to be 1 in at least one GCC
@@ -2876,225 +2872,7 @@ index 87a0c93..9f755d9 100644
  /* Return false if two strings OLD and NEW match, true if not.
     OLD and NEW point not to the beginnings of the lines
     but rather to the beginnings of the fields to compare.
-@@ -281,17 +385,113 @@ find_field (struct linebuffer const *line)
- static bool
- different (char *old, char *new, size_t oldlen, size_t newlen)
- {
-+  char *copy_old, *copy_new;
-+
-   if (check_chars < oldlen)
-     oldlen = check_chars;
-   if (check_chars < newlen)
-     newlen = check_chars;
- 
-   if (ignore_case)
--    return oldlen != newlen || memcasecmp (old, new, oldlen);
-+    {
-+      size_t i;
-+
-+      copy_old = xmalloc (oldlen + 1);
-+      copy_new = xmalloc (oldlen + 1);
-+
-+      for (i = 0; i < oldlen; i++)
-+        {
-+          copy_old[i] = toupper (old[i]);
-+          copy_new[i] = toupper (new[i]);
-+        }
-+      bool rc = xmemcoll (copy_old, oldlen, copy_new, newlen);
-+      free (copy_old);
-+      free (copy_new);
-+      return rc;
-+    }
-   else
--    return oldlen != newlen || memcmp (old, new, oldlen);
-+    {
-+      copy_old = (char *)old;
-+      copy_new = (char *)new;
-+    }
-+
-+  return xmemcoll (copy_old, oldlen, copy_new, newlen);
-+
- }
- 
-+#if HAVE_MBRTOWC
-+static int
-+different_multi (const char *old, const char *new, size_t oldlen, size_t newlen, mbstate_t oldstate, mbstate_t newstate)
-+{
-+  size_t i, j, chars;
-+  const char *str[2];
-+  char *copy[2];
-+  size_t len[2];
-+  mbstate_t state[2];
-+  size_t mblength;
-+  wchar_t wc, uwc;
-+  mbstate_t state_bak;
-+
-+  str[0] = old;
-+  str[1] = new;
-+  len[0] = oldlen;
-+  len[1] = newlen;
-+  state[0] = oldstate;
-+  state[1] = newstate;
-+
-+  for (i = 0; i < 2; i++)
-+    {
-+      copy[i] = xmalloc (len[i] + 1);
-+      memset (copy[i], '\0', len[i] + 1);
-+
-+      for (j = 0, chars = 0; j < len[i] && chars < check_chars; chars++)
-+        {
-+          state_bak = state[i];
-+          mblength = mbrtowc (&wc, str[i] + j, len[i] - j, &(state[i]));
-+
-+          switch (mblength)
-+            {
-+            case (size_t)-1:
-+            case (size_t)-2:
-+              state[i] = state_bak;
-+              /* Fall through */
-+            case 0:
-+              mblength = 1;
-+              break;
-+
-+            default:
-+              if (ignore_case)
-+                {
-+                  uwc = towupper (wc);
-+
-+                  if (uwc != wc)
-+                    {
-+                      mbstate_t state_wc;
-+                      size_t mblen;
-+
-+                      memset (&state_wc, '\0', sizeof(mbstate_t));
-+                      mblen = wcrtomb (copy[i] + j, uwc, &state_wc);
-+                      assert (mblen != (size_t)-1);
-+                    }
-+                  else
-+                    memcpy (copy[i] + j, str[i] + j, mblength);
-+                }
-+              else
-+                memcpy (copy[i] + j, str[i] + j, mblength);
-+            }
-+          j += mblength;
-+        }
-+      copy[i][j] = '\0';
-+      len[i] = j;
-+    }
-+  int rc = xmemcoll (copy[0], len[0], copy[1], len[1]);
-+  free (copy[0]);
-+  free (copy[1]);
-+  return rc;
-+
-+}
-+#endif
-+
- /* Output the line in linebuffer LINE to standard output
-    provided that the switches say it should be output.
-    MATCH is true if the line matches the previous line.
-@@ -355,19 +555,38 @@ check_file (const char *infile, const char *outfile, char delimiter)
-       char *prevfield IF_LINT ( = NULL);
-       size_t prevlen IF_LINT ( = 0);
-       bool first_group_printed = false;
-+#if HAVE_MBRTOWC
-+      mbstate_t prevstate;
-+
-+      memset (&prevstate, '\0', sizeof (mbstate_t));
-+#endif
- 
-       while (!feof (stdin))
-         {
-           char *thisfield;
-           size_t thislen;
-           bool new_group;
-+#if HAVE_MBRTOWC
-+          mbstate_t thisstate;
-+#endif
- 
-           if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
-             break;
- 
-           thisfield = find_field (thisline);
-           thislen = thisline->length - 1 - (thisfield - thisline->buffer);
-+#if HAVE_MBRTOWC
-+          if (MB_CUR_MAX > 1)
-+            {
-+              thisstate = thisline->state;
- 
-+              new_group = (prevline->length == 0
-+                           || different_multi (thisfield, prevfield,
-+                                               thislen, prevlen,
-+                                               thisstate, prevstate));
-+            }
-+          else
-+#endif
-           new_group = (prevline->length == 0
-                        || different (thisfield, prevfield, thislen, prevlen));
- 
-@@ -385,6 +604,10 @@ check_file (const char *infile, const char *outfile, char delimiter)
-               SWAP_LINES (prevline, thisline);
-               prevfield = thisfield;
-               prevlen = thislen;
-+#if HAVE_MBRTOWC
-+              if (MB_CUR_MAX > 1)
-+                prevstate = thisstate;
-+#endif
-               first_group_printed = true;
-             }
-         }
-@@ -397,17 +620,26 @@ check_file (const char *infile, const char *outfile, char delimiter)
-       size_t prevlen;
-       uintmax_t match_count = 0;
-       bool first_delimiter = true;
-+#if HAVE_MBRTOWC
-+      mbstate_t prevstate;
-+#endif
- 
-       if (readlinebuffer_delim (prevline, stdin, delimiter) == 0)
-         goto closefiles;
-       prevfield = find_field (prevline);
-       prevlen = prevline->length - 1 - (prevfield - prevline->buffer);
-+#if HAVE_MBRTOWC
-+      prevstate = prevline->state;
-+#endif
- 
-       while (!feof (stdin))
-         {
-           bool match;
-           char *thisfield;
-           size_t thislen;
-+#if HAVE_MBRTOWC
-+          mbstate_t thisstate = thisline->state;
-+#endif
-           if (readlinebuffer_delim (thisline, stdin, delimiter) == 0)
-             {
-               if (ferror (stdin))
-@@ -416,6 +648,14 @@ check_file (const char *infile, const char *outfile, char delimiter)
-             }
-           thisfield = find_field (thisline);
-           thislen = thisline->length - 1 - (thisfield - thisline->buffer);
-+#if HAVE_MBRTOWC
-+          if (MB_CUR_MAX > 1)
-+            {
-+              match = !different_multi (thisfield, prevfield,
-+                                thislen, prevlen, thisstate, prevstate);
-+            }
-+          else
-+#endif
-           match = !different (thisfield, prevfield, thislen, prevlen);
-           match_count += match;
- 
-@@ -448,6 +688,9 @@ check_file (const char *infile, const char *outfile, char delimiter)
-               SWAP_LINES (prevline, thisline);
-               prevfield = thisfield;
-               prevlen = thislen;
-+#if HAVE_MBRTOWC
-+              prevstate = thisstate;
-+#endif
-               if (!match)
-                 match_count = 0;
-             }
-@@ -493,6 +736,19 @@ main (int argc, char **argv)
+@@ -493,6 +597,19 @@ main (int argc, char **argv)
  
    atexit (close_stdout);
  

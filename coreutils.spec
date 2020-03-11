@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -89,6 +89,8 @@ BuildRequires: perl(FileHandle)
 %if 23 < 0%{?fedora} || 7 < 0%{?rhel}
 # needed by i18n test-cases
 BuildRequires: glibc-langpack-en
+BuildRequires: glibc-langpack-fr
+BuildRequires: glibc-langpack-ko
 %endif
 
 Requires: %{name}-common = %{version}-%{release}
@@ -257,6 +259,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Wed Mar 11 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-3
+- uniq: remove collation handling as required by newer POSIX
+
 * Mon Mar 09 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-2
 - make mknod work again in chroot without /proc being mounted (#1811038)
 - ls: restore 8.31 behavior on removed directories

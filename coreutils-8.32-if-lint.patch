@@ -140,7 +140,7 @@ diff --git a/src/ls.c b/src/ls.c
 index 64ecf40..cc61400 100644
 --- a/src/ls.c
 +++ b/src/ls.c
-@@ -4451,7 +4451,7 @@ quote_name_buf (char **inbuf, size_t bufsize, char *name,
+@@ -4429,7 +4429,7 @@ quote_name_buf (char **inbuf, size_t bufsize, char *name,
                  int needs_general_quoting, size_t *width, bool *pad)
  {
    char *buf = *inbuf;
@@ -335,7 +335,7 @@ diff --git a/src/uniq.c b/src/uniq.c
 index ba3c4ce..fa0fc5c 100644
 --- a/src/uniq.c
 +++ b/src/uniq.c
-@@ -552,8 +552,8 @@ check_file (const char *infile, const char *outfile, char delimiter)
+@@ -456,8 +456,8 @@ check_file (const char *infile, const char *outfile, char delimiter)
    */
    if (output_unique && output_first_repeated && countmode == count_none)
      {
@@ -344,8 +344,8 @@ index ba3c4ce..fa0fc5c 100644
 +      char *prevfield = NULL;
 +      size_t prevlen = 0;
        bool first_group_printed = false;
- #if HAVE_MBRTOWC
-       mbstate_t prevstate;
+ 
+       while (!feof (stdin))
 diff --git a/src/who.c b/src/who.c
 index abf3bc7..401ad0f 100644
 --- a/src/who.c
