@@ -83,6 +83,9 @@ BuildRequires: openssl-devel
 BuildRequires: strace
 BuildRequires: texinfo
 
+# test-only dependencies
+BuildRequires: perl-interpreter
+BuildRequires: perl(FileHandle)
 %if 23 < 0%{?fedora} || 7 < 0%{?rhel}
 # needed by i18n test-cases
 BuildRequires: glibc-langpack-en
