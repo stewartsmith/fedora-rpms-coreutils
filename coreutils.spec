@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -259,6 +259,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Fri Apr 17 2020 Tom Stellard <tstellar@redhat.com> - 8.32-4
+- Fix missing inline function definition
+
 * Wed Mar 11 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-3
 - uniq: remove collation handling as required by newer POSIX
 

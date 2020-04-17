@@ -23,6 +23,7 @@ Co-authored-by: Pádraig Brady <pbrady@redhat.com>
  lib/mbfile.h         | 255 +++++++++++++++++++++++++++++++++++++++++++++++++++
  m4/mbfile.m4         |  14 +++
  src/expand.c         |  43 +++++----
+ src/local.mk         |   4 +-
  src/unexpand.c       |  54 +++++++----
  tests/expand/mb.sh   |  98 ++++++++++++++++++++
  tests/local.mk       |   2 +
@@ -458,6 +459,21 @@ index 9fa2e10..380e020 100644
      }
  }
  
+diff --git a/src/local.mk b/src/local.mk
+index 72db9c704..ef3bfa469 100644
+--- a/src/local.mk
++++ b/src/local.mk
+@@ -415,8 +415,8 @@ src_basenc_CPPFLAGS = -DBASE_TYPE=42 $(AM_CPPFLAGS)
+ 
+ src_ginstall_CPPFLAGS = -DENABLE_MATCHPATHCON=1 $(AM_CPPFLAGS)
+ 
+-src_expand_SOURCES = src/expand.c src/expand-common.c
+-src_unexpand_SOURCES = src/unexpand.c src/expand-common.c
++src_expand_SOURCES = src/expand.c src/expand-common.c lib/mbfile.c
++src_unexpand_SOURCES = src/unexpand.c src/expand-common.c lib/mbfile.c
+ 
+ # Ensure we don't link against libcoreutils.a as that lib is
+ # not compiled with -fPIC which causes issues on 64 bit at least
 diff --git a/src/unexpand.c b/src/unexpand.c
 index 7801274..569a7ee 100644
 --- a/src/unexpand.c
