@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -15,6 +15,9 @@ Source106:  coreutils-colorls.csh
 
 # ls: restore 8.31 behavior on removed directories
 Patch1:   coreutils-8.32-ls-removed-dir.patch
+
+# du: simplify leaf optimization for XFS (#1823247)
+Patch2:   coreutils-8.32-leaf-opt-xfs.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -259,6 +262,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Thu Apr 23 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-5
+- du: simplify leaf optimization for XFS (#1823247)
+
 * Fri Apr 17 2020 Tom Stellard <tstellar@redhat.com> - 8.32-4
 - Fix missing inline function definition
 
