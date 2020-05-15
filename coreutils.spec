@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -62,9 +62,6 @@ Patch908: coreutils-getgrouplist.patch
 #SELINUX Patch - implements Redhat changes
 #(upstream did some SELinux implementation unlike with RedHat patch)
 Patch950: coreutils-selinux.patch
-
-# do not use IF_LINT for initialization of scalar variables
-Patch951: coreutils-8.32-if-lint.patch
 
 Conflicts: filesystem < 3
 # To avoid clobbering installs
@@ -165,6 +162,13 @@ autoreconf -fiv
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 
+# Upstream suggests to build with -Dlint for static analyzers:
+# https://lists.gnu.org/archive/html/coreutils/2018-06/msg00110.html
+# ... and even for production binary RPMs:
+# https://lists.gnu.org/archive/html/bug-gnulib/2020-05/msg00130.html
+# There is currently no measurable performance drop or other known downside.
+CFLAGS="$CFLAGS -Dlint"
+
 # make mknod work again in chroot without /proc being mounted (#1811038)
 export ac_cv_func_lchmod="no"
 
@@ -262,6 +266,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Fri May 15 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-6
+- compile with -Dlint to enable optional initialization and cleanup code
+
 * Thu Apr 23 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-5
 - du: simplify leaf optimization for XFS (#1823247)
 
