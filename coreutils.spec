@@ -185,7 +185,7 @@ for type in separate single; do
              --enable-no-install-program=kill,uptime \
              --with-tty-group \
              DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
-  make all %{?_smp_mflags}
+  make %{?_smp_mflags} all V=1
 
   # make sure that parse-datetime.{c,y} ends up in debuginfo (#1555079)
   ln -v ../lib/parse-datetime.{c,y} .
