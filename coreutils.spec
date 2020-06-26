@@ -124,7 +124,7 @@ packaged as a single multicall binary.
 # yum obsoleting rules explained at:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
 Obsoletes: %{name} < 8.24-100
-Requires: ncurses
+Recommends: ncurses
 Summary:  coreutils common optional components
 %description common
 Optional though recommended components,
@@ -268,6 +268,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %changelog
 * Fri Jun 26 2020 James Cassell <cyberpear@fedoraproject.org> - 8.32-7
 - move ncurses to -common package since it's needed for colorls.sh
+- make ncurses optional
 
 * Fri May 15 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-6
 - compile with -Dlint to enable optional initialization and cleanup code
