@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -94,7 +94,6 @@ BuildRequires: glibc-langpack-ko
 %endif
 
 Requires: %{name}-common = %{version}-%{release}
-Requires: ncurses
 
 Provides: coreutils-full = %{version}-%{release}
 %include %{SOURCE51}
@@ -125,6 +124,7 @@ packaged as a single multicall binary.
 # yum obsoleting rules explained at:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
 Obsoletes: %{name} < 8.24-100
+Requires: ncurses
 Summary:  coreutils common optional components
 %description common
 Optional though recommended components,
@@ -266,6 +266,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Fri Jun 26 2020 James Cassell <cyberpear@fedoraproject.org> - 8.32-7
+- move ncurses to -common package since it's needed for colorls.sh
+
 * Fri May 15 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-6
 - compile with -Dlint to enable optional initialization and cleanup code
 
