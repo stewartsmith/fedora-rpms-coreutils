@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -189,7 +189,7 @@ for type in separate single; do
              --enable-no-install-program=kill,uptime \
              --with-tty-group \
              DEFAULT_POSIX2_VERSION=200112 alternative=199209 || :
-  make %{?_smp_mflags} all V=1
+  %make_build all V=1
 
   # make sure that parse-datetime.{c,y} ends up in debuginfo (#1555079)
   ln -v ../lib/parse-datetime.{c,y} .
@@ -266,6 +266,10 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com>
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
+
 * Fri Jun 26 2020 James Cassell <cyberpear@fedoraproject.org> - 8.32-7
 - move ncurses to -common package since it's needed for colorls.sh
 - make ncurses optional
