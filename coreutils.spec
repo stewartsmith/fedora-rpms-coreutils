@@ -266,7 +266,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
-* Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com>
+* Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com> - 8.32-8
 - Use make macros
 - https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
 
