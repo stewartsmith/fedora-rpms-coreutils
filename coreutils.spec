@@ -153,6 +153,10 @@ sed src/dircolors.hin \
 # apply all patches
 %autopatch -p1
 
+# replace weirdo constant in gnulib tests causing test failures on armv7hl
+sed -e 's/1729576/EPERM/' \
+    -i gnulib-tests/test-{perror2,strerror_r}.c
+
 (echo ">>> Fixing permissions on tests") 2>/dev/null
 find tests -name '*.sh' -perm 0644 -print -exec chmod 0755 '{}' '+'
 (echo "<<< done") 2>/dev/null
