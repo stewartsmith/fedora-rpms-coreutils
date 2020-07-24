@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -162,6 +162,11 @@ autoreconf -fiv
 %build
 export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing -fpic"
 
+# disable -flto on ppc64le to make test-float pass (#1789115)
+%ifarch ppc64le
+CFLAGS="$CFLAGS -fno-lto"
+%endif
+
 # Upstream suggests to build with -Dlint for static analyzers:
 # https://lists.gnu.org/archive/html/coreutils/2018-06/msg00110.html
 # ... and even for production binary RPMs:
@@ -266,6 +271,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Fri Jul 24 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-9
+- disable -flto on ppc64le to make test-float pass (#1789115)
+
 * Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com> - 8.32-8
 - Use make macros
 - https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
