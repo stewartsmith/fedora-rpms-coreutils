@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -275,6 +275,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org>
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Fri Jul 24 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-9
 - disable -flto on ppc64le to make test-float pass (#1789115)
 
