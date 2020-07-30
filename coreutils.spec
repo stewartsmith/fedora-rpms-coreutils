@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -18,6 +18,9 @@ Patch1:   coreutils-8.32-ls-removed-dir.patch
 
 # du: simplify leaf optimization for XFS (#1823247)
 Patch2:   coreutils-8.32-leaf-opt-xfs.patch
+
+# cp: default to --reflink=auto (#1861108)
+Patch3:   coreutils-8.32-cp-reflink-auto.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -275,6 +278,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Thu Jul 30 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-11
+- cp: default to --reflink=auto (#1861108)
+
 * Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org>
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
