@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -141,16 +141,11 @@ sed src/dircolors.hin \
         -e 's| 00;36$| 01;36|' \
         > DIR_COLORS
 sed src/dircolors.hin \
-        -e 's| 01;31$| 38;5;9|'  \
-        -e 's| 01;35$| 38;5;13|' \
-        -e 's| 01;36$| 38;5;45|' \
-        > DIR_COLORS.256color
-sed src/dircolors.hin \
         -e 's| 01;31$| 00;31|' \
         -e 's| 01;35$| 00;35|' \
         > DIR_COLORS.lightbgcolor
 
-# git add DIR_COLORS{,.256color,.lightbgcolor}
+# git add DIR_COLORS{,.lightbgcolor}
 # git commit -m "clone DIR_COLORS before patching"
 
 # apply all patches
@@ -242,8 +237,7 @@ for type in separate single; do
 done
 
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
-install -p -c -m644 DIR_COLORS{,.256color,.lightbgcolor} \
-    $RPM_BUILD_ROOT%{_sysconfdir}
+install -p -c -m644 DIR_COLORS{,.lightbgcolor} $RPM_BUILD_ROOT%{_sysconfdir}
 install -p -c -m644 %SOURCE105 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.sh
 install -p -c -m644 %SOURCE106 $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/colorls.csh
 
@@ -278,6 +272,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon Aug 17 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-12
+- do not install /etc/DIR_COLORS.256color (#1830318)
+
 * Thu Jul 30 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-11
 - cp: default to --reflink=auto (#1861108)
 
