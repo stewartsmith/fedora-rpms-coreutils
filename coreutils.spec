@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -179,10 +179,13 @@ CFLAGS="$CFLAGS -Dlint"
 # make mknod work again in chroot without /proc being mounted (#1811038)
 export ac_cv_func_lchmod="no"
 
+# needed for out-of-tree build
+%global _configure ../configure
+
 %{expand:%%global optflags %{optflags} -D_GNU_SOURCE=1}
 for type in separate single; do
-  mkdir $type && \
-  (cd $type && ln -s ../configure || exit 1
+  mkdir -p $type && \
+  (cd $type || exit $?
   if test $type = 'single'; then
     config_single='--enable-single-binary'
     config_single="$config_single --without-openssl"  # smaller/slower sha*sum
@@ -199,7 +202,7 @@ for type in separate single; do
   %make_build all V=1
 
   # make sure that parse-datetime.{c,y} ends up in debuginfo (#1555079)
-  ln -v ../lib/parse-datetime.{c,y} .
+  ln -fv ../lib/parse-datetime.{c,y} .
   )
 done
 
@@ -272,6 +275,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Wed Oct 14 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-13
+- make the %%build section idempotent
+
 * Mon Aug 17 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-12
 - do not install /etc/DIR_COLORS.256color (#1830318)
 
