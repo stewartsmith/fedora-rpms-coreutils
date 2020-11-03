@@ -22,6 +22,9 @@ Patch2:   coreutils-8.32-leaf-opt-xfs.patch
 # cp: default to --reflink=auto (#1861108)
 Patch3:   coreutils-8.32-cp-reflink-auto.patch
 
+# eliminate unportable gnulib tests
+Patch4:   coreutils-8.32-gnulib-perror-test.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
@@ -150,10 +153,6 @@ sed src/dircolors.hin \
 
 # apply all patches
 %autopatch -p1
-
-# replace weirdo constant in gnulib tests causing test failures on armv7hl
-sed -e 's/1729576/EPERM/' \
-    -i gnulib-tests/test-{perror2,strerror_r}.c
 
 (echo ">>> Fixing permissions on tests") 2>/dev/null
 find tests -name '*.sh' -perm 0644 -print -exec chmod 0755 '{}' '+'
