@@ -1,0 +1,104 @@
+From 09400b7f7f48d8eedc0df55de8073a43bc0aac96 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Tue, 27 Oct 2020 20:15:43 +0000
+Subject: [PATCH 1/2] stat,tail: sync file system constants from the linux
+ kernel
+
+* src/stat.c: Add magic constants for "devmem", and
+"zonefs" file systems.
+* NEWS: Mention the improvement.
+
+Upstream-commit: ff80b6b0a0507e24f39cc1aad09d147f5187430b
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/stat.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/stat.c b/src/stat.c
+index 5012622..8cd69da 100644
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -347,6 +347,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "debugfs";
+     case S_MAGIC_DEVFS: /* 0x1373 local */
+       return "devfs";
++    case S_MAGIC_DEVMEM: /* 0x454D444D local */
++      return "devmem";
+     case S_MAGIC_DEVPTS: /* 0x1CD1 local */
+       return "devpts";
+     case S_MAGIC_DMA_BUF: /* 0x444D4142 local */
+@@ -549,6 +551,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "z3fold";
+     case S_MAGIC_ZFS: /* 0x2FC12FC1 local */
+       return "zfs";
++    case S_MAGIC_ZONEFS: /* 0x5A4F4653 local */
++      return "zonefs";
+     case S_MAGIC_ZSMALLOC: /* 0x58295829 local */
+       return "zsmallocfs";
+ 
+-- 
+2.25.4
+
+
+From d5948fd41013dfe4d2d10083111821667977c6d1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Tue, 27 Oct 2020 21:04:14 +0000
+Subject: [PATCH 2/2] mountlist: recognize more file system types as remote
+
+Sync "remote" file systems from stat.c in coreutils.
+Note we only consider file systems that do not use host:resource
+mount source.  I.e. those that don't generally use a colon when
+mounting, as that case is already considered.  Searching for
+"<fstype> /etc/fstab" was informative for identifying these.
+The full list of "remote" file systems in coreutils is currently:
+  acfs afs ceph cifs coda fhgfs fuseblk fusectl
+  gfs gfs2 gpfs ibrix k-afs lustre novell nfs nfsd
+  ocfs2 panfs prl_fs smb smb2 snfs vboxsf vmhgfs vxfs
+Note also we do not include virtual machine file systems,
+as even though they're remote to the current kernel,
+they are generally not distributed to separate hosts.
+
+* lib/mountlist.c (ME_REMOTE): Sync previously unconsidered
+"remote" file systems from stat.c in coreutils.
+
+Upstream-commit: dd1fc46be12d671c1a9d9dc5a6fa8c766e99aa2f
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ lib/mountlist.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/lib/mountlist.c b/lib/mountlist.c
+index 7abe024..e0227b7 100644
+--- a/lib/mountlist.c
++++ b/lib/mountlist.c
+@@ -221,8 +221,9 @@ me_remote (char const *fs_name, char const *fs_type _GL_UNUSED)
+ #ifndef ME_REMOTE
+ /* A file system is "remote" if its Fs_name contains a ':'
+    or if (it is of type (smbfs or cifs) and its Fs_name starts with '//')
+-   or if it is of type (afs or auristorfs)
+-   or Fs_name is equal to "-hosts" (used by autofs to mount remote fs).  */
++   or if it is of any other of the listed types
++   or Fs_name is equal to "-hosts" (used by autofs to mount remote fs).
++   "VM" file systems like prl_fs or vboxsf are not considered remote here. */
+ # define ME_REMOTE(Fs_name, Fs_type)            \
+     (strchr (Fs_name, ':') != NULL              \
+      || ((Fs_name)[0] == '/'                    \
+@@ -230,8 +231,15 @@ me_remote (char const *fs_name, char const *fs_type _GL_UNUSED)
+          && (strcmp (Fs_type, "smbfs") == 0     \
+              || strcmp (Fs_type, "smb3") == 0   \
+              || strcmp (Fs_type, "cifs") == 0)) \
++     || strcmp (Fs_type, "acfs") == 0           \
+      || strcmp (Fs_type, "afs") == 0            \
++     || strcmp (Fs_type, "coda") == 0           \
+      || strcmp (Fs_type, "auristorfs") == 0     \
++     || strcmp (Fs_type, "fhgfs") == 0          \
++     || strcmp (Fs_type, "gpfs") == 0           \
++     || strcmp (Fs_type, "ibrix") == 0          \
++     || strcmp (Fs_type, "ocfs2") == 0          \
++     || strcmp (Fs_type, "vxfs") == 0           \
+      || strcmp ("-hosts", Fs_name) == 0)
+ #endif
+ 
+-- 
+2.25.4
+

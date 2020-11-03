@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -24,6 +24,9 @@ Patch3:   coreutils-8.32-cp-reflink-auto.patch
 
 # eliminate unportable gnulib tests
 Patch4:   coreutils-8.32-gnulib-perror-test.patch
+
+# df,stat,tail: recognize more file system types
+Patch5:   coreutils-8.32-new-fs-types.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -138,6 +141,9 @@ including documentation and translations.
 
 %prep
 %autosetup -N
+
+# will be regenerated in the build directories
+rm -f src/fs.h
 
 # will be further modified by coreutils-8.32-DIR_COLORS.patch
 sed src/dircolors.hin \
@@ -274,6 +280,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Tue Nov 03 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-14
+- df,stat,tail: recognize more file system types
+
 * Wed Oct 14 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-13
 - make the %%build section idempotent
 
