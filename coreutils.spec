@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -27,6 +27,9 @@ Patch4:   coreutils-8.32-gnulib-perror-test.patch
 
 # df,stat,tail: recognize more file system types
 Patch5:   coreutils-8.32-new-fs-types.patch
+
+# rm: do not skip files upon failure to remove an empty dir (#1905481)
+Patch6:   coreutils-8.32-rm-stray-skip.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -280,6 +283,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Tue Dec 08 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-15
+- rm: do not skip files upon failure to remove an empty dir (#1905481)
+
 * Tue Nov 03 2020 Kamil Dudka <kdudka@redhat.com> - 8.32-14
 - df,stat,tail: recognize more file system types
 

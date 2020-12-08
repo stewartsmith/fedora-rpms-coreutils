@@ -1,0 +1,109 @@
+From 11b37b65d08c2a8b6d967fd866ebbdbe7e864949 Mon Sep 17 00:00:00 2001
+From: Nishant Nayan <nishant.nayan@oracle.com>
+Date: Thu, 26 Nov 2020 14:35:17 +0000
+Subject: [PATCH] rm: do not skip files upon failure to remove an empty dir
+
+When removing a directory fails for some reason, and that directory
+is empty, the rm_fts code gets the return value of the excise call
+confused with the return value of its earlier call to prompt,
+causing fts_skip_tree to be called again and the next file
+that rm would otherwise have deleted to survive.
+
+* src/remove.c (rm_fts): Ensure we only skip a single fts entry,
+when processing empty dirs.  I.e. only skip the entry
+having successfully removed it.
+* tests/rm/empty-immutable-skip.sh: New root-only test.
+* tests/local.mk: Add it.
+* NEWS: Mention the bug fix.
+Fixes https://bugs.gnu.org/44883
+
+Upstream-commit: 6bf108358a6104ec1c694c9530b3cd56b95f4b57
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/remove.c                     |  3 ++-
+ tests/local.mk                   |  1 +
+ tests/rm/empty-immutable-skip.sh | 46 ++++++++++++++++++++++++++++++++
+ 3 files changed, 49 insertions(+), 1 deletion(-)
+ create mode 100755 tests/rm/empty-immutable-skip.sh
+
+diff --git a/src/remove.c b/src/remove.c
+index 2d40c55..adf9489 100644
+--- a/src/remove.c
++++ b/src/remove.c
+@@ -506,7 +506,8 @@ rm_fts (FTS *fts, FTSENT *ent, struct rm_options const *x)
+             /* When we know (from prompt when in interactive mode)
+                that this is an empty directory, don't prompt twice.  */
+             s = excise (fts, ent, x, true);
+-            fts_skip_tree (fts, ent);
++            if (s == RM_OK)
++              fts_skip_tree (fts, ent);
+           }
+ 
+         if (s != RM_OK)
+diff --git a/tests/local.mk b/tests/local.mk
+index 5f7f775..2aeff2b 100644
+--- a/tests/local.mk
++++ b/tests/local.mk
+@@ -136,6 +136,7 @@ all_root_tests =				\
+   tests/rm/no-give-up.sh			\
+   tests/rm/one-file-system.sh			\
+   tests/rm/read-only.sh				\
++  tests/rm/empty-immutable-skip.sh		\
+   tests/tail-2/append-only.sh			\
+   tests/tail-2/end-of-device.sh			\
+   tests/touch/now-owned-by-other.sh
+diff --git a/tests/rm/empty-immutable-skip.sh b/tests/rm/empty-immutable-skip.sh
+new file mode 100755
+index 0000000..c91d8d4
+--- /dev/null
++++ b/tests/rm/empty-immutable-skip.sh
+@@ -0,0 +1,46 @@
++#!/bin/sh
++# Ensure that rm does not skip extra files after hitting an empty immutable dir.
++# Requires root access to do chattr +i, as well as an ext[23] or xfs file system
++
++# Copyright (C) 2020 Free Software Foundation, Inc.
++
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++
++. "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
++print_ver_ rm
++require_root_
++
++# These simple one-file operations are expected to work even in the
++# presence of this bug, and we need them to set up the rest of the test.
++chattr_i_works=1
++touch f
++chattr +i f 2>/dev/null || chattr_i_works=0
++rm f 2>/dev/null
++test -f f || chattr_i_works=0
++chattr -i f 2>/dev/null || chattr_i_works=0
++rm f 2>/dev/null || chattr_i_works=0
++test -f f && chattr_i_works=0
++
++if test $chattr_i_works = 0; then
++  skip_ "chattr +i doesn't work on this file system"
++fi
++
++mkdir empty || framework_failure_
++touch x y || framework_failure_
++chattr +i empty || framework_failure_
++rm -rf empty x y
++{ test -f x || test -f y; } && fail=1
++chattr -i empty
++
++Exit $fail
+-- 
+2.26.2
+
