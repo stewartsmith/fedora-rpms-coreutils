@@ -104,6 +104,7 @@ BuildRequires: glibc-langpack-en
 BuildRequires: glibc-langpack-fr
 BuildRequires: glibc-langpack-ko
 %endif
+BuildRequires: make
 
 Requires: %{name}-common = %{version}-%{release}
 
