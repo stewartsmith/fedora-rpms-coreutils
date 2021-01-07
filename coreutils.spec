@@ -91,6 +91,7 @@ BuildRequires: libattr-devel
 BuildRequires: libcap-devel
 BuildRequires: libselinux-devel
 BuildRequires: libselinux-utils
+BuildRequires: make
 BuildRequires: openssl-devel
 BuildRequires: strace
 BuildRequires: texinfo
@@ -104,7 +105,6 @@ BuildRequires: glibc-langpack-en
 BuildRequires: glibc-langpack-fr
 BuildRequires: glibc-langpack-ko
 %endif
-BuildRequires: make
 
 Requires: %{name}-common = %{version}-%{release}
 
