@@ -1,0 +1,85 @@
+From 53c6b01e8e3fd338d7f53e5ff817ef86f9efa852 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Wed, 11 Nov 2020 17:22:33 +0000
+Subject: [PATCH] ls: fix crash printing SELinux context for unstatable files
+
+This crash was identified by Cyber Independent Testing Lab:
+https://cyber-itl.org/2020/10/28/citl-7000-defects.html
+and was introduced with commit v6.9.90-11-g4245876e2
+
+* src/ls.c (gobble_file): Ensure scontext is initialized
+in the case where files are not statable.
+* tests/ls/selinux-segfault.sh: Renamed from proc-selinux-segfault.sh,
+and added test case for broken symlinks.
+* tests/local.mk: Adjust for the renamed test.
+
+Upstream-commit: 6fc695cb4a26f09dfeef8b1c24895a707055334e
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/ls.c                                               |  3 +++
+ tests/local.mk                                         |  2 +-
+ .../{proc-selinux-segfault.sh => selinux-segfault.sh}  | 10 ++++++++--
+ 3 files changed, 12 insertions(+), 3 deletions(-)
+ rename tests/ls/{proc-selinux-segfault.sh => selinux-segfault.sh} (77%)
+
+diff --git a/src/ls.c b/src/ls.c
+index 4acf5f4..8eb483d 100644
+--- a/src/ls.c
++++ b/src/ls.c
+@@ -3412,6 +3412,9 @@ gobble_file (char const *name, enum filetype type, ino_t inode,
+              provokes an exit status of 1.  */
+           file_failure (command_line_arg,
+                         _("cannot access %s"), full_name);
++
++          f->scontext = UNKNOWN_SECURITY_CONTEXT;
++
+           if (command_line_arg)
+             return 0;
+ 
+diff --git a/tests/local.mk b/tests/local.mk
+index 2aeff2b..2441fdc 100644
+--- a/tests/local.mk
++++ b/tests/local.mk
+@@ -616,7 +616,7 @@ all_tests =					\
+   tests/ls/multihardlink.sh			\
+   tests/ls/no-arg.sh				\
+   tests/ls/no-cap.sh				\
+-  tests/ls/proc-selinux-segfault.sh		\
++  tests/ls/selinux-segfault.sh			\
+   tests/ls/quote-align.sh			\
+   tests/ls/readdir-mountpoint-inode.sh		\
+   tests/ls/recursive.sh				\
+diff --git a/tests/ls/proc-selinux-segfault.sh b/tests/ls/selinux-segfault.sh
+similarity index 77%
+rename from tests/ls/proc-selinux-segfault.sh
+rename to tests/ls/selinux-segfault.sh
+index 831a00e..e2b7ef6 100755
+--- a/tests/ls/proc-selinux-segfault.sh
++++ b/tests/ls/selinux-segfault.sh
+@@ -1,5 +1,5 @@
+ #!/bin/sh
+-# ls -l /proc/sys would segfault when built against libselinux1 2.0.15-2+b1
++# Ensure we don't segfault in selinux handling
+ 
+ # Copyright (C) 2008-2020 Free Software Foundation, Inc.
+ 
+@@ -19,9 +19,15 @@
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
+ print_ver_ ls
+ 
++# ls -l /proc/sys would segfault when built against libselinux1 2.0.15-2+b1
+ f=/proc/sys
+ test -r $f || f=.
+-
+ ls -l $f > out || fail=1
+ 
++# ls <= 8.32 would segfault when printing
++# the security context of broken symlink targets
++mkdir sedir || framework_failure_
++ln -sf missing sedir/broken || framework_failure_
++returns_ 1 ls -L -R -Z -m sedir > out || fail=1
++
+ Exit $fail
+-- 
+2.26.2
+

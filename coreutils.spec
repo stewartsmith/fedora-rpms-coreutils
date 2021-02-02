@@ -37,6 +37,9 @@ Patch7:   coreutils-8.32-expr-unmatched-par.patch
 # split: fix --number=K/N to output correct part of file (#1921246)
 Patch8:   coreutils-8.32-split-number.patch
 
+# ls: fix crash printing SELinux context for unstatable files (#1921249)
+Patch9:   coreutils-8.32-ls-scontext-crash.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
@@ -291,6 +294,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Tue Feb 02 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-17
+- ls: fix crash printing SELinux context for unstatable files (#1921249)
 - split: fix --number=K/N to output correct part of file (#1921246)
 - expr: fix invalid read with unmatched \(...\) (#1919775)
 
