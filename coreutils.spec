@@ -34,6 +34,9 @@ Patch6:   coreutils-8.32-rm-stray-skip.patch
 # expr: fix invalid read with unmatched \(...\) (#1919775)
 Patch7:   coreutils-8.32-expr-unmatched-par.patch
 
+# split: fix --number=K/N to output correct part of file (#1921246)
+Patch8:   coreutils-8.32-split-number.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 
@@ -288,6 +291,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Tue Feb 02 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-17
+- split: fix --number=K/N to output correct part of file (#1921246)
 - expr: fix invalid read with unmatched \(...\) (#1919775)
 
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org>
