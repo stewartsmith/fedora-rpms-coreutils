@@ -1,0 +1,81 @@
+From 9618fb718b75920f37e5be2049ad1d0bb5c4a28c Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Tue, 26 Jan 2021 09:23:54 -0800
+Subject: [PATCH] expr: fix bug with unmatched \(...\)
+
+Problem reported by Qiuhao Li.
+* doc/coreutils.texi (String expressions):
+Document the correct behavior, which POSIX requires.
+* src/expr.c (docolon): Treat unmatched \(...\) as empty.
+* tests/misc/expr.pl: New test.
+
+Upstream-commit: 735083ba24878075235007b4417982ad5700436d
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ doc/coreutils.texi | 14 ++++++++------
+ src/expr.c         |  9 +++++++--
+ tests/misc/expr.pl |  3 +++
+ 3 files changed, 18 insertions(+), 8 deletions(-)
+
+diff --git a/doc/coreutils.texi b/doc/coreutils.texi
+index 2382a16..5b2bb2c 100644
+--- a/doc/coreutils.texi
++++ b/doc/coreutils.texi
+@@ -13529,12 +13529,14 @@ second is considered to be a (basic, a la GNU @code{grep}) regular
+ expression, with a @code{^} implicitly prepended.  The first argument is
+ then matched against this regular expression.
+ 
+-If the match succeeds and @var{regex} uses @samp{\(} and @samp{\)}, the
+-@code{:} expression returns the part of @var{string} that matched the
+-subexpression; otherwise, it returns the number of characters matched.
+-
+-If the match fails, the @code{:} operator returns the null string if
+-@samp{\(} and @samp{\)} are used in @var{regex}, otherwise 0.
++If @var{regex} does not use @samp{\(} and @samp{\)}, the @code{:}
++expression returns the number of characters matched, or 0 if the match
++fails.
++
++If @var{regex} uses @samp{\(} and @samp{\)}, the @code{:} expression
++returns the part of @var{string} that matched the subexpression, or
++the null string if the match failed or the subexpression did not
++contribute to the match.
+ 
+ @kindex \( @r{regexp operator}
+ Only the first @samp{\( @dots{} \)} pair is relevant to the return
+diff --git a/src/expr.c b/src/expr.c
+index e134872..0616a42 100644
+--- a/src/expr.c
++++ b/src/expr.c
+@@ -721,8 +721,13 @@ docolon (VALUE *sv, VALUE *pv)
+       /* Were \(...\) used? */
+       if (re_buffer.re_nsub > 0)
+         {
+-          sv->u.s[re_regs.end[1]] = '\0';
+-          v = str_value (sv->u.s + re_regs.start[1]);
++          if (re_regs.end[1] < 0)
++            v = str_value ("");
++          else
++            {
++              sv->u.s[re_regs.end[1]] = '\0';
++              v = str_value (sv->u.s + re_regs.start[1]);
++            }
+         }
+       else
+         {
+diff --git a/tests/misc/expr.pl b/tests/misc/expr.pl
+index e45f8e7..e57f79d 100755
+--- a/tests/misc/expr.pl
++++ b/tests/misc/expr.pl
+@@ -84,6 +84,9 @@ my @Tests =
+      # In 5.94 and earlier, anchors incorrectly matched newlines.
+      ['anchor', "'a\nb' : 'a\$'", {OUT => '0'}, {EXIT => 1}],
+ 
++     # In 8.32, \( ... \) that did not match caused memory errors.
++     ['emptysub', '"a" : "\\(b\\)*"', {OUT => ''}, {EXIT => 1}],
++
+      # These tests are taken from grep/tests/bre.tests.
+      ['bre1', '"abc" : "a\\(b\\)c"', {OUT => 'b'}],
+      ['bre2', '"a(" : "a("', {OUT => '2'}],
+-- 
+2.26.2
+
