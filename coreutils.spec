@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -146,6 +146,10 @@ packaged as a single multicall binary.
 # yum obsoleting rules explained at:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1107973#c7
 Obsoletes: %{name} < 8.24-100
+
+# info doc refers to "Specifying the Time Zone" from glibc-doc (#959597)
+Recommends: glibc-doc
+
 Recommends: ncurses
 Summary:  coreutils common optional components
 %description common
@@ -293,6 +297,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Wed Feb 03 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-18
+- make coreutils-common recommend glibc-doc for info doc refs (#959597)
+
 * Tue Feb 02 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-17
 - ls: fix crash printing SELinux context for unstatable files (#1921249)
 - split: fix --number=K/N to output correct part of file (#1921246)
