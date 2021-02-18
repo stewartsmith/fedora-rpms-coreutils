@@ -1,0 +1,32 @@
+From b87f944c87ffe04db6e5476b007a8e4979de933d Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Thu, 18 Feb 2021 11:18:04 +0100
+Subject: [PATCH] stat,tail: add support for the exfat file system
+
+Bug: https://bugzilla.redhat.com/1921427
+
+* src/stat.c (human_fstype): Add case for the 'exfat' file system type.
+Fixes https://bugs.gnu.org/46613
+
+Upstream-commit: a5e0d8f387e81e854427addbbaf2504541bbf4b9
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/stat.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/stat.c b/src/stat.c
+index 8cd69da..4e1c8e3 100644
+--- a/src/stat.c
++++ b/src/stat.c
+@@ -361,6 +361,8 @@ human_fstype (STRUCT_STATVFS const *statfsbuf)
+       return "efs";
+     case S_MAGIC_EROFS_V1: /* 0xE0F5E1E2 local */
+       return "erofs";
++    case S_MAGIC_EXFAT: /* 0x2011BAB0 local */
++      return "exfat";
+     case S_MAGIC_EXFS: /* 0x45584653 local */
+       return "exfs";
+     case S_MAGIC_EXOFS: /* 0x5DF5 local */
+-- 
+2.26.2
+
