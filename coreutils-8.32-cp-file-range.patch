@@ -1,0 +1,978 @@
+From 5f2dac18054d9d9b3d84e7fba8c2a6e750d2c245 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Wed, 1 Apr 2020 12:51:34 +0100
+Subject: [PATCH 1/6] cp: ensure --attributes-only doesn't remove files
+
+* src/copy.c (copy_internal): Ensure we don't unlink the destination
+unless explicitly requested.
+* tests/cp/attr-existing.sh: Add test cases.
+* NEWS: Mention the bug fix.
+Fixes https://bugs.gnu.org/40352
+
+Upstream-commit: 7b5f0fa47cd04c84975250d5b5da7c98e097e99f
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c                |  9 +++++----
+ tests/cp/attr-existing.sh | 21 ++++++++++++++++++---
+ 2 files changed, 23 insertions(+), 7 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 6e5efc7..54601ce 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -2211,10 +2211,11 @@ copy_internal (char const *src_name, char const *dst_name,
+                    /* Never unlink dst_name when in move mode.  */
+                    && ! x->move_mode
+                    && (x->unlink_dest_before_opening
+-                       || (x->preserve_links && 1 < dst_sb.st_nlink)
+-                       || (x->dereference == DEREF_NEVER
+-                           && ! S_ISREG (src_sb.st_mode))
+-                       ))
++                       || (x->data_copy_required
++                           && ((x->preserve_links && 1 < dst_sb.st_nlink)
++                               || (x->dereference == DEREF_NEVER
++                                   && ! S_ISREG (src_sb.st_mode))))
++                      ))
+             {
+               if (unlink (dst_name) != 0 && errno != ENOENT)
+                 {
+diff --git a/tests/cp/attr-existing.sh b/tests/cp/attr-existing.sh
+index 59ce641..14fc844 100755
+--- a/tests/cp/attr-existing.sh
++++ b/tests/cp/attr-existing.sh
+@@ -19,11 +19,26 @@
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
+ print_ver_ cp
+ 
+-printf '1' > file1
+-printf '2' > file2
+-printf '2' > file2.exp
++printf '1' > file1 || framework_failure_
++printf '2' > file2 || framework_failure_
++printf '2' > file2.exp || framework_failure_
+ 
+ cp --attributes-only file1 file2 || fail=1
+ cmp file2 file2.exp || fail=1
+ 
++# coreutils v8.32 and before would remove destination files
++# if hardlinked or the source was not a regular file.
++ln file2 link2 || framework_failure_
++cp -a --attributes-only file1 file2 || fail=1
++cmp file2 file2.exp || fail=1
++
++ln -s file1 sym1 || framework_failure_
++returns_ 1 cp -a --attributes-only sym1 file2 || fail=1
++cmp file2 file2.exp || fail=1
++
++# One can still force removal though
++cp -a --remove-destination --attributes-only sym1 file2 || fail=1
++test -L file2 || fail=1
++cmp file1 file2 || fail=1
++
+ Exit $fail
+-- 
+2.26.3
+
+
+From c728747b06e71894c96d1f27434f2484af992c75 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Tue, 23 Jun 2020 19:18:04 -0700
+Subject: [PATCH 2/6] cp: refactor extent_copy
+
+* src/copy.c (extent_copy): New arg SCAN, replacing
+REQUIRE_NORMAL_COPY.  All callers changed.
+(enum scantype): New type.
+(infer_scantype): Rename from is_probably_sparse and return
+the new type.  Add args FD and SCAN.  All callers changed.
+
+Upstream-commit: 761ba28400a04ee24eefe9cd4973ec8850cd7a52
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 119 +++++++++++++++++++++++++----------------------------
+ 1 file changed, 55 insertions(+), 64 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 54601ce..f694f91 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -422,9 +422,8 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+              size_t hole_size, off_t src_total_size,
+              enum Sparse_type sparse_mode,
+              char const *src_name, char const *dst_name,
+-             bool *require_normal_copy)
++             struct extent_scan *scan)
+ {
+-  struct extent_scan scan;
+   off_t last_ext_start = 0;
+   off_t last_ext_len = 0;
+ 
+@@ -432,45 +431,25 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+      We may need this at the end, for a final ftruncate.  */
+   off_t dest_pos = 0;
+ 
+-  extent_scan_init (src_fd, &scan);
+-
+-  *require_normal_copy = false;
+   bool wrote_hole_at_eof = true;
+-  do
++  while (true)
+     {
+-      bool ok = extent_scan_read (&scan);
+-      if (! ok)
+-        {
+-          if (scan.hit_final_extent)
+-            break;
+-
+-          if (scan.initial_scan_failed)
+-            {
+-              *require_normal_copy = true;
+-              return false;
+-            }
+-
+-          error (0, errno, _("%s: failed to get extents info"),
+-                 quotef (src_name));
+-          return false;
+-        }
+-
+       bool empty_extent = false;
+-      for (unsigned int i = 0; i < scan.ei_count || empty_extent; i++)
++      for (unsigned int i = 0; i < scan->ei_count || empty_extent; i++)
+         {
+           off_t ext_start;
+           off_t ext_len;
+           off_t ext_hole_size;
+ 
+-          if (i < scan.ei_count)
++          if (i < scan->ei_count)
+             {
+-              ext_start = scan.ext_info[i].ext_logical;
+-              ext_len = scan.ext_info[i].ext_length;
++              ext_start = scan->ext_info[i].ext_logical;
++              ext_len = scan->ext_info[i].ext_length;
+             }
+           else /* empty extent at EOF.  */
+             {
+               i--;
+-              ext_start = last_ext_start + scan.ext_info[i].ext_length;
++              ext_start = last_ext_start + scan->ext_info[i].ext_length;
+               ext_len = 0;
+             }
+ 
+@@ -498,7 +477,7 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+                 {
+                   error (0, errno, _("cannot lseek %s"), quoteaf (src_name));
+                 fail:
+-                  extent_scan_free (&scan);
++                  extent_scan_free (scan);
+                   return false;
+                 }
+ 
+@@ -539,7 +518,7 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+           /* For now, do not treat FIEMAP_EXTENT_UNWRITTEN specially,
+              because that (in combination with no sync) would lead to data
+              loss at least on XFS and ext4 when using 2.6.39-rc3 kernels.  */
+-          if (0 && (scan.ext_info[i].ext_flags & FIEMAP_EXTENT_UNWRITTEN))
++          if (0 && (scan->ext_info[i].ext_flags & FIEMAP_EXTENT_UNWRITTEN))
+             {
+               empty_extent = true;
+               last_ext_len = 0;
+@@ -571,16 +550,23 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+              extents beyond the apparent size.  */
+           if (dest_pos == src_total_size)
+             {
+-              scan.hit_final_extent = true;
++              scan->hit_final_extent = true;
+               break;
+             }
+         }
+ 
+       /* Release the space allocated to scan->ext_info.  */
+-      extent_scan_free (&scan);
++      extent_scan_free (scan);
+ 
++      if (scan->hit_final_extent)
++        break;
++      if (! extent_scan_read (scan) && ! scan->hit_final_extent)
++        {
++          error (0, errno, _("%s: failed to get extents info"),
++                 quotef (src_name));
++          return false;
++        }
+     }
+-  while (! scan.hit_final_extent);
+ 
+   /* When the source file ends with a hole, we have to do a little more work,
+      since the above copied only up to and including the final extent.
+@@ -1021,16 +1007,35 @@ fchmod_or_lchmod (int desc, char const *name, mode_t mode)
+ # define HAVE_STRUCT_STAT_ST_BLOCKS 0
+ #endif
+ 
++/* Type of scan being done on the input when looking for sparseness.  */
++enum scantype
++  {
++   /* No fancy scanning; just read and write.  */
++   PLAIN_SCANTYPE,
++
++   /* Read and examine data looking for zero blocks; useful when
++      attempting to create sparse output.  */
++   ZERO_SCANTYPE,
++
++   /* Extent information is available.  */
++   EXTENT_SCANTYPE
++  };
++
+ /* Use a heuristic to determine whether stat buffer SB comes from a file
+    with sparse blocks.  If the file has fewer blocks than would normally
+    be needed for a file of its size, then at least one of the blocks in
+    the file is a hole.  In that case, return true.  */
+-static bool
+-is_probably_sparse (struct stat const *sb)
++static enum scantype
++infer_scantype (int fd, struct stat const *sb, struct extent_scan *scan)
+ {
+-  return (HAVE_STRUCT_STAT_ST_BLOCKS
+-          && S_ISREG (sb->st_mode)
+-          && ST_NBLOCKS (*sb) < sb->st_size / ST_NBLOCKSIZE);
++  if (! (HAVE_STRUCT_STAT_ST_BLOCKS
++         && S_ISREG (sb->st_mode)
++         && ST_NBLOCKS (*sb) < sb->st_size / ST_NBLOCKSIZE))
++    return PLAIN_SCANTYPE;
++
++  extent_scan_init (fd, scan);
++  extent_scan_read (scan);
++  return scan->initial_scan_failed ? ZERO_SCANTYPE : EXTENT_SCANTYPE;
+ }
+ 
+ 
+@@ -1061,6 +1066,7 @@ copy_reg (char const *src_name, char const *dst_name,
+   mode_t src_mode = src_sb->st_mode;
+   struct stat sb;
+   struct stat src_open_sb;
++  struct extent_scan scan;
+   bool return_val = true;
+   bool data_copy_required = x->data_copy_required;
+ 
+@@ -1260,23 +1266,13 @@ copy_reg (char const *src_name, char const *dst_name,
+       fdadvise (source_desc, 0, 0, FADVISE_SEQUENTIAL);
+ 
+       /* Deal with sparse files.  */
+-      bool make_holes = false;
+-      bool sparse_src = is_probably_sparse (&src_open_sb);
+-
+-      if (S_ISREG (sb.st_mode))
+-        {
+-          /* Even with --sparse=always, try to create holes only
+-             if the destination is a regular file.  */
+-          if (x->sparse_mode == SPARSE_ALWAYS)
+-            make_holes = true;
+-
+-          /* Use a heuristic to determine whether SRC_NAME contains any sparse
+-             blocks.  If the file has fewer blocks than would normally be
+-             needed for a file of its size, then at least one of the blocks in
+-             the file is a hole.  */
+-          if (x->sparse_mode == SPARSE_AUTO && sparse_src)
+-            make_holes = true;
+-        }
++      enum scantype scantype = infer_scantype (source_desc, &src_open_sb,
++                                               &scan);
++      bool make_holes
++        = (S_ISREG (sb.st_mode)
++           && (x->sparse_mode == SPARSE_ALWAYS
++               || (x->sparse_mode == SPARSE_AUTO
++                   && scantype != PLAIN_SCANTYPE)));
+ 
+       /* If not making a sparse file, try to use a more-efficient
+          buffer size.  */
+@@ -1305,10 +1301,8 @@ copy_reg (char const *src_name, char const *dst_name,
+       buf_alloc = xmalloc (buf_size + buf_alignment);
+       buf = ptr_align (buf_alloc, buf_alignment);
+ 
+-      if (sparse_src)
++      if (scantype == EXTENT_SCANTYPE)
+         {
+-          bool normal_copy_required;
+-
+           /* Perform an efficient extent-based copy, falling back to the
+              standard copy only if the initial extent scan fails.  If the
+              '--sparse=never' option is specified, write all data but use
+@@ -1316,14 +1310,11 @@ copy_reg (char const *src_name, char const *dst_name,
+           if (extent_copy (source_desc, dest_desc, buf, buf_size, hole_size,
+                            src_open_sb.st_size,
+                            make_holes ? x->sparse_mode : SPARSE_NEVER,
+-                           src_name, dst_name, &normal_copy_required))
++                           src_name, dst_name, &scan))
+             goto preserve_metadata;
+ 
+-          if (! normal_copy_required)
+-            {
+-              return_val = false;
+-              goto close_src_and_dst_desc;
+-            }
++          return_val = false;
++          goto close_src_and_dst_desc;
+         }
+ 
+       off_t n_read;
+-- 
+2.26.3
+
+
+From ed7ff81de507bef46991f4caac550f41ab65e3ed Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Wed, 24 Jun 2020 17:05:20 -0700
+Subject: [PATCH 3/6] cp: avoid copy_reg goto
+
+* src/copy.c (copy_reg): Redo to avoid label and goto.
+
+Upstream-commit: 2fcd0f3328f5181a2986905fa5469a0152c67279
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 34 +++++++++++-----------------------
+ 1 file changed, 11 insertions(+), 23 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index f694f91..b382cfa 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -1301,29 +1301,18 @@ copy_reg (char const *src_name, char const *dst_name,
+       buf_alloc = xmalloc (buf_size + buf_alignment);
+       buf = ptr_align (buf_alloc, buf_alignment);
+ 
+-      if (scantype == EXTENT_SCANTYPE)
+-        {
+-          /* Perform an efficient extent-based copy, falling back to the
+-             standard copy only if the initial extent scan fails.  If the
+-             '--sparse=never' option is specified, write all data but use
+-             any extents to read more efficiently.  */
+-          if (extent_copy (source_desc, dest_desc, buf, buf_size, hole_size,
+-                           src_open_sb.st_size,
+-                           make_holes ? x->sparse_mode : SPARSE_NEVER,
+-                           src_name, dst_name, &scan))
+-            goto preserve_metadata;
+-
+-          return_val = false;
+-          goto close_src_and_dst_desc;
+-        }
+-
+       off_t n_read;
+-      bool wrote_hole_at_eof;
+-      if (! sparse_copy (source_desc, dest_desc, buf, buf_size,
+-                         make_holes ? hole_size : 0,
+-                         x->sparse_mode == SPARSE_ALWAYS, src_name, dst_name,
+-                         UINTMAX_MAX, &n_read,
+-                         &wrote_hole_at_eof))
++      bool wrote_hole_at_eof = false;
++      if (! (scantype == EXTENT_SCANTYPE
++             ? extent_copy (source_desc, dest_desc, buf, buf_size, hole_size,
++                            src_open_sb.st_size,
++                            make_holes ? x->sparse_mode : SPARSE_NEVER,
++                            src_name, dst_name, &scan)
++             : sparse_copy (source_desc, dest_desc, buf, buf_size,
++                            make_holes ? hole_size : 0,
++                            x->sparse_mode == SPARSE_ALWAYS,
++                            src_name, dst_name, UINTMAX_MAX, &n_read,
++                            &wrote_hole_at_eof)))
+         {
+           return_val = false;
+           goto close_src_and_dst_desc;
+@@ -1336,7 +1325,6 @@ copy_reg (char const *src_name, char const *dst_name,
+         }
+     }
+ 
+-preserve_metadata:
+   if (x->preserve_timestamps)
+     {
+       struct timespec timespec[2];
+-- 
+2.26.3
+
+
+From 5631bded3a385ca0bbd77456b50767fe5580240c Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 25 Jun 2020 16:31:44 -0700
+Subject: [PATCH 4/6] cp: use SEEK_DATA/SEEK_HOLE if available
+
+If it works, prefer lseek with SEEK_DATA and SEEK_HOLE to FIEMAP,
+as lseek is simpler and more portable (will be in next POSIX).
+Problem reported in 2011 by Jeff Liu (Bug#8061).
+* NEWS: Mention this.
+* src/copy.c (lseek_copy) [SEEK_HOLE]: New function.
+(enum scantype): New constants ERROR_SCANTYPE, LSEEK_SCANTYPE.
+(union scan_inference): New type.
+(infer_scantype): Last arg is now union scan_inference *,
+not struct extent_scan *.  All callers changed.
+Prefer SEEK_HOLE to FIEMAP if both work, since
+SEEK_HOLE is simpler and more portable.
+(copy_reg): Do the fdadvise after initial scan, in case the scan
+fails.  Report an error if the initial scan fails.
+(copy_reg) [SEEK_HOLE]: Use lseek_copy if scantype says so.
+
+Upstream-commit: a6eaee501f6ec0c152abe88640203a64c390993e
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 209 ++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 198 insertions(+), 11 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index b382cfa..d88f8cf 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -416,7 +416,12 @@ write_zeros (int fd, off_t n_bytes)
+    Upon a successful copy, return true.  If the initial extent scan
+    fails, set *NORMAL_COPY_REQUIRED to true and return false.
+    Upon any other failure, set *NORMAL_COPY_REQUIRED to false and
+-   return false.  */
++   return false.
++
++   FIXME: Once we no longer need to support Linux kernel versions
++   before 3.1 (2011), this function can be retired as it is superseded
++   by lseek_copy.  That is, we no longer need extent-scan.h and can
++   remove any of the code that uses it.  */
+ static bool
+ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+              size_t hole_size, off_t src_total_size,
+@@ -595,6 +600,150 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+   return true;
+ }
+ 
++#ifdef SEEK_HOLE
++/* Perform an efficient extent copy, if possible.  This avoids
++   the overhead of detecting holes in hole-introducing/preserving
++   copy, and thus makes copying sparse files much more efficient.
++   Copy from SRC_FD to DEST_FD, using BUF (of size BUF_SIZE) for a buffer.
++   Look for holes of size HOLE_SIZE in the input.
++   The input file is of size SRC_TOTAL_SIZE.
++   Use SPARSE_MODE to determine whether to create holes in the output.
++   SRC_NAME and DST_NAME are the input and output file names.
++   Return true if successful, false (with a diagnostic) otherwise.  */
++
++static bool
++lseek_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
++            size_t hole_size, off_t ext_start, off_t src_total_size,
++            enum Sparse_type sparse_mode,
++            char const *src_name, char const *dst_name)
++{
++  off_t last_ext_start = 0;
++  off_t last_ext_len = 0;
++  off_t dest_pos = 0;
++  bool wrote_hole_at_eof = true;
++
++  while (0 <= ext_start)
++    {
++      off_t ext_end = lseek (src_fd, ext_start, SEEK_HOLE);
++      if (ext_end < 0)
++        {
++          if (errno != ENXIO)
++            goto cannot_lseek;
++          ext_end = src_total_size;
++          if (ext_end <= ext_start)
++            {
++              /* The input file grew; get its current size.  */
++              src_total_size = lseek (src_fd, 0, SEEK_END);
++              if (src_total_size < 0)
++                goto cannot_lseek;
++
++              /* If the input file shrank after growing, stop copying.  */
++              if (src_total_size <= ext_start)
++                break;
++
++              ext_end = src_total_size;
++            }
++        }
++      /* If the input file must have grown, increase its measured size.  */
++      if (src_total_size < ext_end)
++        src_total_size = ext_end;
++
++      if (lseek (src_fd, ext_start, SEEK_SET) < 0)
++        goto cannot_lseek;
++
++      wrote_hole_at_eof = false;
++      off_t ext_hole_size = ext_start - last_ext_start - last_ext_len;
++
++      if (ext_hole_size)
++        {
++          if (sparse_mode != SPARSE_NEVER)
++            {
++              if (! create_hole (dest_fd, dst_name,
++                                 sparse_mode == SPARSE_ALWAYS,
++                                 ext_hole_size))
++                return false;
++              wrote_hole_at_eof = true;
++            }
++          else
++            {
++              /* When not inducing holes and when there is a hole between
++                 the end of the previous extent and the beginning of the
++                 current one, write zeros to the destination file.  */
++              if (! write_zeros (dest_fd, ext_hole_size))
++                {
++                  error (0, errno, _("%s: write failed"),
++                         quotef (dst_name));
++                  return false;
++                }
++            }
++        }
++
++      off_t ext_len = ext_end - ext_start;
++      last_ext_start = ext_start;
++      last_ext_len = ext_len;
++
++      /* Copy this extent, looking for further opportunities to not
++         bother to write zeros unless --sparse=never, since SEEK_HOLE
++         is conservative and may miss some holes.  */
++      off_t n_read;
++      bool read_hole;
++      if ( ! sparse_copy (src_fd, dest_fd, buf, buf_size,
++                          sparse_mode == SPARSE_NEVER ? 0 : hole_size,
++                          true, src_name, dst_name, ext_len, &n_read,
++                          &read_hole))
++        return false;
++
++      dest_pos = ext_start + n_read;
++      if (n_read)
++        wrote_hole_at_eof = read_hole;
++      if (n_read < ext_len)
++        {
++          /* The input file shrank.  */
++          src_total_size = dest_pos;
++          break;
++        }
++
++      ext_start = lseek (src_fd, dest_pos, SEEK_DATA);
++      if (ext_start < 0)
++        {
++          if (errno != ENXIO)
++            goto cannot_lseek;
++          break;
++        }
++    }
++
++  /* When the source file ends with a hole, we have to do a little more work,
++     since the above copied only up to and including the final extent.
++     In order to complete the copy, we may have to insert a hole or write
++     zeros in the destination corresponding to the source file's hole-at-EOF.
++
++     In addition, if the final extent was a block of zeros at EOF and we've
++     just converted them to a hole in the destination, we must call ftruncate
++     here in order to record the proper length in the destination.  */
++  if ((dest_pos < src_total_size || wrote_hole_at_eof)
++      && ! (sparse_mode == SPARSE_NEVER
++            ? write_zeros (dest_fd, src_total_size - dest_pos)
++            : ftruncate (dest_fd, src_total_size) == 0))
++    {
++      error (0, errno, _("failed to extend %s"), quoteaf (dst_name));
++      return false;
++    }
++
++  if (sparse_mode == SPARSE_ALWAYS && dest_pos < src_total_size
++      && punch_hole (dest_fd, dest_pos, src_total_size - dest_pos) < 0)
++    {
++      error (0, errno, _("error deallocating %s"), quoteaf (dst_name));
++      return false;
++    }
++
++  return true;
++
++ cannot_lseek:
++  error (0, errno, _("cannot lseek %s"), quoteaf (src_name));
++  return false;
++}
++#endif
++
+ /* FIXME: describe */
+ /* FIXME: rewrite this to use a hash table so we avoid the quadratic
+    performance hit that's probably noticeable only on trees deeper
+@@ -1010,6 +1159,9 @@ fchmod_or_lchmod (int desc, char const *name, mode_t mode)
+ /* Type of scan being done on the input when looking for sparseness.  */
+ enum scantype
+   {
++   /* An error was found when determining scantype.  */
++   ERROR_SCANTYPE,
++
+    /* No fancy scanning; just read and write.  */
+    PLAIN_SCANTYPE,
+ 
+@@ -1017,22 +1169,44 @@ enum scantype
+       attempting to create sparse output.  */
+    ZERO_SCANTYPE,
+ 
++   /* lseek information is available.  */
++   LSEEK_SCANTYPE,
++
+    /* Extent information is available.  */
+    EXTENT_SCANTYPE
+   };
+ 
+-/* Use a heuristic to determine whether stat buffer SB comes from a file
+-   with sparse blocks.  If the file has fewer blocks than would normally
+-   be needed for a file of its size, then at least one of the blocks in
+-   the file is a hole.  In that case, return true.  */
++/* Result of infer_scantype.  */
++union scan_inference
++{
++  /* Used if infer_scantype returns LSEEK_SCANTYPE.  This is the
++     offset of the first data block, or -1 if the file has no data.  */
++  off_t ext_start;
++
++  /* Used if infer_scantype returns EXTENT_SCANTYPE.  */
++  struct extent_scan extent_scan;
++};
++
++/* Return how to scan a file with descriptor FD and stat buffer SB.
++   Store any information gathered into *SCAN.  */
+ static enum scantype
+-infer_scantype (int fd, struct stat const *sb, struct extent_scan *scan)
++infer_scantype (int fd, struct stat const *sb,
++                union scan_inference *scan_inference)
+ {
+   if (! (HAVE_STRUCT_STAT_ST_BLOCKS
+          && S_ISREG (sb->st_mode)
+          && ST_NBLOCKS (*sb) < sb->st_size / ST_NBLOCKSIZE))
+     return PLAIN_SCANTYPE;
+ 
++#ifdef SEEK_HOLE
++  scan_inference->ext_start = lseek (fd, 0, SEEK_DATA);
++  if (0 <= scan_inference->ext_start)
++    return LSEEK_SCANTYPE;
++  else if (errno != EINVAL && errno != ENOTSUP)
++    return errno == ENXIO ? LSEEK_SCANTYPE : ERROR_SCANTYPE;
++#endif
++
++  struct extent_scan *scan = &scan_inference->extent_scan;
+   extent_scan_init (fd, scan);
+   extent_scan_read (scan);
+   return scan->initial_scan_failed ? ZERO_SCANTYPE : EXTENT_SCANTYPE;
+@@ -1066,7 +1240,7 @@ copy_reg (char const *src_name, char const *dst_name,
+   mode_t src_mode = src_sb->st_mode;
+   struct stat sb;
+   struct stat src_open_sb;
+-  struct extent_scan scan;
++  union scan_inference scan_inference;
+   bool return_val = true;
+   bool data_copy_required = x->data_copy_required;
+ 
+@@ -1263,17 +1437,23 @@ copy_reg (char const *src_name, char const *dst_name,
+       size_t buf_size = io_blksize (sb);
+       size_t hole_size = ST_BLKSIZE (sb);
+ 
+-      fdadvise (source_desc, 0, 0, FADVISE_SEQUENTIAL);
+-
+       /* Deal with sparse files.  */
+       enum scantype scantype = infer_scantype (source_desc, &src_open_sb,
+-                                               &scan);
++                                               &scan_inference);
++      if (scantype == ERROR_SCANTYPE)
++        {
++          error (0, errno, _("cannot lseek %s"), quoteaf (src_name));
++          return_val = false;
++          goto close_src_and_dst_desc;
++        }
+       bool make_holes
+         = (S_ISREG (sb.st_mode)
+            && (x->sparse_mode == SPARSE_ALWAYS
+                || (x->sparse_mode == SPARSE_AUTO
+                    && scantype != PLAIN_SCANTYPE)));
+ 
++      fdadvise (source_desc, 0, 0, FADVISE_SEQUENTIAL);
++
+       /* If not making a sparse file, try to use a more-efficient
+          buffer size.  */
+       if (! make_holes)
+@@ -1307,7 +1487,14 @@ copy_reg (char const *src_name, char const *dst_name,
+              ? extent_copy (source_desc, dest_desc, buf, buf_size, hole_size,
+                             src_open_sb.st_size,
+                             make_holes ? x->sparse_mode : SPARSE_NEVER,
+-                            src_name, dst_name, &scan)
++                            src_name, dst_name, &scan_inference.extent_scan)
++#ifdef SEEK_HOLE
++             : scantype == LSEEK_SCANTYPE
++             ? lseek_copy (source_desc, dest_desc, buf, buf_size, hole_size,
++                           scan_inference.ext_start, src_open_sb.st_size,
++                           make_holes ? x->sparse_mode : SPARSE_NEVER,
++                           src_name, dst_name)
++#endif
+              : sparse_copy (source_desc, dest_desc, buf, buf_size,
+                             make_holes ? hole_size : 0,
+                             x->sparse_mode == SPARSE_ALWAYS,
+-- 
+2.26.3
+
+
+From be7466be92d779cfbece418d4de33191ae52ab4a Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Wed, 24 Mar 2021 16:06:53 +0100
+Subject: [PATCH 5/6] import the copy-file-range module from gnulib
+
+---
+ aclocal.m4            |  1 +
+ lib/config.hin        |  3 +++
+ lib/copy-file-range.c | 33 +++++++++++++++++++++++++++++++++
+ lib/gnulib.mk         | 10 ++++++++++
+ m4/copy-file-range.m4 | 36 ++++++++++++++++++++++++++++++++++++
+ m4/gnulib-comp.m4     |  8 ++++++++
+ 6 files changed, 91 insertions(+)
+ create mode 100644 lib/copy-file-range.c
+ create mode 100644 m4/copy-file-range.m4
+
+diff --git a/aclocal.m4 b/aclocal.m4
+index 713f7c5..09a7ea8 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -1163,6 +1163,7 @@ m4_include([m4/closedir.m4])
+ m4_include([m4/codeset.m4])
+ m4_include([m4/config-h.m4])
+ m4_include([m4/configmake.m4])
++m4_include([m4/copy-file-range.m4])
+ m4_include([m4/ctype.m4])
+ m4_include([m4/cycle-check.m4])
+ m4_include([m4/d-ino.m4])
+diff --git a/lib/config.hin b/lib/config.hin
+index 9769c39..bf9f9f8 100644
+--- a/lib/config.hin
++++ b/lib/config.hin
+@@ -370,6 +370,9 @@
+ /* Define to 1 when the gnulib module connect should be tested. */
+ #undef GNULIB_TEST_CONNECT
+ 
++/* Define to 1 when the gnulib module copy-file-range should be tested. */
++#undef GNULIB_TEST_COPY_FILE_RANGE
++
+ /* Define to 1 when the gnulib module dirfd should be tested. */
+ #undef GNULIB_TEST_DIRFD
+ 
+diff --git a/lib/copy-file-range.c b/lib/copy-file-range.c
+new file mode 100644
+index 0000000..069f144
+--- /dev/null
++++ b/lib/copy-file-range.c
+@@ -0,0 +1,33 @@
++/* Stub for copy_file_range
++   Copyright 2019-2020 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
++
++#include <config.h>
++
++#include <unistd.h>
++
++#include <errno.h>
++
++ssize_t
++copy_file_range (int infd, off_t *pinoff,
++                 int outfd, off_t *poutoff,
++                 size_t length, unsigned int flags)
++{
++  /* There is little need to emulate copy_file_range with read+write,
++     since programs that use copy_file_range must fall back on
++     read+write anyway.  */
++  errno = ENOSYS;
++  return -1;
++}
+diff --git a/lib/gnulib.mk b/lib/gnulib.mk
+index b3633b8..86829f3 100644
+--- a/lib/gnulib.mk
++++ b/lib/gnulib.mk
+@@ -65,6 +65,7 @@
+ #  closeout \
+ #  config-h \
+ #  configmake \
++#  copy-file-range \
+ #  crypto/md5 \
+ #  crypto/sha1 \
+ #  crypto/sha256 \
+@@ -800,6 +801,15 @@ CLEANFILES += lib/configmake.h lib/configmake.h-t
+ 
+ ## end   gnulib module configmake
+ 
++## begin gnulib module copy-file-range
++
++
++EXTRA_DIST += lib/copy-file-range.c
++
++EXTRA_lib_libcoreutils_a_SOURCES += lib/copy-file-range.c
++
++## end   gnulib module copy-file-range
++
+ ## begin gnulib module count-leading-zeros
+ 
+ lib_libcoreutils_a_SOURCES += lib/count-leading-zeros.c
+diff --git a/m4/copy-file-range.m4 b/m4/copy-file-range.m4
+new file mode 100644
+index 0000000..5c5a274
+--- /dev/null
++++ b/m4/copy-file-range.m4
+@@ -0,0 +1,36 @@
++# copy-file-range.m4
++dnl Copyright 2019-2020 Free Software Foundation, Inc.
++dnl This file is free software; the Free Software Foundation
++dnl gives unlimited permission to copy and/or distribute it,
++dnl with or without modifications, as long as this notice is preserved.
++
++AC_DEFUN([gl_FUNC_COPY_FILE_RANGE],
++[
++  AC_REQUIRE([gl_UNISTD_H_DEFAULTS])
++
++  dnl Persuade glibc <unistd.h> to declare copy_file_range.
++  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
++
++  dnl Use AC_LINK_IFELSE, rather than AC_CHECK_FUNCS or a variant,
++  dnl since we don't want AC_CHECK_FUNCS's checks for glibc stubs.
++  dnl Programs that use copy_file_range must fall back on read+write
++  dnl anyway, and there's little point to substituting the Gnulib stub
++  dnl for a glibc stub.
++  AC_CACHE_CHECK([for copy_file_range], [gl_cv_func_copy_file_range],
++    [AC_LINK_IFELSE(
++       [AC_LANG_PROGRAM(
++          [[#include <unistd.h>
++          ]],
++          [[ssize_t (*func) (int, off_t *, int, off_t, size_t, unsigned)
++              = copy_file_range;
++            return func (0, 0, 0, 0, 0, 0) & 127;
++          ]])
++       ],
++       [gl_cv_func_copy_file_range=yes],
++       [gl_cv_func_copy_file_range=no])
++    ])
++
++  if test "$gl_cv_func_copy_file_range" != yes; then
++    HAVE_COPY_FILE_RANGE=0
++  fi
++])
+diff --git a/m4/gnulib-comp.m4 b/m4/gnulib-comp.m4
+index dead90e..953e7f0 100644
+--- a/m4/gnulib-comp.m4
++++ b/m4/gnulib-comp.m4
+@@ -129,6 +129,7 @@ AC_DEFUN([gl_EARLY],
+   # Code from module configmake:
+   # Code from module connect:
+   # Code from module connect-tests:
++  # Code from module copy-file-range:
+   # Code from module count-leading-zeros:
+   # Code from module count-leading-zeros-tests:
+   # Code from module crypto/af_alg:
+@@ -977,6 +978,11 @@ AC_DEFUN([gl_INIT],
+   gl_DIRENT_MODULE_INDICATOR([closedir])
+   gl_CONFIG_H
+   gl_CONFIGMAKE_PREP
++  gl_FUNC_COPY_FILE_RANGE
++  if test $HAVE_COPY_FILE_RANGE = 0; then
++    AC_LIBOBJ([copy-file-range])
++  fi
++  gl_UNISTD_MODULE_INDICATOR([copy-file-range])
+   gl_AF_ALG
+   AC_DEFINE([GL_COMPILE_CRYPTO_STREAM], 1, [Compile Gnulib crypto stream ops.])
+   AC_REQUIRE([AC_C_RESTRICT])
+@@ -2746,6 +2752,7 @@ AC_DEFUN([gl_FILE_LIST], [
+   lib/closeout.c
+   lib/closeout.h
+   lib/copy-acl.c
++  lib/copy-file-range.c
+   lib/count-leading-zeros.c
+   lib/count-leading-zeros.h
+   lib/creat-safer.c
+@@ -3438,6 +3445,7 @@ AC_DEFUN([gl_FILE_LIST], [
+   m4/codeset.m4
+   m4/config-h.m4
+   m4/configmake.m4
++  m4/copy-file-range.m4
+   m4/ctype.m4
+   m4/cycle-check.m4
+   m4/d-ino.m4
+-- 
+2.26.3
+
+
+From 48370c95bcf7c25ce021fbd2145062d3d29ae6d5 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 25 Jun 2020 17:34:23 -0700
+Subject: [PATCH 6/6] cp: use copy_file_range if available
+
+* NEWS: Mention this.
+* bootstrap.conf (gnulib_modules): Add copy-file-range.
+* src/copy.c (sparse_copy): Try copy_file_range if not
+looking for holes.
+
+Upstream-commit: 4b04a0c3b792d27909670a81d21f2a3b3e0ea563
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ bootstrap.conf |  1 +
+ src/copy.c     | 40 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 41 insertions(+)
+
+diff --git a/bootstrap.conf b/bootstrap.conf
+index 2a342c1..7d53e28 100644
+--- a/bootstrap.conf
++++ b/bootstrap.conf
+@@ -54,6 +54,7 @@ gnulib_modules="
+   closeout
+   config-h
+   configmake
++  copy-file-range
+   crypto/md5
+   crypto/sha1
+   crypto/sha256
+diff --git a/src/copy.c b/src/copy.c
+index d88f8cf..4050f69 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -265,6 +265,46 @@ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+ {
+   *last_write_made_hole = false;
+   *total_n_read = 0;
++
++  /* If not looking for holes, use copy_file_range if available.  */
++  if (!hole_size)
++    while (max_n_read)
++      {
++        /* Copy at most COPY_MAX bytes at a time; this is min
++           (PTRDIFF_MAX, SIZE_MAX) truncated to a value that is
++           surely aligned well.  */
++        ssize_t ssize_max = TYPE_MAXIMUM (ssize_t);
++        ptrdiff_t copy_max = MIN (ssize_max, SIZE_MAX) >> 30 << 30;
++        ssize_t n_copied = copy_file_range (src_fd, NULL, dest_fd, NULL,
++                                            MIN (max_n_read, copy_max), 0);
++        if (n_copied == 0)
++          {
++            /* copy_file_range incorrectly returns 0 when reading from
++               the proc file system on the Linux kernel through at
++               least 5.6.19 (2020), so fall back on 'read' if the
++               input file seems empty.  */
++            if (*total_n_read == 0)
++              break;
++            return true;
++          }
++        if (n_copied < 0)
++          {
++            if (errno == ENOSYS || errno == EINVAL
++                || errno == EBADF || errno == EXDEV)
++              break;
++            if (errno == EINTR)
++              n_copied = 0;
++            else
++              {
++                error (0, errno, _("error copying %s to %s"),
++                       quoteaf_n (0, src_name), quoteaf_n (1, dst_name));
++                return false;
++              }
++          }
++        max_n_read -= n_copied;
++        *total_n_read += n_copied;
++      }
++
+   bool make_hole = false;
+   off_t psize = 0;
+ 
+-- 
+2.26.3
+

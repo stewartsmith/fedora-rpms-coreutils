@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -42,6 +42,9 @@ Patch9:   coreutils-8.32-ls-scontext-crash.patch
 
 # stat: add support for the exfat file system (#1921427)
 Patch10:  coreutils-8.32-stat-exfat.patch
+
+# cp: use copy_file_range if available
+Patch11:  coreutils-8.32-cp-file-range.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -300,6 +303,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Wed Mar 24 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-20
+- cp: use copy_file_range if available
+
 * Thu Feb 18 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-19
 - stat: add support for the exfat file system (#1921427)
 
