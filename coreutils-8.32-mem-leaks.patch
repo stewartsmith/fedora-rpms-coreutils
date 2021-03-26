@@ -1,0 +1,186 @@
+From be77b4ab7cb68fd2daf9de90bd75d844392788ac Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Thu, 25 Mar 2021 11:57:56 +0100
+Subject: [PATCH 1/4] ln: fix memory leaks in do_link
+
+* src/ln.c (do_link): Free memory allocated by convert_abs_rel
+on all code paths (Bug#47373).
+
+Upstream-commit: 6e98f67758260579d7d44ea5f2df4c82d28c9f58
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/ln.c | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/src/ln.c b/src/ln.c
+index ffa278e..9b52602 100644
+--- a/src/ln.c
++++ b/src/ln.c
+@@ -229,14 +229,14 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+               if (errno != ENOENT)
+                 {
+                   error (0, errno, _("failed to access %s"), quoteaf (dest));
+-                  return false;
++                  goto fail;
+                 }
+               force = false;
+             }
+           else if (S_ISDIR (dest_stats.st_mode))
+             {
+               error (0, 0, _("%s: cannot overwrite directory"), quotef (dest));
+-              return false;
++              goto fail;
+             }
+           else if (seen_file (dest_set, dest, &dest_stats))
+             {
+@@ -245,7 +245,7 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+               error (0, 0,
+                      _("will not overwrite just-created %s with %s"),
+                      quoteaf_n (0, dest), quoteaf_n (1, source));
+-              return false;
++              goto fail;
+             }
+           else
+             {
+@@ -274,7 +274,7 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+                     {
+                       error (0, 0, _("%s and %s are the same file"),
+                              quoteaf_n (0, source), quoteaf_n (1, dest));
+-                      return false;
++                      goto fail;
+                     }
+                 }
+ 
+@@ -285,7 +285,10 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+                       fprintf (stderr, _("%s: replace %s? "),
+                                program_name, quoteaf (dest));
+                       if (!yesno ())
+-                        return true;
++                        {
++                          free(rel_source);
++                          return true;
++                        }
+                     }
+ 
+                   if (backup_type != no_backups)
+@@ -304,7 +307,7 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+                            {
+                               error (0, rename_errno, _("cannot backup %s"),
+                                      quoteaf (dest));
+-                              return false;
++                              goto fail;
+                             }
+                           force = false;
+                         }
+@@ -397,6 +400,10 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+   free (backup_base);
+   free (rel_source);
+   return link_errno <= 0;
++
++fail:
++  free (rel_source);
++  return false;
+ }
+ 
+ void
+-- 
+2.26.3
+
+
+From c051578e69bd8acf8f8a469566ae34e855345532 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 25 Mar 2021 09:15:50 -0700
+Subject: [PATCH 2/4] maint: indenting
+
+* src/ln.c: Fix indenting.
+
+Upstream-commit: 8980b7c898046d899646da01c296fd15f0cced21
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/ln.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/ln.c b/src/ln.c
+index 9b52602..8881d6a 100644
+--- a/src/ln.c
++++ b/src/ln.c
+@@ -286,7 +286,7 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+                                program_name, quoteaf (dest));
+                       if (!yesno ())
+                         {
+-                          free(rel_source);
++                          free (rel_source);
+                           return true;
+                         }
+                     }
+@@ -304,7 +304,7 @@ do_link (char const *source, int destdir_fd, char const *dest_base,
+                           free (backup_base);
+                           backup_base = NULL;
+                           if (rename_errno != ENOENT)
+-                           {
++                            {
+                               error (0, rename_errno, _("cannot backup %s"),
+                                      quoteaf (dest));
+                               goto fail;
+-- 
+2.26.3
+
+
+From 0d6a4afe5bee0e397fb2fc3b205a29b32a69af9d Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 25 Mar 2021 09:16:36 -0700
+Subject: [PATCH 3/4] hostname: use puts
+
+* src/hostname.c (main): Prefer puts to printf "%s\n".
+
+Upstream-commit: c7a588ac3632aae21642d4d568497177950d36bf
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/hostname.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/hostname.c b/src/hostname.c
+index 0b5c0cf..62cc98c 100644
+--- a/src/hostname.c
++++ b/src/hostname.c
+@@ -103,7 +103,7 @@ main (int argc, char **argv)
+       hostname = xgethostname ();
+       if (hostname == NULL)
+         die (EXIT_FAILURE, errno, _("cannot determine hostname"));
+-      printf ("%s\n", hostname);
++      puts (hostname);
+     }
+ 
+   if (optind + 1 < argc)
+-- 
+2.26.3
+
+
+From 19c98d2080251edbaad9fb271aa10ad34f953500 Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Thu, 25 Mar 2021 11:20:18 -0700
+Subject: [PATCH 4/4] hostname: pacify valgrind
+
+* src/hostname.c (main) [IF_LINT]: Free hostname (Bug#47384).
+
+Upstream-commit: 4698e284f37844bc9b9f63f00eb556ccaaed5030
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/hostname.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/hostname.c b/src/hostname.c
+index 62cc98c..7210248 100644
+--- a/src/hostname.c
++++ b/src/hostname.c
+@@ -104,6 +104,7 @@ main (int argc, char **argv)
+       if (hostname == NULL)
+         die (EXIT_FAILURE, errno, _("cannot determine hostname"));
+       puts (hostname);
++      IF_LINT (free (hostname));
+     }
+ 
+   if (optind + 1 < argc)
+-- 
+2.26.3
+

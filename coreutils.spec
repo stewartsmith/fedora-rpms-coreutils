@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -45,6 +45,9 @@ Patch10:  coreutils-8.32-stat-exfat.patch
 
 # cp: use copy_file_range if available
 Patch11:  coreutils-8.32-cp-file-range.patch
+
+# hostname,ln: fix memory leaks detected by Coverity
+Patch12:  coreutils-8.32-mem-leaks.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -303,6 +306,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Fri Mar 26 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-21
+- hostname,ln: fix memory leaks detected by Coverity
+
 * Wed Mar 24 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-20
 - cp: use copy_file_range if available
 
