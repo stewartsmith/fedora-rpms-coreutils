@@ -1,0 +1,52 @@
+From 51b9a8ba0974d262e0b0f81a2078b3c7907b25ed Mon Sep 17 00:00:00 2001
+From: Paul Eggert <eggert@cs.ucla.edu>
+Date: Wed, 7 Apr 2021 17:29:59 -0700
+Subject: [PATCH] utimens: fix confusing arg type in internal func
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Although the old code was technically correct, this was accidental
+and it understandably confused Coverity.  Reported by Ondrej Dubaj in:
+https://lists.gnu.org/r/bug-tar/2021-04/msg00000.html
+* lib/utimens.c (update_timespec): Change arg type from ‘struct
+timespec *[2]’ (pointer to array of 2 pointers to timespecs) to
+‘struct timespec **’ (pointer to pointer to the first timespec in
+an array of 2 timespecs).  Although the old code happened to be
+technically correct, it was misleading and confused Coverity.
+And though the type ‘struct timespec (**)[2]’ (pointer to pointer
+to array of 2 timespecs) would perhaps be more technically
+correct, it would be almost as confusing and would require changes
+elsewhere in this file; let’s quit while we’re ahead.
+
+Upstream-commit: a3a946f670718d0dee5a7425ad5ac0a29fb46ea1
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ lib/utimens.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/lib/utimens.c b/lib/utimens.c
+index 3f53942..ea8c672 100644
+--- a/lib/utimens.c
++++ b/lib/utimens.c
+@@ -123,14 +123,14 @@ validate_timespec (struct timespec timespec[2])
+   return result + (utime_omit_count == 1);
+ }
+ 
+-/* Normalize any UTIME_NOW or UTIME_OMIT values in *TS, using stat
+-   buffer STATBUF to obtain the current timestamps of the file.  If
++/* Normalize any UTIME_NOW or UTIME_OMIT values in (*TS)[0] and (*TS)[1],
++   using STATBUF to obtain the current timestamps of the file.  If
+    both times are UTIME_NOW, set *TS to NULL (as this can avoid some
+    permissions issues).  If both times are UTIME_OMIT, return true
+    (nothing further beyond the prior collection of STATBUF is
+    necessary); otherwise return false.  */
+ static bool
+-update_timespec (struct stat const *statbuf, struct timespec *ts[2])
++update_timespec (struct stat const *statbuf, struct timespec **ts)
+ {
+   struct timespec *timespec = *ts;
+   if (timespec[0].tv_nsec == UTIME_OMIT
+-- 
+2.26.3
+
