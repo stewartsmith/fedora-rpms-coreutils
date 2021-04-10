@@ -160,7 +160,7 @@ packaged as a single multicall binary.
 Obsoletes: %{name} < 8.24-100
 
 # info doc refers to "Specifying the Time Zone" from glibc-doc (#959597)
-Recommends: glibc-doc
+Suggests: glibc-doc
 
 Summary:  coreutils common optional components
 %description common
@@ -309,6 +309,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Fri Apr 09 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-22
+- weaken the dependency on glibc-doc to reduce minimal installations
 - drop the last use of ncurses no longer needed (#1830318)
 - utimens: fix confusing arg type in internal func
 
