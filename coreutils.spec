@@ -162,7 +162,6 @@ Obsoletes: %{name} < 8.24-100
 # info doc refers to "Specifying the Time Zone" from glibc-doc (#959597)
 Recommends: glibc-doc
 
-Recommends: ncurses
 Summary:  coreutils common optional components
 %description common
 Optional though recommended components,
@@ -310,6 +309,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Fri Apr 09 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-22
+- drop the last use of ncurses no longer needed (#1830318)
 - utimens: fix confusing arg type in internal func
 
 * Fri Mar 26 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-21

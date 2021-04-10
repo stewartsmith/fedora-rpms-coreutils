@@ -22,10 +22,6 @@ if [ -z "$USER_LS_COLORS" ]; then
   [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.$TERM" ] && \
   COLORS="/etc/DIR_COLORS.$TERM"
 
-  [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS.256color" ] && \
-  [ "x`/usr/bin/tty -s && /usr/bin/tput colors 2>/dev/null`" = "x256" ] && \
-  COLORS="/etc/DIR_COLORS.256color"
-
   [ -z "$COLORS" ] && [ -e "/etc/DIR_COLORS" ] && \
   COLORS="/etc/DIR_COLORS"
 

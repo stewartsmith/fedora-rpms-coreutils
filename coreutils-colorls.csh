@@ -15,11 +15,6 @@ alias l. 'ls -d .*'
 set COLORS=/etc/DIR_COLORS
 
 if ($?TERM) then
-  if ( -e "/etc/DIR_COLORS.256color" && -e "/usr/bin/tput" ) then
-    if ( "`/usr/bin/tput colors`" == "256" ) then
-       set COLORS=/etc/DIR_COLORS.256color
-    endif
-  endif
   if ( -e "/etc/DIR_COLORS.$TERM" ) then
      set COLORS="/etc/DIR_COLORS.$TERM"
   endif
