@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 22%{?dist}
+Release: 23%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -51,6 +51,9 @@ Patch12:  coreutils-8.32-mem-leaks.patch
 
 # utimens: fix confusing arg type in internal func
 Patch13:  coreutils-8.32-coverity-utimens.patch
+
+# copy: do not refuse to copy a swap file
+Patch14:  coreutils-8.32-copy-swap.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -308,6 +311,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Tue Apr 27 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-23
+- copy: do not refuse to copy a swap file
+
 * Fri Apr 09 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-22
 - weaken the dependency on glibc-doc to reduce minimal installations
 - drop the last use of ncurses no longer needed (#1830318)
