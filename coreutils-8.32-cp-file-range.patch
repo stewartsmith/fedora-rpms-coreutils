@@ -1,7 +1,7 @@
 From 5f2dac18054d9d9b3d84e7fba8c2a6e750d2c245 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
 Date: Wed, 1 Apr 2020 12:51:34 +0100
-Subject: [PATCH 1/6] cp: ensure --attributes-only doesn't remove files
+Subject: [PATCH 1/7] cp: ensure --attributes-only doesn't remove files
 
 * src/copy.c (copy_internal): Ensure we don't unlink the destination
 unless explicitly requested.
@@ -77,7 +77,7 @@ index 59ce641..14fc844 100755
 From c728747b06e71894c96d1f27434f2484af992c75 Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Tue, 23 Jun 2020 19:18:04 -0700
-Subject: [PATCH 2/6] cp: refactor extent_copy
+Subject: [PATCH 2/7] cp: refactor extent_copy
 
 * src/copy.c (extent_copy): New arg SCAN, replacing
 REQUIRE_NORMAL_COPY.  All callers changed.
@@ -320,7 +320,7 @@ index 54601ce..f694f91 100644
 From ed7ff81de507bef46991f4caac550f41ab65e3ed Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Wed, 24 Jun 2020 17:05:20 -0700
-Subject: [PATCH 3/6] cp: avoid copy_reg goto
+Subject: [PATCH 3/7] cp: avoid copy_reg goto
 
 * src/copy.c (copy_reg): Redo to avoid label and goto.
 
@@ -390,7 +390,7 @@ index f694f91..b382cfa 100644
 From 5631bded3a385ca0bbd77456b50767fe5580240c Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 25 Jun 2020 16:31:44 -0700
-Subject: [PATCH 4/6] cp: use SEEK_DATA/SEEK_HOLE if available
+Subject: [PATCH 4/7] cp: use SEEK_DATA/SEEK_HOLE if available
 
 If it works, prefer lseek with SEEK_DATA and SEEK_HOLE to FIEMAP,
 as lseek is simpler and more portable (will be in next POSIX).
@@ -701,7 +701,7 @@ index b382cfa..d88f8cf 100644
 From be7466be92d779cfbece418d4de33191ae52ab4a Mon Sep 17 00:00:00 2001
 From: Kamil Dudka <kdudka@redhat.com>
 Date: Wed, 24 Mar 2021 16:06:53 +0100
-Subject: [PATCH 5/6] import the copy-file-range module from gnulib
+Subject: [PATCH 5/7] import the copy-file-range module from gnulib
 
 ---
  aclocal.m4            |  1 +
@@ -896,7 +896,7 @@ index dead90e..953e7f0 100644
 From 48370c95bcf7c25ce021fbd2145062d3d29ae6d5 Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 25 Jun 2020 17:34:23 -0700
-Subject: [PATCH 6/6] cp: use copy_file_range if available
+Subject: [PATCH 6/7] cp: use copy_file_range if available
 
 * NEWS: Mention this.
 * bootstrap.conf (gnulib_modules): Add copy-file-range.
@@ -975,4 +975,110 @@ index d88f8cf..4050f69 100644
  
 -- 
 2.26.3
+
+
+From cd7c7a6b5ad89ef0a61722552d532901fc1bed05 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Sun, 2 May 2021 21:27:17 +0100
+Subject: [PATCH 7/7] copy: ensure we enforce --reflink=never
+
+* src/copy.c (sparse_copy): Don't use copy_file_range()
+with --reflink=never as copy_file_range() may implicitly
+use acceleration techniques like reflinking.
+(extent_copy): Pass through whether we allow reflinking.
+(lseek_copy): Likewise.
+Fixes https://bugs.gnu.org/48164
+
+Upstream-commit: ea9af99234031ab8d5169c8a669434e2a6b4f864
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 4050f69..0337538 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -258,7 +258,7 @@ create_hole (int fd, char const *name, bool punch_holes, off_t size)
+    bytes read.  */
+ static bool
+ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+-             size_t hole_size, bool punch_holes,
++             size_t hole_size, bool punch_holes, bool allow_reflink,
+              char const *src_name, char const *dst_name,
+              uintmax_t max_n_read, off_t *total_n_read,
+              bool *last_write_made_hole)
+@@ -266,8 +266,9 @@ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+   *last_write_made_hole = false;
+   *total_n_read = 0;
+ 
+-  /* If not looking for holes, use copy_file_range if available.  */
+-  if (!hole_size)
++  /* If not looking for holes, use copy_file_range if available,
++     but don't use if reflink disallowed as that may be implicit.  */
++  if ((! hole_size) && allow_reflink)
+     while (max_n_read)
+       {
+         /* Copy at most COPY_MAX bytes at a time; this is min
+@@ -466,6 +467,7 @@ static bool
+ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+              size_t hole_size, off_t src_total_size,
+              enum Sparse_type sparse_mode,
++             bool allow_reflink,
+              char const *src_name, char const *dst_name,
+              struct extent_scan *scan)
+ {
+@@ -579,8 +581,8 @@ extent_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+ 
+               if ( ! sparse_copy (src_fd, dest_fd, buf, buf_size,
+                                   sparse_mode == SPARSE_ALWAYS ? hole_size: 0,
+-                                  true, src_name, dst_name, ext_len, &n_read,
+-                                  &read_hole))
++                                  true, allow_reflink, src_name, dst_name,
++                                  ext_len, &n_read, &read_hole))
+                 goto fail;
+ 
+               dest_pos = ext_start + n_read;
+@@ -655,6 +657,7 @@ static bool
+ lseek_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+             size_t hole_size, off_t ext_start, off_t src_total_size,
+             enum Sparse_type sparse_mode,
++            bool allow_reflink,
+             char const *src_name, char const *dst_name)
+ {
+   off_t last_ext_start = 0;
+@@ -729,8 +732,8 @@ lseek_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+       bool read_hole;
+       if ( ! sparse_copy (src_fd, dest_fd, buf, buf_size,
+                           sparse_mode == SPARSE_NEVER ? 0 : hole_size,
+-                          true, src_name, dst_name, ext_len, &n_read,
+-                          &read_hole))
++                          true, allow_reflink, src_name, dst_name,
++                          ext_len, &n_read, &read_hole))
+         return false;
+ 
+       dest_pos = ext_start + n_read;
+@@ -1527,17 +1530,20 @@ copy_reg (char const *src_name, char const *dst_name,
+              ? extent_copy (source_desc, dest_desc, buf, buf_size, hole_size,
+                             src_open_sb.st_size,
+                             make_holes ? x->sparse_mode : SPARSE_NEVER,
++                            x->reflink_mode != REFLINK_NEVER,
+                             src_name, dst_name, &scan_inference.extent_scan)
+ #ifdef SEEK_HOLE
+              : scantype == LSEEK_SCANTYPE
+              ? lseek_copy (source_desc, dest_desc, buf, buf_size, hole_size,
+                            scan_inference.ext_start, src_open_sb.st_size,
+                            make_holes ? x->sparse_mode : SPARSE_NEVER,
++                           x->reflink_mode != REFLINK_NEVER,
+                            src_name, dst_name)
+ #endif
+              : sparse_copy (source_desc, dest_desc, buf, buf_size,
+                             make_holes ? hole_size : 0,
+                             x->sparse_mode == SPARSE_ALWAYS,
++                            x->reflink_mode != REFLINK_NEVER,
+                             src_name, dst_name, UINTMAX_MAX, &n_read,
+                             &wrote_hole_at_eof)))
+         {
+-- 
+2.30.2
 
