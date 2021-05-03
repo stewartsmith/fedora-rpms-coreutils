@@ -312,7 +312,7 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
 %changelog
 * Mon May 03 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-24
-- copy: ensure we enforce --reflink=never
+- copy: ensure we enforce --reflink=never (#1956080)
 
 * Tue Apr 27 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-23
 - copy: do not refuse to copy a swap file
