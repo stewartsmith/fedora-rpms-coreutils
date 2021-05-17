@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 24%{?dist}
+Release: 26%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -308,6 +308,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Mon May 17 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-26
+- cp: pick additional copy_file_range()-related fixes from upstream
+
 * Mon May 03 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-24
 - copy: ensure we enforce --reflink=never (#1956080)
 

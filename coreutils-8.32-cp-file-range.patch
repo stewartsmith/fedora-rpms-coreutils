@@ -1,7 +1,7 @@
 From 5f2dac18054d9d9b3d84e7fba8c2a6e750d2c245 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
 Date: Wed, 1 Apr 2020 12:51:34 +0100
-Subject: [PATCH 1/8] cp: ensure --attributes-only doesn't remove files
+Subject: [PATCH 01/12] cp: ensure --attributes-only doesn't remove files
 
 * src/copy.c (copy_internal): Ensure we don't unlink the destination
 unless explicitly requested.
@@ -77,7 +77,7 @@ index 59ce641..14fc844 100755
 From c728747b06e71894c96d1f27434f2484af992c75 Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Tue, 23 Jun 2020 19:18:04 -0700
-Subject: [PATCH 2/8] cp: refactor extent_copy
+Subject: [PATCH 02/12] cp: refactor extent_copy
 
 * src/copy.c (extent_copy): New arg SCAN, replacing
 REQUIRE_NORMAL_COPY.  All callers changed.
@@ -320,7 +320,7 @@ index 54601ce..f694f91 100644
 From ed7ff81de507bef46991f4caac550f41ab65e3ed Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Wed, 24 Jun 2020 17:05:20 -0700
-Subject: [PATCH 3/8] cp: avoid copy_reg goto
+Subject: [PATCH 03/12] cp: avoid copy_reg goto
 
 * src/copy.c (copy_reg): Redo to avoid label and goto.
 
@@ -390,7 +390,7 @@ index f694f91..b382cfa 100644
 From 5631bded3a385ca0bbd77456b50767fe5580240c Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 25 Jun 2020 16:31:44 -0700
-Subject: [PATCH 4/8] cp: use SEEK_DATA/SEEK_HOLE if available
+Subject: [PATCH 04/12] cp: use SEEK_DATA/SEEK_HOLE if available
 
 If it works, prefer lseek with SEEK_DATA and SEEK_HOLE to FIEMAP,
 as lseek is simpler and more portable (will be in next POSIX).
@@ -701,7 +701,7 @@ index b382cfa..d88f8cf 100644
 From be7466be92d779cfbece418d4de33191ae52ab4a Mon Sep 17 00:00:00 2001
 From: Kamil Dudka <kdudka@redhat.com>
 Date: Wed, 24 Mar 2021 16:06:53 +0100
-Subject: [PATCH 5/8] import the copy-file-range module from gnulib
+Subject: [PATCH 05/12] import the copy-file-range module from gnulib
 
 ---
  aclocal.m4            |  1 +
@@ -896,7 +896,7 @@ index dead90e..953e7f0 100644
 From 48370c95bcf7c25ce021fbd2145062d3d29ae6d5 Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 25 Jun 2020 17:34:23 -0700
-Subject: [PATCH 6/8] cp: use copy_file_range if available
+Subject: [PATCH 06/12] cp: use copy_file_range if available
 
 * NEWS: Mention this.
 * bootstrap.conf (gnulib_modules): Add copy-file-range.
@@ -980,7 +980,7 @@ index d88f8cf..4050f69 100644
 From 23ea1ba463d33e268f35847059e637a5935e4581 Mon Sep 17 00:00:00 2001
 From: Zorro Lang <zlang@redhat.com>
 Date: Mon, 26 Apr 2021 17:25:18 +0200
-Subject: [PATCH 7/8] copy: do not refuse to copy a swap file
+Subject: [PATCH 07/12] copy: do not refuse to copy a swap file
 
 * src/copy.c (sparse_copy): Fallback to read() if copy_file_range()
 fails with ETXTBSY.  Otherwise it would be impossible to copy files
@@ -1013,7 +1013,7 @@ index 4050f69..1798bb7 100644
 From cd7c7a6b5ad89ef0a61722552d532901fc1bed05 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
 Date: Sun, 2 May 2021 21:27:17 +0100
-Subject: [PATCH 8/8] copy: ensure we enforce --reflink=never
+Subject: [PATCH 08/12] copy: ensure we enforce --reflink=never
 
 * src/copy.c (sparse_copy): Don't use copy_file_range()
 with --reflink=never as copy_file_range() may implicitly
@@ -1114,4 +1114,226 @@ index 4050f69..0337538 100644
          {
 -- 
 2.30.2
+
+
+From 7978f1de88dcdb17b67db9268038930e9c71154f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Sat, 8 May 2021 17:18:54 +0100
+Subject: [PATCH 09/12] copy: handle ENOTSUP from copy_file_range()
+
+* src/copy.c (sparse_copy): Ensure we fall back to
+a standard copy if copy_file_range() returns ENOTSUP.
+This generally is best checked when checking ENOSYS,
+but it also seems to be a practical concern on Centos 7,
+as a quick search gave https://bugzilla.redhat.com/1840284
+
+Upstream-commit: 8ec0d1799e19a079b8a661c6bb69f6c58e52f1aa
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 9977193..e3977cd 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -290,8 +290,9 @@ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+           }
+         if (n_copied < 0)
+           {
+-            if (errno == ENOSYS || errno == EINVAL
+-                || errno == EBADF || errno == EXDEV || errno == ETXTBSY)
++            if (errno == ENOSYS || is_ENOTSUP (errno)
++                || errno == EINVAL || errno == EBADF
++                || errno == EXDEV || errno == ETXTBSY)
+               break;
+             if (errno == EINTR)
+               n_copied = 0;
+-- 
+2.31.1
+
+
+From d8d3edbfc13ff13c185f23436209b788f906aa41 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Sun, 9 May 2021 21:55:22 +0100
+Subject: [PATCH 10/12] copy: handle EOPNOTSUPP from SEEK_DATA
+
+* src/copy.c (infer_scantype): Ensure we don't error out
+if SEEK_DATA returns EOPNOTSUPP, on systems where this value
+is distinct from ENOTSUP.  Generally both of these should be checked.
+
+Upstream-commit: 017877bd088284d515753d78b81ca6e6a88c1350
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index e3977cd..de8030d 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -1246,7 +1246,7 @@ infer_scantype (int fd, struct stat const *sb,
+   scan_inference->ext_start = lseek (fd, 0, SEEK_DATA);
+   if (0 <= scan_inference->ext_start)
+     return LSEEK_SCANTYPE;
+-  else if (errno != EINVAL && errno != ENOTSUP)
++  else if (errno != EINVAL && !is_ENOTSUP (errno))
+     return errno == ENXIO ? LSEEK_SCANTYPE : ERROR_SCANTYPE;
+ #endif
+ 
+-- 
+2.31.1
+
+
+From 1daf8c0fc9a5766c22b7ea84bea8c88c86a0c495 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Sat, 8 May 2021 19:23:20 +0100
+Subject: [PATCH 11/12] copy: handle system security config issues with
+ copy_file_range()
+
+* src/copy.c (sparse_copy): Upon EPERM from copy_file_range(),
+fall back to a standard copy, which will give a more accurate
+error as to whether the issue is with the source or destination.
+Also this will avoid the issue where seccomp or apparmor are
+not configured to handle copy_file_range(), in which case
+the fall back standard copy would succeed without issue.
+This specific issue with seccomp was noticed for example in:
+https://github.com/golang/go/issues/40900
+
+Upstream-commit: 2e66e1732fced7af20fa76c60e636d39a1767d48
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/copy.c b/src/copy.c
+index de8030d..62eec7b 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -294,6 +294,15 @@ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+                 || errno == EINVAL || errno == EBADF
+                 || errno == EXDEV || errno == ETXTBSY)
+               break;
++
++            /* copy_file_range might not be enabled in seccomp filters,
++               so retry with a standard copy.  EPERM can also occur
++               for immutable files, but that would only be in the edge case
++               where the file is made immutable after creating/truncating,
++               in which case the (more accurate) error is still shown.  */
++            if (errno == EPERM && *total_n_read == 0)
++              break;
++
+             if (errno == EINTR)
+               n_copied = 0;
+             else
+-- 
+2.31.1
+
+
+From 42c9e598f61ba6bc27a615e39e40023a676a523b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Wed, 12 May 2021 23:47:38 +0100
+Subject: [PATCH 12/12] copy: disallow copy_file_range() on Linux kernels
+ before 5.3
+
+copy_file_range() before Linux kernel release 5.3 had many issues,
+as described at https://lwn.net/Articles/789527/, which was
+referenced from https://lwn.net/Articles/846403/; a more general
+article discussing the generality of copy_file_range().
+Linux kernel 5.3 was released in September 2019, which is new enough
+that we need to actively avoid older kernels.
+
+* src/copy.c (functional_copy_file_range): A new function
+that returns false for Linux kernels before version 5.3.
+(sparse_copy): Call this new function to gate use of
+copy_file_range().
+
+Upstream-commit: ba5e6885d2c255648cddb87b4e795659c1990374
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 47 +++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 45 insertions(+), 2 deletions(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 62eec7b..2e1699b 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -21,6 +21,7 @@
+ #include <assert.h>
+ #include <sys/ioctl.h>
+ #include <sys/types.h>
++#include <sys/utsname.h>
+ #include <selinux/selinux.h>
+ 
+ #if HAVE_HURD_H
+@@ -64,6 +65,7 @@
+ #include "write-any-file.h"
+ #include "areadlink.h"
+ #include "yesno.h"
++#include "xstrtol.h"
+ #include "selinux.h"
+ 
+ #if USE_XATTR
+@@ -244,6 +246,47 @@ create_hole (int fd, char const *name, bool punch_holes, off_t size)
+   return true;
+ }
+ 
++/* copy_file_range() before Linux kernel release 5.3 had many issues,
++   as described at https://lwn.net/Articles/789527/,
++   so return FALSE for Linux kernels earlier than that.
++   This function can be removed when such kernels (released before Sep 2019)
++   are no longer a consideration.  */
++
++static bool
++functional_copy_file_range (void)
++{
++#ifdef __linux__
++  static int version_allowed = -1;
++
++  if (version_allowed == -1)
++    version_allowed = 0;
++  else
++    return version_allowed;
++
++  struct utsname name;
++  if (uname (&name) == -1)
++    return version_allowed;
++
++  char *p = name.release;
++  uintmax_t ver[2] = {0, 0};
++  size_t iver = 0;
++
++  do
++    {
++      strtol_error err = xstrtoumax (p, &p, 10, &ver[iver], NULL);
++      if (err != LONGINT_OK || *p++ != '.')
++        break;
++    }
++  while (++iver < ARRAY_CARDINALITY (ver));
++
++  version_allowed = (ver[0] > 5 || (ver[0] == 5 && ver[1] >= 3));
++
++  return version_allowed;
++#else
++  return true;
++#endif
++
++}
+ 
+ /* Copy the regular file open on SRC_FD/SRC_NAME to DST_FD/DST_NAME,
+    honoring the MAKE_HOLES setting and using the BUF_SIZE-byte buffer
+@@ -266,9 +309,9 @@ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+   *last_write_made_hole = false;
+   *total_n_read = 0;
+ 
+-  /* If not looking for holes, use copy_file_range if available,
++  /* If not looking for holes, use copy_file_range if functional,
+      but don't use if reflink disallowed as that may be implicit.  */
+-  if ((! hole_size) && allow_reflink)
++  if ((! hole_size) && allow_reflink && functional_copy_file_range ())
+     while (max_n_read)
+       {
+         /* Copy at most COPY_MAX bytes at a time; this is min
+-- 
+2.31.1
 
