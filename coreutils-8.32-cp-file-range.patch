@@ -1,7 +1,7 @@
 From 5f2dac18054d9d9b3d84e7fba8c2a6e750d2c245 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
 Date: Wed, 1 Apr 2020 12:51:34 +0100
-Subject: [PATCH 1/7] cp: ensure --attributes-only doesn't remove files
+Subject: [PATCH 1/8] cp: ensure --attributes-only doesn't remove files
 
 * src/copy.c (copy_internal): Ensure we don't unlink the destination
 unless explicitly requested.
@@ -77,7 +77,7 @@ index 59ce641..14fc844 100755
 From c728747b06e71894c96d1f27434f2484af992c75 Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Tue, 23 Jun 2020 19:18:04 -0700
-Subject: [PATCH 2/7] cp: refactor extent_copy
+Subject: [PATCH 2/8] cp: refactor extent_copy
 
 * src/copy.c (extent_copy): New arg SCAN, replacing
 REQUIRE_NORMAL_COPY.  All callers changed.
@@ -320,7 +320,7 @@ index 54601ce..f694f91 100644
 From ed7ff81de507bef46991f4caac550f41ab65e3ed Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Wed, 24 Jun 2020 17:05:20 -0700
-Subject: [PATCH 3/7] cp: avoid copy_reg goto
+Subject: [PATCH 3/8] cp: avoid copy_reg goto
 
 * src/copy.c (copy_reg): Redo to avoid label and goto.
 
@@ -390,7 +390,7 @@ index f694f91..b382cfa 100644
 From 5631bded3a385ca0bbd77456b50767fe5580240c Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 25 Jun 2020 16:31:44 -0700
-Subject: [PATCH 4/7] cp: use SEEK_DATA/SEEK_HOLE if available
+Subject: [PATCH 4/8] cp: use SEEK_DATA/SEEK_HOLE if available
 
 If it works, prefer lseek with SEEK_DATA and SEEK_HOLE to FIEMAP,
 as lseek is simpler and more portable (will be in next POSIX).
@@ -701,7 +701,7 @@ index b382cfa..d88f8cf 100644
 From be7466be92d779cfbece418d4de33191ae52ab4a Mon Sep 17 00:00:00 2001
 From: Kamil Dudka <kdudka@redhat.com>
 Date: Wed, 24 Mar 2021 16:06:53 +0100
-Subject: [PATCH 5/7] import the copy-file-range module from gnulib
+Subject: [PATCH 5/8] import the copy-file-range module from gnulib
 
 ---
  aclocal.m4            |  1 +
@@ -718,7 +718,7 @@ diff --git a/aclocal.m4 b/aclocal.m4
 index 713f7c5..09a7ea8 100644
 --- a/aclocal.m4
 +++ b/aclocal.m4
-@@ -1163,6 +1163,7 @@ m4_include([m4/closedir.m4])
+@@ -1165,6 +1165,7 @@ m4_include([m4/closedir.m4])
  m4_include([m4/codeset.m4])
  m4_include([m4/config-h.m4])
  m4_include([m4/configmake.m4])
@@ -896,7 +896,7 @@ index dead90e..953e7f0 100644
 From 48370c95bcf7c25ce021fbd2145062d3d29ae6d5 Mon Sep 17 00:00:00 2001
 From: Paul Eggert <eggert@cs.ucla.edu>
 Date: Thu, 25 Jun 2020 17:34:23 -0700
-Subject: [PATCH 6/7] cp: use copy_file_range if available
+Subject: [PATCH 6/8] cp: use copy_file_range if available
 
 * NEWS: Mention this.
 * bootstrap.conf (gnulib_modules): Add copy-file-range.
@@ -977,10 +977,43 @@ index d88f8cf..4050f69 100644
 2.26.3
 
 
+From 23ea1ba463d33e268f35847059e637a5935e4581 Mon Sep 17 00:00:00 2001
+From: Zorro Lang <zlang@redhat.com>
+Date: Mon, 26 Apr 2021 17:25:18 +0200
+Subject: [PATCH 7/8] copy: do not refuse to copy a swap file
+
+* src/copy.c (sparse_copy): Fallback to read() if copy_file_range()
+fails with ETXTBSY.  Otherwise it would be impossible to copy files
+that are being used as swap.  This used to work before introducing
+the support for copy_file_range() in coreutils.  (Bug#48036)
+
+Upstream-commit: 785478013b416cde50794be35475c0c4fdbb48b4
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/copy.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/copy.c b/src/copy.c
+index 4050f69..1798bb7 100644
+--- a/src/copy.c
++++ b/src/copy.c
+@@ -290,7 +290,7 @@ sparse_copy (int src_fd, int dest_fd, char *buf, size_t buf_size,
+         if (n_copied < 0)
+           {
+             if (errno == ENOSYS || errno == EINVAL
+-                || errno == EBADF || errno == EXDEV)
++                || errno == EBADF || errno == EXDEV || errno == ETXTBSY)
+               break;
+             if (errno == EINTR)
+               n_copied = 0;
+-- 
+2.31.1
+
+
 From cd7c7a6b5ad89ef0a61722552d532901fc1bed05 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
 Date: Sun, 2 May 2021 21:27:17 +0100
-Subject: [PATCH 7/7] copy: ensure we enforce --reflink=never
+Subject: [PATCH 8/8] copy: ensure we enforce --reflink=never
 
 * src/copy.c (sparse_copy): Don't use copy_file_range()
 with --reflink=never as copy_file_range() may implicitly
