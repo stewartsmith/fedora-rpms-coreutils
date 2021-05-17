@@ -52,6 +52,9 @@ Patch12:  coreutils-8.32-mem-leaks.patch
 # utimens: fix confusing arg type in internal func
 Patch13:  coreutils-8.32-coverity-utimens.patch
 
+# fix false positives in the upstrem test-suite (#1960792)
+Patch14:  coreutils-8.32-tests-false-positives.patch
+
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
 

@@ -1,0 +1,99 @@
+From fc6318841f008dadc1e7c93e539f10d24aa83e90 Mon Sep 17 00:00:00 2001
+From: Bernhard Voelker <mail@bernhard-voelker.de>
+Date: Wed, 21 Apr 2021 00:12:00 +0200
+Subject: [PATCH 1/2] tests: fix FP in ls/stat-free-color.sh
+
+On newer systems like Fedora 34 and openSUSE Tumbleweed, ls(1) calls
+newfstatat(STDOUT_FILENO, ...), but only when there is something to
+output.
+
+* tests/ls/stat-free-color.sh: Add -a option to the reference invocation
+of ls, thus enforcing something gets output.
+
+Upstream-commit: b7091093bb6505c33279f9bc940b2e94763a6e5d
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ tests/ls/stat-free-color.sh | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/tests/ls/stat-free-color.sh b/tests/ls/stat-free-color.sh
+index 00942f7..87bed1c 100755
+--- a/tests/ls/stat-free-color.sh
++++ b/tests/ls/stat-free-color.sh
+@@ -56,12 +56,14 @@ eval $(dircolors -b color-without-stat)
+ # The system may perform additional stat-like calls before main.
+ # Furthermore, underlying library functions may also implicitly
+ # add an extra stat call, e.g. opendir since glibc-2.21-360-g46f894d.
+-# To avoid counting those, first get a baseline count for running
+-# ls with one empty directory argument.  Then, compare that with the
+-# invocation under test.
++# Finally, ls(1) makes a stat call for stdout, but only in the case
++# when there is something to output.
++# To get the comparison right, first get a baseline count for running
++# 'ls -a' with one empty directory argument.  Then, compare that with
++# the invocation under test.
+ mkdir d || framework_failure_
+ 
+-strace -q -o log1 -e $stats ls --color=always d || fail=1
++strace -q -o log1 -e $stats ls -a --color=always d || fail=1
+ n_stat1=$(grep -vF '+++' log1 | wc -l) || framework_failure_
+ 
+ test $n_stat1 = 0 \
+-- 
+2.31.1
+
+
+From c16ca58f17a088e925c0d1c4015c48332c380a00 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?P=C3=A1draig=20Brady?= <P@draigBrady.com>
+Date: Sun, 9 May 2021 23:41:00 +0100
+Subject: [PATCH 2/2] tests: fix tests/cp/sparse-2.sh false failure on some
+ systems
+
+* tests/cp/sparse-2.sh: Double check cp --sparse=always,
+with dd conv=sparse, in the case where the former didn't
+create a sparse file.  Now that this test is being newly run
+on macos, we're seeing a failure due to seek() not creating
+holes on apfs unless the size is >= 16MiB.
+
+Upstream-commit: 6b499720fecae935dc00e236d6aefe94d9010482
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ tests/cp/fiemap-2.sh | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/tests/cp/fiemap-2.sh b/tests/cp/fiemap-2.sh
+index 548a376..e20ce54 100755
+--- a/tests/cp/fiemap-2.sh
++++ b/tests/cp/fiemap-2.sh
+@@ -17,7 +17,7 @@
+ # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ 
+ . "${srcdir=.}/tests/init.sh"; path_prepend_ ./src
+-print_ver_ cp
++print_ver_ cp stat dd
+ 
+ # Require a fiemap-enabled FS.
+ touch fiemap_chk # check a file rather than current dir for best coverage
+@@ -46,10 +46,17 @@ dd bs=1k seek=1 of=k count=255 < /dev/zero || framework_failure_
+ 
+ # cp should detect the all-zero blocks and convert some of them to holes.
+ # How many it detects/converts currently depends on io_blksize.
+-# Currently, on my F14/ext4 desktop, this K starts off with size 256KiB,
++# Currently, on my F14/ext4 desktop, this K file starts off with size 256KiB,
+ # (note that the K in the preceding test starts off with size 4KiB).
+ # cp from coreutils-8.9 with --sparse=always reduces the size to 32KiB.
+ cp --sparse=always k k2 || fail=1
+-test $(stat -c %b k2) -lt $(stat -c %b k) || fail=1
++if test $(stat -c %b k2) -ge $(stat -c %b k); then
++  # If not sparse, then double check by creating with dd
++  # as we're not guaranteed that seek will create a hole.
++  # apfs on darwin 19.2.0 for example was seen to not to create holes < 16MiB.
++  hole_size=$(stat -c %o k2) || framework_failure_
++  dd if=k of=k2.dd bs=$hole_size conv=sparse || framework_failure_
++  test $(stat -c %b k2) -eq $(stat -c %b k2.dd) || fail=1
++fi
+ 
+ Exit $fail
+-- 
+2.31.1
+
