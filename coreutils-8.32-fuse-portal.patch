@@ -1,0 +1,38 @@
+From 602fb566468d3837b7871c17a0fab1a20228d119 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Mon, 7 Jun 2021 14:43:03 +0200
+Subject: [PATCH] mountlist: recognize fuse.portal as dummy file system
+
+This was originally proposed at:
+
+    https://lists.gnu.org/archive/html/bug-gnulib/2021-02/msg00053.html
+
+As the full review might take some time, would it be possible to apply
+at least the part related to fuse.portal file systems?  They started to
+cause problems recently:
+
+    https://bugs.launchpad.net/ubuntu/+source/xdg-desktop-portal/+bug/1905623
+    https://github.com/muesli/duf/issues/35
+    https://bugzilla.redhat.com/1913358
+
+Upstream-commit: 9a38d499ca16f2f4304992eb1ab0894cd0b478e1
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ lib/mountlist.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/mountlist.c b/lib/mountlist.c
+index e0227b7..e5f6b07 100644
+--- a/lib/mountlist.c
++++ b/lib/mountlist.c
+@@ -170,6 +170,7 @@
+    || strcmp (Fs_type, "debugfs") == 0          \
+    || strcmp (Fs_type, "devpts") == 0           \
+    || strcmp (Fs_type, "fusectl") == 0          \
++   || strcmp (Fs_type, "fuse.portal") == 0      \
+    || strcmp (Fs_type, "mqueue") == 0           \
+    || strcmp (Fs_type, "rpc_pipefs") == 0       \
+    || strcmp (Fs_type, "sysfs") == 0            \
+-- 
+2.31.1
+

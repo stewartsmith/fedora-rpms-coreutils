@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 26%{?dist}
+Release: 27%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -54,6 +54,9 @@ Patch13:  coreutils-8.32-coverity-utimens.patch
 
 # fix false positives in the upstrem test-suite (#1960792)
 Patch14:  coreutils-8.32-tests-false-positives.patch
+
+# mountlist: recognize fuse.portal as dummy file system (#1913358)
+Patch15:  coreutils-8.32-fuse-portal.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -311,6 +314,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Tue Jun 08 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-27
+- mountlist: recognize fuse.portal as dummy file system (#1913358)
+
 * Mon May 17 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-26
 - cp: pick additional copy_file_range()-related fixes from upstream
 
