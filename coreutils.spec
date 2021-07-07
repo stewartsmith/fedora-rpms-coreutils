@@ -1,7 +1,7 @@
 Summary: A set of basic GNU tools commonly used in shell scripts
 Name:    coreutils
 Version: 8.32
-Release: 28%{?dist}
+Release: 30%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
@@ -60,6 +60,9 @@ Patch15:  coreutils-8.32-fuse-portal.patch
 
 # tail: fix stack out-of-bounds write with --follow
 Patch16:  coreutils-8.32-tail-use-poll.patch
+
+# df: fix duplicated remote entries due to bind mounts (#1979814)
+Patch17:  coreutils-8.32-df-duplicated-entries.patch
 
 # disable the test-lock gnulib test prone to deadlock
 Patch100: coreutils-8.26-test-lock.patch
@@ -317,6 +320,9 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 %license COPYING
 
 %changelog
+* Wed Jul 07 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-30
+- df: fix duplicated remote entries due to bind mounts (#1979814)
+
 * Thu Jul 01 2021 Kamil Dudka <kdudka@redhat.com> - 8.32-28
 - tail: fix stack out-of-bounds write with --follow
 

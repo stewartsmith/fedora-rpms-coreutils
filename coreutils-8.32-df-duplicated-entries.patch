@@ -1,0 +1,72 @@
+From 0f053de4bc3ca0cfd88a42d236881dfdddb10ee9 Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Wed, 30 Jun 2021 17:53:22 +0200
+Subject: [PATCH] df: fix duplicated remote entries due to bind mounts
+
+As originally reported in <https://bugzilla.redhat.com/1962515>,
+df invoked without -a printed duplicated entries for NFS mounts
+of bind mounts.  This is a regression from commit v8.25-54-g1c17f61ef99,
+which introduced the use of a hash table.
+
+The proposed patch makes sure that the devlist entry seen the last time
+is used for comparison when eliminating duplicated mount entries.  This
+way it worked before introducing the hash table.
+
+Patch co-authored by Roberto Bergantinos.
+
+* src/ls.c (struct devlist): Introduce the seen_last pointer.
+(devlist_for_dev): Return the devlist entry seen the last time if found.
+(filter_mount_list): Remember the devlist entry seen the last time for
+each hashed item.
+Fixes https://bugs.gnu.org/49298
+
+Upstream-commit: d6125af095c9553f38cba0696f15158f5abe4ecc
+Signed-off-by: Kamil Dudka <kdudka@redhat.com>
+---
+ src/df.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/src/df.c b/src/df.c
+index 7e01839..3e9247f 100644
+--- a/src/df.c
++++ b/src/df.c
+@@ -54,6 +54,7 @@ struct devlist
+   dev_t dev_num;
+   struct mount_entry *me;
+   struct devlist *next;
++  struct devlist *seen_last; /* valid for hashed devlist entries only */
+ };
+ 
+ /* Filled with device numbers of examined file systems to avoid
+@@ -689,7 +690,13 @@ devlist_for_dev (dev_t dev)
+     return NULL;
+   struct devlist dev_entry;
+   dev_entry.dev_num = dev;
+-  return hash_lookup (devlist_table, &dev_entry);
++
++  struct devlist *found = hash_lookup (devlist_table, &dev_entry);
++  if (found == NULL)
++    return NULL;
++
++  /* Return the last devlist entry we have seen with this dev_num */
++  return found->seen_last;
+ }
+ 
+ static void
+@@ -807,8 +814,12 @@ filter_mount_list (bool devices_only)
+           devlist->dev_num = buf.st_dev;
+           devlist->next = device_list;
+           device_list = devlist;
+-          if (hash_insert (devlist_table, devlist) == NULL)
++
++          struct devlist *hash_entry = hash_insert (devlist_table, devlist);
++          if (hash_entry == NULL)
+             xalloc_die ();
++          /* Ensure lookups use this latest devlist.  */
++          hash_entry->seen_last = devlist;
+ 
+           me = me->me_next;
+         }
+-- 
+2.31.1
+
