@@ -5,6 +5,10 @@ Release: 30%{?dist}
 License: GPLv3+
 Url:     https://www.gnu.org/software/coreutils/
 Source0: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
+Source1: https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
+# From https://savannah.gnu.org/project/release-gpgkeys.php?group=coreutils&download=1
+# which is linked as project keyring on https://savannah.gnu.org/projects/coreutils
+Source2: coreutils-keyring.gpg
 Source50:   supported_utils
 Source51:   coreutils-provides.inc
 Source105:  coreutils-colorls.sh
@@ -129,6 +133,9 @@ BuildRequires: openssl-devel
 BuildRequires: strace
 BuildRequires: texinfo
 
+# For gpg verification of source tarball
+BuildRequires: gnupg2
+
 # test-only dependencies
 BuildRequires: perl-interpreter
 BuildRequires: perl(FileHandle)
@@ -180,6 +187,7 @@ Optional though recommended components,
 including documentation and translations.
 
 %prep
+%{gpgverify} --keyring='%{SOURCE2}' --signature='%{SOURCE1}' --data='%{SOURCE0}'
 %autosetup -N
 
 # will be regenerated in the build directories
